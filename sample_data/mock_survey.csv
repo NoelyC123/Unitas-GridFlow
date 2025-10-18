@@ -1,0 +1,4 @@
+id,location_name,clearance_m,pole_spacing_m,cable_depth_mm
+1,Field A,5.5,35,650
+2,Field B,4.8,80,550
+3,Main Road,5.1,60,600

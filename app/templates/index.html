@@ -1,0 +1,36 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EW Design Tool – Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>EW Design Tool – Upload Files</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <h2>Upload Survey CSV</h2>
+  <form action="/upload_csv" method="POST" enctype="multipart/form-data">
+    <input type="file" name="csv_file">
+    <input type="submit" value="Upload">
+  </form>
+
+  <h2>Upload GIS Shapefile (.zip)</h2>
+  <form action="/upload_gis" method="POST" enctype="multipart/form-data">
+    <input type="file" name="gis_file">
+    <input type="submit" value="Upload">
+  </form>
+
+  <p><a href="{{ url_for('main.map_preview') }}">🗺️ Map Preview</a></p>
+  <p><a href="{{ url_for('main.export_dxf') }}">📤 Export DXF</a></p>
+</body>
+</html>

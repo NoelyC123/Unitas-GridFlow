@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GIS Upload Preview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>GIS Upload - Shapefile Data</h1>
+  {{ gdf|safe }}
+  <p><a href="{{ url_for('main.home') }}">← Back to Home</a></p>
+</body>
+</html>
