@@ -1,0 +1,73 @@
+.
+├── __init__.py
+├── .env
+├── .env.example
+├── app
+│   ├── __init__.py
+│   ├── dno_rules.py
+│   ├── qa_engine.py
+│   ├── routes
+│   │   ├── __init__.py
+│   │   ├── api_intake.py
+│   │   ├── api_jobs.py
+│   │   ├── api_rulepacks.py
+│   │   ├── jobs_page.py
+│   │   └── map_preview.py
+│   ├── routes.py
+│   ├── static
+│   │   ├── js
+│   │   │   ├── map-viewer.js
+│   │   │   ├── rulepack-selector.js
+│   │   │   ├── toast.js
+│   │   │   └── upload-manager.js
+│   │   ├── map.js
+│   │   └── style.css
+│   └── templates
+│       ├── csv_preview.html
+│       ├── gis_preview.html
+│       ├── gis_upload.html
+│       ├── index.html
+│       ├── map_viewer.html
+│       ├── map.html
+│       ├── results.html
+│       ├── upload_csv.html
+│       └── upload.html
+├── backup_tests
+├── checksums.txt
+├── deploy
+│   └── nginx.conf
+├── docker
+│   └── frontend
+│       └── generate-htpasswd.sh
+├── docker-compose.yml
+├── duplicate_hashes.txt
+├── duplicate_names.txt
+├── FRONTEND_FINAL_IMPLEMENTATION.md
+├── generate_mock_shapefile.py
+├── largest_files.txt
+├── Makefile
+├── message.asc
+├── mock_survey.csv
+├── poetry.lock
+├── project_tree.txt
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+├── requirements.txt.bak
+├── run.py
+├── RUNBOOK.md
+├── sample_data
+│   ├── mock_shapefile.zip
+│   └── mock_survey.csv
+├── start.sh
+├── temp_gis
+│   ├── exported.dxf
+│   ├── poles.cpg
+│   ├── poles.dbf
+│   ├── poles.prj
+│   ├── poles.shp
+│   └── poles.shx
+└── uploads
+    └── mock_survey.csv
+
+13 directories, 58 files
