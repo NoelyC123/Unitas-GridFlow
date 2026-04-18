@@ -1,36 +1,58 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>EW Design Tool – Home</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpanCore — Pre-CAD QA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <h1>EW Design Tool – Upload Files</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">SpanCore</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/upload">Upload</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/jobs">Jobs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/health/full">Health</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="mb-4">SpanCore — Pre-CAD QA Tool</h1>
+                <p class="lead">Upload survey data, check DNO compliance, get cleaner handoffs to CAD.</p>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Quick Start</h5>
+                        <ul>
+                            <li><a href="/upload">Upload survey CSV</a> — SPEN 11kV ready</li>
+                            <li><a href="/jobs">View jobs</a> — See all uploaded datasets</li>
+                            <li><a href="/health/full">Health check</a> — System status</li>
+                        </ul>
+                    </div>
+                </div>
 
-  <h2>Upload Survey CSV</h2>
-  <form action="/upload_csv" method="POST" enctype="multipart/form-data">
-    <input type="file" name="csv_file">
-    <input type="submit" value="Upload">
-  </form>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">About</h5>
+                        <p>SpanCore validates surveyed pole data against DNO-specific rules before it reaches CAD design.</p>
+                        <p><strong>Current capabilities:</strong> QA rule checking, pole/span validation, pass/warn/fail reporting.</p>
+                        <p><small class="text-muted">Development build — Phase 1 recovery in progress.</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <h2>Upload GIS Shapefile (.zip)</h2>
-  <form action="/upload_gis" method="POST" enctype="multipart/form-data">
-    <input type="file" name="gis_file">
-    <input type="submit" value="Upload">
-  </form>
-
-  <p><a href="{{ url_for('main.map_preview') }}">🗺️ Map Preview</a></p>
-  <p><a href="{{ url_for('main.export_dxf') }}">📤 Export DXF</a></p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
