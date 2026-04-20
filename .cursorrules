@@ -1,0 +1,28 @@
+# Unitas-GridFlow Cursor Rules
+
+## What this project is
+Narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
+Local Flask/Python web app. DNO survey compliance gatekeeper.
+
+## Codebase location
+/Users/noelcollins/Unitas-GridFlow/
+
+## Current phase
+Working local MVP. Next priority: improve app/dno_rules.py with real DNO QA rules.
+
+## Tech stack
+Python 3.13, Flask, pandas, geopandas, reportlab, Leaflet, Bootstrap 5
+Venv: .venv312
+
+## Hard rules
+- Never broaden scope beyond narrow MVP
+- Always read a file before editing it
+- After any change: run pytest -v
+- After tests pass: git add/commit/push
+- Never add features not directly tied to the current task
+
+## Key files
+- app/dno_rules.py — QA rules (current priority)
+- app/qa_engine.py — QA engine
+- app/routes/api_intake.py — CSV processing
+- AI_CONTROL/ — read these first for project context
