@@ -2,37 +2,41 @@
 
 ## Immediate task
 
-The immediate task is **not** to keep doing open-ended feature building.
+The immediate task is no longer repo setup, branding cleanup, or baseline test/tooling establishment.
 
-The immediate task is to:
+That phase has now been completed to a strong MVP-appropriate standard.
 
-1. refresh the AI control layer so it matches the now-working local MVP
-2. lock the new canonical current truth
-3. then choose the next best development priority from a clean baseline
+The immediate task is now:
+
+1. lock the updated control layer to reflect the completed baseline phase
+2. move into the next real product-improvement phase
+3. improve the QA logic so the tool becomes more genuinely useful
 
 ---
 
 ## Why this is the current task
 
-The project has materially changed state.
+The project has materially advanced.
 
-It is no longer in the earlier phase where the narrow MVP upload flow was still broken.
+It now has:
 
-The following now work locally:
+- a canonical repo and active project identity
+- an aligned local and GitHub setup
+- a working local MVP flow
+- cleaned current-facing branding
+- active quality tooling
+- active CI
+- passing automated backend tests
 
-- upload page
-- upload / presign
-- CSV save
-- QA processing
-- job metadata creation
-- map output generation
-- map viewer
-- PDF route
-- jobs page
+So the project is no longer mainly constrained by process, setup, or professionalisation gaps.
 
-Because of that, the control files written during the earlier recovery phase are now partly obsolete.
+The biggest current weakness is now the product logic itself:
 
-So the current task is first to bring the control layer up to date before more significant development continues.
+- the QA rules are still placeholder/basic
+- the QA engine is still MVP-level
+- the product’s practical value is still limited more by rule quality than by tooling or repo setup
+
+That makes **better QA rules** the correct current task.
 
 ---
 
@@ -51,10 +55,11 @@ Update:
 - `AI_CONTROL/04_SESSION_HANDOFF.md`
 
 ### Step 4
-Confirm the canonical current state after those updates
+Confirm that the baseline/tooling/testing phase is now complete
 
 ### Step 5
-Decide the next development priority from the new baseline
+Start the next active phase:
+- **better QA rules**
 
 ---
 
@@ -62,73 +67,73 @@ Decide the next development priority from the new baseline
 
 The current task is **not**:
 
-- debugging the upload flow from scratch
-- rebuilding the backend architecture
-- adding broad new features without control-layer refresh
-- doing major product expansion
-- moving into broad SaaS/platform thinking
-- using other AIs for large next-step ideation before the canonical current state is updated
+- repo naming work
+- GitHub cleanup
+- branding cleanup of live files
+- setting up pre-commit / Ruff / pytest / CI
+- broad feature expansion
+- browser E2E testing
+- free-form product ideation
+- bringing in other AIs before the new control state is locked
 
-Those would all be premature until the control files are aligned with the live MVP.
+Those were either already completed or are not the highest-value next move.
 
 ---
 
 ## Current development checkpoint
 
-The project is now at a meaningful checkpoint:
+The project is now at this checkpoint:
 
-**working narrow MVP + documentation/control-layer refresh + next-priority decision**
+**working MVP + baseline/tooling/testing complete + next product-improvement phase ready**
 
-That means the immediate implementation recovery objective has been achieved sufficiently for the project to pause and re-state its current truth.
+This is an important transition point.
 
----
+The “make the project professionally workable” phase is now complete enough.
 
-## Current decision that must be made next
-
-Once the AI control files are updated, the next decision should be:
-
-### Which of these is the highest-value next development move?
-
-1. **better QA rules**
-2. **more realistic sample/input handling**
-3. **cleanup / refactor / hardening**
-
-That decision should be made from the now-working MVP baseline, not from the earlier broken-scaffold state.
+The “make the product itself more valuable” phase should now begin.
 
 ---
 
-## Current likely next-priority candidates
+## Current next-priority decision
 
-### Candidate 1 — better QA rules
-This would improve the real usefulness of the tool by making the QA engine less placeholder-like and more domain-relevant.
+The next active phase should be:
 
-### Candidate 2 — more realistic sample/input handling
-This would improve the credibility of the workflow by making the input mapping and example data closer to real field conditions.
+## **better QA rules**
 
-### Candidate 3 — cleanup / refactor / hardening
-This would improve technical quality by cleaning up fast recovery code, clarifying contracts, and making the app less fragile.
+This should come before:
 
-At this stage, all three are reasonable candidates, but the current task is **not yet** to choose between them before the control layer is updated.
+### More input realism work
+Because the current representative schema step is already sufficient for the MVP baseline, whereas the QA logic is still too weak to carry strong product value.
 
----
+### Cleanup / refactor / hardening
+Because the project is now stable enough to improve the business-critical logic first, then harden later once the next useful logic layer exists.
 
-## Current instruction for this phase
-
-During this phase:
-
-- keep updates disciplined
-- avoid new speculative features
-- avoid broadening the product narrative
-- finish the control-layer refresh first
-- then take one explicit next-step decision
+### Playwright / browser automation
+Because backend behaviour and rule quality matter more right now than browser-level automation.
 
 ---
 
-## Current practical objective
+## What “better QA rules” means in practical terms
+
+This does **not** mean broad uncontrolled feature expansion.
+
+It means targeted improvement to the current QA logic, for example:
+
+- stronger rule definitions in `app/dno_rules.py`
+- more realistic validation criteria
+- better issue modelling
+- more useful pass/fail outputs
+- more product-relevant checks grounded in the tool’s actual purpose
+
+The point is to move from placeholder QA toward meaningfully useful QA.
+
+---
+
+## Immediate practical objective
 
 The practical objective of the present task is:
 
-**make the control files fully reflect the live working MVP so future development decisions are made from accurate current truth**
+**finish the control-layer update, then begin the first deliberate QA-rule improvement step**
 
 ---
 
@@ -139,8 +144,8 @@ This task is complete when:
 - `AI_CONTROL/02_CURRENT_STATE.md` is updated
 - `AI_CONTROL/03_CURRENT_TASK.md` is updated
 - `AI_CONTROL/04_SESSION_HANDOFF.md` is updated
-- the new canonical current state is confirmed
-- and the next development priority is ready to be chosen deliberately
+- the completed baseline phase is formally locked
+- the project has clearly entered the QA-rule improvement phase
 
 ---
 
@@ -148,4 +153,4 @@ This task is complete when:
 
 The current task is:
 
-**refresh the control layer, lock the new current truth, then decide the next best development priority from the working MVP baseline**
+**move out of baseline/setup mode and begin improving the actual QA logic**

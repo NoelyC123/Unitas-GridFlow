@@ -2,13 +2,38 @@
 
 ## Project status
 
-The project has now moved beyond the earlier broken-scaffold state and into a working narrow MVP state.
+The project is now beyond the earlier recovery-and-foundation phase.
 
-The live local MVP currently supports a real end-to-end flow:
+It now has:
 
-**upload CSV -> save file -> run QA -> save outputs -> view map -> download PDF -> browse jobs**
+- a working local MVP
+- a canonical repo and naming structure
+- a functioning quality/test stack
+- active CI
+- cleaned current-facing branding
+- a stable baseline for real product improvement work
 
-This means the immediate recovery phase for the narrow MVP has materially succeeded.
+The project is now in:
+
+**working local MVP + baseline/tooling/testing complete + next product-improvement phase**
+
+---
+
+## Canonical active project identity
+
+### Active project name
+**Unitas GridFlow**
+
+### Canonical active repo
+`NoelyC123/Unitas-GridFlow`
+
+### Canonical active local folder
+`/Users/noelcollins/Unitas-GridFlow`
+
+### Repo rule
+This is the **only active canonical repo** for the project.
+
+Older EW / SpanCore / design-tool repos are archived and are not active development repos.
 
 ---
 
@@ -21,141 +46,180 @@ This means the immediate recovery phase for the narrow MVP has materially succee
 - `pyproject.toml`
 - `README.md`
 - `RUNBOOK.md`
-- `docker-compose.yml`
 - `sample_data/`
 - `uploads/`
 - `temp_gis/`
 
-### AI / strategy / control layer
+### Control / coordination layer
+- `MASTER_PROJECT_READ_FIRST.md`
 - `AI_CONTROL/`
+
+### Strategic / reasoning layer
 - `PROJECT_SYNTHESIS/`
 
-### Legacy / reference / archive areas
-- `_reference/`
+### GitHub / admin layer
+- `GITHUB_ADMIN/`
+
+### Legacy / reference areas
 - `_archive/`
 - `_quarantine/`
+- `_reference/` (if present in older contexts; not part of live app work)
 
 ---
 
-## Current narrow MVP status
+## Current MVP status
 
-The narrow MVP is now **working locally**.
+The narrow MVP is working locally.
 
 ### Confirmed working flow
-- `/upload` page loads
-- CSV upload works
+**upload CSV -> save file -> run QA -> save outputs -> view map -> download PDF -> browse jobs**
+
+### Confirmed working parts
+- `/upload` page works
 - `/api/presign` works
-- uploaded CSV is saved under `uploads/jobs/<job_id>/`
+- CSV upload/save works
 - `/api/import/<job_id>` works
 - QA processing runs
-- `issues.csv` is created
-- `map_data.json` is created
-- `meta.json` is created
+- `issues.csv` is written
+- `map_data.json` is written
 - `/map/view/<job_id>` works
-- `/map/data/<job_id>` works
 - `/pdf/qa/<job_id>` works
-- `/jobs/` works and lists previous jobs
+- `/jobs/` works
+- `/health/full` works
 
-### Current MVP user journey
-1. Open upload page
-2. Select CSV
-3. Upload and validate
-4. Auto-redirect to map page
-5. Inspect markers and summary
-6. Download PDF
-7. Browse previous jobs from `/jobs/`
+### Confirmed current-facing branding state
+The live/current-facing app branding has been updated to:
+
+**Unitas GridFlow**
+
+This includes:
+- README
+- upload page
+- map viewer
+- jobs page
+- PDF report branding
+- runtime health/service naming
 
 ---
 
-## Current live MVP files
+## Current testing / quality status
 
-### App entry / config
-- `run.py`
-- `requirements.txt`
+The baseline quality stack is now active and working.
 
-### Core app
-- `app/__init__.py`
-- `app/qa_engine.py`
-- `app/dno_rules.py`
+### Confirmed active tooling
+- `pre-commit`
+- Ruff
+- pytest
+- GitHub Actions CI
 
-### Live routes
-- `app/routes/api_upload.py`
-- `app/routes/api_intake.py`
-- `app/routes/api_jobs.py`
-- `app/routes/api_rulepacks.py`
-- `app/routes/jobs_page.py`
-- `app/routes/map_preview.py`
-- `app/routes/pdf_reports.py`
+### Current automated test state
+There are currently **14 passing tests**.
 
-### Live templates
-- `app/templates/upload.html`
-- `app/templates/map_viewer.html`
-- `app/templates/jobs.html`
-- `app/templates/index.html`
+Test coverage now includes:
+- schema normalization
+- issue post-processing
+- CSV payload sanitization
+- feature collection generation
+- JSON-safe output
+- health endpoint
+- jobs API
+- job status endpoint
+- PDF endpoint
+- import/finalize success path
+- import/finalize error paths
 
-### Live frontend JS
-- `app/static/js/upload-manager.js`
-- `app/static/js/map-viewer.js`
-- `app/static/js/rulepack-selector.js`
-- `app/static/js/toast.js`
+### Current CI state
+GitHub Actions runs on push/pull request to `master` and currently executes:
+- `pre-commit run --all-files`
+- `pytest -q`
+
+This baseline/tooling/testing phase is now materially complete.
+
+---
+
+## Current sample/input realism status
+
+The earlier input realism step has already been completed to an MVP-appropriate level.
+
+### Current representative sample schema
+The current sample CSV uses a more realistic schema including:
+- `asset_id`
+- `structure_type`
+- `height_m`
+- `material`
+- `location_name`
+- `easting`
+- `northing`
+- `latitude`
+- `longitude`
+
+### Current normalization behaviour
+`api_intake.py` now maps that schema into the internal working fields used by the MVP QA engine.
+
+This is no longer the earlier demo-fallback-only state.
 
 ---
 
 ## Current output structure
 
-Successful jobs now create files under:
+Successful jobs currently create outputs under:
 
 - `uploads/jobs/<job_id>/meta.json`
-- `uploads/jobs/<job_id>/mock_survey.csv` (or uploaded CSV filename)
+- `uploads/jobs/<job_id>/<uploaded_csv>.csv`
 - `uploads/jobs/<job_id>/issues.csv`
 - `uploads/jobs/<job_id>/map_data.json`
 
-This output structure is now part of the practical current truth of the local MVP.
+This remains the practical output contract of the current MVP.
 
 ---
 
 ## What is now true that was not true before
 
-The following earlier blockers have been resolved:
+The following material shifts have now happened:
 
-- `app/routes/api_upload.py` now exists
-- `/api/presign` now exists and works
-- upload no longer fails at presign stage
-- `api_intake` is wired and processing jobs
-- map route works
-- PDF route works
-- jobs page works
+- the repo identity is now locked to **Unitas GridFlow**
+- old design-tool repos are archived
+- current-facing app branding is no longer in mixed SpanCore/EW state
+- quality tooling is installed and active
+- automated backend tests exist and pass
+- CI exists and passes
+- the baseline/professionalisation phase has been completed
 
-So the old “missing upload route / missing presign / upload currently fails” state is obsolete.
+So the project is no longer primarily in recovery, repo setup, or baseline discipline mode.
 
 ---
 
 ## Current remaining weaknesses
 
-Although the narrow MVP now works, it is still an early local MVP and has important limitations.
+The project is stronger, but still clearly MVP-stage.
 
-### Rules / QA realism
-- `dno_rules.py` is still placeholder-level and not yet a real DNO-grade ruleset
-- `qa_engine.py` is still basic
-- current sample-data handling uses MVP-friendly normalization logic rather than true field-standard logic
-- issue modelling is still simplistic
+### 1. QA logic remains basic
+This is now the biggest current weakness.
 
-### Data realism
-- `sample_data/mock_survey.csv` is only a demo dataset
-- field mapping is still lightweight
-- current normalization is pragmatic for MVP proof, not production-grade schema handling
+- `app/dno_rules.py` is still placeholder/basic
+- `app/qa_engine.py` still reflects MVP-level logic
+- current QA checks are useful as a scaffold, but not yet strong enough to represent a truly valuable DNO-grade product
 
-### Product maturity
-- jobs are stored locally as files, not in a proper persistent app database
-- no authentication / permissions model
-- no production deployment hardening
-- no true multi-user workflow
-- UI is now usable, but still MVP-level rather than polished production UX
+### 2. Input handling is still narrow
+Although the current representative schema step is done, input handling is still limited.
 
-### Architecture / quality
-- some code was written quickly during recovery and may need cleanup/refactor
-- output contracts are not yet formally defined
-- error handling is improved but not production-grade
+- one representative schema is supported
+- broader real-world input variation is not yet handled
+- field mapping is still deliberately constrained
+
+### 3. Architecture still has MVP debt
+- some route/code paths were built quickly during recovery and stabilisation
+- contracts are still lightweight
+- there is still room for cleanup/refactor/hardening later
+
+### 4. Browser test coverage does not yet exist
+- Playwright is not yet set up
+- current automated testing is backend-focused
+
+### 5. Historical/control docs still contain legacy naming
+Some non-live files still refer to SpanCore / EW Design Tool in historical or synthesis contexts.
+
+This is not a blocker for current product work.
 
 ---
 
@@ -169,46 +233,46 @@ Short version:
 
 **a DNO survey compliance gatekeeper**
 
-This has not changed.
-
-What has changed is that the product now has a real local MVP flow rather than only a recovery plan.
+What has changed is that the project now has a more professional baseline and test discipline than before.
 
 ---
 
 ## Current phase of the project
 
 The project is no longer in:
-- “missing-route recovery only”
-- or “broken scaffold diagnosis only”
+
+- broken-scaffold diagnosis
+- missing-route recovery
+- repo canonicalisation
+- toolchain setup
+- branding cleanup
+- baseline testing establishment
 
 It is now in:
 
-**working narrow MVP + control-layer refresh + next-priority decision phase**
-
-That means the immediate task is no longer “make upload work at all”.
-
-The immediate task is now:
-- update the control files
-- lock the new canonical current state
-- decide the next best development priority
+**working MVP + baseline complete + next product-improvement phase**
 
 ---
 
-## Current likely next development options
+## Current next-priority decision
 
-Once the control layer is updated, the next development decision will likely be between:
+The most important current product weakness is now the QA logic itself.
 
-1. **better QA rules**
-2. **more realistic sample/input handling**
-3. **cleanup / refactor / hardening**
+So the next active phase should be:
 
-Those should be evaluated from the new working-MVP baseline, not from the old broken baseline.
+**better QA rules**
+
+This is now a more valuable next step than:
+- additional setup work
+- more branding cleanup
+- more baseline process work
+- broad new feature expansion
 
 ---
 
 ## Current control-layer implication
 
-Because the live MVP state has changed materially, the following files must now be updated to reflect the new truth:
+Because the project has moved out of the baseline/tooling/testing phase, the control layer must now reflect that:
 
 - `AI_CONTROL/02_CURRENT_STATE.md`
 - `AI_CONTROL/03_CURRENT_TASK.md`
