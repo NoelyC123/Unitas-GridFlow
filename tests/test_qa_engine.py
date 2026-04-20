@@ -158,3 +158,64 @@ def test_dependent_allowed_values_flags_inconsistent_material() -> None:
     assert (
         issues.iloc[0]["Issue"] == "Inconsistent 'material' for 'structure_type=Wood Pole': Steel"
     )
+
+
+def test_coord_consistency_flags_mismatched_coordinates() -> None:
+    """lat/lon pointing to Glasgow but easting/northing pointing to London."""
+    df = pd.DataFrame(
+        [
+            {
+                "lat": 55.861,
+                "lon": -4.251,
+                "easting": 530000,  # London area
+                "northing": 180000,  # London area
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "coord_consistency",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "easting_field": "easting",
+            "northing_field": "northing",
+            "tolerance_m": 100,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert "Coordinate mismatch" in issues.iloc[0]["Issue"]
+
+
+def test_coord_consistency_passes_matching_coordinates() -> None:
+    """Glasgow lat/lon with matching OSGB easting/northing — should produce no issues.
+
+    Reference values derived from pyproj EPSG:4326 -> EPSG:27700 transform:
+    lat=55.861, lon=-4.251 -> E=259214, N=665382
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "lat": 55.861,
+                "lon": -4.251,
+                "easting": 259214,
+                "northing": 665382,
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "coord_consistency",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "easting_field": "easting",
+            "northing_field": "northing",
+            "tolerance_m": 100,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0

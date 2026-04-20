@@ -78,6 +78,18 @@ SPEN_11KV_RULES = [
         },
         "description": "Material must match the declared structure type.",
     },
+    # --- Coordinate consistency cross-check ---
+    # Converts lat/lon to OSGB27700 and checks against declared easting/northing.
+    # Tolerance 100m catches transcription errors and mismatched pole records.
+    {
+        "check": "coord_consistency",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "easting_field": "easting",
+        "northing_field": "northing",
+        "tolerance_m": 100,
+        "description": "lat/lon must be consistent with easting/northing within 100m.",
+    },
 ]
 
 
