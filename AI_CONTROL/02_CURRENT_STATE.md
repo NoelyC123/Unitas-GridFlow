@@ -2,20 +2,14 @@
 
 ## Project status
 
-The project is now beyond the earlier recovery-and-foundation phase.
+The project has now completed two distinct phases:
 
-It now has:
+1. baseline/professionalisation phase — complete
+2. first QA-rule improvement step — complete
 
-- a working local MVP
-- a canonical repo and naming structure
-- a functioning quality/test stack
-- active CI
-- cleaned current-facing branding
-- a stable baseline for real product improvement work
+It is now in:
 
-The project is now in:
-
-**working local MVP + baseline/tooling/testing complete + next product-improvement phase**
+**working local MVP + rulepack architecture in place + QA engine extended + next iteration ready**
 
 ---
 
@@ -32,38 +26,7 @@ The project is now in:
 
 ### Repo rule
 This is the **only active canonical repo** for the project.
-
 Older EW / SpanCore / design-tool repos are archived and are not active development repos.
-
----
-
-## Current live areas
-
-### Core live app
-- `app/`
-- `run.py`
-- `requirements.txt`
-- `pyproject.toml`
-- `README.md`
-- `RUNBOOK.md`
-- `sample_data/`
-- `uploads/`
-- `temp_gis/`
-
-### Control / coordination layer
-- `MASTER_PROJECT_READ_FIRST.md`
-- `AI_CONTROL/`
-
-### Strategic / reasoning layer
-- `PROJECT_SYNTHESIS/`
-
-### GitHub / admin layer
-- `GITHUB_ADMIN/`
-
-### Legacy / reference areas
-- `_archive/`
-- `_quarantine/`
-- `_reference/` (if present in older contexts; not part of live app work)
 
 ---
 
@@ -78,8 +41,8 @@ The narrow MVP is working locally.
 - `/upload` page works
 - `/api/presign` works
 - CSV upload/save works
-- `/api/import/<job_id>` works
-- QA processing runs
+- `/api/import/<job_id>` works — now selects rulepack by DNO
+- QA processing runs with extended check types
 - `issues.csv` is written
 - `map_data.json` is written
 - `/map/view/<job_id>` works
@@ -87,35 +50,44 @@ The narrow MVP is working locally.
 - `/jobs/` works
 - `/health/full` works
 
-### Confirmed current-facing branding state
-The live/current-facing app branding has been updated to:
+---
 
-**Unitas GridFlow**
+## Current QA architecture state
 
-This includes:
-- README
-- upload page
-- map viewer
-- jobs page
-- PDF report branding
-- runtime health/service naming
+### dno_rules.py
+Upgraded from a single flat list to a proper rulepack architecture.
+
+**Structure:**
+- `BASE_RULES` — generic UK-wide rules, used as fallback
+- `DNO_RULES` — backwards-compatible alias for `BASE_RULES`
+- `SPEN_11KV_RULES` — extends BASE_RULES with SPEN-specific checks
+- `RULEPACKS` dict — `{"DEFAULT": BASE_RULES, "SPEN_11kV": SPEN_11KV_RULES}`
+
+**SPEN_11kV rulepack includes:**
+- Corrected height range: 7m-20m (ENA TS 43-8 / SPEN OHL policy)
+- Pole ID regex validation (stable identifier format)
+- Paired coordinate checks (lat/lon must both be present, easting/northing must both be present)
+- SPEN network area coordinate bounds (lat 54.5-60.9, lon -6.5 to -0.7)
+- Material/structure_type cross-field consistency check
+
+### qa_engine.py
+Extended with three new check types:
+- `regex` — validates field against a pattern
+- `paired_required` — both fields in a pair must be present or both absent
+- `dependent_allowed_values` — allowed values for one field depend on another field's value
+
+### api_intake.py
+Now selects rules by the requested DNO:
+- `RULEPACKS[requested_dno]` → fallback to `RULEPACKS["DEFAULT"]` → fallback to `DNO_RULES`
 
 ---
 
-## Current testing / quality status
+## Current testing status
 
-The baseline quality stack is now active and working.
+### Test count
+**23 passing tests**
 
-### Confirmed active tooling
-- `pre-commit`
-- Ruff
-- pytest
-- GitHub Actions CI
-
-### Current automated test state
-There are currently **14 passing tests**.
-
-Test coverage now includes:
+### Coverage includes
 - schema normalization
 - issue post-processing
 - CSV payload sanitization
@@ -125,157 +97,60 @@ Test coverage now includes:
 - jobs API
 - job status endpoint
 - PDF endpoint
-- import/finalize success path
-- import/finalize error paths
+- import/finalize success and error paths
+- regex check
+- paired_required check
+- dependent_allowed_values check
 
-### Current CI state
-GitHub Actions runs on push/pull request to `master` and currently executes:
-- `pre-commit run --all-files`
-- `pytest -q`
-
-This baseline/tooling/testing phase is now materially complete.
-
----
-
-## Current sample/input realism status
-
-The earlier input realism step has already been completed to an MVP-appropriate level.
-
-### Current representative sample schema
-The current sample CSV uses a more realistic schema including:
-- `asset_id`
-- `structure_type`
-- `height_m`
-- `material`
-- `location_name`
-- `easting`
-- `northing`
-- `latitude`
-- `longitude`
-
-### Current normalization behaviour
-`api_intake.py` now maps that schema into the internal working fields used by the MVP QA engine.
-
-This is no longer the earlier demo-fallback-only state.
+### Quality tooling
+- pre-commit: active
+- Ruff: active
+- pytest: active (23 passing)
+- GitHub Actions CI: active
 
 ---
 
-## Current output structure
+## Tool bootstrapping state
 
-Successful jobs currently create outputs under:
+All development tools are now bootstrapped with project context:
 
-- `uploads/jobs/<job_id>/meta.json`
-- `uploads/jobs/<job_id>/<uploaded_csv>.csv`
-- `uploads/jobs/<job_id>/issues.csv`
-- `uploads/jobs/<job_id>/map_data.json`
-
-This remains the practical output contract of the current MVP.
-
----
-
-## What is now true that was not true before
-
-The following material shifts have now happened:
-
-- the repo identity is now locked to **Unitas GridFlow**
-- old design-tool repos are archived
-- current-facing app branding is no longer in mixed SpanCore/EW state
-- quality tooling is installed and active
-- automated backend tests exist and pass
-- CI exists and passes
-- the baseline/professionalisation phase has been completed
-
-So the project is no longer primarily in recovery, repo setup, or baseline discipline mode.
+- Claude app Project: Instructions + 8 AI_CONTROL knowledge files
+- Claude Code: `CLAUDE.md` in project root
+- Cursor Pro: `.cursorrules` in project root
+- GitHub Copilot: installed in VS Code
+- ChatGPT/Gemini/Grok: use `CLAUDE_REVIEW_BUNDLES/` zips
 
 ---
 
 ## Current remaining weaknesses
 
-The project is stronger, but still clearly MVP-stage.
+### 1. Only one rulepack exists (SPEN_11kV)
+Other DNOs (SSEN, ENWL, NIE, UKPN) have no rulepack yet.
+The architecture supports adding them — the rules don't exist yet.
 
-### 1. QA logic remains basic
-This is now the biggest current weakness.
+### 2. No coordinate consistency cross-check yet
+lat/lon and easting/northing are each validated independently.
+A check confirming they point to the same location (within tolerance) does not yet exist.
 
-- `app/dno_rules.py` is still placeholder/basic
-- `app/qa_engine.py` still reflects MVP-level logic
-- current QA checks are useful as a scaffold, but not yet strong enough to represent a truly valuable DNO-grade product
-
-### 2. Input handling is still narrow
-Although the current representative schema step is done, input handling is still limited.
-
-- one representative schema is supported
-- broader real-world input variation is not yet handled
-- field mapping is still deliberately constrained
-
-### 3. Architecture still has MVP debt
-- some route/code paths were built quickly during recovery and stabilisation
-- contracts are still lightweight
-- there is still room for cleanup/refactor/hardening later
+### 3. Input handling is still narrow
+One representative schema is supported.
+Broader real-world survey export variation is not yet handled.
 
 ### 4. Browser test coverage does not yet exist
-- Playwright is not yet set up
-- current automated testing is backend-focused
+Playwright is not yet active.
+Current automated testing is backend-focused.
 
-### 5. Historical/control docs still contain legacy naming
-Some non-live files still refer to SpanCore / EW Design Tool in historical or synthesis contexts.
-
-This is not a blocker for current product work.
-
----
-
-## Current best description of the product
-
-The strongest current product identity remains:
-
-**a narrow pre-CAD QA / compliance / submission-readiness tool for electricity survey-to-design handoffs**
-
-Short version:
-
-**a DNO survey compliance gatekeeper**
-
-What has changed is that the project now has a more professional baseline and test discipline than before.
+### 5. Architecture still has MVP debt
+Some route/code paths were built quickly.
+Cleanup/hardening can come after the rule quality improves further.
 
 ---
 
-## Current phase of the project
+## Current phase
 
-The project is no longer in:
+**working MVP + rulepack architecture complete + SPEN_11kV rulepack live + 23 tests passing**
 
-- broken-scaffold diagnosis
-- missing-route recovery
-- repo canonicalisation
-- toolchain setup
-- branding cleanup
-- baseline testing establishment
+## Current next priority
 
-It is now in:
-
-**working MVP + baseline complete + next product-improvement phase**
-
----
-
-## Current next-priority decision
-
-The most important current product weakness is now the QA logic itself.
-
-So the next active phase should be:
-
-**better QA rules**
-
-This is now a more valuable next step than:
-- additional setup work
-- more branding cleanup
-- more baseline process work
-- broad new feature expansion
-
----
-
-## Current control-layer implication
-
-Because the project has moved out of the baseline/tooling/testing phase, the control layer must now reflect that:
-
-- `AI_CONTROL/02_CURRENT_STATE.md`
-- `AI_CONTROL/03_CURRENT_TASK.md`
-- `AI_CONTROL/04_SESSION_HANDOFF.md`
-
-This file is the first of those updates.
+Add coordinate consistency cross-check (lat/lon vs easting/northing).
+Then expand rulepacks to cover a second DNO.

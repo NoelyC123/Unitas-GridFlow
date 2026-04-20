@@ -1,4 +1,10 @@
-DNO_RULES = [
+from __future__ import annotations
+
+MATERIAL_VALUES = ["Wood", "Steel", "Concrete", "Composite"]
+STRUCTURE_TYPE_VALUES = ["Wood Pole", "Steel Pole", "Concrete Pole", "Composite Pole"]
+
+
+BASE_RULES = [
     {"check": "unique", "field": "pole_id"},
     {"check": "required", "field": "pole_id"},
     {"check": "required", "field": "height"},
@@ -9,19 +15,73 @@ DNO_RULES = [
     {"check": "required", "field": "lon"},
     {"check": "required", "field": "easting"},
     {"check": "required", "field": "northing"},
-    {"check": "range", "field": "height", "min": 10, "max": 25},
+    # Generic height range (overridden per DNO rulepack)
+    {"check": "range", "field": "height", "min": 7, "max": 25},
+    # UK-wide coordinate bounds
     {"check": "range", "field": "lat", "min": 49, "max": 62},
     {"check": "range", "field": "lon", "min": -9, "max": 3},
     {"check": "range", "field": "easting", "min": 0, "max": 700000},
     {"check": "range", "field": "northing", "min": 0, "max": 1300000},
-    {
-        "check": "allowed_values",
-        "field": "material",
-        "values": ["Wood", "Steel", "Concrete", "Composite"],
-    },
+    {"check": "allowed_values", "field": "material", "values": MATERIAL_VALUES},
     {
         "check": "allowed_values",
         "field": "structure_type",
-        "values": ["Wood Pole", "Steel Pole", "Concrete Pole", "Composite Pole"],
+        "values": STRUCTURE_TYPE_VALUES,
     },
 ]
+
+
+# Backwards-compatible alias (older code/docs reference this name).
+DNO_RULES = BASE_RULES
+
+
+SPEN_11KV_RULES = [
+    *BASE_RULES,
+    # --- SPEN 11kV: voltage-correct height range ---
+    # ENA TS 43-8 / SPEN overhead line policy:
+    #   Wood poles: 7m-14m standard for 11kV distribution
+    #   Steel poles: 8m-20m
+    #   Using 7-20m to cover both materials without per-material branching
+    {"check": "range", "field": "height", "min": 7, "max": 20},
+    # --- Pole ID format ---
+    {
+        "check": "regex",
+        "field": "pole_id",
+        "pattern": r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+        "description": "Pole IDs must be stable identifiers (no spaces or punctuation).",
+    },
+    # --- Coordinate pair integrity ---
+    {
+        "check": "paired_required",
+        "fields": ["lat", "lon"],
+        "description": "Coordinates must be provided as a lat/lon pair.",
+    },
+    {
+        "check": "paired_required",
+        "fields": ["easting", "northing"],
+        "description": "OSGB coordinates must be provided as an easting/northing pair.",
+    },
+    # --- SPEN network area coordinate bounds ---
+    # SPEN operates in Scotland and NW England - tighter than UK-wide BASE_RULES
+    {"check": "range", "field": "lat", "min": 54.5, "max": 60.9},
+    {"check": "range", "field": "lon", "min": -6.5, "max": -0.7},
+    # --- Material must match declared structure type ---
+    {
+        "check": "dependent_allowed_values",
+        "if_field": "structure_type",
+        "then_field": "material",
+        "mapping": {
+            "Wood Pole": ["Wood"],
+            "Steel Pole": ["Steel"],
+            "Concrete Pole": ["Concrete"],
+            "Composite Pole": ["Composite"],
+        },
+        "description": "Material must match the declared structure type.",
+    },
+]
+
+
+RULEPACKS: dict[str, list[dict]] = {
+    "DEFAULT": BASE_RULES,
+    "SPEN_11kV": SPEN_11KV_RULES,
+}

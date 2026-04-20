@@ -8,7 +8,7 @@ from typing import Any
 import pandas as pd
 from flask import Blueprint, jsonify, request
 
-from app.dno_rules import DNO_RULES
+from app.dno_rules import DNO_RULES, RULEPACKS
 from app.qa_engine import run_qa_checks
 
 api_intake_bp = Blueprint("api_intake", __name__)
@@ -344,7 +344,8 @@ def finalize(job_short: str):
         df = df.reset_index(drop=True)
         df["__row_index__"] = df.index
 
-        issues_df = run_qa_checks(df, DNO_RULES)
+        selected_rules = RULEPACKS.get(requested_dno) or RULEPACKS.get("DEFAULT") or DNO_RULES
+        issues_df = run_qa_checks(df, selected_rules)
         issues_df = _postprocess_issues(issues_df, df)
 
         map_issues_df = issues_df.copy()

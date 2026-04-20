@@ -107,3 +107,54 @@ def test_missing_column_still_returns_issue() -> None:
 
     assert len(issues) == 1
     assert issues.iloc[0]["Issue"] == "Missing column: material"
+
+
+def test_regex_flags_invalid_format() -> None:
+    df = pd.DataFrame([{"pole_id": "P-1001"}, {"pole_id": "P 1002"}])
+    rules = [{"check": "regex", "field": "pole_id", "pattern": r"^[A-Za-z0-9_-]+$"}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert issues.iloc[0]["Issue"] == "Invalid format for 'pole_id': P 1002"
+
+
+def test_paired_required_flags_half_coordinates() -> None:
+    df = pd.DataFrame(
+        [
+            {"lat": 54.5, "lon": -3.0},
+            {"lat": 54.5, "lon": None},
+            {"lat": None, "lon": -3.0},
+            {"lat": None, "lon": None},
+        ]
+    )
+    rules = [{"check": "paired_required", "fields": ["lat", "lon"]}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 2
+    assert "Missing required paired field(s)" in issues.iloc[0]["Issue"]
+
+
+def test_dependent_allowed_values_flags_inconsistent_material() -> None:
+    df = pd.DataFrame(
+        [
+            {"structure_type": "Wood Pole", "material": "Wood"},
+            {"structure_type": "Wood Pole", "material": "Steel"},
+        ]
+    )
+    rules = [
+        {
+            "check": "dependent_allowed_values",
+            "if_field": "structure_type",
+            "then_field": "material",
+            "mapping": {"Wood Pole": ["Wood"]},
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert (
+        issues.iloc[0]["Issue"] == "Inconsistent 'material' for 'structure_type=Wood Pole': Steel"
+    )
