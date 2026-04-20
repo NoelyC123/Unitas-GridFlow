@@ -1,0 +1,18 @@
+NoelyC123/Unitas-GridFlow		private	2026-04-20T11:33:45Z
+NoelyC123/unitasfund	UnitasFund — UK Funding Intelligence Platform. Match, score and track grants. Next.js, Supabase, Stripe.	public, archived	2026-03-21T14:48:38Z
+NoelyC123/unitasconnect-engine	UnitasConnect scraper engine — collects UK funding opportunities from 19 sources.	public	2026-03-21T14:48:28Z
+NoelyC123/unitasconnect-website	UnitasConnect — Funding, Strategy and Growth consultancy for VCSEs, SMEs and community organisations.	public	2026-03-19T13:58:28Z
+NoelyC123/unara-mvp		private	2026-03-13T17:37:15Z
+NoelyC123/unitasai-runtime		public, archived	2026-02-03T13:03:02Z
+NoelyC123/unitasai-canon-v0.1	UnitasAI Canon v0.1 — frozen design and implementation mapping (IM-1 to IM-15)	public, archived	2026-01-31T12:54:29Z
+NoelyC123/TwoPeas		private, archived	2025-11-10T16:23:52Z
+NoelyC123/SpanCore_MASTER		private, archived	2025-10-22T09:25:49Z
+NoelyC123/SpanCore-EW-Design-Tool		private, archived	2025-10-12T20:59:24Z
+NoelyC123/ew-design-tool-pro	A Flask-based QA + DXF generator for electricity infrastructure survey data (CSV/GeoJSON).	private, archived	2025-09-07T15:38:31Z
+NoelyC123/ew-design-tool		private, archived	2025-08-03T17:02:03Z
+NoelyC123/OLAW2025		private, archived	2025-06-05T15:39:23Z
+NoelyC123/MRI_BrainSuite	Brain	private, archived	2024-12-16T18:43:32Z
+NoelyC123/MRI_BrainSuite_Project	MRI_BrainSuite_Project UPDATE	private, archived	2024-12-16T18:40:48Z
+NoelyC123/MRI_BrainSuite_Analysis		public, archived	2024-12-16T18:33:15Z
+NoelyC123/EchoMind	Project	private, archived	2024-12-12T16:09:33Z
+NoelyC123/EchoMind-Chatbot		public, archived	2024-12-11T09:49:22Z
