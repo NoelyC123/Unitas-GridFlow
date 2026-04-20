@@ -98,6 +98,44 @@ def test_allowed_values_ignores_blank_values_when_required_is_separate() -> None
     assert len(issues) == 0
 
 
+def test_ssen_11kv_rulepack_is_registered() -> None:
+    """SSEN_11kV must be registered in RULEPACKS as a non-empty rule list."""
+    from app.dno_rules import RULEPACKS
+
+    assert "SSEN_11kV" in RULEPACKS
+    assert isinstance(RULEPACKS["SSEN_11kV"], list)
+    assert len(RULEPACKS["SSEN_11kV"]) > 0
+
+
+def test_ssen_11kv_rulepack_passes_valid_ssen_pole() -> None:
+    """A realistic valid SSEN pole in SHEPD (Inverness) should produce no issues.
+
+    Uses Inverness centre (approx 57.477, -4.225) with OSGB coords derived from
+    pyproj to match within the 100m coord_consistency tolerance.
+    """
+    from app.dno_rules import RULEPACKS
+
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "SSEN-INV-0001",
+                "height": 11.0,
+                "material": "Wood",
+                "structure_type": "Wood Pole",
+                "location": "Inverness Substation Approach",
+                "lat": 57.477,
+                "lon": -4.225,
+                "easting": 266679,
+                "northing": 845157,
+            }
+        ]
+    )
+
+    issues = run_qa_checks(df, RULEPACKS["SSEN_11kV"])
+
+    assert len(issues) == 0
+
+
 def test_missing_column_still_returns_issue() -> None:
     df = pd.DataFrame([{"pole_id": "P-1001"}])
 

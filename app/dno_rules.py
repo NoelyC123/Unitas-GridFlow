@@ -93,7 +93,75 @@ SPEN_11KV_RULES = [
 ]
 
 
+SSEN_11KV_RULES = [
+    *BASE_RULES,
+    # --- SSEN 11kV: voltage-correct height range ---
+    # ENA TS 43-8 / SSEN overhead line policy (same 11kV class as SPEN):
+    #   Wood poles: 7m-14m standard for 11kV distribution
+    #   Steel poles: 8m-20m
+    #   Using 7-20m to cover both materials without per-material branching
+    {"check": "range", "field": "height", "min": 7, "max": 20},
+    # --- Pole ID format ---
+    {
+        "check": "regex",
+        "field": "pole_id",
+        "pattern": r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+        "description": "Pole IDs must be stable identifiers (no spaces or punctuation).",
+    },
+    # --- Coordinate pair integrity ---
+    {
+        "check": "paired_required",
+        "fields": ["lat", "lon"],
+        "description": "Coordinates must be provided as a lat/lon pair.",
+    },
+    {
+        "check": "paired_required",
+        "fields": ["easting", "northing"],
+        "description": "OSGB coordinates must be provided as an easting/northing pair.",
+    },
+    # --- SSEN network area coordinate bounds ---
+    # SSEN operates two licence areas:
+    #   SEPD (Southern Electric Power Distribution) - southern England
+    #     (approx lat 50.0-52.5, lon -5.7 to +1.8)
+    #   SHEPD (Scottish Hydro Electric Power Distribution) - northern Scotland
+    #     (approx lat 55.8-60.9, lon -7.5 to -1.0)
+    # These areas don't overlap geographically. A single bounding box is used
+    # here for MVP simplicity - this will pass coordinates in non-SSEN areas
+    # between the two licence zones (e.g. Midlands), but still catches grossly
+    # wrong coordinates (e.g. mainland Europe). TODO: replace with polygon
+    # check for tighter SSEN-territory validation.
+    {"check": "range", "field": "lat", "min": 50.0, "max": 60.9},
+    {"check": "range", "field": "lon", "min": -7.5, "max": 1.8},
+    # --- Material must match declared structure type ---
+    {
+        "check": "dependent_allowed_values",
+        "if_field": "structure_type",
+        "then_field": "material",
+        "mapping": {
+            "Wood Pole": ["Wood"],
+            "Steel Pole": ["Steel"],
+            "Concrete Pole": ["Concrete"],
+            "Composite Pole": ["Composite"],
+        },
+        "description": "Material must match the declared structure type.",
+    },
+    # --- Coordinate consistency cross-check ---
+    # Converts lat/lon to OSGB27700 and checks against declared easting/northing.
+    # Tolerance 100m catches transcription errors and mismatched pole records.
+    {
+        "check": "coord_consistency",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "easting_field": "easting",
+        "northing_field": "northing",
+        "tolerance_m": 100,
+        "description": "lat/lon must be consistent with easting/northing within 100m.",
+    },
+]
+
+
 RULEPACKS: dict[str, list[dict]] = {
     "DEFAULT": BASE_RULES,
     "SPEN_11kV": SPEN_11KV_RULES,
+    "SSEN_11kV": SSEN_11KV_RULES,
 }
