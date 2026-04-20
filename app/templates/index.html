@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpanCore — Pre-CAD QA</title>
+    <title>Unitas GridFlow — Pre-CAD QA</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">SpanCore</a>
+            <a class="navbar-brand" href="/">Unitas GridFlow</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -27,16 +27,16 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <h1 class="mb-4">SpanCore — Pre-CAD QA Tool</h1>
-                <p class="lead">Upload survey data, check DNO compliance, get cleaner handoffs to CAD.</p>
+                <h1 class="mb-4">Unitas GridFlow — Pre-CAD QA Tool</h1>
+                <p class="lead">Upload survey data, check DNO compliance, and produce cleaner handoffs to CAD.</p>
 
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">Quick Start</h5>
                         <ul>
-                            <li><a href="/upload">Upload survey CSV</a> — SPEN 11kV ready</li>
-                            <li><a href="/jobs">View jobs</a> — See all uploaded datasets</li>
-                            <li><a href="/health/full">Health check</a> — System status</li>
+                            <li><a href="/upload">Upload survey CSV</a> — start a new QA job</li>
+                            <li><a href="/jobs">View jobs</a> — browse completed and failed runs</li>
+                            <li><a href="/health/full">Health check</a> — verify system status</li>
                         </ul>
                     </div>
                 </div>
@@ -44,9 +44,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">About</h5>
-                        <p>SpanCore validates surveyed pole data against DNO-specific rules before it reaches CAD design.</p>
-                        <p><strong>Current capabilities:</strong> QA rule checking, pole/span validation, pass/warn/fail reporting.</p>
-                        <p><small class="text-muted">Development build — Phase 1 recovery in progress.</small></p>
+                        <p>Unitas GridFlow validates surveyed pole data against DNO-oriented QA checks before it reaches CAD design.</p>
+                        <p><strong>Current capabilities:</strong> CSV upload, schema normalization, QA issue detection, map review, PDF reporting, and job browsing.</p>
+                        <p><small class="text-muted">Current build: working local MVP with active CI, linting, and initial pytest coverage.</small></p>
                     </div>
                 </div>
             </div>
