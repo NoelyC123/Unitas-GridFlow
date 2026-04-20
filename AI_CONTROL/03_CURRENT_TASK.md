@@ -2,62 +2,48 @@
 
 ## Immediate task
 
-The first QA-rule improvement step is now complete.
+Add `SSEN_11kV` rulepack to `app/dno_rules.py`.
 
-The project has:
-- upgraded `dno_rules.py` to a rulepack architecture
-- extended `qa_engine.py` with regex, paired_required, and dependent_allowed_values checks
-- wired rulepack selection into `api_intake.py`
-- corrected SPEN 11kV height ranges to real ENA values (7m-20m)
-- added SPEN network area coordinate bounds
-- reached 23 passing tests
-
-The immediate next task is:
-
-1. Add coordinate consistency cross-check (lat/lon vs easting/northing)
-2. Add a second DNO rulepack (SSEN_11kV is the logical next choice)
+This proves the rulepack architecture works for multiple DNOs and extends coverage beyond SPEN.
 
 ---
 
-## Why these are the next tasks
+## Why this is the current task
 
-### Coordinate consistency check
-Currently lat/lon and easting/northing are validated in isolation.
-A common real-world survey error is mismatched coordinates —
-where lat/lon points to one location and easting/northing to another.
-This check would catch that. It is high signal and narrow in scope.
+- SPEN_11kV is now solid — includes corrected height range, pole ID regex, paired coord checks, network bounds, structure/material consistency, and lat/lon ↔ easting/northing coordinate consistency.
+- The control layer has just been consolidated; further refactor work has diminishing returns.
+- Only one DNO is currently supported. A second one is the logical next extension.
 
-### Second DNO rulepack
-SPEN_11kV is now solid. The next most natural extension is SSEN_11kV
-(Scottish and Southern Electricity Networks), which covers a similar
-geographic area with similar but distinct standards.
-Adding a second rulepack proves the architecture works for multiple DNOs.
+SSEN (Scottish and Southern Electricity Networks) is the natural second choice — it covers central/southern Scotland and southern England, with similar but distinct standards to SPEN.
 
 ---
 
-## What is not the current task
+## Work sequence
 
-- broad new feature expansion
-- browser E2E testing (Playwright)
-- deployment / hosting
-- UI redesign
-- database integration
-- any work not tied directly to QA rule quality
-
----
-
-## Current development checkpoint
-
-**working MVP + rulepack architecture + SPEN_11kV live + 23 tests passing**
-
-The project has moved meaningfully from placeholder QA toward
-genuinely useful DNO-grade validation. The next step continues that
-same direction without broadening scope.
+1. Add `SSEN_11KV_RULES` to `app/dno_rules.py`, extending `BASE_RULES` as SPEN does.
+2. Use real published values where known (height range per ENA TS 43-8 for SSEN voltage class; SSEN network coordinate bounds; relevant pole/structure standards).
+3. Register it in the `RULEPACKS` dict as `"SSEN_11kV"`.
+4. Add at least one test in `tests/test_qa_engine.py` or `tests/test_api_intake.py` that covers the SSEN rulepack.
+5. Run `pytest -v` — all tests must pass.
+6. `git add / commit / push`.
+7. Update `04_SESSION_HANDOFF.md`, append to `CHANGELOG.md`, and adjust master truth §4 rulepack list + §5 priority list.
 
 ---
 
-## Short version
+## After this task, next in line
 
-Next two tasks in order:
-1. coordinate consistency check
-2. SSEN_11kV rulepack
+1. Add remaining DNO rulepacks (NIE, ENWL, NGED, UKPN).
+2. Wire `app/routes/api_rulepacks.py` to the real `RULEPACKS` dict.
+3. Fix `Makefile` stale port (5010 → 5001).
+
+See master truth §5 for the full current priority list.
+
+---
+
+## Not in scope
+
+- Broad feature expansion.
+- Browser E2E testing (Playwright) — later.
+- Deployment / hosting — later.
+- UI redesign — later.
+- Database integration — not planned.

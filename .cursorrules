@@ -1,36 +1,38 @@
 # Unitas-GridFlow — Cursor Rules
 
 ## First action — read this before anything else
-Read: AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md
-That file is the single source of truth for the entire project.
+Read: `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md`
+That file is the single source of truth for the entire project. It holds current test count, check-type count, rulepacks, and current priority.
 
 ## Then also read
-- AI_CONTROL/03_CURRENT_TASK.md — what to do this session
-- AI_CONTROL/04_SESSION_HANDOFF.md — what changed last session
+- `AI_CONTROL/03_CURRENT_TASK.md` — what to do this session
+- `AI_CONTROL/04_SESSION_HANDOFF.md` — what changed last session
+- `CHANGELOG.md` — rolling history of what shipped
 
 ## Project identity
 Unitas GridFlow — narrow pre-CAD QA and compliance tool for UK electricity
-network survey-to-design handoffs. DNO survey compliance gatekeeper.
+network survey-to-design handoffs. A DNO survey compliance gatekeeper.
 
-/Users/noelcollins/Unitas-GridFlow/
-GitHub: https://github.com/NoelyC123/Unitas-GridFlow
-Port: 5001 | Venv: .venv312 | Python: 3.13
+Location: `/Users/noelcollins/Unitas-GridFlow/`
+GitHub: `https://github.com/NoelyC123/Unitas-GridFlow`
+Port: 5001 | Venv: `.venv312` | Python: 3.13
 
 ## Tech stack
-Flask, pandas, geopandas, reportlab, Leaflet, Bootstrap 5
+Flask, pandas, geopandas, reportlab, pyproj, Leaflet, Bootstrap 5
 
-## Hard rules
-- Never broaden scope beyond narrow MVP
-- Always read a file before editing it — never assume contents
-- After any change: pytest -v (23 tests must pass)
-- After tests pass: git add / commit / push
-- Commit messages must be clear and descriptive
-- Never add features not tied to the current task
-- Never restore from _quarantine/ blindly
+## Hard rules (full list in master truth §7)
+- Never broaden scope beyond narrow MVP.
+- Always read a file before editing it — never assume contents.
+- After any change: `pytest -v` (all tests must pass).
+- After tests pass: `git add / commit / push`.
+- Commit messages must be clear and descriptive.
+- Never add features not tied to the current task.
+- Never restore from `_quarantine/` blindly.
+- Never treat autocomplete suggestions as authoritative for DNO-specific values.
 
 ## Key files
-- app/dno_rules.py         — QA rulepacks (CURRENT PRIORITY — add more DNOs)
-- app/qa_engine.py         — QA engine (7 check types)
-- app/routes/api_intake.py — main CSV processing pipeline
-- app/routes/api_rulepacks.py — rulepack API (currently stub — needs wiring)
-- tests/                   — pytest suite, must stay green
+- `app/dno_rules.py`         — QA rulepacks (current priority: add more DNOs)
+- `app/qa_engine.py`         — QA engine (check types in master truth §4)
+- `app/routes/api_intake.py` — main CSV processing pipeline
+- `app/routes/api_rulepacks.py` — rulepack API (stub — needs wiring)
+- `tests/`                   — pytest suite, must stay green

@@ -1,156 +1,89 @@
-# Current State
+# Current State — Deeper Technical Reference
 
-## Project status
-
-The project has now completed two distinct phases:
-
-1. baseline/professionalisation phase — complete
-2. first QA-rule improvement step — complete
-
-It is now in:
-
-**working local MVP + rulepack architecture in place + QA engine extended + next iteration ready**
+This file holds technical detail that doesn't belong in the master truth file.
+It does NOT repeat facts that change often (test counts, check-type counts, priorities) — those live in `00_MASTER_SOURCE_OF_TRUTH.md`.
 
 ---
 
-## Canonical active project identity
+## MVP flow
 
-### Active project name
-**Unitas GridFlow**
+**upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs**
 
-### Canonical active repo
-`NoelyC123/Unitas-GridFlow`
+### Working parts
+- `/upload` page
+- `/api/presign`
+- CSV upload/save to job folder
+- `/api/import/<job_id>` — selects rulepack by DNO, runs QA, writes outputs
+- `issues.csv` output
+- `map_data.json` output
+- `/map/view/<job_id>`
+- `/pdf/qa/<job_id>`
+- `/jobs/`
+- `/health/full`
 
-### Canonical active local folder
-`/Users/noelcollins/Unitas-GridFlow`
+### Job output contract
 
-### Repo rule
-This is the **only active canonical repo** for the project.
-Older EW / SpanCore / design-tool repos are archived and are not active development repos.
-
----
-
-## Current MVP status
-
-The narrow MVP is working locally.
-
-### Confirmed working flow
-**upload CSV -> save file -> run QA -> save outputs -> view map -> download PDF -> browse jobs**
-
-### Confirmed working parts
-- `/upload` page works
-- `/api/presign` works
-- CSV upload/save works
-- `/api/import/<job_id>` works — now selects rulepack by DNO
-- QA processing runs with extended check types
-- `issues.csv` is written
-- `map_data.json` is written
-- `/map/view/<job_id>` works
-- `/pdf/qa/<job_id>` works
-- `/jobs/` works
-- `/health/full` works
+Successful jobs create:
+- `uploads/jobs/<job_id>/meta.json`
+- `uploads/jobs/<job_id>/<uploaded_csv>.csv`
+- `uploads/jobs/<job_id>/issues.csv`
+- `uploads/jobs/<job_id>/map_data.json`
 
 ---
 
-## Current QA architecture state
+## QA architecture
 
-### dno_rules.py
-Upgraded from a single flat list to a proper rulepack architecture.
+### `app/dno_rules.py`
+- `BASE_RULES` — generic UK-wide rules used as fallback.
+- `DNO_RULES` — backwards-compatible alias for `BASE_RULES`.
+- `SPEN_11KV_RULES` — extends `BASE_RULES` with SPEN-specific checks.
+- `RULEPACKS` dict — `{"DEFAULT": BASE_RULES, "SPEN_11kV": SPEN_11KV_RULES}`.
 
-**Structure:**
-- `BASE_RULES` — generic UK-wide rules, used as fallback
-- `DNO_RULES` — backwards-compatible alias for `BASE_RULES`
-- `SPEN_11KV_RULES` — extends BASE_RULES with SPEN-specific checks
-- `RULEPACKS` dict — `{"DEFAULT": BASE_RULES, "SPEN_11kV": SPEN_11KV_RULES}`
+### `app/qa_engine.py`
+Each check returns issues as DataFrame rows with `{Issue, Row}` columns.
+See master truth §4 for the current list of check types.
 
-**SPEN_11kV rulepack includes:**
-- Corrected height range: 7m-20m (ENA TS 43-8 / SPEN OHL policy)
-- Pole ID regex validation (stable identifier format)
-- Paired coordinate checks (lat/lon must both be present, easting/northing must both be present)
-- SPEN network area coordinate bounds (lat 54.5-60.9, lon -6.5 to -0.7)
-- Material/structure_type cross-field consistency check
+The engine uses a single if/elif chain. Checks fall into two groups:
+- Checks that operate on a single `field` key (`unique`, `required`, `range`, `allowed_values`, `regex`).
+- Checks that operate on multiple fields (`paired_required`, `dependent_allowed_values`, `coord_consistency`).
 
-### qa_engine.py
-Extended with three new check types:
-- `regex` — validates field against a pattern
-- `paired_required` — both fields in a pair must be present or both absent
-- `dependent_allowed_values` — allowed values for one field depend on another field's value
-
-### api_intake.py
-Now selects rules by the requested DNO:
-- `RULEPACKS[requested_dno]` → fallback to `RULEPACKS["DEFAULT"]` → fallback to `DNO_RULES`
+### `app/routes/api_intake.py`
+Rulepack selection chain:
+`RULEPACKS[requested_dno]` → fallback to `RULEPACKS["DEFAULT"]` → fallback to `DNO_RULES`.
 
 ---
 
-## Current testing status
+## Testing
 
-### Test count
-**23 passing tests**
+Test layout (see master truth §4 for current total):
+- `tests/test_api_intake.py` — normalization, post-processing, sanitization, feature collection.
+- `tests/test_app_routes.py` — route behaviour, health, jobs API, PDF, import/finalize paths.
+- `tests/test_qa_engine.py` — per-check-type behaviour.
 
-### Coverage includes
-- schema normalization
-- issue post-processing
-- CSV payload sanitization
-- feature collection generation
-- JSON-safe output
-- health endpoint
-- jobs API
-- job status endpoint
-- PDF endpoint
-- import/finalize success and error paths
-- regex check
-- paired_required check
-- dependent_allowed_values check
-
-### Quality tooling
-- pre-commit: active
-- Ruff: active
-- pytest: active (23 passing)
-- GitHub Actions CI: active
+Quality stack:
+- `pre-commit` — trailing whitespace, EOF fix, YAML/JSON/large-file checks, Ruff hooks.
+- `Ruff` — lint + format.
+- `pytest` — backend unit and integration tests.
+- `pytest-cov` — coverage reporting (`pytest --cov=app`).
+- `GitHub Actions` — runs `pre-commit run --all-files` and `pytest -q` on every push/PR to `master`.
+- `Dependabot` — weekly dependency updates via `.github/dependabot.yml`.
 
 ---
 
-## Tool bootstrapping state
+## Non-blocking technical debt
 
-All development tools are now bootstrapped with project context:
+Known items that don't block the current priority but should be addressed when next relevant:
 
-- Claude app Project: Instructions + 8 AI_CONTROL knowledge files
-- Claude Code: `CLAUDE.md` in project root
-- Cursor Pro: `.cursorrules` in project root
-- GitHub Copilot: installed in VS Code
-- ChatGPT/Gemini/Grok: use `CLAUDE_REVIEW_BUNDLES/` zips
-
----
-
-## Current remaining weaknesses
-
-### 1. Only one rulepack exists (SPEN_11kV)
-Other DNOs (SSEN, ENWL, NIE, UKPN) have no rulepack yet.
-The architecture supports adding them — the rules don't exist yet.
-
-### 2. No coordinate consistency cross-check yet
-lat/lon and easting/northing are each validated independently.
-A check confirming they point to the same location (within tolerance) does not yet exist.
-
-### 3. Input handling is still narrow
-One representative schema is supported.
-Broader real-world survey export variation is not yet handled.
-
-### 4. Browser test coverage does not yet exist
-Playwright is not yet active.
-Current automated testing is backend-focused.
-
-### 5. Architecture still has MVP debt
-Some route/code paths were built quickly.
-Cleanup/hardening can come after the rule quality improves further.
+- Historical test jobs linger in `uploads/jobs/` (stale paths fixed 20 April 2026).
+- `issues.csv` payloads are still verbose.
+- `app/routes/api_rulepacks.py` returns stub data — needs wiring to real `RULEPACKS` dict.
+- `Makefile` has a stale port (5010 instead of 5001).
+- GitHub Actions shows a non-blocking Node.js deprecation warning for upstream actions.
+- No automated browser tests (Playwright not yet active).
+- `docker-compose.yml` exists at root but isn't used by current dev flow.
 
 ---
 
-## Current phase
+## Known weaknesses
 
-**working MVP + rulepack architecture complete + SPEN_11kV rulepack live + 23 tests passing**
-
-## Current next priority
-
-Add coordinate consistency cross-check (lat/lon vs easting/northing).
-Then expand rulepacks to cover a second DNO.
+See master truth §4 for the canonical list. This file does not duplicate it.
