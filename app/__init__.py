@@ -1,4 +1,3 @@
-# app/__init__.py
 import os
 
 from flask import Flask, jsonify, render_template
@@ -13,14 +12,14 @@ def create_app() -> Flask:
         template_folder=os.path.join(base_dir, "templates"),
     )
 
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "spancore-dev-key")
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "unitas-gridflow-dev-key")
 
     @app.get("/health/full")
     def health_full():
         return jsonify(
             {
                 "ok": True,
-                "service": "spancore",
+                "service": "unitas-gridflow",
                 "version": "dev",
                 "status": "healthy",
             }
@@ -34,7 +33,6 @@ def create_app() -> Flask:
     def upload():
         return render_template("upload.html")
 
-    # --- Blueprints ---
     try:
         from app.routes.jobs_page import jobs_bp
 
