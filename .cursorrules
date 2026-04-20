@@ -1,28 +1,36 @@
-# Unitas-GridFlow Cursor Rules
+# Unitas-GridFlow — Cursor Rules
 
-## What this project is
-Narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
-Local Flask/Python web app. DNO survey compliance gatekeeper.
+## Project identity
+Unitas GridFlow is a narrow pre-CAD QA and compliance tool for UK electricity
+network survey-to-design handoffs. DNO survey compliance gatekeeper.
 
-## Codebase location
+## Codebase
 /Users/noelcollins/Unitas-GridFlow/
+GitHub: https://github.com/NoelyC123/Unitas-GridFlow
 
 ## Current phase
 Working local MVP. Next priority: improve app/dno_rules.py with real DNO QA rules.
 
 ## Tech stack
 Python 3.13, Flask, pandas, geopandas, reportlab, Leaflet, Bootstrap 5
-Venv: .venv312
+Venv: .venv312 | Port: 5001
+
+## Before doing anything in a session
+Read AI_CONTROL/ files to understand current state. Start with:
+- MASTER_PROJECT_READ_FIRST.md
+- AI_CONTROL/02_CURRENT_STATE.md
+- AI_CONTROL/03_CURRENT_TASK.md
 
 ## Hard rules
 - Never broaden scope beyond narrow MVP
 - Always read a file before editing it
-- After any change: run pytest -v
-- After tests pass: git add/commit/push
-- Never add features not directly tied to the current task
+- After any change: run pytest -v (20 tests must pass)
+- After tests pass: git add / commit / push
+- Commit messages must be clear and descriptive
+- Never add features not tied to the current task
 
-## Key files
-- app/dno_rules.py — QA rules (current priority)
-- app/qa_engine.py — QA engine
-- app/routes/api_intake.py — CSV processing
-- AI_CONTROL/ — read these first for project context
+## Key files to know
+- app/dno_rules.py      — QA rules (CURRENT PRIORITY)
+- app/qa_engine.py      — QA engine
+- app/routes/api_intake.py — main processing pipeline
+- tests/                — pytest suite, must stay green
