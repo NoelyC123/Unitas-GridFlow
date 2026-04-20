@@ -69,7 +69,7 @@ Any other folder or repo is archive/reference only.
 
 ## 4. Current state (verified 20 April 2026)
 
-**Phase:** Working local MVP + rulepack architecture complete + SPEN_11kV live with full cross-checks + 25 tests passing.
+**Phase:** Working local MVP + rulepack architecture complete + SPEN_11kV and SSEN_11kV live + 27 tests passing.
 
 **Confirmed flow:** upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
 
@@ -91,25 +91,32 @@ Any other folder or repo is archive/reference only.
   - SPEN network bounds (lat 54.5–60.9, lon -6.5 to -0.7)
   - Material/structure_type cross-field consistency
   - lat/lon ↔ easting/northing coordinate consistency (100m tolerance)
+- `SSEN_11kV` — extends `BASE_RULES` with:
+  - ENA TS 43-8 height range (7–20m)
+  - Pole ID regex
+  - Paired coord presence checks
+  - Combined SEPD + SHEPD bounding box (lat 50.0–60.9, lon -7.5 to +1.8) — loose MVP bounds; `TODO` to tighten with polygon check
+  - Material/structure_type cross-field consistency
+  - lat/lon ↔ easting/northing coordinate consistency (100m tolerance)
 
-**Tests:** 25 passing
+**Tests:** 27 passing
 **CI:** GitHub Actions runs `pre-commit` + `pytest` on every push to `master`.
 
 **Known weaknesses:**
-1. Only one DNO rulepack (SPEN_11kV) — adding others is the active priority.
-2. Input schema still narrow — one representative schema supported.
-3. No Playwright browser tests yet — backend tests only.
-4. `app/routes/api_rulepacks.py` returns stub data — needs wiring to real `RULEPACKS` dict.
-5. `Makefile` has stale port (5010 instead of 5001).
+1. Only two DNO rulepacks (SPEN_11kV, SSEN_11kV) — more DNOs are the active priority.
+2. SSEN bounds use a single loose bounding box across two disjoint licence areas (SEPD and SHEPD). Tighten with polygon check when needed.
+3. Input schema still narrow — one representative schema supported.
+4. No Playwright browser tests yet — backend tests only.
+5. `app/routes/api_rulepacks.py` returns stub data — needs wiring to real `RULEPACKS` dict.
+6. `Makefile` has stale port (5010 instead of 5001).
 
 ---
 
 ## 5. Current next priority
 
-1. Add `SSEN_11kV` rulepack.
-2. Add remaining DNO rulepacks (NIE, ENWL, NGED, UKPN).
-3. Wire `app/routes/api_rulepacks.py` to the real `RULEPACKS` dict.
-4. Fix `Makefile` port (5010 → 5001).
+1. Add remaining DNO rulepacks (NIE, ENWL, NGED, UKPN).
+2. Wire `app/routes/api_rulepacks.py` to the real `RULEPACKS` dict.
+3. Fix `Makefile` port (5010 → 5001).
 
 **What is NOT the current priority:**
 - Browser E2E testing (Playwright) — later, once UI is stable.
