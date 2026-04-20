@@ -1,6 +1,27 @@
 DNO_RULES = [
     {"check": "unique", "field": "pole_id"},
-    {"check": "range", "field": "height", "min": 10, "max": 25},
+    {"check": "required", "field": "pole_id"},
+    {"check": "required", "field": "height"},
     {"check": "required", "field": "material"},
     {"check": "required", "field": "location"},
+    {"check": "required", "field": "structure_type"},
+    {"check": "required", "field": "lat"},
+    {"check": "required", "field": "lon"},
+    {"check": "required", "field": "easting"},
+    {"check": "required", "field": "northing"},
+    {"check": "range", "field": "height", "min": 10, "max": 25},
+    {"check": "range", "field": "lat", "min": 49, "max": 62},
+    {"check": "range", "field": "lon", "min": -9, "max": 3},
+    {"check": "range", "field": "easting", "min": 0, "max": 700000},
+    {"check": "range", "field": "northing", "min": 0, "max": 1300000},
+    {
+        "check": "allowed_values",
+        "field": "material",
+        "values": ["Wood", "Steel", "Concrete", "Composite"],
+    },
+    {
+        "check": "allowed_values",
+        "field": "structure_type",
+        "values": ["Wood Pole", "Steel Pole", "Concrete Pole", "Composite Pole"],
+    },
 ]
