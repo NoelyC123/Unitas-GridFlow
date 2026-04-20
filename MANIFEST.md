@@ -2,7 +2,7 @@
 
 **Complete inventory of every file and directory in the canonical project.**
 
-Last updated: 17 April 2026  
+Last updated: 17 April 2026
 Canonical folder: `/Users/noelcollins/SpanCore-EW-Design-Tool-LOCAL`
 
 ---
@@ -121,17 +121,17 @@ Canonical folder: `/Users/noelcollins/SpanCore-EW-Design-Tool-LOCAL`
 
 ## Safe to Modify
 
-✅ `app/dno_rules.py` — extend with real rules  
-✅ `app/routes/api_*.py` — implement missing endpoints  
-✅ Templates and styles — add features  
-✅ Config files — update as needed  
+✅ `app/dno_rules.py` — extend with real rules
+✅ `app/routes/api_*.py` — implement missing endpoints
+✅ Templates and styles — add features
+✅ Config files — update as needed
 
-❌ `app/__init__.py` — Flask factory  
-❌ `app/qa_engine.py` — core logic  
-❌ `run.py` — WSGI entry point  
-🔒 `.env` — never commit  
-🔒 `uploads/`, `temp_gis/` — runtime only  
-🔒 `_quarantine/` — reference only  
+❌ `app/__init__.py` — Flask factory
+❌ `app/qa_engine.py` — core logic
+❌ `run.py` — WSGI entry point
+🔒 `.env` — never commit
+🔒 `uploads/`, `temp_gis/` — runtime only
+🔒 `_quarantine/` — reference only
 
 ---
 

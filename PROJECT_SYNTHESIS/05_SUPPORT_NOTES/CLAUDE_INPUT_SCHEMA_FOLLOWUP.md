@@ -1,6 +1,6 @@
 # Claude Input Schema Follow-up
 
-Source: Claude follow-up implementation-spec response  
+Source: Claude follow-up implementation-spec response
 
 Date: 2026-04-19
 

@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def run_qa_checks(df, rules):
     issues = []
 
@@ -23,7 +24,9 @@ def run_qa_checks(df, rules):
             max_val = rule.get("max", float("inf"))
             out_of_range = df[(df[field] < min_val) | (df[field] > max_val)]
             for _, row in out_of_range.iterrows():
-                issues.append({"Issue": f"{field} out of range ({min_val}-{max_val})", "Row": row.to_dict()})
+                issues.append(
+                    {"Issue": f"{field} out of range ({min_val}-{max_val})", "Row": row.to_dict()}
+                )
 
         elif check == "required":
             missing = df[df[field].isnull() | (df[field] == "")]

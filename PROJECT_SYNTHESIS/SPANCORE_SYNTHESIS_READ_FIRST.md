@@ -55,24 +55,24 @@ These are the restored raw AI responses used to rebuild the synthesis pack.
 
 ## Folder structure
 
-- `00_RAW_AI_RESPONSES/`  
+- `00_RAW_AI_RESPONSES/`
   Restored source analyses from ChatGPT, Claude, Gemini, and Grok
 
-- `01_COMPARISON/`  
+- `01_COMPARISON/`
   High-level AI comparison matrix
 
-- `02_FINAL_SYNTHESIS/`  
+- `02_FINAL_SYNTHESIS/`
   Deep synthesis documents:
   - master claims ledger
   - master synthesis
 
-- `03_DECISION_MEMO/`  
+- `03_DECISION_MEMO/`
   Final decision memo
 
-- `04_EXECUTION_ALIGNMENT/`  
+- `04_EXECUTION_ALIGNMENT/`
   Practical execution plan
 
-- `05_SUPPORT_NOTES/`  
+- `05_SUPPORT_NOTES/`
   Supporting derivative notes, including extra Claude execution outputs
 
 ---

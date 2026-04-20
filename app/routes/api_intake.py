@@ -141,7 +141,9 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     normalized = False
 
     normalized |= _copy_if_missing(df, "pole_id", ["asset_id", "pole_id"])
-    normalized |= _copy_if_missing(df, "height", ["height_m", "height", "pole_height_m", "pole_height"])
+    normalized |= _copy_if_missing(
+        df, "height", ["height_m", "height", "pole_height_m", "pole_height"]
+    )
     normalized |= _copy_if_missing(df, "material", ["material", "pole_material"])
     normalized |= _copy_if_missing(df, "location", ["location_name", "location"])
     normalized |= _copy_if_missing(df, "lat", ["latitude", "lat"])
@@ -213,8 +215,7 @@ def _sanitize_issues_for_csv(issues_df: pd.DataFrame) -> pd.DataFrame:
             cleaned_payload = _sanitize_for_json(row_payload)
             # For CSV readability, use empty string instead of None in row payloads.
             cleaned_payload = {
-                key: ("" if value is None else value)
-                for key, value in cleaned_payload.items()
+                key: ("" if value is None else value) for key, value in cleaned_payload.items()
             }
             row_dict["Row"] = cleaned_payload
 
@@ -272,8 +273,12 @@ def _build_feature_collection(
                 "coordinates": [lon, lat],
             },
             "properties": {
-                "id": row.get("pole_id", f"row-{int(row_index) + 1 if row_index is not None else 'unknown'}"),
-                "name": row.get("location", f"Record {int(row_index) + 1 if row_index is not None else ''}"),
+                "id": row.get(
+                    "pole_id", f"row-{int(row_index) + 1 if row_index is not None else 'unknown'}"
+                ),
+                "name": row.get(
+                    "location", f"Record {int(row_index) + 1 if row_index is not None else ''}"
+                ),
                 "pole_id": _safe_value(row.get("pole_id")),
                 "material": _safe_value(row.get("material")),
                 "height": _safe_value(row.get("height")),

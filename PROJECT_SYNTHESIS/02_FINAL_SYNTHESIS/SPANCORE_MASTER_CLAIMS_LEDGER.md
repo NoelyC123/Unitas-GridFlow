@@ -357,8 +357,8 @@ Internal tool / consultancy leverage / narrow licensed product is strongly favou
 ### Final synthesis judgment
 The best commercial form is:
 
-**Phase 1:** internal tool / consultancy-leverage tool  
-**Phase 2:** licensed niche product  
+**Phase 1:** internal tool / consultancy-leverage tool
+**Phase 2:** licensed niche product
 **Phase 3:** broader software ambition only if repeatability, rule ownership, and demand are all proven
 
 ### Confidence
@@ -383,7 +383,7 @@ Recover the missing operational MVP flow immediately and prove upload → QA →
 ### Final synthesis judgment
 The best next move is a **two-track action**:
 
-1. **Complete the narrow MVP recovery** so the product can actually be shown and used end-to-end  
+1. **Complete the narrow MVP recovery** so the product can actually be shown and used end-to-end
 2. **Immediately validate it with one real user / design team / buyer champion**
 
 ### Confidence

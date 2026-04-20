@@ -1,6 +1,6 @@
 # Claude Next Priority Review
 
-Source: Claude App review after working local MVP checkpoint  
+Source: Claude App review after working local MVP checkpoint
 
 Date: 2026-04-19
 
@@ -61,4 +61,3 @@ Fixing input handling first closes this gap. Once you have a representative samp
 Fix the input layer first. The QA pipeline is running on invented field mappings against a demo CSV. That makes everything downstream — the rules, the map, the PDF report — cosmetically correct but actually untestable against real work. Get one real or fully representative sample CSV, map it properly through `_normalize_dataframe`, remove the demo-fallback hacks, and then the QA rule expansion will be worth doing.
 
 ---
-

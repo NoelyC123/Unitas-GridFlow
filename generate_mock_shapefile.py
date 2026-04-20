@@ -1,19 +1,20 @@
-import geopandas as gpd
-from shapely.geometry import Point
 import os
 import zipfile
 
+import geopandas as gpd
+from shapely.geometry import Point
+
 # Match the mock_survey.csv ids (1–5)
 data = {
-    'id': [1, 2, 3, 4, 5],
-    'name': ['Pole A', 'Pole B', 'Pole C', 'Pole D', 'Pole E'],
-    'geometry': [
+    "id": [1, 2, 3, 4, 5],
+    "name": ["Pole A", "Pole B", "Pole C", "Pole D", "Pole E"],
+    "geometry": [
         Point(10.0, 50.0),
         Point(10.1, 50.1),
         Point(10.2, 50.2),
         Point(10.3, 50.3),
-        Point(10.4, 50.4)
-    ]
+        Point(10.4, 50.4),
+    ],
 }
 
 # Create GeoDataFrame

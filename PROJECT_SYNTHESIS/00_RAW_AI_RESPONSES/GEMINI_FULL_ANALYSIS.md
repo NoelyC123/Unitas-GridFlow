@@ -177,9 +177,9 @@ Key Unanswered Questions
 
 Several strategic questions remain regarding the long-term scalability of the platform:
 
-1. DNO Integration: Will DNOs like SPEN officially integrate with SpanCore APIs, or will the tool remain a "pre-submission filter" used exclusively by contractors? 
+1. DNO Integration: Will DNOs like SPEN officially integrate with SpanCore APIs, or will the tool remain a "pre-submission filter" used exclusively by contractors?
 
-2. Data Security: How will the platform navigate the stringent National Protective Security Authority (NPSA) requirements for critical national infrastructure data as it moves to a cloud-based SaaS? 
+2. Data Security: How will the platform navigate the stringent National Protective Security Authority (NPSA) requirements for critical national infrastructure data as it moves to a cloud-based SaaS?
 
 3. Revenue Model: Is the market for a "Compliance Engine" large enough to sustain a standalone business, or will SpanCore inevitably be forced to expand into a full design suite?
 
@@ -208,10 +208,10 @@ Detailed Analysis of DNO Submission Rejections
 A critical driver for SpanCore's commercial adoption is the forensic analysis of why OHL designs currently fail DNO adoption. Submission rejections are rarely caused by fundamental engineering failures; they are triggered by "incomplete or inconsistent information".
 
 Operator	Critical Compliance Threshold	Typical Rejection Trigger
-SPEN	Approved Equipment Register (ESDD-02-021).	Use of non-standard insulators or pole types. 
-ENWL	Soil Resistivity and Earthing Resistance.	Missing earthing system design references. 
-SSEN Distribution	OHL Clearances (TG-NET-OHL-011).	Spans failing to meet 400kV-to-LV vertical clearance steps. 
-UKPN	G100 Export Limitation.	Inaccurate Single Line Diagrams (SLDs) for LCT connections. 
+SPEN	Approved Equipment Register (ESDD-02-021).	Use of non-standard insulators or pole types.
+ENWL	Soil Resistivity and Earthing Resistance.	Missing earthing system design references.
+SSEN Distribution	OHL Clearances (TG-NET-OHL-011).	Spans failing to meet 400kV-to-LV vertical clearance steps.
+UKPN	G100 Export Limitation.	Inaccurate Single Line Diagrams (SLDs) for LCT connections.
 
 SpanCore’s architecture, utilizing a dispatcher to call specific check functions for each DNO, is the most robust response to this fragmented regulatory landscape. By formalizing these tacit rules into YAML-driven rule packs, SpanCore moves from being a mere "parser" to a "standardization agent," which is the ultimate requirement for national-scale infrastructure coordination.
 

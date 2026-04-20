@@ -1,7 +1,7 @@
 # SpanCore / EW Design Tool — Execution Alignment Plan
 
-Prepared: 2026-04-18  
-Status: Immediate execution plan following the restored AI source set, comparison matrix, claims ledger, master synthesis, and final decision memo  
+Prepared: 2026-04-18
+Status: Immediate execution plan following the restored AI source set, comparison matrix, claims ledger, master synthesis, and final decision memo
 Purpose: To convert the synthesis into a practical sequence of actions
 
 ---
@@ -21,9 +21,9 @@ without drifting back into:
 
 The principle is simple:
 
-**Recover one narrow workflow.  
-Prove one real result.  
-Validate with one real user.  
+**Recover one narrow workflow.
+Prove one real result.
+Validate with one real user.
 Then decide what happens next.**
 
 ---

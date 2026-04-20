@@ -1,7 +1,7 @@
 # SpanCore / EW Design Tool — Final Decision Memo
 
-Prepared: 2026-04-18  
-Status: Final decision memo derived from the restored AI source set, comparison matrix, claims ledger, and master synthesis  
+Prepared: 2026-04-18
+Status: Final decision memo derived from the restored AI source set, comparison matrix, claims ledger, and master synthesis
 Purpose: To state clearly what has been decided about SpanCore, what it is, what it is not, and what happens next
 
 ---

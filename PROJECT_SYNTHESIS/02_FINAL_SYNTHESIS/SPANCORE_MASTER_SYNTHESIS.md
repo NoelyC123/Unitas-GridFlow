@@ -1,7 +1,7 @@
 # SpanCore / EW Design Tool — Master Synthesis
 
-Prepared: 2026-04-18  
-Status: Rebuilt final unified synthesis based on the prior AI analysis process, current project control files, and the cleaned live project state  
+Prepared: 2026-04-18
+Status: Rebuilt final unified synthesis based on the prior AI analysis process, current project control files, and the cleaned live project state
 Purpose: To establish the strongest current shared judgment on what SpanCore is, whether it is worth continuing, what it should become, and what should happen next
 
 ---
@@ -71,7 +71,7 @@ What does **not** appear to exist yet in full production form:
 
 So the honest position is:
 
-**The architecture and product shell are real.  
+**The architecture and product shell are real.
 The full trusted workflow is not yet real.**
 
 That distinction matters.
@@ -133,7 +133,7 @@ It becomes a weak idea when framed too broadly:
 
 So the correct final answer is:
 
-**SpanCore is a good narrow idea.  
+**SpanCore is a good narrow idea.
 It is not a good broad idea.**
 
 ---
@@ -237,7 +237,7 @@ The main technical dangers are not theoretical impossibility. They are:
 
 So the technical lesson is:
 
-**Recover. Narrow. Prove.  
+**Recover. Narrow. Prove.
 Do not expand first.**
 
 ---
@@ -282,7 +282,7 @@ The strongest combined arguments in favour are:
 
 A particularly strong combined argument is this:
 
-> SpanCore does not need to invent a market.  
+> SpanCore does not need to invent a market.
 > It only needs to make one ugly, repetitive, rules-heavy workflow substantially better than spreadsheet/manual alternatives.
 
 That is a much stronger position than trying to invent a new software category.
@@ -377,7 +377,7 @@ So the correct current commercial posture is:
 
 ## 15. Best next move
 
-The best next move is not just one thing.  
+The best next move is not just one thing.
 It is a **two-track action**.
 
 ### Track 1 — finish the narrow MVP recovery
@@ -456,8 +456,8 @@ The best current synthesis is:
 
 **Continue — but only in narrowed form.**
 
-Do **not** treat SpanCore as ready for broad productisation.  
-Do **not** pursue platform ambition yet.  
+Do **not** treat SpanCore as ready for broad productisation.
+Do **not** pursue platform ambition yet.
 Do **not** assume the market gap will carry the project on its own.
 
 Instead:

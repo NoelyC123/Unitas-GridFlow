@@ -15,25 +15,25 @@ The aim is not to choose a winner, but to identify:
 
 Each AI is assessed on:
 
-1. **Groundedness**  
+1. **Groundedness**
    Does it stay tied to the available project evidence and the audited/current repo state?
 
-2. **Built vs Planned Accuracy**  
+2. **Built vs Planned Accuracy**
    Does it clearly distinguish implemented work from partially built or merely planned work?
 
-3. **Technical Realism**  
+3. **Technical Realism**
    Does it give a believable and useful technical judgment?
 
-4. **Product Clarity**  
+4. **Product Clarity**
    Does it identify the strongest realistic product identity?
 
-5. **Commercial Realism**  
+5. **Commercial Realism**
    Does it avoid hype and stay realistic about adoption, buyers, and profitability?
 
-6. **Actionability**  
+6. **Actionability**
    Does it give practical next steps, not just broad commentary?
 
-7. **Original Insight**  
+7. **Original Insight**
    Does it add anything genuinely useful or new?
 
 Scores are from 1–5.

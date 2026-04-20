@@ -3,19 +3,13 @@
 from __future__ import annotations
 
 import csv
-
 import io
-
 import json
-
 from pathlib import Path
 
 from flask import Blueprint, abort, send_file
-
 from reportlab.lib.pagesizes import A4
-
 from reportlab.lib.units import mm
-
 from reportlab.pdfgen import canvas
 
 pdf_reports_bp = Blueprint("pdf_reports", __name__)
@@ -24,47 +18,48 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 JOBS_ROOT = PROJECT_ROOT / "uploads" / "jobs"
 
+
 def _job_dir(job_id: str) -> Path:
 
     return JOBS_ROOT / job_id
+
 
 def _meta_path(job_id: str) -> Path:
 
     return _job_dir(job_id) / "meta.json"
 
+
 def _issues_path(job_id: str) -> Path:
 
     return _job_dir(job_id) / "issues.csv"
+
 
 def _load_meta(job_id: str) -> dict:
 
     path = _meta_path(job_id)
 
     if not path.exists():
-
         return {}
 
     try:
-
         return json.loads(path.read_text(encoding="utf-8"))
 
     except Exception:
-
         return {}
+
 
 def _load_issues(job_id: str) -> list[dict]:
 
     path = _issues_path(job_id)
 
     if not path.exists():
-
         return []
 
     with path.open("r", encoding="utf-8", newline="") as f:
-
         reader = csv.DictReader(f)
 
         return list(reader)
+
 
 def _draw_line(pdf: canvas.Canvas, text: str, x: float, y: float, font="Helvetica", size=10):
 
@@ -72,14 +67,13 @@ def _draw_line(pdf: canvas.Canvas, text: str, x: float, y: float, font="Helvetic
 
     pdf.drawString(x, y, text)
 
-@pdf_reports_bp.get("/qa/<job_id>")
 
+@pdf_reports_bp.get("/qa/<job_id>")
 def qa_pdf(job_id: str):
 
     job_path = _job_dir(job_id)
 
     if not job_path.exists():
-
         abort(404)
 
     meta = _load_meta(job_id)
@@ -137,17 +131,14 @@ def qa_pdf(job_id: str):
     y -= 8 * mm
 
     if not issues:
-
         _draw_line(pdf, "No issues.csv found for this job, or no issues were recorded.", left, y)
 
         y -= line_gap
 
     else:
-
         max_rows = 20
 
         for idx, issue in enumerate(issues[:max_rows], start=1):
-
             issue_text = str(issue.get("Issue", "Unknown issue")).strip()
 
             row_text = str(issue.get("Row", "")).strip()
@@ -157,7 +148,6 @@ def qa_pdf(job_id: str):
             y -= line_gap
 
             if row_text:
-
                 trimmed = row_text[:120]
 
                 _draw_line(pdf, f"   Row: {trimmed}", left, y, size=9)
@@ -165,18 +155,25 @@ def qa_pdf(job_id: str):
                 y -= line_gap
 
             if y < 25 * mm:
-
                 pdf.showPage()
 
                 y = top
 
-                _draw_line(pdf, "SpanCore EW — QA Report (continued)", left, y, font="Helvetica-Bold", size=14)
+                _draw_line(
+                    pdf,
+                    "SpanCore EW — QA Report (continued)",
+                    left,
+                    y,
+                    font="Helvetica-Bold",
+                    size=14,
+                )
 
                 y -= 10 * mm
 
         if len(issues) > max_rows:
-
-            _draw_line(pdf, f"... {len(issues) - max_rows} more issue(s) not shown in this PDF.", left, y)
+            _draw_line(
+                pdf, f"... {len(issues) - max_rows} more issue(s) not shown in this PDF.", left, y
+            )
 
             y -= line_gap
 
@@ -191,13 +188,8 @@ def qa_pdf(job_id: str):
     buffer.seek(0)
 
     return send_file(
-
         buffer,
-
         mimetype="application/pdf",
-
         as_attachment=False,
-
         download_name=f"{job_id}_qa_report.pdf",
-
     )
