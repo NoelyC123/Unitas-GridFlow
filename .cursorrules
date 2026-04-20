@@ -9,7 +9,8 @@ network survey-to-design handoffs. DNO survey compliance gatekeeper.
 GitHub: https://github.com/NoelyC123/Unitas-GridFlow
 
 ## Current phase
-Working local MVP. Next priority: improve app/dno_rules.py with real DNO QA rules.
+Working local MVP. Rulepack architecture in place. SPEN_11kV live with real ENA values.
+23 tests passing. Next: coordinate consistency check + SSEN_11kV rulepack.
 
 ## Tech stack
 Python 3.13, Flask, pandas, geopandas, reportlab, Leaflet, Bootstrap 5
@@ -23,14 +24,18 @@ Read AI_CONTROL/ files to understand current state. Start with:
 
 ## Hard rules
 - Never broaden scope beyond narrow MVP
-- Always read a file before editing it
-- After any change: run pytest -v (20 tests must pass)
+- Always read a file before editing it — never assume contents
+- After any change: run pytest -v (23 tests must pass)
 - After tests pass: git add / commit / push
 - Commit messages must be clear and descriptive
 - Never add features not tied to the current task
 
-## Key files to know
-- app/dno_rules.py      — QA rules (CURRENT PRIORITY)
-- app/qa_engine.py      — QA engine
-- app/routes/api_intake.py — main processing pipeline
-- tests/                — pytest suite, must stay green
+## Key files
+- app/dno_rules.py         — QA rulepacks (CURRENT PRIORITY — add more DNOs)
+- app/qa_engine.py         — QA engine (7 check types: unique, required, range,
+                             allowed_values, regex, paired_required,
+                             dependent_allowed_values)
+- app/routes/api_intake.py — main CSV processing pipeline
+- app/routes/api_upload.py — file upload handling
+- app/routes/pdf_reports.py — PDF generation
+- tests/                   — pytest suite, must stay green

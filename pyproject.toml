@@ -1,7 +1,7 @@
 [project]
-name = "ew-design-tool"
+name = "unitas-gridflow"
 version = "0.1.0"
-description = "Web-based planning and design tool for SpanCore / EW Design workflows"
+description = "Pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs"
 authors = [
     { name = "Noel C" }
 ]

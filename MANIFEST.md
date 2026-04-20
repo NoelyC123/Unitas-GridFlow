@@ -1,65 +1,85 @@
-# SpanCore Project Manifest
+# Unitas GridFlow — Project Manifest
 
 **Complete inventory of every file and directory in the canonical project.**
 
-Last updated: 17 April 2026
-Canonical folder: `/Users/noelcollins/SpanCore-EW-Design-Tool-LOCAL`
+Last updated: 20 April 2026
+Canonical folder: `/Users/noelcollins/Unitas-GridFlow`
+Canonical repo: `https://github.com/NoelyC123/Unitas-GridFlow`
 
 ---
 
 ## Root-Level Files
 
 ### Configuration
-- **`pyproject.toml`** — Poetry project config, Python 3.11+, 19 dependencies
-- **`requirements.txt`** — Pip requirements (Flask 3.1.1, geopandas, shapely, pyproj, etc.)
+- **`pyproject.toml`** — Poetry project config, Python 3.13, project name: unitas-gridflow
+- **`requirements.txt`** — Pip requirements (Flask, geopandas, shapely, pyproj, reportlab, etc.)
 - **`poetry.lock`** — Locked dependency versions
-- **`.env`** — Development environment (FLASK_ENV=development, PORT=5010)
-- **`.env.example`** — Template for .env (reference only, do not edit)
-- **`.gitignore`** — Git ignore rules (protects .env, uploads/, temp_gis/, venv)
+- **`.env`** — Development environment variables (not committed)
+- **`.env.example`** — Template for .env
+- **`.gitignore`** — Git ignore rules
+- **`.pre-commit-config.yaml`** — Pre-commit hooks (trailing whitespace, Ruff, etc.)
+- **`.cursorrules`** — Cursor Pro project context
+- **`CLAUDE.md`** — Claude Code project context
 
 ### Application
-- **`run.py`** — WSGI entry point, calls `create_app()` from `app/__init__.py`
+- **`run.py`** — WSGI entry point, calls `create_app()`, runs on port 5001
 - **`start.sh`** — Dev server launcher script
 
 ### Infrastructure & Deployment
-- **`docker-compose.yml`** — Docker services: Flask app (port 5010), MinIO, Postgres 15, optional Nginx
-- **`Makefile`** — Build targets: `docker-up`, `docker-down`, `gen-pass`, `smoke`
+- **`docker-compose.yml`** — Docker services: Flask app, MinIO, Postgres 15, optional Nginx
+- **`Makefile`** — Build targets: docker-up, docker-down, gen-pass, smoke
 
 ### Documentation
 - **`README.md`** — Project overview and quick start
 - **`RUNBOOK.md`** — Operations quick reference
 - **`MANIFEST.md`** — This file
+- **`MASTER_PROJECT_READ_FIRST.md`** — Top-level orientation for all AIs
 
-### Code Generation
-- **`generate_mock_shapefile.py`** — Creates sample shapefile for testing
+### AI Control Layer
+- **`AI_CONTROL/`** — All AI session control files (read these first every session)
 
 ---
 
 ## `app/` Directory — Core Application
 
 ### Core Logic Files
-- **`__init__.py`** (53 lines) — Flask app factory, blueprint registration, inline routes
-- **`qa_engine.py`** (35 lines) — QA validation engine, WORKING
-- **`dno_rules.py`** (5 lines) — DNO rule definitions, PLACEHOLDER
+- **`__init__.py`** — Flask app factory, blueprint registration
+- **`qa_engine.py`** — QA validation engine (supports unique, required, range, allowed_values, regex, paired_required, dependent_allowed_values)
+- **`dno_rules.py`** — DNO rulepack definitions (BASE_RULES, SPEN_11kV, RULEPACKS dict)
 
 ### Routes (Blueprints) in `app/routes/`
-- **`api_intake.py`** — `POST /api/import/<job_short>` — STUB
-- **`api_jobs.py`** — `GET /api/jobs/` — STUB
-- **`api_rulepacks.py`** — `GET /api/rulepacks/<id>` — STUB
-- **`jobs_page.py`** — `GET /jobs/` — FUNCTIONAL
-- **`map_preview.py`** — `GET /map/data/<job_id>` — STUB
+- **`api_intake.py`** — `POST /api/import/<job_short>` — CSV processing, QA, outputs
+- **`api_jobs.py`** — `GET /api/jobs/` and `GET /api/jobs/<id>/status`
+- **`api_rulepacks.py`** — `GET /api/rulepacks/<id>`
+- **`api_upload.py`** — `POST /api/presign` and `PUT /api/upload/<job_id>/<filename>`
+- **`jobs_page.py`** — `GET /jobs/`
+- **`map_preview.py`** — `GET /map/view/<job_id>` and `GET /map/data/<job_id>`
+- **`pdf_reports.py`** — `GET /pdf/qa/<job_id>`
 
 ### Templates in `app/templates/`
-- **`index.html`** — Home page
+- **`index.html`** — Home page (Unitas GridFlow branding)
 - **`upload.html`** — Upload form with DNO selector
 - **`map_viewer.html`** — Leaflet map viewer
+- **`jobs.html`** — Jobs listing page
 
 ### Static Assets in `app/static/`
 - **`js/upload-manager.js`** — Upload workflow
-- **`js/map-viewer.js`** — Map renderer
+- **`js/map-viewer.js`** — Map renderer with QA status colours
 - **`js/rulepack-selector.js`** — DNO dropdown
 - **`js/toast.js`** — Toast notifications
 - **`style.css`** — Base styles
+
+---
+
+## Testing
+
+### `tests/`
+- **`conftest.py`** — pytest configuration
+- **`test_qa_engine.py`** — QA engine unit tests
+- **`test_api_intake.py`** — API intake route tests
+- **`test_app_routes.py`** — App route integration tests
+
+**Current test count: 23 passing**
 
 ---
 
@@ -76,63 +96,31 @@ Canonical folder: `/Users/noelcollins/SpanCore-EW-Design-Tool-LOCAL`
 ## Data & Samples
 
 ### `sample_data/`
-- **`mock_survey.csv`** — 5-row test CSV
+- **`mock_survey.csv`** — Representative 5-row test CSV with realistic schema
 - **`mock_shapefile.zip`** — Test shapefile
 
 ### Runtime (Git-ignored)
-- **`uploads/`** — Upload storage
-- **`temp_gis/`** — Temp files
+- **`uploads/`** — Upload and job output storage
+- **`temp_gis/`** — Temp GIS files
 
 ---
 
 ## Archive & Reference
 
 ### `_quarantine/`
-- **`20251029_163204/routes.py`** — Pre-refactor monolithic version (REFERENCE ONLY)
-- **`20251029_170333/`** — Mid-refactor snapshot
-- **`ARCHIVE/routes_monolithic_backup.py`** — Old code backup
+- Legacy/reference-only code snapshots. Do not restore blindly.
 
 ---
 
-## Status Summary
+## Current Status
 
-| Component | Status | Action |
-|-----------|--------|--------|
-| App factory | ✅ Working | Keep, do not modify |
-| QA engine | ✅ Complete | Keep, do not modify |
-| Routes (5) | ⚠️ Stubs | Complete in Phase 1 |
-| Frontend | ✅ Complete | Keep, do not modify |
-| Config | ✅ Clean | Keep as-is |
-| Docker stack | ✅ Ready | Ready to use |
-
----
-
-## What's Missing (Phase 1 Recovery)
-
-- `POST /api/presign` — Upload presign endpoint (~20 lines)
-- `PUT /api/upload/put/` — File receiver (~10 lines)
-- `GET /api/jobs/<id>/status` — Status polling (~15 lines)
-- `GET /map/view/<job_id>` — Map page route (~3 lines)
-- Wire QA into finalize — Processing (~20 lines)
-- Real GeoJSON in /map/data/ — Geometry output (~30 lines)
-- Fix index.html — Home page (~15 lines)
-
----
-
-## Safe to Modify
-
-✅ `app/dno_rules.py` — extend with real rules
-✅ `app/routes/api_*.py` — implement missing endpoints
-✅ Templates and styles — add features
-✅ Config files — update as needed
-
-❌ `app/__init__.py` — Flask factory
-❌ `app/qa_engine.py` — core logic
-❌ `run.py` — WSGI entry point
-🔒 `.env` — never commit
-🔒 `uploads/`, `temp_gis/` — runtime only
-🔒 `_quarantine/` — reference only
-
----
-
-*Complete manifest. For recovery plan, see handover pack.*
+| Component | Status |
+|---|---|
+| App factory | ✅ Working |
+| QA engine | ✅ Working — 7 check types |
+| All routes | ✅ Working |
+| Frontend | ✅ Working |
+| SPEN_11kV rulepack | ✅ Live with real ENA values |
+| Tests | ✅ 23 passing |
+| CI | ✅ GitHub Actions active |
+| Tool bootstrapping | ✅ CLAUDE.md + .cursorrules |
