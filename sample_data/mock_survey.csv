@@ -1,4 +1,6 @@
-id,location_name,clearance_m,pole_spacing_m,cable_depth_mm
-1,Field A,5.5,35,650
-2,Field B,4.8,80,550
-3,Main Road,5.1,60,600
+asset_id,structure_type,height_m,material,location_name,easting,northing,latitude,longitude
+P-1001,Wood Pole,11.0,Wood,Dalton Road Junction,352841,503122,54.5210,-3.0140
+P-1002,Wood Pole,7.5,Wood,Back Lane Farm,352910,503088,54.5183,-3.0121
+P-1003,Steel Pole,28.0,Steel,Moorside Substation,352975,503200,54.5291,-3.0098
+P-1004,Wood Pole,12.5,,Hartley Bridge,353041,503155,54.5246,-3.0075
+P-1001,Wood Pole,13.0,Wood,Dalton Road Junction North,353100,503170,54.5261,-3.0052

@@ -1,18 +1,29 @@
+# app/__init__.py
 import os
 from flask import Flask, jsonify, render_template
 
-def create_app():
-    BASE = os.path.dirname(os.path.abspath(__file__))
+
+def create_app() -> Flask:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
     app = Flask(
         __name__,
-        static_folder=os.path.join(BASE, "static"),
-        template_folder=os.path.join(BASE, "templates")
+        static_folder=os.path.join(base_dir, "static"),
+        template_folder=os.path.join(base_dir, "templates"),
     )
+
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "spancore-dev-key")
 
     @app.get("/health/full")
     def health_full():
-        return jsonify({"ok": True, "service": "spancore", "version": "dev", "status": "healthy"})
+        return jsonify(
+            {
+                "ok": True,
+                "service": "spancore",
+                "version": "dev",
+                "status": "healthy",
+            }
+        )
 
     @app.get("/")
     def home():
@@ -22,6 +33,7 @@ def create_app():
     def upload():
         return render_template("upload.html")
 
+    # --- Blueprints ---
     try:
         from app.routes.jobs_page import jobs_bp
         app.register_blueprint(jobs_bp, url_prefix="/jobs")
@@ -33,6 +45,12 @@ def create_app():
         app.register_blueprint(api_rulepacks_bp, url_prefix="/api/rulepacks")
     except Exception as exc:
         app.logger.warning(f"api_rulepacks blueprint not loaded: {exc}")
+
+    try:
+        from app.routes.api_upload import api_upload_bp
+        app.register_blueprint(api_upload_bp, url_prefix="/api")
+    except Exception as exc:
+        app.logger.warning(f"api_upload blueprint not loaded: {exc}")
 
     try:
         from app.routes.api_jobs import api_jobs_bp
@@ -51,5 +69,11 @@ def create_app():
         app.register_blueprint(map_preview_bp, url_prefix="/map")
     except Exception as exc:
         app.logger.warning(f"map_preview blueprint not loaded: {exc}")
+
+    try:
+        from app.routes.pdf_reports import pdf_reports_bp
+        app.register_blueprint(pdf_reports_bp, url_prefix="/pdf")
+    except Exception as exc:
+        app.logger.warning(f"pdf_reports blueprint not loaded: {exc}")
 
     return app

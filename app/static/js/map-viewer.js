@@ -1,53 +1,138 @@
-let map, layerGroup;
-function initMap(jobId){
-  map = L.map('map').setView([54.5, -4.0], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap contributors'
-  }).addTo(map);
-  layerGroup = L.featureGroup().addTo(map);
-  load(jobId);
-}
-async function load(jobId){
-  try{
-    const r = await fetch(`/map/data/${jobId}`, { cache:'no-store' });
-    if(!r.ok) throw new Error('failed to load map data');
-    const gj = await r.json();
-    (gj.features||[]).forEach(f => draw(f));
-    const b = layerGroup.getBounds(); if(b.isValid()) map.fitBounds(b, {padding:[30,30]});
-    // summary
-    const m = gj.metadata || {};
-    setText('jobIdDisplay', jobId);
-    setText('poleCount', m.pole_count || 0);
-    setText('spanCount', m.span_count || 0);
-    setText('passCount', m.pass_count || m.qa_pass || 0);
-    setText('warnCount', m.warn_count || m.qa_warn || 0);
-    setText('failCount', m.fail_count || m.qa_fail || 0);
-    if(m.rulepack_id) {
-      const rb = document.getElementById('rulepackBadge');
-      if(rb) rb.innerHTML = `<span class="badge bg-info">${m.rulepack_id}</span>`;
+class MapViewer {
+  constructor() {
+    this.jobId = document.querySelector('meta[name="job-id"]')?.content;
+    this.mapEl = document.getElementById('map');
+
+    this.poleCountEl = document.getElementById('pole-count');
+    this.spanCountEl = document.getElementById('span-count');
+    this.passCountEl = document.getElementById('pass-count');
+    this.warnCountEl = document.getElementById('warn-count');
+    this.failCountEl = document.getElementById('fail-count');
+    this.rulepackBadgeEl = document.getElementById('rulepack-badge');
+    this.autoNormalizedEl = document.getElementById('auto-normalized');
+    this.issueCountEl = document.getElementById('issue-count');
+    this.issueNoteEl = document.getElementById('issue-note');
+
+    this.map = null;
+    this.markers = [];
+  }
+
+  init() {
+    if (!this.jobId || !this.mapEl) return;
+
+    this.map = L.map('map').setView([54.55, -3.1], 10);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(this.map);
+
+    this.loadData();
+  }
+
+  async loadData() {
+    try {
+      const res = await fetch(`/map/data/${this.jobId}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Failed to load map data: ${res.status}`);
+
+      const data = await res.json();
+      this.renderSummary(data.metadata || {});
+      this.renderMarkers(data.features || []);
+    } catch (err) {
+      console.error(err);
+      if (this.issueNoteEl) {
+        this.issueNoteEl.textContent = `Map data failed to load: ${err.message || err}`;
+      }
     }
-    if(m.auto_normalized) Toast?.show?.('Info: Auto-normalized input', 'info');
-  }catch(e){
-    console.error(e); Toast?.show?.('Failed to load map data','error');
+  }
+
+  renderSummary(meta) {
+    if (this.poleCountEl) this.poleCountEl.textContent = meta.pole_count ?? 0;
+    if (this.spanCountEl) this.spanCountEl.textContent = meta.span_count ?? 0;
+    if (this.passCountEl) this.passCountEl.textContent = meta.pass_count ?? 0;
+    if (this.warnCountEl) this.warnCountEl.textContent = meta.warn_count ?? 0;
+    if (this.failCountEl) this.failCountEl.textContent = meta.fail_count ?? 0;
+    if (this.issueCountEl) this.issueCountEl.textContent = meta.issue_count ?? 0;
+    if (this.rulepackBadgeEl) this.rulepackBadgeEl.textContent = meta.rulepack_id || 'Unknown';
+    if (this.autoNormalizedEl) this.autoNormalizedEl.textContent = meta.auto_normalized ? 'Yes' : 'No';
+
+    if (this.issueNoteEl) {
+      if ((meta.issue_count ?? 0) > 0) {
+        this.issueNoteEl.textContent = 'This job contains flagged issues. Click markers to inspect record details, then use the PDF for the full issue list.';
+      } else {
+        this.issueNoteEl.textContent = 'No issues recorded for this job.';
+      }
+    }
+  }
+
+  renderMarkers(features) {
+    const bounds = [];
+
+    for (const feature of features) {
+      const geometry = feature.geometry || {};
+      const props = feature.properties || {};
+      const coords = geometry.coordinates || [];
+
+      if (geometry.type !== 'Point' || coords.length < 2) continue;
+
+      const lon = coords[0];
+      const lat = coords[1];
+      bounds.push([lat, lon]);
+
+      const status = (props.qa_status || 'PASS').toUpperCase();
+      const color = this.getMarkerColor(status);
+
+      const marker = L.circleMarker([lat, lon], {
+        radius: 7,
+        color: '#ffffff',
+        weight: 2,
+        fillColor: color,
+        fillOpacity: 0.9
+      });
+
+      const popupHtml = `
+        <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
+        <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
+        <div class="popup-row"><strong>Pole ID:</strong> ${this.escapeHtml(props.pole_id || '')}</div>
+        <div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material || '')}</div>
+        <div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height || '')}</div>
+      `;
+
+      marker.bindPopup(popupHtml);
+      marker.addTo(this.map);
+      this.markers.push(marker);
+    }
+
+    if (bounds.length === 1) {
+      this.map.setView(bounds[0], 13);
+    } else if (bounds.length > 1) {
+      this.map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }
+
+  getMarkerColor(status) {
+    if (status === 'FAIL') return '#d94141';
+    if (status === 'WARN') return '#d39e00';
+    return '#2e8b57';
+  }
+
+  statusBadge(status) {
+    if (status === 'FAIL') return '<span style="color:#d94141;font-weight:700;">FAIL</span>';
+    if (status === 'WARN') return '<span style="color:#d39e00;font-weight:700;">WARN</span>';
+    return '<span style="color:#2e8b57;font-weight:700;">PASS</span>';
+  }
+
+  escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 }
-function draw(feat){
-  const g = feat.geometry, p = feat.properties || {};
-  const color = qaColor(p.qa_status || p.QA || 'PASS');
-  if(g?.type === 'Point'){
-    const [lng, lat] = g.coordinates;
-    const mk = L.circleMarker([lat,lng], { radius:6, color:'#fff', weight:2, fillColor:color, fillOpacity:0.9 });
-    mk.bindPopup(popup(p)); mk.addTo(layerGroup);
-  } else if(g?.type === 'LineString'){
-    const latlngs = g.coordinates.map(([lng,lat])=> [lat,lng]);
-    const ln = L.polyline(latlngs, { color, weight:3, opacity:0.9 });
-    ln.bindPopup(popup(p)); ln.addTo(layerGroup);
-  }
-}
-function qaColor(s){ return {PASS:'#28a745', WARN:'#ffc107', FAIL:'#dc3545'}[s] || '#28a745'; }
-function popup(p){
-  return `<div><strong>${p.name || p.id || 'Feature'}</strong><br/>
-  Status: <span class="badge" style="background:${qaColor(p.qa_status||'PASS')}">${p.qa_status||'PASS'}</span></div>`;
-}
-function setText(id, val){ const el = document.getElementById(id); if(el) el.textContent = val; }
-window.initMap = initMap;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const viewer = new MapViewer();
+  viewer.init();
+});

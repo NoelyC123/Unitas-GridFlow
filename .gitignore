@@ -7,11 +7,13 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Virtual environments
 .venv/
 .venv312/
 venv/
 
-# IDE
+# IDE / editor
 .vscode/
 .idea/
 *.swp
@@ -22,17 +24,17 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Project runtime
+# Project runtime / generated data
 uploads/
 temp_gis/
 *.db
 *.sqlite
 
-# Environment (NEVER commit secrets)
+# Environment / secrets
 .env
 .env.local
 
-# Testing
+# Testing / coverage
 .pytest_cache/
 .coverage
 htmlcov/
@@ -40,7 +42,12 @@ htmlcov/
 # Logs
 *.log
 
-# Misc
+# Type checking / misc caches
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Optional local archives / scratch
+*.zip
+*.tar.gz
+*.tgz
