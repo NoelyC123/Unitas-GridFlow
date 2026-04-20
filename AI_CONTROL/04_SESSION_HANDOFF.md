@@ -26,7 +26,7 @@ This session completed two major phases of work:
 
 - rulepack architecture exists and works
 - SPEN_11kV rulepack is live with real-world values
-- QA engine supports 6 check types: unique, required, range, allowed_values, regex,
+- QA engine supports 7 check types: unique, required, range, allowed_values, regex,
   paired_required, dependent_allowed_values
 - api_intake.py selects rules by DNO with proper fallback chain
 - all development tools bootstrapped with project context

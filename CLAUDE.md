@@ -1,53 +1,36 @@
-# Unitas-GridFlow — Claude Code Context
+# Unitas-GridFlow — Claude Code Bootstrap
 
-## What this project is
-Unitas GridFlow is a narrow pre-CAD QA and compliance tool for UK electricity
-network survey-to-design handoffs. Local Flask/Python web app.
-Short identity: a DNO survey compliance gatekeeper.
+## First action — read this before anything else
+Read: AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md
+That file is the single source of truth for the entire project.
 
-## Canonical location
-/Users/noelcollins/Unitas-GridFlow/
+## Then also read
+- AI_CONTROL/03_CURRENT_TASK.md — what to do this session
+- AI_CONTROL/04_SESSION_HANDOFF.md — what changed last session
 
-## GitHub repo
-https://github.com/NoelyC123/Unitas-GridFlow
+## Claude Code specific
 
-## Session start rule — read these first every session
-1. MASTER_PROJECT_READ_FIRST.md
-2. AI_CONTROL/00_READ_THIS_FIRST.md
-3. AI_CONTROL/01_PROJECT_TRUTH.md
-4. AI_CONTROL/02_CURRENT_STATE.md
-5. AI_CONTROL/03_CURRENT_TASK.md
-6. AI_CONTROL/04_SESSION_HANDOFF.md
+**Canonical location:** /Users/noelcollins/Unitas-GridFlow/
+**GitHub repo:** https://github.com/NoelyC123/Unitas-GridFlow
 
-## Current phase
-Working local MVP with rulepack architecture in place.
-23 tests passing. Next: coordinate consistency check + SSEN_11kV rulepack.
-
-## Tech stack
-- Python 3.13, venv: .venv312
-- Flask, pandas, geopandas, reportlab, shapely, pyproj
-- Leaflet, Bootstrap 5
-- pre-commit, Ruff, pytest, GitHub Actions CI
-- Tools: VS Code, Cursor Pro, Claude Code, macOS Terminal/zsh, Git/GitHub
-
-## Run commands
+**Run commands:**
 source .venv312/bin/activate
-python run.py              # runs on port 5001
+python run.py              # port 5001
 pytest -v                  # 23 tests must pass
 pre-commit run --all-files
 
-## Key files
-- app/dno_rules.py         — QA rulepacks (SPEN_11kV live, more DNOs next)
+**Key files:**
+- app/dno_rules.py         — QA rulepacks (CURRENT PRIORITY — add more DNOs)
 - app/qa_engine.py         — QA engine (7 check types)
 - app/routes/api_intake.py — CSV processing pipeline
 - app/routes/api_upload.py — file upload handling
 - app/routes/pdf_reports.py — PDF generation
-- app/templates/           — HTML templates (Unitas GridFlow branding)
+- app/routes/api_rulepacks.py — rulepack API (currently stub — needs wiring)
 - tests/                   — pytest suite, must stay green
 
-## Hard rules
+**Hard rules:**
+- Read a file before editing it — never assume contents
+- Run pytest -v after every code change — 23 tests must pass
+- git add/commit/push after confirmed passing tests
 - Never broaden scope beyond narrow MVP
-- Always read a file before editing it — never assume contents
-- Always run pytest -v after any code change
-- Always git add/commit/push after confirmed passing tests
-- Commit messages must be clear and descriptive
+- Never restore from _quarantine/ blindly

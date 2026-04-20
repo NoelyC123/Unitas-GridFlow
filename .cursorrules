@@ -1,41 +1,36 @@
 # Unitas-GridFlow — Cursor Rules
 
+## First action — read this before anything else
+Read: AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md
+That file is the single source of truth for the entire project.
+
+## Then also read
+- AI_CONTROL/03_CURRENT_TASK.md — what to do this session
+- AI_CONTROL/04_SESSION_HANDOFF.md — what changed last session
+
 ## Project identity
-Unitas GridFlow is a narrow pre-CAD QA and compliance tool for UK electricity
+Unitas GridFlow — narrow pre-CAD QA and compliance tool for UK electricity
 network survey-to-design handoffs. DNO survey compliance gatekeeper.
 
-## Codebase
 /Users/noelcollins/Unitas-GridFlow/
 GitHub: https://github.com/NoelyC123/Unitas-GridFlow
-
-## Current phase
-Working local MVP. Rulepack architecture in place. SPEN_11kV live with real ENA values.
-23 tests passing. Next: coordinate consistency check + SSEN_11kV rulepack.
+Port: 5001 | Venv: .venv312 | Python: 3.13
 
 ## Tech stack
-Python 3.13, Flask, pandas, geopandas, reportlab, Leaflet, Bootstrap 5
-Venv: .venv312 | Port: 5001
-
-## Before doing anything in a session
-Read AI_CONTROL/ files to understand current state. Start with:
-- MASTER_PROJECT_READ_FIRST.md
-- AI_CONTROL/02_CURRENT_STATE.md
-- AI_CONTROL/03_CURRENT_TASK.md
+Flask, pandas, geopandas, reportlab, Leaflet, Bootstrap 5
 
 ## Hard rules
 - Never broaden scope beyond narrow MVP
 - Always read a file before editing it — never assume contents
-- After any change: run pytest -v (23 tests must pass)
+- After any change: pytest -v (23 tests must pass)
 - After tests pass: git add / commit / push
 - Commit messages must be clear and descriptive
 - Never add features not tied to the current task
+- Never restore from _quarantine/ blindly
 
 ## Key files
 - app/dno_rules.py         — QA rulepacks (CURRENT PRIORITY — add more DNOs)
-- app/qa_engine.py         — QA engine (7 check types: unique, required, range,
-                             allowed_values, regex, paired_required,
-                             dependent_allowed_values)
+- app/qa_engine.py         — QA engine (7 check types)
 - app/routes/api_intake.py — main CSV processing pipeline
-- app/routes/api_upload.py — file upload handling
-- app/routes/pdf_reports.py — PDF generation
+- app/routes/api_rulepacks.py — rulepack API (currently stub — needs wiring)
 - tests/                   — pytest suite, must stay green

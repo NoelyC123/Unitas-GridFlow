@@ -211,44 +211,16 @@ Planned for later once UI flows are stable enough for end-to-end browser testing
 
 ## 6. Confirmed AI roles
 
-To avoid confusion and duplicated effort, each AI/tool should have a defined role.
+See `AI_CONTROL/05_AI_ROLE_RULES.md` for full role descriptions.
+See `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md` Section 6 for the current tool priority summary.
 
-### ChatGPT role
-ChatGPT is the **project coordinator**.
-
-Responsibilities:
-- keep the control layer coherent
-- keep the implementation sequence disciplined
-- decide what to ask other AIs
-- convert analysis into exact next steps
-- reduce drift and duplicated thinking
-- keep all work grounded in current truth
-
-### Claude role
-Claude is the **primary structured external reviewer**.
-
-Responsibilities:
-- answer tightly constrained questions from the canonical state
-- help choose between defined next priorities
-- provide implementation-spec follow-ups when needed
-
-Claude should not be used for broad free-form ideation during active disciplined build work.
-
-### Gemini role
-Gemini is the **structured challenger**.
-
-Responsibilities:
-- provide a second opinion after current truth is locked
-- test whether the chosen path misses something important
-
-### Grok role
-Grok is the **practical trade-off enforcer**.
-
-Responsibilities:
-- identify wasted effort
-- simplify decisions
-- call out overbuilding
-- sharpen “do this, not that”
+The current tool priority is:
+1. Claude app (Filesystem MCP) — live development sessions, reads/writes files directly
+2. Claude Code — terminal-based repo work
+3. Cursor Pro — in-editor coding
+4. GitHub Copilot — passive autocomplete
+5. ChatGPT / Gemini / Grok — strategic decisions only, at genuine decision points
+6. Ollama — offline/private drafting only
 
 ---
 
@@ -258,6 +230,7 @@ Responsibilities:
 - `MASTER_PROJECT_READ_FIRST.md`
 
 ## 7.2 AI control layer
+- `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md` — PRIMARY AUTHORITY (read first)
 - `AI_CONTROL/00_READ_THIS_FIRST.md`
 - `AI_CONTROL/01_PROJECT_TRUTH.md`
 - `AI_CONTROL/02_CURRENT_STATE.md`
@@ -474,11 +447,14 @@ If project truth changed materially, review these first:
 
 These items are known and should be kept in view for later work:
 
-- historical old test jobs still remain in `uploads/jobs/`
+- historical old test jobs still remain in `uploads/jobs/` (stale paths fixed 20 Apr 2026)
 - `issues.csv` payloads are still verbose
-- QA rules are still placeholder/basic
-- no automated browser tests yet
-- GitHub Actions currently shows a non-blocking Node.js deprecation warning for upstream actions
+- Only one DNO rulepack exists (SPEN_11kV) — more DNOs are the active next priority
+- No coordinate consistency cross-check yet (lat/lon vs easting/northing)
+- No automated browser tests yet (Playwright not yet active)
+- `api_rulepacks.py` still returns stub data — needs wiring to real RULEPACKS dict
+- Makefile has stale port (5010 instead of 5001)
+- GitHub Actions shows a non-blocking Node.js deprecation warning for upstream actions
 
 These are not blockers unless they become tied to the active next priority.
 
@@ -515,14 +491,19 @@ Do not:
 
 ## 17. Current next-step logic
 
-As of the current state:
+As of the current state (verified 20 April 2026):
 
-- the canonical repo and development stack are now properly established
-- pre-commit, Ruff, pytest, and GitHub Actions are active
-- the current likely next technical choice is between:
-  - more pytest coverage
-  - or a current-facing branding cleanup pass toward Unitas GridFlow
-- Playwright should come later, once the UI flow is stable enough
+- the canonical repo, naming, and development stack are fully established
+- pre-commit, Ruff, pytest, and GitHub Actions are active and passing
+- the complete rename to Unitas GridFlow is done across all files
+- the rulepack architecture is in place with SPEN_11kV live
+- the immediate next priorities are:
+  1. coordinate consistency cross-check (lat/lon vs easting/northing)
+  2. SSEN_11kV rulepack
+  3. remaining DNO rulepacks (NIE, ENWL, NGED, UKPN)
+  4. wire api_rulepacks.py to real RULEPACKS data
+  5. fix Makefile port (5010 → 5001)
+- Playwright browser tests should come later, once UI is stable
 
 ---
 
@@ -530,13 +511,10 @@ As of the current state:
 
 At the start of any future session, the working order should be:
 
-1. read `MASTER_PROJECT_READ_FIRST.md`
-2. read `AI_CONTROL/00_READ_THIS_FIRST.md`
-3. read `AI_CONTROL/01_PROJECT_TRUTH.md`
-4. read `AI_CONTROL/02_CURRENT_STATE.md`
-5. read `AI_CONTROL/03_CURRENT_TASK.md`
-6. read `AI_CONTROL/04_SESSION_HANDOFF.md`
-7. only then inspect the implementation files relevant to the current task
+1. read `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md` — PRIMARY AUTHORITY
+2. read `AI_CONTROL/03_CURRENT_TASK.md`
+3. read `AI_CONTROL/04_SESSION_HANDOFF.md`
+4. only then inspect the implementation files relevant to the current task
 
 This is the required session bootstrap.
 

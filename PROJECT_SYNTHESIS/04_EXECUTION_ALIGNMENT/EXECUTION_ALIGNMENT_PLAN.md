@@ -1,3 +1,9 @@
+> **RENAME NOTE — 20 April 2026**
+> This document was written when the project was called SpanCore / EW Design Tool.
+> The canonical active name is now **Unitas GridFlow** (repo: NoelyC123/Unitas-GridFlow).
+> The strategic conclusions in this document remain valid. Historical naming is preserved as-is.
+> **Current status:** Phase 1 (MVP recovery) is COMPLETE. The project is now in Phase 2 (QA rule improvement).
+
 # SpanCore / EW Design Tool — Execution Alignment Plan
 
 Prepared: 2026-04-18
@@ -45,33 +51,12 @@ This plan assumes:
 ### Goal
 Make the narrow MVP runnable end-to-end.
 
-### Focus
-Recover the exact workflow that matters most.
-
-### Scope
-Only work on what is needed for:
-- one upload path
-- one QA path
-- one output/reporting path
-- one demonstrable workflow
-
-### Explicitly allowed
-- fixing broken or missing routes
-- restoring the narrow operational flow
-- getting one stable end-to-end demo working
-- tightening repo clarity where needed for MVP execution
-
-### Explicitly not allowed
-- broad new feature work
-- multi-DNO expansion
-- heavy infrastructure work
-- auth / tenancy / enterprise admin features
-- broad UI redesign
-- AI additions
-- speculative integrations
-
-### Output of Phase 1
-A runnable narrow MVP that can be shown to a real user.
+### Status — COMPLETE as of 20 April 2026
+The narrow MVP is now runnable end-to-end:
+- upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
+- 23 tests passing
+- SPEN_11kV rulepack live with real ENA values
+- All routes working
 
 ---
 
@@ -130,7 +115,7 @@ A written validation note containing:
 ## 6. Phase 4 — Proof-of-value measurement
 
 ### Goal
-Measure whether SpanCore produces a meaningful result on one workflow.
+Measure whether the tool produces a meaningful result on one workflow.
 
 ### Proof metrics could include
 - hours saved
@@ -142,12 +127,12 @@ Measure whether SpanCore produces a meaningful result on one workflow.
 - clearer auditability
 
 ### Key rule
-Do not rely on “this seems useful.”
+Do not rely on "this seems useful."
 
 Require:
 - one measurable comparison
 - before vs after
-- current process vs SpanCore-supported process
+- current process vs tool-supported process
 
 ### Output of Phase 4
 One written ROI / proof-of-value note.
@@ -173,7 +158,7 @@ Pause and reassess if:
 - or the ROI is too soft
 
 ### Stop productisation
-Stop treating SpanCore as a product opportunity if:
+Stop treating the tool as a product opportunity if:
 - proof-of-value does not emerge
 - adoption friction is too high
 - the workflow does not generalise
@@ -207,17 +192,17 @@ If not, it is probably not a priority.
 
 ## 9. Immediate priorities list
 
-### Priority 1
-Finish the narrow MVP recovery
+### Priority 1 — DONE
+~~Finish the narrow MVP recovery~~ ✅ Complete
 
-### Priority 2
-Define the first proof-of-value workflow
+### Priority 2 — IN PROGRESS
+Improve QA rule quality — more DNO rulepacks, coordinate consistency check
 
 ### Priority 3
 Identify one real user / design team / buyer champion
 
 ### Priority 4
-Run one real validation conversation or demo
+Run one real validation conversation or demo with a real OHL designer
 
 ### Priority 5
 Write one proof-of-value note
@@ -228,7 +213,6 @@ Write one proof-of-value note
 
 We are not currently:
 - building a broad SaaS
-- expanding to many DNOs
 - replacing CAD/GIS tools
 - adding AI-first features
 - building enterprise auth / tenancy
@@ -240,13 +224,8 @@ We are not currently:
 
 ## 11. Final execution instruction
 
-The next stage of SpanCore is not:
-- more abstraction
-- more open-ended idea generation
-- or more broad comparison work
+The next stage is:
 
-It is:
+**improve QA rules → validate with real user → measure ROI → decide**
 
-**recover, validate, measure, decide**
-
-That sequence should govern all work from here.
+That sequence governs all work from here.
