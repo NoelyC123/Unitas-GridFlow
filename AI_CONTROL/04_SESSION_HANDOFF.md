@@ -2,74 +2,72 @@
 
 ## Session summary
 
-This session completed two major phases of work:
+This session completed two work items:
 
-### Phase 1 — Full project setup
-- Created Unitas-GridFlow Claude Project with Instructions + 8 knowledge files
-- Fixed stale SpanCore paths in all 36 job meta files
-- Created `CLAUDE.md` for Claude Code bootstrapping
-- Created `.cursorrules` for Cursor Pro bootstrapping
-- Fixed stale `.zshrc` proj alias
-- Confirmed 20 passing tests at start of session
+### Work item 1 — Control layer consolidation
+- Created `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md` as the new single source of truth
+- Slimmed `MASTER_PROJECT_READ_FIRST.md` to a short pointer
+- Updated `CLAUDE.md` and `.cursorrules` to point to master truth file first
+- Fixed stale sections in `AI_CONTROL/06_DEVELOPMENT_PROCESS.md` (sections 6, 14, 17, 18)
+- Fixed "6 check types" → "7 check types" in `04_SESSION_HANDOFF.md`
 
-### Phase 2 — First QA-rule improvement
-- Upgraded `dno_rules.py` from flat list to rulepack architecture
-- Extended `qa_engine.py` with regex, paired_required, dependent_allowed_values
-- Wired rulepack selection into `api_intake.py`
-- Corrected SPEN 11kV height range to real ENA values (7m-20m)
-- Added SPEN network area coordinate bounds (lat 54.5-60.9, lon -6.5 to -0.7)
-- Reached 23 passing tests
+### Work item 2 — Coordinate consistency cross-check
+- Added `coord_consistency` check type to `app/qa_engine.py`
+  - Converts lat/lon to OSGB27700 using pyproj
+  - Checks distance against declared easting/northing
+  - Configurable tolerance (default 100m)
+  - Skips rows with any missing coordinate values
+- Added rule to `SPEN_11KV_RULES` in `app/dno_rules.py` (tolerance 100m)
+- Added 2 new tests to `test_qa_engine.py`
+- Refactored `qa_engine.py` into a clean single if/elif chain
 
 ---
 
 ## What is now materially true
 
-- rulepack architecture exists and works
-- SPEN_11kV rulepack is live with real-world values
-- QA engine supports 7 check types: unique, required, range, allowed_values, regex,
-  paired_required, dependent_allowed_values
-- api_intake.py selects rules by DNO with proper fallback chain
-- all development tools bootstrapped with project context
-- 23 tests passing, CI active
+- 25 tests passing (was 23)
+- `coord_consistency` is the 8th check type in the QA engine
+- SPEN_11kV rulepack now catches lat/lon vs easting/northing mismatches
+- Control layer is consolidated into `00_MASTER_SOURCE_OF_TRUTH.md`
+- All tool bootstrap files (CLAUDE.md, .cursorrules) updated
 
 ---
 
 ## What the next session should do
 
-1. Add coordinate consistency cross-check (lat/lon vs easting/northing)
-2. Add SSEN_11kV rulepack
-3. Run pytest -v to confirm still green after each change
+1. Add SSEN_11kV rulepack
+2. Add further DNO rulepacks (NIE, ENWL, NGED, UKPN)
+3. Run `pytest -v` to confirm still green after each change
 4. Commit and push after each confirmed passing state
 
 ---
 
 ## What the next session should NOT do
 
-- return to setup work
-- broaden scope
-- add features unrelated to QA rule quality
-- skip pytest before committing
+- Return to setup work
+- Broaden scope
+- Skip pytest before committing
 
 ---
 
 ## Current weakness summary
 
-1. No coordinate consistency check yet
-2. Only one DNO rulepack (SPEN_11kV)
-3. Input schema still narrow (one representative schema)
-4. No browser E2E tests yet
-5. Some MVP debt in route/code paths
+1. Only one DNO rulepack (SPEN_11kV)
+2. Input schema still narrow (one representative schema)
+3. No browser E2E tests yet
+4. `api_rulepacks.py` still returns stub — needs wiring to real RULEPACKS dict
+5. Makefile has stale port (5010 instead of 5001)
 
 ---
 
 ## Short version
 
 ### What is complete
-- full tool setup and bootstrapping
-- rulepack architecture
-- SPEN_11kV with real values
-- 23 passing tests
+- control layer consolidation
+- coord_consistency check (8th check type)
+- SPEN_11kV coord cross-check live
+- 25 passing tests
 
 ### What is next
-- coordinate consistency check
 - SSEN_11kV rulepack
+- remaining DNO rulepacks

@@ -5,7 +5,7 @@ Every AI tool, every session, reads this file first — no exceptions.
 If this file and any other file disagree, this file wins.
 When project state changes materially, update this file first.
 
-Last verified: 20 April 2026 | Tests: 23 passing | Port: 5001
+Last verified: 20 April 2026 | Tests: 25 passing | Port: 5001
 
 ---
 
@@ -94,24 +94,22 @@ unique, required, range, allowed_values, regex, paired_required, dependent_allow
   - SPEN network bounds (lat 54.5–60.9, lon -6.5 to -0.7)
   - Material/structure_type cross-field consistency
 
-**Tests:** 23 passing (5 api_intake + 9 app_routes + 9 qa_engine)
+**Tests:** 25 passing (5 api_intake + 9 app_routes + 11 qa_engine)
 **CI:** GitHub Actions runs pre-commit + pytest on every push to master
 
 **Known weaknesses:**
 1. Only one DNO rulepack (SPEN_11kV) — more DNOs are the next priority
-2. No coordinate consistency cross-check yet (lat/lon vs easting/northing)
-3. Input schema still narrow — one representative schema supported
-4. No Playwright browser tests yet — backend tests only
+2. Input schema still narrow — one representative schema supported
+3. No Playwright browser tests yet — backend tests only
 
 ---
 
 ## 5. Current next priority
 
-1. Add coordinate consistency cross-check (lat/lon vs easting/northing)
-2. Add SSEN_11kV rulepack (data available in SpanCore-CLEAN/rules/ — archive/reference only)
-3. Add NIE, ENWL, NGED, UKPN rulepacks from same source
-4. Fix Makefile stale port (APP?=http://127.0.0.1:5010 → 5001)
-5. Wire api_rulepacks.py to real RULEPACKS data (currently returns stub)
+1. Add SSEN_11kV rulepack
+2. Add NIE, ENWL, NGED, UKPN rulepacks
+3. Fix Makefile stale port (APP?=http://127.0.0.1:5010 → 5001)
+4. Wire api_rulepacks.py to real RULEPACKS data (currently returns stub)
 
 **What is NOT the current priority:**
 - Browser E2E testing (Playwright) — later
@@ -152,7 +150,7 @@ unique, required, range, allowed_values, regex, paired_required, dependent_allow
 3. Never broaden scope beyond the narrow MVP
 4. Never add features not tied to the current task
 5. Always read a file before editing it — never assume contents
-6. Always run `pytest -v` after any code change — 23 tests must pass
+6. Always run `pytest -v` after any code change — 25 tests must pass
 7. Always `git add/commit/push` after confirmed passing tests
 8. Always update this file and supporting control files when state changes materially
 9. Never restore from `_quarantine/` blindly
