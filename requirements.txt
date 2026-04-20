@@ -1,5 +1,5 @@
 blinker==1.9.0
-certifi==2025.7.14
+certifi==2026.2.25
 click==8.2.1
 Flask==3.1.1
 geopandas==1.1.1
