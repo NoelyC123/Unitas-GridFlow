@@ -1,49 +1,98 @@
 # Current Task
 
-## Immediate task
+## Status: Priority decision required before any new code
 
-Add `ENWL_11kV` rulepack to `app/dno_rules.py`.
+**Do not make any code changes until this priority decision is confirmed.**
 
-ENWL (Electricity North West Limited) is the DNO for North West England. Adding it continues the pattern established by SPEN_11kV, SSEN_11kV, and NIE_11kV.
-
----
-
-## Why this is the current task
-
-- NIE_11kV is now live (committed 21 April 2026). Three rulepacks proven.
-- ENWL, NGED, and UKPN are the remaining UK DNOs per master truth §5.
-- ENWL covers a geographically distinct area (North West England) with a clean contiguous bounding box.
+A review of real Electricity Worx survey files (21 April 2026) revealed that the current intake
+normalisation layer does not match the real Trimble CSV format. This changes the priority picture.
 
 ---
 
-## Work sequence
+## The decision required
 
-1. Add `ENWL_11KV_RULES` to `app/dno_rules.py`, extending `BASE_RULES` as the existing rulepacks do.
-2. Use real published values: height range per ENA TS 43-8 for 11kV (7–20m); ENWL network bounds — North West England roughly lat 53.3–54.7, lon -3.4 to -1.8.
-3. Include: Pole ID regex, paired coord checks, material/structure_type consistency, coord_consistency (100m) — same pattern as existing rulepacks.
-4. Register it in the `RULEPACKS` dict as `"ENWL_11kV"`.
-5. Add two tests in `tests/test_qa_engine.py`: registration check + valid ENWL pole passes (realistic NW England coords).
+Two paths are available. You must confirm which comes first.
+
+---
+
+### Path A — Real Trimble CSV intake/normalisation (recommended)
+
+**What this means:**
+Redesign the intake normalisation layer in `app/routes/api_intake.py` (and supporting code) to
+correctly parse real Trimble CSV exports, including:
+
+- Skip the job header row (`Job:...,Version:...,Units:...`)
+- Skip the PRS/base station row
+- Parse variable-width feature-coded point records
+- Map Trimble feature codes (`Angle`, `EXpole`, `LVxing`, `BTxing`, etc.) to internal schema
+- Filter out `Ignore`-tagged rows (TAG field = `I`)
+- Preserve REMARK text for each point
+- Handle the HEIGHT sub-field where present (crossings, trees, hedges)
+- Produce a normalised DataFrame compatible with the existing QA engine
+
+**Why this may be higher priority:**
+- Without this, the tool cannot be run on any real survey data.
+- Any user validation attempt will require loading a real file first.
+- All further rulepack work is being tested against synthetic sample data, not reality.
+- Demonstrating the tool on a real job (e.g. 4-474 or 474c) requires this to work first.
+
+**Also needed alongside this (smaller fixes):**
+- Fix `coord_consistency` to use the correct CRS for NI data (ITM/TM65 rather than OSGB27700).
+- Add Ignore-row filtering before QA processing.
+
+---
+
+### Path B — Continue remaining DNO rulepacks first (ENWL, NGED, UKPN)
+
+**What this means:**
+Continue the rulepack expansion pattern established by SPEN, SSEN, NIE:
+- Add ENWL_11kV (Electricity North West — NW England)
+- Add NGED_11kV (National Grid Electricity Distribution — Midlands, SW, S Wales)
+- Add UKPN_11kV (UK Power Networks — London, SE, East Anglia)
+
+**When this makes sense:**
+- If completing UK DNO coverage is the highest near-term business priority.
+- If user validation conversations are planned against GB DNO workflows rather than NI.
+- If the intake rewrite is being deferred to a separate focused piece of work.
+
+**Risk of this path:**
+- All three rulepacks will be tested against the synthetic sample schema, not real Trimble data.
+- The coord_consistency bug for NI remains unaddressed.
+- UK rulepack rules are valid, but their testing remains synthetic.
+
+---
+
+## What is NOT acceptable as a next step
+
+Making code changes before this priority decision is confirmed and recorded here.
+
+---
+
+## After the priority decision is confirmed, likely sequence
+
+### If Path A (intake first):
+
+1. Design the Trimble CSV parser — document the field mapping before writing code.
+2. Implement the parser/normaliser in `app/routes/api_intake.py` or a new module.
+3. Fix `coord_consistency` CRS for NI (configurable per rulepack or auto-detect).
+4. Add Ignore-row filtering.
+5. Update/add tests covering real Trimble format inputs.
 6. Run `pytest -v` — all tests must pass.
-7. `git add / commit / push`.
-8. Update `04_SESSION_HANDOFF.md`, append to `CHANGELOG.md`, and adjust master truth §4 rulepack list + §5 priority list.
+7. Test with a real file (4-474.csv or 474c.csv) end-to-end.
+8. Commit, push, update control layer.
+9. Then resume rulepack expansion (ENWL, NGED, UKPN).
+
+### If Path B (rulepacks first):
+
+1. Add ENWL_11kV rulepack — see previous task file for work sequence.
+2. Add NGED_11kV.
+3. Add UKPN_11kV.
+4. Then tackle real Trimble intake/normalisation as the next major phase.
+5. Fix coord_consistency CRS for NI at that point.
 
 ---
 
-## After this task, next in line
+## Context
 
-1. Add NGED_11kV (National Grid Electricity Distribution — Midlands, SW England, S Wales).
-2. Add UKPN_11kV (UK Power Networks — London, SE England, East Anglia).
-3. Wire `app/routes/api_rulepacks.py` to the real `RULEPACKS` dict.
-4. Fix `Makefile` stale port (5010 → 5001).
-
-See master truth §5 for the full current priority list.
-
----
-
-## Not in scope
-
-- Broad feature expansion.
-- Browser E2E testing (Playwright) — later.
-- Deployment / hosting — later.
-- UI redesign — later.
-- Database integration — not planned.
+Real survey files reviewed: `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/REAL_SURVEY_INPUT_ANALYSIS.md`
+Project rationale: `PROJECT_SYNTHESIS/00_PROJECT_RATIONALE.md`
