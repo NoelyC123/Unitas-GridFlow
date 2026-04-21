@@ -7,6 +7,28 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-21
+
+### Added
+- `NIE_11KV_RULES` rulepack in `app/dno_rules.py`. Uses ENA TS 43-8 height range (7–20m), pole ID regex, paired-coord checks, material/structure-type consistency, and `coord_consistency` (100m). Network bounds: Northern Ireland lat 54.0–55.3, lon -8.2 to -5.4 — single contiguous licence area, no disjoint-zone caveat.
+- `NIE_11kV` entry in `RULEPACKS` dict.
+- Two new tests in `tests/test_qa_engine.py`: registration check + valid NIE pole (realistic Belfast coords) passes.
+- `PROJECT_OPERATING_MODEL.md` — plain-English guide to how the project is organised, who does what, and how sessions run.
+
+### Changed
+- `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md`: §4 updated to reflect NIE live and 29 tests; §5 priority list updated; §6 Claude app role clarified as "primary implementation tool and control-layer custodian"; §7 hard rule 9 added (never close a session without updating handoff + changelog); §9 file map updated to include `PROJECT_OPERATING_MODEL.md`.
+- `AI_CONTROL/03_CURRENT_TASK.md`: Rewritten — next task is `ENWL_11kV`.
+- `AI_CONTROL/04_SESSION_HANDOFF.md`: Rewritten to record this session.
+
+### State at end of session
+- 29 tests passing.
+- 8 QA check types.
+- 3 DNO rulepacks live (SPEN_11kV, SSEN_11kV, NIE_11kV).
+- Control layer in sync with code.
+- CI green.
+
+---
+
 ## 2026-04-20 (continued)
 
 ### Added
