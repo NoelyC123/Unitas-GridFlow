@@ -98,6 +98,44 @@ def test_allowed_values_ignores_blank_values_when_required_is_separate() -> None
     assert len(issues) == 0
 
 
+def test_nie_11kv_rulepack_is_registered() -> None:
+    """NIE_11kV must be registered in RULEPACKS as a non-empty rule list."""
+    from app.dno_rules import RULEPACKS
+
+    assert "NIE_11kV" in RULEPACKS
+    assert isinstance(RULEPACKS["NIE_11kV"], list)
+    assert len(RULEPACKS["NIE_11kV"]) > 0
+
+
+def test_nie_11kv_rulepack_passes_valid_nie_pole() -> None:
+    """A realistic valid NIE pole in Northern Ireland (Belfast) should produce no issues.
+
+    Uses Belfast centre (approx 54.597, -5.930) with OSGB coords derived from
+    pyproj: E=146246, N=529526. Tolerance 100m.
+    """
+    from app.dno_rules import RULEPACKS
+
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "NIE-BEL-0001",
+                "height": 10.0,
+                "material": "Wood",
+                "structure_type": "Wood Pole",
+                "location": "Belfast Substation Approach",
+                "lat": 54.597,
+                "lon": -5.930,
+                "easting": 146246,
+                "northing": 529526,
+            }
+        ]
+    )
+
+    issues = run_qa_checks(df, RULEPACKS["NIE_11kV"])
+
+    assert len(issues) == 0
+
+
 def test_ssen_11kv_rulepack_is_registered() -> None:
     """SSEN_11kV must be registered in RULEPACKS as a non-empty rule list."""
     from app.dno_rules import RULEPACKS
