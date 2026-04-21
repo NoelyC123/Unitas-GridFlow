@@ -1,103 +1,174 @@
 # Session Handoff
 
-## Last session summary (21 April 2026 — continued)
+## Session summary
 
-This session had two distinct phases. The first (NIE rulepack + control layer sync) was recorded
-in the previous handoff entry. This entry records the second phase.
+This session redesigned and finalised the project's control layer.
 
----
+The project itself (app code, tests, repo) remains stable and working.
 
-## Phase 2 — Rationale document + real survey file review
-
-### What was done
-
-1. **Project rationale document saved permanently.**
-   `PROJECT_SYNTHESIS/00_PROJECT_RATIONALE.md` now exists. It is the source-of-truth explanation
-   of why the project exists, what problem it solves, and what it is not. Working instruction at
-   the top: Unitas Grid-Flow is a true fresh-start project; do not assume any prior EW Design
-   Tool / SpanCore build is the current product state.
-
-2. **Real survey-origin files reviewed.**
-   Three Trimble CSV exports (jobs 4-474, 474c, 513), one Trimble binary .job file, two
-   ArcGIS/PoleCAD design images, and two handwritten field notebook sketches were examined.
-
-3. **Real survey input analysis note created.**
-   `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/REAL_SURVEY_INPUT_ANALYSIS.md` records all findings in
-   full detail.
-
-4. **`02_CURRENT_STATE.md` updated.**
-   Added a full "Real survey input — confirmed state" section covering all discoveries.
-
-5. **`03_CURRENT_TASK.md` rewritten.**
-   No longer points at ENWL rulepack as automatic next step. Now presents a clear two-path
-   priority decision (intake rewrite vs rulepack continuation) with no code changes until
-   the decision is confirmed.
+The control system is now lean, practical, and scalable.
 
 ---
 
-## Key discoveries from real file review
+## What was completed this session
 
-### Discovery 1 — Real Trimble CSV format is completely different from current sample schema
-The current intake normalisation layer assumes a flat named-column schema. Real Trimble exports
-are variable-width, feature-coded format with a job header row, a PRS base station row, and
-point records structured as:
-`point_id, easting, northing, height, feature_code, [feature_code]:STRING, string_number,
-[feature_code]:TAG, tag_value, [feature_code]:REMARK, remark_text, [feature_code]:LAND USE,
-land_use[, [feature_code]:HEIGHT, feature_height]`
+### 1. Control layer redesign
+**Before:** 8 overlapping control files with duplication
+**After:** 5 lean, focused control files + 1 separate reference file
 
-The tool cannot process real survey files without intake rework.
+**Affected files:**
+- Created: `00_PROJECT_CANONICAL.md` (project identity + MVP status)
+- Created: `03_WORKING_RULES.md` (day-to-day operating rules)
+- Created: `05_PROJECT_REFERENCE.md` (historical/reference context)
+- Kept: `01_CURRENT_STATE.md`, `02_CURRENT_TASK.md`, `04_SESSION_HANDOFF.md`
+- Removed from active use: `MASTER_PROJECT_READ_FIRST.md`, `05_AI_ROLE_RULES.md`, `06_DEVELOPMENT_PROCESS.md`
 
-### Discovery 2 — NI coordinate projection may be wrong
-Real files use TM65 Irish Grid (EPSG:29902) or ITM (EPSG:2157). The current `coord_consistency`
-check uses OSGB27700 (EPSG:27700 — British National Grid). Wrong for NI. NIE_11kV rulepack
-coord checks will be incorrect until this is fixed.
+### 2. Documentation consolidation
+- Removed duplication between control files
+- Moved historical context to reference file
+- Each control file now answers one clear question
+- Navigation simplified: "read only the file you need"
 
-### Discovery 3 — Ignore-tagged rows need filtering
-Trimble CSV exports include points tagged `I` (Ignore). These must be excluded before QA.
-
-### Discovery 4 — .job file is binary, not a first intake target
-Proprietary Trimble General Survey Journal binary. Not parseable without a SDK. CSV is the
-practical intake path.
-
-### Discovery 5 — Handwritten notes confirm the handoff gap is real
-Field notebook sketches show stay geometry, clearance measurements, drain/hedge constraints,
-and site context that is structurally absent from the CSV data. The product rationale is
-confirmed by the actual files.
+### 3. Clear next phase
+- Phase 1 (immediate): Better QA rules
+- Phase 2 (after): Broader input handling
+- Phase 3 (later): Browser automation
 
 ---
 
-## Current priority status
+## What is now true
 
-**Blocked on a decision.** See `03_CURRENT_TASK.md`.
+### Control layer is finalised
+- 5 operational control files in `AI_CONTROL/`
+- Each file answers one question
+- No bloat, no duplication
+- Ready for scaling (contractors, multiple AIs, long-term use)
 
-The decision is:
-- **Path A:** Real Trimble CSV intake/normalisation first (recommended — enables real-data testing)
-- **Path B:** Continue DNO rulepack expansion first (ENWL, NGED, UKPN)
+### Project status is unchanged
+- Local MVP still works
+- 14 tests still passing
+- CI/CD still active
+- Code remains stable
 
-No code changes should be made until this is confirmed.
+### Next priority is clear
+- **Phase 1: Improve QA rules** (`app/dno_rules.py`)
+- This is the highest-value immediate work
+- Timeline: 1-3 weeks, 10-20 hours
 
 ---
 
-## What is materially true now
+## What changed in Claude project
 
-- 29 tests passing.
-- 8 QA check types.
-- Three DNO rulepacks live: `SPEN_11kV`, `SSEN_11kV`, `NIE_11kV`.
-- `PROJECT_SYNTHESIS/00_PROJECT_RATIONALE.md` now exists — permanent rationale record.
-- `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/REAL_SURVEY_INPUT_ANALYSIS.md` now exists — real file findings.
-- Real Trimble CSV format is now understood and documented.
-- Control layer reflects that intake normalisation needs rework before real-data use.
+**Files to keep uploaded:**
+- `00_PROJECT_CANONICAL.md`
+- `01_CURRENT_STATE.md`
+- `02_CURRENT_TASK.md`
+- `03_WORKING_RULES.md`
+- `04_SESSION_HANDOFF.md`
+
+**Files to delete from project:**
+- `MASTER_PROJECT_READ_FIRST.md` (consolidated into 00_PROJECT_CANONICAL)
+- `05_AI_ROLE_RULES.md` (moved to reference/archive)
+- `06_DEVELOPMENT_PROCESS.md` (too long for daily use, kept on disk as reference)
+
+**Files NOT uploaded to project (kept on disk only):**
+- `05_PROJECT_REFERENCE.md` (reference only, not operational)
+
+**Result:** 5 active files instead of 8, each with clear purpose
+
+---
+
+## Current MVP status
+
+### Confirmed working
+- `/upload` route
+- `/api/presign`
+- `/api/import/<job_id>`
+- `/map/view/<job_id>`
+- `/pdf/qa/<job_id>`
+- `/jobs/`
+- `/health/full`
+- CSV upload/save flow
+- QA processing
+- Output generation (issues.csv, map_data.json)
+
+### Tests
+- 14 passing tests
+- pre-commit active
+- Ruff active
+- GitHub Actions CI active
+
+---
+
+## Known remaining weaknesses
+
+1. **QA rules are basic** (PRIORITY)
+   - `app/dno_rules.py` has placeholder checks
+   - Phase 1 will fix this
+
+2. **Input handling is narrow**
+   - One CSV schema supported
+   - Phase 2 will handle more formats
+
+3. **No browser automation**
+   - Testing is backend-only
+   - Phase 3 will add Playwright
+
+4. **Architecture has MVP debt**
+   - Some code was built quickly
+   - Can refactor after Phase 1
 
 ---
 
 ## Next session should
 
-1. Confirm the priority decision (Path A or Path B).
-2. Update `03_CURRENT_TASK.md` with the confirmed path.
-3. Only then begin implementation work.
+1. **Confirm** control files are in place locally
+2. **Update** Claude project files (delete 3, keep 5)
+3. **Commit** the changes to GitHub
+4. **Then begin Phase 1:** Improve QA rules in `app/dno_rules.py`
 
-## Next session should NOT
+See `02_CURRENT_TASK.md` for Phase 1 details.
 
-- Begin any code changes before the priority decision is confirmed.
-- Assume ENWL rulepack is still the automatic next step.
-- Use any EW Design Tool / SpanCore codebase as current product state.
+See `PROJECT_OVERVIEW_AND_NEXT_STEPS.md` for full timeline and context.
+
+---
+
+## Key principles (unchanged)
+
+- Stay narrow
+- Do not broaden scope
+- Recover the MVP first
+- Work from the current task, not 3-month roadmaps
+- Update control files when state changes
+- Only read the files you need
+
+---
+
+## Files to review next session
+
+**If starting Phase 1:**
+1. `02_CURRENT_TASK.md` (what to do)
+2. `PROJECT_OVERVIEW_AND_NEXT_STEPS.md` (context)
+3. Then start editing `app/dno_rules.py`
+
+**If needing context:**
+1. `01_CURRENT_STATE.md` (what works)
+2. `00_PROJECT_CANONICAL.md` (what is this?)
+3. `03_WORKING_RULES.md` (how do I work?)
+
+**If strategic review:**
+1. `PROJECT_OVERVIEW_AND_NEXT_STEPS.md` (phases and timeline)
+2. `05_PROJECT_REFERENCE.md` (decision history)
+
+---
+
+## Success metric for Phase 1
+
+When `app/dno_rules.py` catches 5-10 meaningful validation problems:
+
+**Update this file to:**
+- Mark Phase 1 as complete
+- Set Phase 2 as next task
+- Note any learning from Phase 1
+
+That will signal the project has moved forward and is gaining real product value.
