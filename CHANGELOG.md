@@ -7,6 +7,62 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-22
+
+### Added
+- Formal `_archive/` structure introduced to separate active project from historical material.
+- New `AI_CONTROL/05_PROJECT_REFERENCE.md` created to preserve historical context without bloating operational files.
+- Clear three-layer model defined:
+  - Active project surface
+  - Archive/reference surface
+  - Local/tool-specific surface
+
+### Changed
+- Repository reorganised to reflect clean separation between:
+  - active code and control files
+  - historical synthesis and archive material
+- `CLAUDE.md` rewritten to align with cleaned control layer and new repo structure.
+- `.cursorrules` rewritten to match Claude bootstrap and enforce correct working model.
+- `README.md` rewritten to:
+  - reflect current MVP state
+  - define project structure
+  - document active vs archive separation
+  - clarify development priorities
+
+### Moved
+- `PROJECT_SYNTHESIS/` → `_archive/docs/PROJECT_SYNTHESIS/`
+- `RUNBOOK.md` → `_archive/docs/`
+- `PROJECT_OPERATING_MODEL.md` → `_archive/docs/`
+- `MANIFEST.md` → `_archive/docs/`
+- `FRONTEND_FINAL_IMPLEMENTATION.md` → `_archive/docs/`
+- AI bundle folders:
+  - `CHATGPT_UPLOAD_BUNDLES/`
+  - `CLAUDE_APP_UPLOAD_BUNDLES/`
+  - `CLAUDE_REVIEW_BUNDLES/`
+  → `_archive/ai_bundles/`
+
+### Removed
+- Legacy control-layer entry points from active usage:
+  - `MASTER_PROJECT_READ_FIRST.md`
+  - `AI_CONTROL/00_READ_THIS_FIRST.md`
+  - `AI_CONTROL/01_PROJECT_TRUTH.md`
+
+### Fixed
+- Eliminated ambiguity between:
+  - active instructions
+  - historical synthesis
+  - archived code
+- Prevented future AI/tool drift by enforcing single authoritative control layer.
+
+### State at end of session
+- Clean repository structure established.
+- Control layer fully aligned with project direction.
+- Archive separated and safe from accidental use.
+- Claude + Cursor environments aligned with new structure.
+- Project ready for focused Phase 1 work (QA rule improvements).
+
+---
+
 ## 2026-04-21
 
 ### Added
@@ -85,4 +141,5 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 ## Earlier history
 
 Earlier sessions are summarised in `AI_CONTROL/04_SESSION_HANDOFF.md` and
-`PROJECT_SYNTHESIS/`. This file starts at 2026-04-20.
+`_archive/docs/PROJECT_SYNTHESIS/`.
+This file starts at 2026-04-20.

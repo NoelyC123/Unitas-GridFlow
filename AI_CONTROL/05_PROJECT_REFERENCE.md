@@ -14,13 +14,13 @@ The project has evolved through multiple iterations and naming conventions:
 - Initial DNO compliance/QA tool concept
 - Early design and problem definition
 - Decision memos and initial architecture work
-- Archived but referenced in historical synthesis
+- Archived but still useful for historical understanding
 
 ### EW Design Tool (middle phase)
 - Secondary naming convention during development
 - Broader design-tool exploration
-- Later deprecated in favor of narrow MVP approach
-- Archived, not for active development
+- Later deprecated in favour of the narrow MVP approach
+- Historical only, not for active development
 
 ### Unitas GridFlow (current phase)
 - Final, canonical name for the project
@@ -30,235 +30,183 @@ The project has evolved through multiple iterations and naming conventions:
 
 ---
 
-## Repository locations
+## Active repository locations
 
 ### Active development
 - **GitHub:** `https://github.com/NoelyC123/Unitas-GridFlow`
 - **Local:** `/Users/noelcollins/Unitas-GridFlow`
 - **Branch:** `master`
 
-### Archive locations
-Older repos (SpanCore, EW Design Tool) are archived and not used for active development.
+### Archive/reference
+- `_archive/` contains historical materials, previous control-layer files, old exports, synthesis documents, and quarantined code
+- `_archive/` is reference-only unless explicitly needed
 
-They exist for:
-- Historical reference
-- Understanding decision evolution
-- Finding old analysis or synthesis documents
-
-Do not try to restore or develop from archived repos.
+Do not treat archived material as active instruction.
 
 ---
 
-## Three-layer project structure
+## Current structural model
 
-The project is managed across three aligned layers:
+The repository is now deliberately organised into three categories:
 
-### Layer 1: AI Control (`AI_CONTROL/`)
-**Current day-to-day operational control files:**
-- `00_PROJECT_CANONICAL.md` — project identity and MVP status
-- `01_CURRENT_STATE.md` — current project state
+### 1. Active project surface
+These are the live files and folders used for current development:
+
+- `AI_CONTROL/`
+- `app/`
+- `tests/`
+- `sample_data/`
+- `README.md`
+- `CHANGELOG.md`
+- `CLAUDE.md`
+- root config/runtime files
+
+These define the current working system.
+
+### 2. Archive/reference surface
+Historical, archived, or non-active materials live under:
+
+- `_archive/control_layer/old_ai_control/`
+- `_archive/docs/PROJECT_SYNTHESIS/`
+- `_archive/docs/FRONTEND_FINAL_IMPLEMENTATION.md`
+- `_archive/docs/MANIFEST.md`
+- `_archive/docs/PROJECT_OPERATING_MODEL.md`
+- `_archive/docs/RUNBOOK.md`
+- `_archive/admin/GITHUB_ADMIN/`
+- `_archive/quarantine/old_quarantine/`
+- `_archive/ai_bundles/`
+
+These are preserved for historical understanding, not active development.
+
+### 3. Local/tool-specific surface
+These exist in the working repo but are not part of the shared project truth:
+
+- `.env`
+- `.vscode/`
+- `.claude/`
+- `.venv312/`
+- caches / coverage files
+
+---
+
+## Active control layer
+
+The active operational control layer is:
+
+- `AI_CONTROL/00_PROJECT_CANONICAL.md`
+- `AI_CONTROL/01_CURRENT_STATE.md`
+- `AI_CONTROL/02_CURRENT_TASK.md`
+- `AI_CONTROL/03_WORKING_RULES.md`
+- `AI_CONTROL/04_SESSION_HANDOFF.md`
+- `AI_CONTROL/05_PROJECT_REFERENCE.md`
+
+### Purpose of each file
+- `00_PROJECT_CANONICAL.md` — project identity and canonical model
+- `01_CURRENT_STATE.md` — current state of the live system
 - `02_CURRENT_TASK.md` — immediate next work
-- `03_WORKING_RULES.md` — how to work on this project
-- `04_SESSION_HANDOFF.md` — what changed in the last session
-- `05_PROJECT_REFERENCE.md` — this file (historical/reference context)
+- `03_WORKING_RULES.md` — how to work on the project
+- `04_SESSION_HANDOFF.md` — latest session continuity
+- `05_PROJECT_REFERENCE.md` — this file, for historical/reference context
 
-**Updated:** When project state materially changes
+---
 
-**Read:** Only the files you need for your current task
+## Historical synthesis and strategy documents
 
-### Layer 2: Strategy/Synthesis (`PROJECT_SYNTHESIS/`)
-Contains deeper analysis and decision documentation:
+The deeper strategic and historical reasoning for the project is preserved under:
 
-- `00_RAW_AI_RESPONSES/` — raw AI analyses and initial thinking
+- `_archive/docs/PROJECT_SYNTHESIS/`
+
+This includes:
+
+- `00_RAW_AI_RESPONSES/` — raw AI analyses and exploratory thinking
 - `01_COMPARISON/` — comparison and evaluation work
-- `02_FINAL_SYNTHESIS/` — consolidated analysis (e.g., `SPANCORE_MASTER_SYNTHESIS.md`)
-- `03_DECISION_MEMO/` — strategic decisions and rationale (e.g., `FINAL_DECISION_MEMO.md`)
-- `04_EXECUTION_ALIGNMENT/` — execution plans and alignment (e.g., `EXECUTION_ALIGNMENT_PLAN.md`)
-- `05_SUPPORT_NOTES/` — prompts, reviews, and follow-up notes
+- `02_FINAL_SYNTHESIS/` — consolidated synthesis documents
+- `03_DECISION_MEMO/` — strategic decision records
+- `04_EXECUTION_ALIGNMENT/` — execution planning
+- `05_SUPPORT_NOTES/` — prompts, notes, reviews, follow-up context
 
-**Purpose:** Preserves why decisions were made, not just what is true now
+### Purpose
+These explain **why** past decisions were made.
 
-**Read:** When you need to understand the reasoning behind a current decision
-
-### Layer 3: Live code (`app/` and root files)
-The running implementation and tests:
-
-- `app/` — Flask application code
-- `run.py` — entry point
-- `requirements.txt` and `pyproject.toml` — dependencies
-- `tests/` — pytest suite
-- `sample_data/` — example CSVs
-- `uploads/` — working directory for jobs
-
-**Purpose:** The actual working implementation
-
-**Updated:** Every development session
+### Rule
+Do not treat these as daily operational instructions. Use them only when strategic history or rationale is needed.
 
 ---
 
 ## Multi-AI workflow background
 
-This project has been coordinated across multiple AI systems to avoid drift and duplication:
+The project has used multiple AI systems across its earlier strategic phases.
 
-### ChatGPT
-**Role:** Strategic judgment, prioritisation, architecture review, decision-making
+### Purpose of that workflow
+- challenge assumptions
+- compare options
+- preserve decision reasoning
+- avoid rediscovering the project from scratch
 
-**When used:** For high-level direction and strategic questions
+### Result
+The strongest conclusions from those earlier phases were consolidated into:
+- the active control layer
+- the live repo structure
+- the current narrow MVP direction
 
-**Outputs:** Saved in `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/` with CHATGPT prefix
-
-### Claude (Claude.ai / Claude Code)
-**Role:** Structured review, repo-level reasoning, implementation assistance
-
-**When used:** For validation, code review, and targeted implementation help
-
-**Outputs:** Saved in `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/` with CLAUDE prefix
-
-### Gemini and Grok
-**Role:** Structured challenging (Gemini) and practical trade-off enforcement (Grok)
-
-**When used:** For second opinions and simplification pressure
-
-**Outputs:** If used, saved in `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/`
-
-**Rule:** All prompts and responses used for decision-making are saved so that later AIs can see the reasoning.
+The old raw and synthesis materials are now historical context, not active instruction.
 
 ---
 
-## Key decision documents
+## Archive locations and meaning
 
-### Strategic decisions
-**Location:** `PROJECT_SYNTHESIS/03_DECISION_MEMO/FINAL_DECISION_MEMO.md`
+### `_archive/control_layer/old_ai_control/`
+Older control-layer files that were superseded by the cleaned active control layer.
 
-**Contains:** Why the tool is narrow pre-CAD QA, not a broad platform. Why MVP comes first.
+### `_archive/docs/PROJECT_SYNTHESIS/`
+Historical strategic reasoning, AI analysis, and project synthesis.
 
-### Execution alignment
-**Location:** `PROJECT_SYNTHESIS/04_EXECUTION_ALIGNMENT/EXECUTION_ALIGNMENT_PLAN.md`
+### `_archive/admin/GITHUB_ADMIN/`
+Archived GitHub/admin planning material.
 
-**Contains:** How to execute the MVP without scope creep, phased approach, next priorities.
+### `_archive/quarantine/old_quarantine/`
+Legacy or reference-only code and materials that were intentionally removed from the active project surface.
 
-### Master synthesis
-**Location:** `PROJECT_SYNTHESIS/02_FINAL_SYNTHESIS/SPANCORE_MASTER_SYNTHESIS.md`
-
-**Contains:** Comprehensive analysis from earlier phases, consolidated reasoning.
-
----
-
-## Archive locations
-
-### _archive/
-Old versions, exports, and moved artifacts.
-
-Used for: historical reference, finding old work.
-
-**Do not restore from archive without understanding why something was moved.**
-
-### _quarantine/
-Legacy or reference-only code that is not part of live development.
-
-Used for: understanding old approaches, historical context.
-
-**Do not restore or execute quarantined code.**
+### `_archive/ai_bundles/`
+Old upload/export bundles used for earlier AI workflows and handoffs.
 
 ---
 
-## Why this structure exists
+## How to use this file
 
-The three-layer system (control, strategy, live code) exists to solve a specific problem:
+Read this file when you need to understand:
 
-**Problem:** Multiple AIs, multiple tools, multiple sessions → constant re-discovery and drift
+- how the project evolved
+- what older naming conventions meant
+- where archived materials now live
+- how historical reasoning is organised
+- what kinds of materials exist outside the active control layer
 
-**Solution:** One canonical control layer that all AIs and sessions read first, combined with preserved reasoning (strategy layer) and actual code (live code).
+Do **not** use this file to decide the current task or current live status.
 
-**Result:**
-- No AI re-discovers the project from scratch
-- Decisions are preserved with reasoning, not just outcomes
-- Control layer stays lean because history doesn't bloat it
-- Strategy layer doesn't bloat code because it's separate
-- Code stays focused because decisions are already made
-
----
-
-## When to read each layer
-
-### Read the control layer (AI_CONTROL/) when:
-- Starting work on the project
-- Trying to understand current status
-- Wondering what to work on next
-- Unsure how to commit or test your changes
-
-### Read the strategy layer (PROJECT_SYNTHESIS/) when:
-- You want to understand *why* a decision was made
-- A design choice seems wrong but you don't understand the reasoning
-- You're about to propose a scope change and want to see why earlier thinking went a different direction
-- You're bringing in a new AI and want them to understand the decision history
-
-### Read the live code layer (app/) when:
-- You're implementing something
-- You're debugging
-- You're understanding how the system actually works
-
----
-
-## Current project truths (as of latest session)
-
-### What's working
-- Local MVP (upload → QA → map → PDF)
-- Tests passing (14 tests)
-- CI/CD active (GitHub Actions)
-- Canonical repo established
-- Control layer lean and practical
-
-### What's weak
-- QA rules are placeholder/basic (highest priority)
-- Input handling is narrow (one schema)
-- No browser automation tests
-
-### What's next
-**Phase 1:** Better QA rules (immediate)
-**Phase 2:** Broader input handling
-**Phase 3:** Browser automation
-
----
-
-## How to find things
-
-**"Where do I find the decision to make the tool narrow pre-CAD instead of broad?"**
-→ `PROJECT_SYNTHESIS/03_DECISION_MEMO/FINAL_DECISION_MEMO.md`
-
-**"Why are we improving QA rules first?"**
-→ `PROJECT_SYNTHESIS/04_EXECUTION_ALIGNMENT/EXECUTION_ALIGNMENT_PLAN.md`
-
-**"What was the reasoning behind X choice?"**
-→ Check `PROJECT_SYNTHESIS/05_SUPPORT_NOTES/` for archived prompts and AI reviews
-
-**"What's the status right now?"**
-→ `AI_CONTROL/02_CURRENT_STATE.md` or `01_CURRENT_STATE.md`
-
-**"What should I work on?"**
-→ `AI_CONTROL/02_CURRENT_TASK.md`
+For that, use:
+- `AI_CONTROL/01_CURRENT_STATE.md`
+- `AI_CONTROL/02_CURRENT_TASK.md`
 
 ---
 
 ## Important reminders
 
-- **Do not broaden scope.** The narrow MVP approach is deliberate.
-- **Do not try to restore old repos.** They are archived for a reason.
-- **Do read the control files before working.** They are lean for a reason.
-- **Do update control files when state changes.** They are the single source of truth.
-- **Do preserve strategy documents.** They explain the reasoning.
+- Do not broaden scope based on historical material alone.
+- Do not restore archived or quarantined code blindly.
+- Do not treat old repo names as current project identity.
+- Do preserve archive material, because it explains earlier decisions.
+- Do rely on the active control layer for current truth.
 
 ---
 
-## Not in the control layer on purpose
+## Summary
 
-These topics are not in the daily control files, but they exist elsewhere:
+This file exists to preserve continuity without polluting the active operational layer.
 
-- **Detailed AI workflow rules** → See this file
-- **Historical evolution** → See this file
-- **Archive locations** → See this file
-- **Decision reasoning** → `PROJECT_SYNTHESIS/`
-- **Old code or approaches** → `_archive/` and `_quarantine/`
-- **Experimental notes** → `PROJECT_SYNTHESIS/00_RAW_AI_RESPONSES/` or `05_SUPPORT_NOTES/`
+It helps future sessions, tools, and AIs understand:
 
-This separation keeps control files lean while preserving important context.
+- where the project came from
+- how it changed
+- where old materials were moved
+- how to distinguish live files from historical ones

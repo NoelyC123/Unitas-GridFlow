@@ -1,111 +1,197 @@
 # Working Rules
 
-## Before you edit a file
-Read it first. Never assume contents.
+## Core principles
 
-## Stay narrow
-Do not broaden scope. Do not redesign. Focus on the current task.
-
-## Use minimum relevant files
-Only read control files you need for the current work:
-- Starting a task? Read `02_CURRENT_TASK.md`
-- Need context? Read `01_CURRENT_STATE.md` or `04_SESSION_HANDOFF.md`
-- Need to know how to work? Read this file.
-
-## Make targeted edits
-Make small, focused changes. One thing at a time.
+- Always read a file before editing it.
+- Never assume file contents.
+- Stay strictly within the current task.
+- Do not broaden scope.
+- Prefer simple, clear, deterministic logic.
 
 ---
 
-## Standard workflow
+## Project structure awareness (CRITICAL)
 
-1. Identify what you're working on
-2. Read the relevant file(s)
-3. Make the code change
-4. Run `pytest -v`
-5. Run `pre-commit run --all-files`
-6. Commit with a clear message
-7. Push to `master`
-8. Wait for CI to pass
+The repository has three layers:
+
+### 1. Active project (use this)
+- `AI_CONTROL/`
+- `app/`
+- `tests/`
+- `sample_data/`
+- root config files
+
+### 2. Archive (reference only — do not use)
+- `_archive/`
+
+Contains:
+- old control layer
+- synthesis documents
+- AI bundles
+- quarantined code
+- legacy documentation
+
+**Rule:**
+Do NOT use `_archive/` for implementation or decision-making unless explicitly instructed.
+
+---
+
+### 3. Local/tool files (ignore as project truth)
+- `.env`
+- `.vscode/`
+- `.claude/`
+- `.venv312/`
+- caches / coverage
+
+---
+
+## Use minimum necessary context
+
+Only read what you need:
+
+- Starting work → `02_CURRENT_TASK.md`
+- Need state → `01_CURRENT_STATE.md`
+- Need session context → `04_SESSION_HANDOFF.md`
+- Need working rules → this file
+
+Avoid reading everything by default.
+
+---
+
+## Make targeted changes
+
+- One change at a time
+- Small, focused edits
+- Avoid large rewrites
+- Keep logic simple and traceable
+
+---
+
+## Standard development workflow
+
+1. Identify the task
+2. Read relevant file(s)
+3. Make the change
+4. Run:
+   ```bash
+   pytest -v
+   ```
+5. Run:
+   ```bash
+   pre-commit run --all-files
+   ```
+6. Commit:
+   ```bash
+   git add .
+   git commit -m "clear, specific message"
+   git push
+   ```
+7. Wait for CI to pass
+
+---
+
+## Control layer alignment
+
+The project must stay aligned across:
+
+1. `AI_CONTROL/` → truth and direction
+2. `app/` → implementation
+3. `_archive/` → history (reference only)
+
+If code changes but control files don’t → misalignment.
 
 ---
 
 ## When to update control files
 
-Update immediately after work if:
+Update immediately if:
 
-- a broken flow now works
-- the MVP state changed materially
+- a flow starts working
+- project behaviour changes
 - the current task is completed
-- the next priority changed
-- a new development phase started
+- the next priority changes
+- a new phase begins
 
-**Files to update:**
-- `01_CURRENT_STATE.md` (what works, what's weak)
-- `02_CURRENT_TASK.md` (what is next)
-- `04_SESSION_HANDOFF.md` (what changed this session)
-
----
-
-## Three aligned layers
-
-The project lives in three places:
-
-1. **Canonical truth** (`AI_CONTROL/`) — what is, what works, what's next
-2. **Live code** (`app/` and root) — the working implementation
-3. **Strategy** (`PROJECT_SYNTHESIS/`) — analysis and decisions
-
-Keep them aligned. If code changes but control files don't, misalignment happens.
+Files to update:
+- `01_CURRENT_STATE.md`
+- `02_CURRENT_TASK.md`
+- `04_SESSION_HANDOFF.md`
+- `CHANGELOG.md` (if something shipped)
 
 ---
 
 ## Checkpoint method
 
-Stop and checkpoint when:
-- a task completes
-- the priority becomes unclear
-- the control files feel stale
+Stop and reassess when:
 
-Answer:
+- a task completes
+- direction becomes unclear
+- control files feel outdated
+
+Ask:
+
 1. What now works?
 2. What is still weak?
-3. What is the next decision?
-4. Do the control files match reality?
+3. What is the next priority?
+4. Do control files reflect reality?
 
-Update them if they don't.
+Update them if not.
 
 ---
 
 ## Session workflow
 
-**Start:** Read the current task. Read control files only if needed for that task.
+### Start
+- Read `02_CURRENT_TASK.md`
+- Read additional files only if needed
 
-**During:** Make changes, test, commit/push.
+### During
+- Implement changes
+- test → commit → push
 
-**End:** If the task changed the project state, update control files.
-
----
-
-## Development debt
-
-Known items that are not urgent:
-- Old test jobs in `uploads/jobs/`
-- `issues.csv` is verbose
-- QA rules are basic (this is the priority to improve)
-- No browser automation yet
-
-These are not blockers unless tied to the current task.
+### End
+- Update control files if state changed
 
 ---
 
-## Bringing in external review
+## Development constraints
 
-Only ask for external AI review when:
-1. You have a specific question or decision
-2. You have current control files ready
-3. You are not in the middle of active build work
+- This is a narrow MVP tool
+- Do not expand scope
+- Do not redesign architecture during feature work
+- Do not introduce unrelated improvements
 
-Don't ask:
-- broad "what should we build?" questions during MVP work
-- without reading current control files
-- for work another AI already did
+---
+
+## Known non-urgent items
+
+These are not priorities unless directly relevant:
+
+- old job files in `uploads/`
+- verbose `issues.csv`
+- limited input schema support
+- lack of browser automation
+
+---
+
+## External AI usage
+
+Only bring in external AI when:
+
+- you have a specific question
+- you have read current control files
+- you are not mid-implementation
+
+Do NOT:
+
+- ask broad open-ended questions
+- ask for work already defined
+- skip reading current task/state
+
+---
+
+## Final rule
+
+**Always follow the control layer.
+Never rely on memory.
+Never rely on archive.**

@@ -2,106 +2,181 @@
 
 ## Project status
 
-The project is in: **working local MVP + baseline/tooling/testing complete**
+The project is in:
+
+**Working local MVP + baseline tooling complete + entering product-improvement phase**
 
 The project is NOT in:
-- repo setup mode (done)
-- branding cleanup mode (done)
-- baseline tool/test establishment mode (done)
+- repo setup mode (completed)
+- branding cleanup mode (completed)
+- baseline tooling/test setup mode (completed)
 
 ---
 
 ## What works right now
 
 ### MVP flow (confirmed)
+
 ```
 upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
 ```
 
-### Routes (confirmed working)
+---
+
+### Core routes (working)
+
 - `/upload` — CSV upload form
-- `/api/presign` — S3 signed URL
+- `/api/presign` — upload handling
 - `/api/import/<job_id>` — QA processing
 - `/map/view/<job_id>` — Leaflet map
 - `/pdf/qa/<job_id>` — PDF download
 - `/jobs/` — job browser
 - `/health/full` — health check
 
-### Testing and CI
-- 14 passing tests (pytest)
-- pre-commit, Ruff active
+---
+
+### System capabilities
+
+- CSV upload and persistence
+- QA processing pipeline
+- Issue generation (`issues.csv`)
+- Map data generation (`map_data.json`)
+- PDF QA report generation
+- Job storage and browsing
+
+---
+
+### Testing and quality
+
+- pytest suite is active and passing
+- pre-commit hooks active
+- Ruff linting active
 - GitHub Actions CI active (on push/PR)
 
-### Code quality
-- Local environment working (Python 3.13, .venv312)
-- Canonical repo established (Unitas-GridFlow)
-- Live branding updated to Unitas GridFlow
+---
+
+### Environment and setup
+
+- Local development environment working (`.venv312`)
+- Python 3.13 configured
+- Canonical repository established (`Unitas-GridFlow`)
+- Local and GitHub repos aligned
 
 ---
 
 ## What is weak right now
 
-### 1. QA rules are basic (PRIORITY)
-- `app/dno_rules.py` contains placeholder/basic checks
-- Not enough to represent genuine DNO-grade validation
-- This is the biggest current weakness and the reason for Phase 1
+### 1. QA rules are basic (PRIMARY WEAKNESS)
+
+- `app/dno_rules.py` contains placeholder-level checks
+- Not sufficient for real DNO-grade validation
+- Limits real-world usefulness of the tool
+
+This is the **current highest priority**.
+
+---
 
 ### 2. Input handling is narrow
-- One representative CSV schema is supported
-- Broader real-world survey variation is not yet handled
-- Phase 2 priority (after QA rules work)
 
-### 3. Architecture still has MVP debt
-- Some code paths were built quickly during recovery
-- Cleanup/refactoring can wait until QA rules are stronger
+- One representative CSV schema supported
+- Does not yet reflect real-world survey variability
+- Will become relevant after QA rules improve
+
+---
+
+### 3. Architecture contains MVP debt
+
+- Some logic implemented quickly during recovery/build phase
+- Not yet optimised or refactored
+- Acceptable for current stage
+
+---
 
 ### 4. No browser automation
-- Playwright is not active
-- Testing is backend-focused only
-- Phase 3 priority (lowest urgency)
+
+- No Playwright or UI automation
+- Testing is backend-only
+- Low priority at current stage
 
 ---
 
 ## Current development phase
 
-**This project has moved past baseline/setup.**
+The project has moved beyond setup and stabilisation.
 
-It is now in: **working MVP ready for product-improvement phase**
+It is now in:
 
-The immediate priority is no longer:
-- repo organisation ✓ (done)
-- branding alignment ✓ (done)
-- tool/test setup ✓ (done)
-- baseline discipline ✓ (done)
+**Working MVP → Product improvement phase**
 
-The immediate priority is now:
-- **better QA rules** (Phase 1)
+---
+
+## Current priority
+
+**Improve QA rule quality in `app/dno_rules.py`**
+
+Goal:
+- make validation meaningful
+- reflect real-world survey issues
+- enforce DNO-style logic
+- produce genuinely useful outputs
 
 ---
 
 ## What changed recently
 
-The control layer was redesigned to be lean and practical:
+### Control layer redesign
 
-- Reduced from 8 overlapping files to 5 focused files
-- Removed historical/reference content from daily files
-- Created separate reference file for context preservation
-- Established clear "read this file for X question" navigation
+- Reduced from multiple overlapping files → 6 clearly defined files
+- Separated operational control from historical/reference content
+- Established clear navigation ("which file answers which question")
+- Removed legacy/duplicated control files
 
-The project itself (app code, tests, repo) remains stable:
-- MVP continues to work
-- All tests continue to pass
-- CI/CD continues to validate
+---
+
+### Repository structure clarified
+
+The project now follows a strict three-layer model:
+
+1. **Active project**
+   - `AI_CONTROL/`
+   - `app/`
+   - `tests/`
+   - `sample_data/`
+   - root files
+
+2. **Archive**
+   - `_archive/` (historical only)
+
+3. **Local/tool files**
+   - environment and editor-specific files
+
+---
+
+### System stability
+
+- MVP functionality remains unchanged and working
+- Tests continue to pass
+- CI continues to validate
+- No regressions introduced during restructuring
 
 ---
 
 ## Next checkpoint trigger
 
 Update this file when:
-- A previously broken flow starts working
-- The MVP state changes materially
-- The current task is completed
-- The next priority changes
-- A new development phase begins
 
-The next likely checkpoint will be when Phase 1 (better QA rules) is completed.
+- MVP behaviour changes
+- QA rules significantly improve
+- a new phase begins
+- a major weakness is resolved
+- project direction shifts
+
+---
+
+## Expected next update
+
+This file should next be updated when:
+
+**Phase 1 (QA rule improvements) produces meaningful validation capability**
+
+That marks a real increase in product value.
