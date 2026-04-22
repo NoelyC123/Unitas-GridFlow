@@ -1,18 +1,18 @@
 # Unitas GridFlow
 
-**Pre-CAD QA, compliance, and workflow automation for UK electricity network survey-to-design handoffs.**
+**Pre-CAD QA, validation, and workflow support for UK electricity network survey-to-design handoffs.**
 
 ---
 
 ## Overview
 
-Unitas GridFlow is a focused workflow tool for validating survey inputs before CAD/design handoff.
+Unitas GridFlow is a narrow workflow tool for validating survey inputs before CAD/design handoff.
 
 Its role is to:
 
 - ingest survey CSV data
 - normalise input into a consistent internal schema
-- apply DNO-specific QA validation
+- apply rule-based QA validation
 - generate structured issues
 - render mapped outputs
 - produce a PDF QA report
@@ -20,42 +20,79 @@ Its role is to:
 
 Short version:
 
-**A DNO survey compliance gatekeeper**
+**A narrow pre-CAD QA gatekeeper for survey-to-design workflows**
+
+---
+
+## Why this project exists
+
+Unitas GridFlow exists because repeated real-world friction was observed in the handoff between field survey and office design.
+
+The main problem is not usually the engineering calculation itself.
+
+The main problem is often that incoming survey information is:
+
+- inconsistent
+- incomplete
+- awkward to interpret
+- mixed in quality
+- discovered to be defective too late in the process
+
+The project is intended to act as a structured gate between survey and design by:
+
+- validating incoming data early
+- catching missing or inconsistent information
+- applying practical workflow / DNO-style checks
+- surfacing issues before office time is wasted downstream
 
 ---
 
 ## Current MVP Status
 
-The project currently has a **working local MVP**.
+The project currently has a working local MVP.
 
 ### Working flow
 
-**upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs**
+    upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
 
 ### Confirmed working components
 
 - upload page
-- upload/presign flow
+- upload / presign flow
 - CSV save to job folder
-- intake/finalise route
+- intake / finalise route
 - QA processing
 - `issues.csv` generation
 - `map_data.json` generation
 - PDF QA report route
 - jobs listing page
-- representative sample input schema
+- representative input schema with header normalisation
 - pytest coverage
 - GitHub Actions CI (`pre-commit` + `pytest`)
 
 ---
 
-## Current limitations
+## Current status
 
-- QA rules are still basic / placeholder-level
-- issue modelling is still lightweight
-- browser E2E coverage not yet implemented
-- output model is MVP-level, not production-grade
-- branding transition from legacy naming still incomplete
+The project has moved beyond setup and baseline scaffolding.
+
+### Completed so far
+
+- working local MVP
+- 4 live regional rulepacks
+- 10 QA check types
+- Phase 1 complete: QA rule improvements
+- Phase 2A complete: input/header normalisation improvements
+- 38 passing tests
+- active control layer for project truth and direction
+
+### Current main unresolved issue
+
+The biggest remaining uncertainty is now:
+
+**real-world validation**
+
+The project still needs proof that the current tool provides meaningful value on real survey files for real users.
 
 ---
 
@@ -63,14 +100,44 @@ The project currently has a **working local MVP**.
 
 Primary priority:
 
-**Improve QA rule quality in `app/dno_rules.py`**
+**Validation-led next phase**
 
-Goals:
+This means the next important step is to:
 
-- make rules realistic
-- align with real DNO standards
-- enforce strict validation logic
-- eliminate placeholder logic
+- test the current tool against one or more real survey files from real jobs
+- identify what works
+- identify what breaks
+- identify what real users actually care about
+- refine the next development phase from that evidence
+
+This is now more important than abstract feature expansion.
+
+---
+
+## Current limitations
+
+- real-world validation still missing
+- rules are meaningful for an MVP but not yet deeply differentiated or truly DNO-grade
+- issue modelling is still lightweight
+- browser E2E coverage not yet implemented
+- output model is still MVP-level, not production-grade
+- current intake model is still centered on structured CSV workflows only
+
+---
+
+## Best current framing
+
+At this stage, the strongest realistic framing is:
+
+- internal workflow tool
+- consultancy leverage asset
+- narrow productivity / QA layer
+
+Less realistic framing right now:
+
+- broad SaaS platform
+- major standalone utility software business
+- fully mature DNO compliance product
 
 ---
 
@@ -84,9 +151,11 @@ The repository is intentionally split into three layers:
 - `app/` → Flask application
 - `tests/` → pytest suite
 - `sample_data/` → example inputs
+- `README.md`
+- `CHANGELOG.md`
+- `CLAUDE.md`
+- `PROJECT_DEEP_CONTEXT.md`
 - root config files
-
----
 
 ### 2. ARCHIVE (reference only — do not use for development)
 
@@ -100,9 +169,7 @@ Contains:
 - quarantined code
 - upload bundles
 
-These are **historical only**.
-
----
+These are historical only.
 
 ### 3. LOCAL / TOOL FILES (not project truth)
 
@@ -124,6 +191,7 @@ Project direction is controlled by:
 - `AI_CONTROL/03_WORKING_RULES.md`
 - `AI_CONTROL/04_SESSION_HANDOFF.md`
 - `AI_CONTROL/05_PROJECT_REFERENCE.md`
+- `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
 
 These define:
 
@@ -132,6 +200,7 @@ These define:
 - current task
 - development rules
 - session continuity
+- strategic conclusions
 
 ---
 
@@ -139,31 +208,23 @@ These define:
 
 ### Create and activate environment
 
-```bash
-python3.13 -m venv .venv312
-source .venv312/bin/activate
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install -r requirements.txt
-python -m pip install pre-commit ruff pytest
-```
+    python3.13 -m venv .venv312
+    source .venv312/bin/activate
+    python -m pip install --upgrade pip setuptools wheel
+    python -m pip install -r requirements.txt
+    python -m pip install pre-commit ruff pytest
 
 ### Run the app
 
-```bash
-python run.py
-```
+    python run.py
 
 ### Run tests
 
-```bash
-pytest -v
-```
+    pytest -v
 
 ### Run linting
 
-```bash
-pre-commit run --all-files
-```
+    pre-commit run --all-files
 
 ---
 
@@ -185,19 +246,20 @@ pre-commit run --all-files
 
 ## Development principles
 
-- Stay strictly MVP-focused
+- Stay strictly narrow in scope
 - Work one task at a time
 - Prefer small, targeted changes
 - Avoid unnecessary rewrites
 - Do not introduce features outside current scope
+- Do not assume more features are the right next step without validation evidence
 
 ---
 
 ## Key files
 
-- `app/dno_rules.py` — QA rulepacks (primary focus)
+- `app/dno_rules.py` — QA rulepacks
 - `app/qa_engine.py` — QA engine
-- `app/routes/api_intake.py` — CSV pipeline
+- `app/routes/api_intake.py` — CSV intake and normalisation
 - `app/routes/api_upload.py` — upload handling
 - `app/routes/map_preview.py` — map logic
 - `app/routes/pdf_reports.py` — PDF generation
@@ -209,17 +271,14 @@ pre-commit run --all-files
 
 Always run:
 
-```bash
-pytest -v
-```
+    pytest -v
+    pre-commit run --all-files
 
 Then:
 
-```bash
-git add .
-git commit -m "clear message"
-git push
-```
+    git add .
+    git commit -m "clear message"
+    git push
 
 ---
 
@@ -227,6 +286,6 @@ git push
 
 This project is intentionally narrow.
 
-It is not a general platform — it is a **specialist QA layer for survey-to-design workflows**.
+It is not a general platform.
 
-All development should reinforce that focus.
+It is a specialist pre-CAD QA layer for survey-to-design workflows, and the next meaningful step is proving that it provides real-world value on real survey files.
