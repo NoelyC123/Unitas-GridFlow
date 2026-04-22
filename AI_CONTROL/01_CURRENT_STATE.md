@@ -122,9 +122,26 @@ Goal:
 
 ---
 
+## Current counts
+
+- **DNO rulepacks live:** 4 (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV)
+- **QA check types:** 10
+- **Tests passing:** 35
+
+---
+
 ## What changed recently
 
-### Control layer redesign
+### Phase 1 progress — QA rule improvements
+
+- `ENWL_11kV` rulepack added to `app/dno_rules.py`
+- `unique_pair` check added to `app/qa_engine.py` and all 4 DNO rulepacks — flags two poles sharing the same lat/lon
+- `span_distance` check added to `app/qa_engine.py` and all 4 DNO rulepacks — flags spans < 10m (likely duplicate) or > 500m (likely GPS error)
+- 4 new tests added; 35 total passing
+
+---
+
+### Control layer redesign (previous session)
 
 - Reduced from multiple overlapping files → 6 clearly defined files
 - Separated operational control from historical/reference content

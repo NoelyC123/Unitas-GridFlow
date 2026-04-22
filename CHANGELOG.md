@@ -7,6 +7,38 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-22 (continued)
+
+### Added
+- `ENWL_11KV_RULES` rulepack in `app/dno_rules.py`. Covers Electricity North West
+  licence area (Lancashire, Cumbria, Cheshire, Greater Manchester): lat 53.3–55.0,
+  lon -3.5 to -1.8. Uses same ENA TS 43-8 height range (7–20m), pole ID regex,
+  paired-coord checks, material/structure-type consistency, and coord_consistency
+  (100m) as existing rulepacks.
+- `ENWL_11kV` entry in `RULEPACKS` dict.
+- `unique_pair` check type in `app/qa_engine.py`. Flags rows where two or more poles
+  share the same composite field values (applied as lat/lon pair in all DNO rulepacks).
+  Skips rows with missing values. Added to all 4 DNO rulepacks.
+- `span_distance` check type in `app/qa_engine.py`. Converts consecutive pole lat/lon
+  to OSGB27700 and measures distance between adjacent rows. Flags spans below 10m
+  (likely duplicate entry) or above 500m (likely GPS error or missing pole). Added to
+  all 4 DNO rulepacks.
+- Four new tests in `tests/test_qa_engine.py` covering unique_pair and span_distance.
+
+### Fixed
+- `test_import_finalize_returns_success_for_valid_job` hardcoded issue count updated
+  9→11 to reflect the two additional issues correctly raised by the new rules on the
+  existing integration test fixture.
+
+### State at end of session
+- 35 tests passing.
+- 10 QA check types.
+- 4 DNO rulepacks live (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV).
+- Control layer in sync with code.
+- CI green.
+
+---
+
 ## 2026-04-22
 
 ### Added

@@ -199,7 +199,7 @@ def test_import_finalize_returns_success_for_valid_job(tmp_path, monkeypatch) ->
     assert data["ok"] is True
     assert data["job_id"] == "J50005"
     assert data["rulepack_id"] == "SPEN_11kV"
-    assert data["issue_count"] == 9
+    assert data["issue_count"] == 11
 
     updated_meta = json.loads((job_dir / "meta.json").read_text(encoding="utf-8"))
     assert updated_meta["status"] == "complete"

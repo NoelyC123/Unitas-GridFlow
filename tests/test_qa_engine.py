@@ -295,3 +295,117 @@ def test_coord_consistency_passes_matching_coordinates() -> None:
     issues = run_qa_checks(df, rules)
 
     assert len(issues) == 0
+
+
+def test_enwl_11kv_rulepack_is_registered() -> None:
+    """ENWL_11kV must be registered in RULEPACKS as a non-empty rule list."""
+    from app.dno_rules import RULEPACKS
+
+    assert "ENWL_11kV" in RULEPACKS
+    assert isinstance(RULEPACKS["ENWL_11kV"], list)
+    assert len(RULEPACKS["ENWL_11kV"]) > 0
+
+
+def test_enwl_11kv_rulepack_passes_valid_enwl_pole() -> None:
+    """A valid ENWL pole in Greater Manchester should produce no issues.
+
+    Manchester Piccadilly area (53.4808, -2.2426). OSGB coords derived from
+    pyproj EPSG:4326 -> EPSG:27700: E=383997, N=398258. Tolerance 100m.
+    """
+    from app.dno_rules import RULEPACKS
+
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "ENWL-MAN-0001",
+                "height": 10.0,
+                "material": "Wood",
+                "structure_type": "Wood Pole",
+                "location": "Manchester Piccadilly Approach",
+                "lat": 53.4808,
+                "lon": -2.2426,
+                "easting": 383997,
+                "northing": 398258,
+            }
+        ]
+    )
+
+    issues = run_qa_checks(df, RULEPACKS["ENWL_11kV"])
+
+    assert len(issues) == 0
+
+
+def test_unique_pair_flags_duplicate_coordinates() -> None:
+    df = pd.DataFrame(
+        [
+            {"pole_id": "P-001", "lat": 54.5, "lon": -3.0},
+            {"pole_id": "P-002", "lat": 54.5, "lon": -3.0},
+        ]
+    )
+    rules = [{"check": "unique_pair", "fields": ["lat", "lon"]}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert "Duplicate pair" in issues.iloc[0]["Issue"]
+
+
+def test_unique_pair_passes_unique_coordinates() -> None:
+    df = pd.DataFrame(
+        [
+            {"pole_id": "P-001", "lat": 54.5, "lon": -3.0},
+            {"pole_id": "P-002", "lat": 54.6, "lon": -3.1},
+        ]
+    )
+    rules = [{"check": "unique_pair", "fields": ["lat", "lon"]}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0
+
+
+def test_span_distance_flags_poles_too_close() -> None:
+    # 0.0001 degree lat ≈ 11m — below min_m=50 so flagged as too short
+    df = pd.DataFrame(
+        [
+            {"pole_id": "P-001", "lat": 54.5000, "lon": -3.0000},
+            {"pole_id": "P-002", "lat": 54.5001, "lon": -3.0000},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 50,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert "Span too short" in issues.iloc[0]["Issue"]
+
+
+def test_span_distance_passes_normal_span() -> None:
+    # 0.001 degree lat ≈ 111m — within 10–500m range
+    df = pd.DataFrame(
+        [
+            {"pole_id": "P-001", "lat": 54.5000, "lon": -3.0000},
+            {"pole_id": "P-002", "lat": 54.5010, "lon": -3.0000},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0

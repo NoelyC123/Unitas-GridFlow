@@ -90,6 +90,19 @@ SPEN_11KV_RULES = [
         "tolerance_m": 100,
         "description": "lat/lon must be consistent with easting/northing within 100m.",
     },
+    {
+        "check": "unique_pair",
+        "fields": ["lat", "lon"],
+        "description": "No two poles should share the same lat/lon — likely a duplicate entry.",
+    },
+    {
+        "check": "span_distance",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "min_m": 10,
+        "max_m": 500,
+        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+    },
 ]
 
 
@@ -157,6 +170,19 @@ SSEN_11KV_RULES = [
         "tolerance_m": 100,
         "description": "lat/lon must be consistent with easting/northing within 100m.",
     },
+    {
+        "check": "unique_pair",
+        "fields": ["lat", "lon"],
+        "description": "No two poles should share the same lat/lon — likely a duplicate entry.",
+    },
+    {
+        "check": "span_distance",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "min_m": 10,
+        "max_m": 500,
+        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+    },
 ]
 
 
@@ -217,6 +243,79 @@ NIE_11KV_RULES = [
         "tolerance_m": 100,
         "description": "lat/lon must be consistent with easting/northing within 100m.",
     },
+    {
+        "check": "unique_pair",
+        "fields": ["lat", "lon"],
+        "description": "No two poles should share the same lat/lon — likely a duplicate entry.",
+    },
+    {
+        "check": "span_distance",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "min_m": 10,
+        "max_m": 500,
+        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+    },
+]
+
+
+ENWL_11KV_RULES = [
+    *BASE_RULES,
+    # ENA TS 43-8 / ENWL 11kV: 7-20m covers wood (7-14m) and steel (8-20m)
+    {"check": "range", "field": "height", "min": 7, "max": 20},
+    {
+        "check": "regex",
+        "field": "pole_id",
+        "pattern": r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+        "description": "Pole IDs must be stable identifiers (no spaces or punctuation).",
+    },
+    {
+        "check": "paired_required",
+        "fields": ["lat", "lon"],
+        "description": "Coordinates must be provided as a lat/lon pair.",
+    },
+    {
+        "check": "paired_required",
+        "fields": ["easting", "northing"],
+        "description": "OSGB coordinates must be provided as an easting/northing pair.",
+    },
+    # ENWL licence area: Lancashire, Cumbria, Cheshire, Greater Manchester
+    {"check": "range", "field": "lat", "min": 53.3, "max": 55.0},
+    {"check": "range", "field": "lon", "min": -3.5, "max": -1.8},
+    {
+        "check": "dependent_allowed_values",
+        "if_field": "structure_type",
+        "then_field": "material",
+        "mapping": {
+            "Wood Pole": ["Wood"],
+            "Steel Pole": ["Steel"],
+            "Concrete Pole": ["Concrete"],
+            "Composite Pole": ["Composite"],
+        },
+        "description": "Material must match the declared structure type.",
+    },
+    {
+        "check": "coord_consistency",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "easting_field": "easting",
+        "northing_field": "northing",
+        "tolerance_m": 100,
+        "description": "lat/lon must be consistent with easting/northing within 100m.",
+    },
+    {
+        "check": "unique_pair",
+        "fields": ["lat", "lon"],
+        "description": "No two poles should share the same lat/lon — likely a duplicate entry.",
+    },
+    {
+        "check": "span_distance",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "min_m": 10,
+        "max_m": 500,
+        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+    },
 ]
 
 
@@ -225,4 +324,5 @@ RULEPACKS: dict[str, list[dict]] = {
     "SPEN_11kV": SPEN_11KV_RULES,
     "SSEN_11kV": SSEN_11KV_RULES,
     "NIE_11kV": NIE_11KV_RULES,
+    "ENWL_11kV": ENWL_11KV_RULES,
 }

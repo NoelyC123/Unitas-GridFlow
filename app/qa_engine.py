@@ -4,6 +4,9 @@ import math
 import re
 
 import pandas as pd
+from pyproj import Transformer
+
+_OSGB_TRANSFORMER = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
 
 
 def _is_missing_value(series: pd.Series) -> pd.Series:
@@ -90,8 +93,6 @@ def run_qa_checks(df, rules):
                     )
 
         elif check == "coord_consistency":
-            from pyproj import Transformer
-
             lat_field = rule.get("lat_field", "lat")
             lon_field = rule.get("lon_field", "lon")
             easting_field = rule.get("easting_field", "easting")
@@ -105,7 +106,7 @@ def run_qa_checks(df, rules):
                     issues.append({"Issue": f"Missing column: {mc}", "Row": {}})
                 continue
 
-            transformer = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
+            transformer = _OSGB_TRANSFORMER
 
             for _, row in df.iterrows():
                 lat = row.get(lat_field)
@@ -138,6 +139,82 @@ def run_qa_checks(df, rules):
                             "Row": row.to_dict(),
                         }
                     )
+
+        elif check == "unique_pair":
+            fields = rule.get("fields") or []
+            missing_columns = [name for name in fields if name not in df.columns]
+            if missing_columns:
+                for missing in missing_columns:
+                    issues.append({"Issue": f"Missing column: {missing}", "Row": {}})
+                continue
+
+            if len(fields) < 2:
+                issues.append({"Issue": "Invalid unique_pair rule: need 2+ fields", "Row": {}})
+                continue
+
+            all_present = ~df[fields].apply(_is_missing_value).any(axis=1)
+            df_present = df[all_present]
+
+            duplicate_mask = df_present.duplicated(subset=fields, keep="first")
+            for _, row in df_present[duplicate_mask].iterrows():
+                values = ", ".join(str(row[f]) for f in fields)
+                issues.append(
+                    {
+                        "Issue": f"Duplicate pair ({', '.join(fields)}): {values}",
+                        "Row": row.to_dict(),
+                    }
+                )
+
+        elif check == "span_distance":
+            lat_field = rule.get("lat_field", "lat")
+            lon_field = rule.get("lon_field", "lon")
+            min_m = rule.get("min_m", 10)
+            max_m = rule.get("max_m", 500)
+
+            required_cols = [lat_field, lon_field]
+            missing_cols = [c for c in required_cols if c not in df.columns]
+            if missing_cols:
+                for mc in missing_cols:
+                    issues.append({"Issue": f"Missing column: {mc}", "Row": {}})
+                continue
+
+            transformer = _OSGB_TRANSFORMER
+
+            prev_e = prev_n = None
+            for _, row in df.iterrows():
+                lat = row.get(lat_field)
+                lon = row.get(lon_field)
+                if any(_is_missing_scalar(v) for v in (lat, lon)):
+                    prev_e = prev_n = None
+                    continue
+                try:
+                    e, n = transformer.transform(float(lon), float(lat))
+                except Exception:
+                    prev_e = prev_n = None
+                    continue
+                if prev_e is not None:
+                    dist = math.sqrt((e - prev_e) ** 2 + (n - prev_n) ** 2)
+                    if dist < min_m:
+                        issues.append(
+                            {
+                                "Issue": (
+                                    f"Span too short: {dist:.0f}m between consecutive poles "
+                                    f"(min {min_m}m) — possible duplicate entry"
+                                ),
+                                "Row": row.to_dict(),
+                            }
+                        )
+                    elif dist > max_m:
+                        issues.append(
+                            {
+                                "Issue": (
+                                    f"Span too long: {dist:.0f}m between consecutive poles "
+                                    f"(max {max_m}m) — possible GPS error or missing pole"
+                                ),
+                                "Row": row.to_dict(),
+                            }
+                        )
+                prev_e, prev_n = e, n
 
         # --- checks that use a single `field` key ---
 

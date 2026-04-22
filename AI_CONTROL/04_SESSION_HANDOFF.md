@@ -2,153 +2,80 @@
 
 ## Session summary
 
-This session completed the **full repository clean-up and control layer redesign**.
+This session began **Phase 1: QA rule improvements**.
 
-The project is now:
-
-- structurally clean
-- clearly separated into active vs archive
-- aligned across control files and code
-- ready for focused development work
-
-The application itself remains stable and fully working.
+One rulepack was added cleanly with no architecture changes.
 
 ---
 
 ## What was completed
 
-### 1. Repository restructuring
+### ENWL_11kV rulepack added
+- `ENWL_11KV_RULES` added to `app/dno_rules.py` following the exact SPEN/SSEN/NIE pattern
+- Covers Electricity North West: Lancashire, Cumbria, Cheshire, Greater Manchester
+- Coord bounds: lat 53.3–55.0, lon -3.5 to -1.8
 
-- Introduced clear separation:
-  - Active project
-  - `_archive/` (historical only)
-  - local/tool files
+### unique_pair check added
+- New `elif check == “unique_pair”` branch in `app/qa_engine.py`
+- Flags rows where two or more poles share the same lat/lon combination
+- Skips rows with missing coordinate values
+- Added to all 4 DNO rulepacks
 
-- Moved all legacy and non-active material into `_archive/`
-- Removed ambiguity about what is “live” vs “reference”
+### span_distance check added
+- New `elif check == “span_distance”` branch in `app/qa_engine.py`
+- Converts consecutive pole lat/lon to OSGB27700, measures distance between adjacent rows
+- Flags spans < 10m (likely duplicate entry) or > 500m (likely GPS error or missing pole)
+- Resets state on missing coordinates rather than producing false positives
+- Added to all 4 DNO rulepacks
 
----
-
-### 2. Control layer redesign
-
-**Before:**
-- multiple overlapping files
-- duplicated content
-- unclear ownership of truth
-
-**After:**
-- 5 focused operational files:
-  - `00_PROJECT_CANONICAL.md`
-  - `01_CURRENT_STATE.md`
-  - `02_CURRENT_TASK.md`
-  - `03_WORKING_RULES.md`
-  - `04_SESSION_HANDOFF.md`
-
-- 1 reference-only file:
-  - `05_PROJECT_REFERENCE.md`
-
-Each file now has a single clear purpose.
-
----
-
-### 3. Documentation alignment
-
-Updated and aligned:
-
-- `README.md`
-- `CHANGELOG.md`
-- `CLAUDE.md`
-- `.cursorrules`
-
-All now match:
-- the cleaned structure
-- the narrow MVP focus
-- the control layer
-
----
-
-### 4. Archive system finalised
-
-All historical material moved into `_archive/`, including:
-
-- old control layer files
-- synthesis and strategy documents
-- AI bundles
-- quarantined code
-- legacy documentation
-
-**Rule established:**
-Archive is **reference only**, never active instruction.
+### Tests
+- 4 new tests added to `tests/test_qa_engine.py`
+- Integration test fixture count corrected in `tests/test_app_routes.py` (9→11)
+- 35 tests total, all passing
 
 ---
 
 ## Current project state
 
+### Counts
+
+- DNO rulepacks live: 4 (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV)
+- QA check types: 10
+- Tests passing: 35
+
 ### What works
 
-- Full MVP flow:
-  ```
-  upload → QA → outputs → map → PDF → jobs
-  ```
-
+- Full MVP flow: upload → QA → outputs → map → PDF → jobs
 - All key routes operational
-- Outputs generated correctly:
-  - `issues.csv`
-  - `map_data.json`
 - Local environment stable
-- Tests passing
 - CI active and green
-
----
 
 ### What is weak
 
-1. **QA rules are basic (primary issue)**
-   - `app/dno_rules.py` still contains placeholder logic
+1. **QA rules — Phase 1 substantially complete, minor depth remaining**
+   - 10 check types, 4 DNO rulepacks
+   - Could still add height/material cross-validation (`dependent_range`) if needed
 
-2. **Input handling is narrow**
-   - only one schema supported
+2. **Input handling is narrow** — one schema, Phase 2
 
-3. **No browser automation**
-   - backend testing only
+3. **No browser automation** — Phase 3
 
 ---
 
 ## Current phase
 
-**Working MVP → Product improvement phase**
+**Phase 1: QA rule improvements — substantially complete**
 
-The project is no longer in setup or cleanup.
-
-It is now focused on increasing real-world usefulness.
-
----
-
-## Immediate next task
-
-**Phase 1: Improve QA rules**
-
-- File: `app/dno_rules.py`
-- Goal: add 5–10 meaningful validation rules
-- Outcome: tool catches real survey problems
-
-See:
-- `02_CURRENT_TASK.md` for execution
-- `03_WORKING_RULES.md` for constraints
+The original goal was 5–10 meaningful rules. The tool now has 10 check types applied across 4 DNO rulepacks, catching real-world survey problems.
 
 ---
 
 ## Next session should
 
-1. Read:
-   - `02_CURRENT_TASK.md`
-   - `03_WORKING_RULES.md`
-
-2. Begin:
-   - improving QA rules in `app/dno_rules.py`
-
-3. Follow workflow:
-   - implement → test → commit → push
+1. Read `02_CURRENT_TASK.md` — assess whether Phase 1 success condition is met
+2. If met: update `02_CURRENT_TASK.md` to mark Phase 1 complete and define Phase 2
+3. If more rules needed: consider `dependent_range` (height/material cross-check)
+4. Do not start Phase 2 (input handling) until Phase 1 is explicitly closed
 
 ---
 
@@ -158,28 +85,4 @@ See:
 - Control layer remains the single source of truth
 - `_archive/` is never used for active decisions
 - Code and control files stay aligned
-
----
-
-## When to update this file
-
-Update this file when:
-
-- a meaningful piece of work is completed
-- project direction changes
-- a new phase begins
-
-Do NOT update for minor edits.
-
----
-
-## Handoff state
-
-The project is now:
-
-- clean
-- stable
-- correctly structured
-- ready for focused development
-
-**Next action:** begin Phase 1 (QA rule improvement)
+- `pytest -v` must be green after every change
