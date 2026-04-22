@@ -8,7 +8,9 @@ from app.controller_intake import (
     convert_grid_to_wgs84,
     detect_grid_crs,
     is_controller_csv,
+    is_raw_controller_dump,
     parse_controller_csv,
+    parse_raw_controller_dump,
 )
 
 # ---------------------------------------------------------------------------
@@ -232,3 +234,109 @@ def test_build_completeness_summary_empty_df_returns_no_data() -> None:
     summary = build_completeness_summary(pd.DataFrame())
     assert summary["total_records"] == 0
     assert summary["position_status"] == "no_data"
+
+
+def test_build_completeness_summary_includes_feature_codes_found() -> None:
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "structure_type": "Angle", "easting": 242186.0, "northing": 402362.0},
+            {"pole_id": "2", "structure_type": "Pol", "easting": 242200.0, "northing": 402380.0},
+            {"pole_id": "3", "structure_type": "Hedge", "easting": 242250.0, "northing": 402400.0},
+        ]
+    )
+    summary = build_completeness_summary(df)
+    assert "feature_codes_found" in summary
+    assert set(summary["feature_codes_found"]) == {"Angle", "Pol", "Hedge"}
+
+
+# ---------------------------------------------------------------------------
+# is_raw_controller_dump
+# ---------------------------------------------------------------------------
+
+
+def test_is_raw_controller_dump_detects_job_version_units_header() -> None:
+    assert is_raw_controller_dump("Job:28-14 513,Version:24.00,Units:Metres") is True
+
+
+def test_is_raw_controller_dump_returns_false_for_plain_csv_header() -> None:
+    assert is_raw_controller_dump("pole_id,easting,northing,height,material") is False
+
+
+def test_is_raw_controller_dump_returns_false_for_controller_column_header() -> None:
+    # Structured controller export with actual column names — not a raw dump
+    assert is_raw_controller_dump("Point,Code,Grid E,Grid N,Elev,Desc") is False
+
+
+# ---------------------------------------------------------------------------
+# parse_raw_controller_dump
+# ---------------------------------------------------------------------------
+
+_RAW_DUMP_CONTENT = """\
+Job:28-14 513,Version:24.00,Units:Metres
+PRS485572899536,219497.298,413575.610,118.985,
+1,242186.075,402362.807,99.505,Angle,Angle:STRING,1,Angle:TAG,5,Angle:REMARK,convert to tee
+2,242200.000,402380.000,100.000,Pol,Pol:STRING,2,Pol:TAG,6,Pol:HEIGHT,10.5
+3,242250.000,402400.000,101.000,Hedge
+4,242300.000,402420.000,101.500,EXpole,EXpole:REMARK,new term pole pos
+"""
+
+
+def test_parse_raw_controller_dump_extracts_correct_record_count(tmp_path) -> None:
+    f = tmp_path / "dump.csv"
+    f.write_text(_RAW_DUMP_CONTENT)
+    df = parse_raw_controller_dump(f)
+    # 4 survey points — metadata and PRS rows must be excluded
+    assert len(df) == 4
+
+
+def test_parse_raw_controller_dump_skips_prs_and_metadata_rows(tmp_path) -> None:
+    f = tmp_path / "dump.csv"
+    f.write_text(_RAW_DUMP_CONTENT)
+    df = parse_raw_controller_dump(f)
+    assert "PRS485572899536" not in df["pole_id"].values
+
+
+def test_parse_raw_controller_dump_maps_height_from_attribute_not_gps_elevation(
+    tmp_path,
+) -> None:
+    # Point 1 has no HEIGHT attribute (only STRING/TAG/REMARK) → height should be NaN
+    # Point 2 has HEIGHT attribute = 10.5 → height should be 10.5
+    # Point 3 has no attributes at all → height should be NaN
+    f = tmp_path / "dump.csv"
+    f.write_text(_RAW_DUMP_CONTENT)
+    df = parse_raw_controller_dump(f).set_index("pole_id")
+
+    assert pd.isna(df.loc["1", "height"])
+    assert df.loc["2", "height"] == pytest.approx(10.5)
+    assert pd.isna(df.loc["3", "height"])
+
+
+def test_parse_raw_controller_dump_maps_remark_to_location(tmp_path) -> None:
+    f = tmp_path / "dump.csv"
+    f.write_text(_RAW_DUMP_CONTENT)
+    df = parse_raw_controller_dump(f).set_index("pole_id")
+
+    assert df.loc["1", "location"] == "convert to tee"
+    assert df.loc["4", "location"] == "new term pole pos"
+    assert pd.isna(df.loc["3", "location"])
+
+
+def test_parse_raw_controller_dump_maps_feature_code_to_structure_type(tmp_path) -> None:
+    f = tmp_path / "dump.csv"
+    f.write_text(_RAW_DUMP_CONTENT)
+    df = parse_raw_controller_dump(f).set_index("pole_id")
+
+    assert df.loc["1", "structure_type"] == "Angle"
+    assert df.loc["3", "structure_type"] == "Hedge"
+    assert df.loc["4", "structure_type"] == "EXpole"
+
+
+def test_parse_raw_controller_dump_easting_northing_are_numeric(tmp_path) -> None:
+    f = tmp_path / "dump.csv"
+    f.write_text(_RAW_DUMP_CONTENT)
+    df = parse_raw_controller_dump(f)
+
+    assert df["easting"].dtype.kind == "f"
+    assert df["northing"].dtype.kind == "f"
+    assert df.loc[0, "easting"] == pytest.approx(242186.075)
+    assert df.loc[0, "northing"] == pytest.approx(402362.807)

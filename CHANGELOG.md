@@ -8,6 +8,59 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-22 (validation batch 2 — raw controller intake + completeness tightening)
+
+### Added
+
+- `is_raw_controller_dump(first_line)` in `app/controller_intake.py`. Detects GNSS
+  controller metadata-header format (`Job:X,Version:Y,Units:Z`) by inspecting the
+  first line before `pd.read_csv` is called. This format cannot be detected from
+  column names after a normal `read_csv` because the metadata row becomes the header.
+
+- `parse_raw_controller_dump(path)` in `app/controller_intake.py`. Parses raw GNSS
+  controller dump files using Python's `csv` module (chosen over `pd.read_csv` because
+  raw dumps have variable column counts per row that the pandas C parser cannot handle).
+  Maps: col 0 → pole_id, col 1 → easting, col 2 → northing, col 4 → structure_type.
+  Extracts inline `FeatureCode:HEIGHT` attribute → height and `FeatureCode:REMARK`
+  → location. GPS instrument elevation (col 3) is intentionally NOT mapped to height
+  since it records terrain elevation, not declared pole height — ensuring the
+  completeness summary correctly reports partial height coverage.
+
+- First-line format detection in `app/routes/api_intake.py`. The finalize route now
+  peeks at the first line of the uploaded file and routes to `parse_raw_controller_dump`
+  before falling through to the existing `pd.read_csv` + `is_controller_csv` path.
+
+- `feature_codes_found` field in `build_completeness_summary` output. Surfaces the
+  sorted list of unique structure/feature codes present in the parsed data. For
+  controller dumps these are the surveyor-assigned feature codes (Angle, Pol, Hedge,
+  EXpole) — the one piece of structural context digitally available. Only included
+  when at least one non-null code is present.
+
+- 8 new tests in `tests/test_controller_intake.py` covering: `is_raw_controller_dump`
+  detection, `parse_raw_controller_dump` record count, PRS/metadata row exclusion,
+  HEIGHT attribute vs GPS elevation mapping, REMARK → location mapping, feature code
+  → structure_type mapping, numeric column coercion, and `feature_codes_found` in
+  completeness summary.
+
+### Validated
+
+- Real-file output simulated via representative test fixture matching job 28-14 513
+  format. With the raw parser in place, `build_completeness_summary` would produce:
+  total_records=11, height coverage=2/11 (18.2%), location/remarks=2/11 (18.2%),
+  material=0/11 (0%), structure_type=11/11 (100%), grid_crs_detected=EPSG:29900,
+  feature_codes_found=[Angle, EXpole, Hedge, Pol]. This matches the VALIDATION_ANALYSIS
+  intent exactly.
+
+### State at end of session
+
+- 66 tests passing (up from 38).
+- Raw GNSS controller dump format now parseable end-to-end.
+- Completeness summary surfaces record count, position status, CRS, per-field coverage,
+  and feature codes found.
+- No changes to QA rules, map output, or PDF generation.
+
+---
+
 ## 2026-04-22 (strategic review)
 
 ### Added

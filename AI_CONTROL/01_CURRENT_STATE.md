@@ -134,7 +134,7 @@ Goal:
 
 - **DNO rulepacks live:** 4 (`SPEN_11kV`, `SSEN_11kV`, `NIE_11kV`, `ENWL_11kV`)
 - **QA check types:** 10
-- **Tests passing:** 38
+- **Tests passing:** 66
 
 ---
 
@@ -167,6 +167,20 @@ Goal:
   - abbreviated field names
   - OSGB alias names for easting/northing
 - Test coverage increased from 35 to 38 passing tests
+
+---
+
+### Validation batch 2 — raw controller intake + completeness tightening
+
+- Ran first real-job validation (job 28-14 513, NIE Networks, Strabane area)
+- Confirmed the tool could not parse the raw GNSS controller dump format (metadata-header CSV)
+- Added `is_raw_controller_dump()` and `parse_raw_controller_dump()` to `app/controller_intake.py`
+- Added first-line format detection in `app/routes/api_intake.py` finalize route
+- Raw parser correctly maps point numbers, grid coordinates, feature codes, HEIGHT attributes, and REMARK attributes
+- GPS instrument elevation (col 3) intentionally not mapped to height — only explicit HEIGHT inline attributes map there
+- Added `feature_codes_found` to `build_completeness_summary` output
+- Completeness summary now correctly surfaces: record count, position status, CRS, per-field coverage, and feature codes found
+- Test count increased from 38 to 66
 
 ---
 

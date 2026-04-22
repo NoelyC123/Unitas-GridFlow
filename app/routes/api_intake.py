@@ -12,7 +12,9 @@ from app.controller_intake import (
     build_completeness_summary,
     convert_grid_to_wgs84,
     is_controller_csv,
+    is_raw_controller_dump,
     parse_controller_csv,
+    parse_raw_controller_dump,
 )
 from app.dno_rules import DNO_RULES, RULEPACKS
 from app.qa_engine import run_qa_checks
@@ -393,12 +395,21 @@ def finalize(job_short: str):
         if not csv_path.exists():
             raise FileNotFoundError(f"Uploaded CSV not found: {csv_path}")
 
-        df = pd.read_csv(csv_path)
-
+        # Peek at the first line to detect raw controller dump format before
+        # calling pd.read_csv, which would treat the metadata row as column
+        # headers and make format detection impossible.
         file_type = "structured"
-        if is_controller_csv(df):
-            df = parse_controller_csv(df)
+        with csv_path.open(encoding="utf-8", errors="replace") as _fh:
+            first_line = _fh.readline()
+
+        if is_raw_controller_dump(first_line):
+            df = parse_raw_controller_dump(csv_path)
             file_type = "controller"
+        else:
+            df = pd.read_csv(csv_path)
+            if is_controller_csv(df):
+                df = parse_controller_csv(df)
+                file_type = "controller"
 
         df, auto_normalized = _normalize_dataframe(df)
         if file_type == "controller":

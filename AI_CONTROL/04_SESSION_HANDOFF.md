@@ -2,40 +2,50 @@
 
 ## Session summary
 
-This session completed the external AI strategic review process and distilled the conclusions back into the live project direction.
+This session completed validation batch 2: analysed the first real-job survey file
+(NIE job 28-14 513, Strabane area) through the current intake path, identified the
+raw controller dump format as the critical parsing gap, and shipped the fix.
 
 The key outcome is:
 
-**The project should continue, but the next phase must be validation-led rather than purely feature-led.**
+**The tool can now parse real GNSS controller dump files and produce a meaningful completeness summary for design-handoff purposes.**
 
 ---
 
 ## What was completed this session
 
-### External strategic review completed
+### Real-job validation analysis
 
-- A full external AI review pack was created and used to gather independent analysis from multiple AI systems
-- The responses were compared and synthesised into a final strategic conclusion
-- The raw review materials were kept outside the repo as external review artefacts
+- Analysed first real job (NIE Networks, job 28-14 513, Strabane area) through the current intake path
+- Confirmed the tool could not parse the raw GNSS controller dump format
+- The raw format has a metadata header row (`Job:X,Version:Y,Units:Z`) where `pd.read_csv` treats the metadata as column names, making all field detection fail
+- Completeness output before this fix: 0% coverage on all fields, `position_status: "no_position"` — completely useless
 
-### Strategic conclusion distilled into live project truth
+### Raw controller dump parser shipped
 
-- The project remains worth continuing
-- The narrow pre-CAD QA framing remains correct
-- The strongest realistic near-term framing is:
-  - internal tool
-  - consultancy leverage asset
-- The main unresolved issue is now:
-  - lack of real-world validation using real survey files and real users
+- `is_raw_controller_dump(first_line)` added — detects metadata-header format before `pd.read_csv` is called
+- `parse_raw_controller_dump(path)` added — uses Python's `csv` module (not `pd.read_csv`) because raw dumps have variable column counts per row that pandas C parser cannot handle
+- GPS elevation (col 3) deliberately NOT mapped to height — only explicit `FeatureCode:HEIGHT` inline attribute maps there
+- `FeatureCode:REMARK` attribute maps to `location`
+- Feature code (col 4) maps to `structure_type`
 
-### Project direction refined
+### Completeness summary tightened
 
-- The project is no longer primarily blocked by:
-  - setup
-  - repo structure
-  - baseline QA scaffolding
-- The project is now primarily blocked by:
-  - lack of proof that the current tool provides meaningful value on real survey files from real jobs
+- `feature_codes_found` added to `build_completeness_summary` output — surfaces unique feature/structure codes (Angle, Pol, Hedge, EXpole etc.)
+- After the fix, completeness summary for job 28-14 513 would report:
+  - total_records: 11
+  - grid_crs_detected: EPSG:29900 (TM65 — Irish Grid)
+  - height coverage: 2/11 (18.2%)
+  - location/remarks: 2/11 (18.2%)
+  - material: 0/11 (0%)
+  - structure_type: 11/11 (100%)
+  - feature_codes_found: [Angle, EXpole, Hedge, Pol]
+- This matches the VALIDATION_ANALYSIS intent exactly
+
+### Tests
+
+- 8 new tests added, 66 total (up from 38)
+- All tests green
 
 ---
 
@@ -46,21 +56,22 @@ The key outcome is:
 - Working local MVP exists
 - Phase 1 (QA rule improvements) is complete
 - Phase 2A (input/header normalisation) is complete
+- Validation batch 2 (raw controller intake + completeness tightening) is complete
 - pytest, Ruff, pre-commit, and CI remain active
-- The project is technically stable enough for real-world validation work
+- The tool can now parse real GNSS controller dump files
 
 ### Strategic state
 
 - The project should continue
 - The project should remain narrow
-- The project should not drift into broader platform work at this stage
-- The next meaningful progress must come from validation evidence, not just new features
+- Real-file intake gap is now resolved for the raw controller dump format
+- The next meaningful question is whether the completeness output is useful to real users
 
 ### Main unresolved question
 
 The central unresolved question is now:
 
-**Does the current tool provide meaningful value on a real survey file for a real user?**
+**Is the completeness summary output useful enough that a designer would actually trust and act on it?**
 
 ---
 
@@ -93,15 +104,13 @@ That means:
 ## Next session should
 
 1. Read `02_CURRENT_TASK.md`
-2. Read `06_STRATEGIC_REVIEW_2026-04-22.md`
-3. Focus on obtaining one or more real survey files if possible
-4. Run them through the current pipeline
-5. Record:
-   - what works
-   - what breaks
-   - what is noisy
-   - what is genuinely useful
-6. Use that evidence to define the next precise development step
+2. Obtain user feedback on whether the completeness summary output is useful in practice
+3. If more real files are available, run them through the parser and record:
+   - whether the parser handles them correctly
+   - whether the completeness output is the right level of detail
+   - what a designer would actually need to act on the report
+4. Use that evidence to define the next precise development step
+5. If no new evidence is available, the tool is at a stable state and does not need further speculative improvement
 
 ---
 

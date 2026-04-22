@@ -4,7 +4,7 @@
 
 The immediate task is:
 
-**Begin validation-led Phase 2 by testing the current tool against one or more real survey files from real jobs.**
+**Continue validation-led development by obtaining additional real survey files or user feedback on whether the current completeness output is useful in practice.**
 
 ---
 
@@ -14,13 +14,13 @@ Phase 1 (meaningful QA rule improvements) is complete.
 
 Phase 2A (column/header normalisation improvements) is also complete.
 
-The strongest remaining uncertainty is no longer whether the tool can be built.
+Validation batch 2 is also complete:
+- First real-job (NIE job 28-14 513) was analysed — tool could not parse the raw controller format
+- Raw GNSS controller dump parser added and shipped
+- Completeness summary tightened: now reports CRS, height/remarks coverage, feature codes found
 
-It is whether the current tool provides meaningful value on real-world survey data.
-
-That means the next task is not broad feature expansion.
-
-The next task is to validate the current MVP against real usage conditions.
+The tool can now process the real file format. The next uncertainty is whether the
+completeness summary output is genuinely useful when a designer sees it in practice.
 
 ---
 

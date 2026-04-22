@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import csv
+from pathlib import Path
+
 import pandas as pd
 from pyproj import Transformer
 
@@ -100,6 +103,116 @@ def is_controller_csv(df: pd.DataFrame) -> bool:
     return bool(normalised & _CONTROLLER_INDICATOR_COLS)
 
 
+def is_raw_controller_dump(first_line: str) -> bool:
+    """
+    Return True if first_line matches the GNSS controller metadata header format.
+    Detects: Job:<name>,Version:<n>,Units:<unit>
+    This format cannot be read by pd.read_csv() with default settings because
+    the metadata row is treated as the column header, breaking all field detection.
+    """
+    stripped = first_line.strip()
+    return stripped.startswith("Job:") and "Version:" in stripped and "Units:" in stripped
+
+
+def parse_raw_controller_dump(path: Path | str) -> pd.DataFrame:
+    """
+    Parse a raw GNSS controller CSV dump where row 0 is a metadata header
+    (Job:X,Version:Y,Units:Z) rather than column names.
+
+    Row layout (after skipping header and base station):
+      Col 0  → pole_id (survey point number)
+      Col 1  → easting
+      Col 2  → northing
+      Col 3  → GPS instrument elevation — NOT pole height; intentionally omitted
+      Col 4  → structure_type (feature code: Angle, Pol, Hedge, EXpole, ...)
+      Col 5+ → alternating inline attribute pairs: FeatureCode:ATTR_TYPE, value
+                Recognised ATTR_TYPEs: HEIGHT → height, REMARK → location
+
+    GPS elevation is intentionally not mapped to 'height' because it records
+    terrain/instrument elevation, not declared pole height. This ensures
+    build_completeness_summary correctly reports partial height coverage
+    (only rows with an explicit HEIGHT attribute have height data).
+
+    Uses Python's csv module rather than pd.read_csv because the raw dump
+    has variable column counts per row (metadata row has 3 fields; data rows
+    can have 20+), which the pandas C parser cannot handle without errors.
+    """
+    records: list[dict] = []
+
+    with open(path, encoding="utf-8", errors="replace", newline="") as fh:
+        reader = csv.reader(fh)
+        for raw_row in reader:
+            values = [v.strip() for v in raw_row if v.strip()]
+
+            if not values:
+                continue
+
+            first = values[0]
+
+            # Skip metadata header (Job:...) and base station rows (PRS...)
+            if first.startswith("Job:") or first.upper().startswith("PRS"):
+                continue
+
+            if len(values) < 3:
+                continue
+
+            point_num = first
+            try:
+                easting = float(values[1])
+                northing = float(values[2])
+            except ValueError:
+                continue
+
+            # Feature code at col 4 → structure_type
+            feature_code = values[4] if len(values) > 4 else None
+
+            # Parse inline attribute pairs from col 5 onwards
+            height: float | None = None
+            remark: str | None = None
+
+            idx = 5
+            while idx + 1 < len(values):
+                attr_key = values[idx]
+                attr_val = values[idx + 1]
+                idx += 2
+
+                if ":" not in attr_key:
+                    continue
+
+                attr_type = attr_key.split(":", 1)[1].upper()
+
+                if attr_type == "HEIGHT" and attr_val:
+                    try:
+                        height = float(attr_val)
+                    except ValueError:
+                        pass
+                elif attr_type == "REMARK" and attr_val:
+                    remark = attr_val or None
+
+            records.append(
+                {
+                    "pole_id": point_num,
+                    "easting": easting,
+                    "northing": northing,
+                    "height": height,
+                    "structure_type": feature_code,
+                    "location": remark,
+                }
+            )
+
+    if not records:
+        return pd.DataFrame(
+            columns=["pole_id", "easting", "northing", "height", "structure_type", "location"]
+        )
+
+    df = pd.DataFrame(records)
+    for col in ("easting", "northing", "height"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    return df
+
+
 def _resolve_controller_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Map raw controller column names to internal schema names in-place."""
     df = df.copy()
@@ -185,9 +298,21 @@ def build_completeness_summary(df: pd.DataFrame) -> dict:
     crs_col = df.get("_grid_crs", pd.Series(dtype=str)).dropna()
     grid_crs_detected = str(crs_col.iloc[0]) if len(crs_col) else None
 
-    return {
+    result: dict = {
         "total_records": total,
         "fields": fields,
         "position_status": position_status,
         "grid_crs_detected": grid_crs_detected,
     }
+
+    # Surface unique feature/structure codes present in the digital file.
+    # For controller dumps these are the surveyor-assigned feature codes (Angle, Pol, etc.)
+    # which are the one piece of structural context available digitally.
+    if "structure_type" in df.columns:
+        unique_codes = sorted(
+            str(v) for v in df["structure_type"].dropna().unique().tolist() if str(v).strip()
+        )
+        if unique_codes:
+            result["feature_codes_found"] = unique_codes
+
+    return result
