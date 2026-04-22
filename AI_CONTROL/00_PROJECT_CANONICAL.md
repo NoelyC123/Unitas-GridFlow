@@ -4,6 +4,27 @@
 
 **Unitas GridFlow** is a narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
 
+## Why this project exists
+
+This project comes from repeated real-world friction in the handoff between field survey and office design for UK electricity network work.
+
+The idea did not begin software-first. It came from direct exposure to how survey data is captured in the field, transferred to office teams, interpreted, and then converted into design and CAD outputs.
+
+The key insight was that the biggest inefficiency often sits in the survey-to-design handoff, not in the engineering design itself.
+
+Unitas GridFlow is intended to act as a structured gate between survey and design. Its purpose is to:
+- validate incoming survey data
+- check for missing or inconsistent information
+- apply practical workflow and DNO-style rules
+- flag issues early
+- produce cleaner, design-ready outputs before office time is wasted
+
+This is a fresh-start project from a delivery perspective. The original rationale and workflow understanding are carried forward, but older builds are not treated as the current product state.
+
+The project should remain focused on real-world usefulness:
+- use real survey data early
+- keep scope narrow and practical
+- treat QA rules and validation logic as first-class components
 **Identity:** a DNO survey compliance gatekeeper.
 
 **Core function:** takes survey CSV data, runs DNO-specific QA checks, displays results on a map, generates PDF reports.
