@@ -1,106 +1,110 @@
 # Current Task
 
-## Phase 1 — COMPLETE
+## Immediate task
 
-**QA rule improvements** are done.
+The immediate task is:
 
-### What was delivered
-- 10 QA check types in `app/qa_engine.py`
-- 4 DNO rulepacks in `app/dno_rules.py` (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV)
-- 35 tests passing
-- Rules catch real survey problems: missing fields, out-of-range values, coordinate
-  inconsistencies, duplicate entries, impossible span lengths, material/type mismatches
-
-### Success condition met
-The tool now flags issues a surveyor or CAD engineer would recognise as real problems.
-
----
-
-## Current task — Phase 2: Input schema breadth
-
-**Make the tool accept real-world survey CSV data**
-
-Primary file:
-- `app/routes/api_intake.py`
+**Begin validation-led Phase 2 by testing the current tool against one or more real survey files from real jobs.**
 
 ---
 
 ## Why this is the current task
 
-Phase 1 produced a capable QA engine — but it only works on one specific CSV column
-schema. Real survey exports from different instruments and teams arrive with different
-column names, capitalisations, and layouts.
+Phase 1 (meaningful QA rule improvements) is complete.
 
-Until this is solved, the tool cannot be used on actual survey data without manual
-preprocessing. That is the main blocker to real-world usefulness.
+Phase 2A (column/header normalisation improvements) is also complete.
 
----
+The strongest remaining uncertainty is no longer whether the tool can be built.
 
-## What Phase 2 means
+It is whether the current tool provides meaningful value on real-world survey data.
 
-This task IS:
+That means the next task is not broad feature expansion.
 
-- Normalising incoming column names to the internal schema
-  (e.g. `Latitude` → `lat`, `Height (m)` → `height`, `Asset ID` → `pole_id`)
-- Handling missing optional columns gracefully
-- Supporting a wider range of real survey export formats
-- Keeping the QA engine untouched — it receives normalised data, nothing changes there
-
-This task is NOT:
-
-- Redesigning the QA engine
-- Adding new QA rules (Phase 1 is closed)
-- Building a general ETL pipeline
-- Supporting every possible format — focus on common real-world patterns
+The next task is to validate the current MVP against real usage conditions.
 
 ---
 
-## Expected outcome
+## What this task means
 
-After Phase 2:
+This task means:
 
-A user should be able to upload a survey CSV from a common field instrument or
-spreadsheet export and get meaningful QA results without reformatting the file first.
-
----
-
-## Execution approach
-
-1. Collect 2–3 realistic column name variants for each core field
-2. Add a normalisation mapping in `app/routes/api_intake.py`
-3. Test with sample CSVs that use non-standard column names
-4. Run `pytest -v` — existing tests must stay green
-5. Commit, push
+- obtain one or more real survey files (ideally anonymised if necessary)
+- run them through the current intake and QA pipeline
+- log what works
+- log what breaks
+- identify what the tool catches that users care about
+- identify what the tool misses that users care about
+- use that evidence to refine the next development phase
 
 ---
 
-## Constraints
+## What success looks like
+
+This task is successful when we can answer questions like:
+
+- Did the tool work on a real file without manual reconstruction?
+- Which rules produced meaningful value?
+- Which rules produced noise or false positives?
+- What real issues were missed?
+- What would an actual user most want fixed next?
+
+---
+
+## What not to do during this task
 
 Do NOT:
-- modify `app/qa_engine.py` (Phase 1 is closed)
-- modify `app/dno_rules.py` (Phase 1 is closed)
-- attempt to support every possible schema variant
-- introduce new dependencies unless essential
+
+- broaden the product into a larger platform
+- add major new features without validation evidence
+- add more superficial rulepacks just for coverage
+- focus on commercial packaging before proof-of-value exists
+
+---
+
+## Approved focus areas
+
+The likely files involved next are:
+
+- `app/routes/api_intake.py`
+- `app/qa_engine.py`
+- `app/dno_rules.py`
+- `tests/test_api_intake.py`
+- `tests/test_qa_engine.py`
+
+along with any safe, anonymised sample data used for validation.
+
+---
+
+## Strategic note
+
+The external AI review completed on 2026-04-22 concluded:
+
+- continue the project
+- keep the scope narrow
+- treat the project primarily as an internal tool / consultancy asset for now
+- shift the next phase toward validation-led development
 
 ---
 
 ## What comes next (do not start yet)
 
-### Phase 3
-Browser automation testing (Playwright) — full upload → QA → map → PDF flow.
+Possible next work after validation findings are known may include:
 
-### Later
-- NGED and UKPN rulepacks
-- Issue severity levels (critical / warning / info)
-- Output quality improvements (PDF, map, issues.csv)
+- refining intake handling based on real file structures
+- refining QA rules based on real false positives / false negatives
+- improving output usefulness based on real user feedback
+- adding more genuinely differentiated rule depth only where evidence supports it
+
+This should be decided from validation findings, not assumed in advance.
 
 ---
 
 ## When to update this file
 
 Update when:
-- Phase 2 is complete
-- a blocker changes the plan
-- priority shifts
+
+- one or more real survey files have been tested
+- the most important validation findings are known
+- the next development phase becomes clearer from real evidence
 
 Otherwise leave unchanged.

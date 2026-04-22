@@ -22,6 +22,7 @@ Read additional files only if needed:
 
 - `AI_CONTROL/01_CURRENT_STATE.md` → only if current reality is needed
 - `AI_CONTROL/04_SESSION_HANDOFF.md` → only if continuing prior work
+- `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` → only if strategic direction is relevant to the current step
 - specific code/test files → only if they are part of the approved task
 
 Never read unless explicitly asked:
@@ -36,6 +37,7 @@ Never read unless explicitly asked:
 Unitas GridFlow is a narrow pre-CAD QA and compliance tool for survey-to-design handoffs.
 
 Purpose:
+
 - validate survey data before design/CAD
 - catch real-world data issues early
 - act as a structured QA gate between survey and design
@@ -51,6 +53,12 @@ Follow:
 - `AI_CONTROL/02_CURRENT_TASK.md` for what to do
 - `AI_CONTROL/01_CURRENT_STATE.md` only if needed for current truth
 
+Important strategic update:
+
+- The project should continue
+- The next phase must be validation-led
+- Do not assume more features are the right next step without real survey-file evidence
+
 Do not invent tasks or broaden scope.
 
 ---
@@ -60,12 +68,14 @@ Do not invent tasks or broaden scope.
 When given an approved task, proceed end-to-end within scope.
 
 You may:
+
 - read only necessary files
 - edit only necessary in-scope files
 - run tests
 - update clearly necessary docs/control files
 
 You must:
+
 - keep scope narrow
 - avoid unrelated refactors
 - avoid architecture changes unless explicitly part of the task
@@ -120,18 +130,21 @@ Keep the report concise.
 - Never assume file contents
 - Always test before commit
 - Always commit completed approved work
+- Never replace real-world validation with abstract feature work
 
 ---
 
 ## Efficiency behaviour
 
 Prefer:
+
 - fewer reads
 - fewer messages
 - end-to-end execution
 - one final report
 
 Avoid:
+
 - repeated confirmations
 - unnecessary explanations
 - re-reading control files in the same task

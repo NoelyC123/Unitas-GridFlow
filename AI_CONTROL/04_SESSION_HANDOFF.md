@@ -2,94 +2,117 @@
 
 ## Session summary
 
-This session began **Phase 1: QA rule improvements**.
+This session completed the external AI strategic review process and distilled the conclusions back into the live project direction.
 
-One rulepack was added cleanly with no architecture changes.
+The key outcome is:
 
----
-
-## What was completed
-
-### ENWL_11kV rulepack added
-- `ENWL_11KV_RULES` added to `app/dno_rules.py` following the exact SPEN/SSEN/NIE pattern
-- Covers Electricity North West: Lancashire, Cumbria, Cheshire, Greater Manchester
-- Coord bounds: lat 53.3–55.0, lon -3.5 to -1.8
-
-### unique_pair check added
-- New `elif check == “unique_pair”` branch in `app/qa_engine.py`
-- Flags rows where two or more poles share the same lat/lon combination
-- Skips rows with missing coordinate values
-- Added to all 4 DNO rulepacks
-
-### span_distance check added
-- New `elif check == “span_distance”` branch in `app/qa_engine.py`
-- Converts consecutive pole lat/lon to OSGB27700, measures distance between adjacent rows
-- Flags spans < 10m (likely duplicate entry) or > 500m (likely GPS error or missing pole)
-- Resets state on missing coordinates rather than producing false positives
-- Added to all 4 DNO rulepacks
-
-### Tests
-- 4 new tests added to `tests/test_qa_engine.py`
-- Integration test fixture count corrected in `tests/test_app_routes.py` (9→11)
-- 35 tests total, all passing
+**The project should continue, but the next phase must be validation-led rather than purely feature-led.**
 
 ---
 
-## Current project state
+## What was completed this session
 
-### Counts
+### External strategic review completed
 
-- DNO rulepacks live: 4 (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV)
-- QA check types: 10
-- Tests passing: 35
+- A full external AI review pack was created and used to gather independent analysis from multiple AI systems
+- The responses were compared and synthesised into a final strategic conclusion
+- The raw review materials were kept outside the repo as external review artefacts
 
-### What works
+### Strategic conclusion distilled into live project truth
 
-- Full MVP flow: upload → QA → outputs → map → PDF → jobs
-- All key routes operational
-- Local environment stable
-- CI active and green
+- The project remains worth continuing
+- The narrow pre-CAD QA framing remains correct
+- The strongest realistic near-term framing is:
+  - internal tool
+  - consultancy leverage asset
+- The main unresolved issue is now:
+  - lack of real-world validation using real survey files and real users
 
-### What is weak
+### Project direction refined
 
-1. **QA rules — Phase 1 substantially complete, minor depth remaining**
-   - 10 check types, 4 DNO rulepacks
-   - Could still add height/material cross-validation (`dependent_range`) if needed
+- The project is no longer primarily blocked by:
+  - setup
+  - repo structure
+  - baseline QA scaffolding
+- The project is now primarily blocked by:
+  - lack of proof that the current tool provides meaningful value on real survey files from real jobs
 
-2. **Input handling is narrow** — one schema, Phase 2
+---
 
-3. **No browser automation** — Phase 3
+## What is now true
+
+### Project state
+
+- Working local MVP exists
+- Phase 1 (QA rule improvements) is complete
+- Phase 2A (input/header normalisation) is complete
+- pytest, Ruff, pre-commit, and CI remain active
+- The project is technically stable enough for real-world validation work
+
+### Strategic state
+
+- The project should continue
+- The project should remain narrow
+- The project should not drift into broader platform work at this stage
+- The next meaningful progress must come from validation evidence, not just new features
+
+### Main unresolved question
+
+The central unresolved question is now:
+
+**Does the current tool provide meaningful value on a real survey file for a real user?**
 
 ---
 
 ## Current phase
 
-**Phase 2A complete: input column normalisation delivered**
-
-Phase 2 is in progress. The input normalisation layer now handles the most common
-real-world survey CSV header variants.
+**Working MVP + Phase 1 complete + Phase 2A complete + next: validation-led proof-of-value work**
 
 ---
 
-## What was done (Phase 2A)
+## What changed in project understanding
 
-- `_normalize_dataframe` in `app/routes/api_intake.py` updated:
-  - Added column name normalisation step (strip, lowercase, spaces→underscores)
-  - Extended alias lists for all 9 core fields
-  - `structure_type`, `easting`, `northing` now have explicit alias coverage
-- 3 new tests in `tests/test_api_intake.py` (capitalised headers, abbreviations, OSGB aliases)
-- 38 tests passing
+Previously, the project direction was still largely feature-led:
+
+- improve QA rules
+- broaden schema handling
+- continue roadmap execution
+
+The strategic review changed that emphasis.
+
+The project is now understood as being in a **proof-risk** phase rather than a **concept-risk** phase.
+
+That means:
+
+- the concept is strong enough
+- the MVP is credible enough
+- the main uncertainty is now whether it proves useful in real-world use
 
 ---
 
 ## Next session should
 
-1. Read `02_CURRENT_TASK.md` to confirm Phase 2 scope and decide whether Phase 2A
-   is sufficient or further input handling work is needed
-2. Candidate next steps (do not start without reviewing 02_CURRENT_TASK.md):
-   - Test against real survey CSV samples to find remaining gaps
-   - Add NGED or UKPN rulepacks (follows established pattern)
-   - Begin issue severity work
+1. Read `02_CURRENT_TASK.md`
+2. Read `06_STRATEGIC_REVIEW_2026-04-22.md`
+3. Focus on obtaining one or more real survey files if possible
+4. Run them through the current pipeline
+5. Record:
+   - what works
+   - what breaks
+   - what is noisy
+   - what is genuinely useful
+6. Use that evidence to define the next precise development step
+
+---
+
+## What should not happen next
+
+Do NOT:
+
+- broaden the product into a larger platform
+- add more superficial rulepacks just for coverage
+- focus on commercial packaging before proof-of-value exists
+- treat more feature work as the default next step without validation evidence
 
 ---
 
@@ -99,4 +122,5 @@ real-world survey CSV header variants.
 - Control layer remains the single source of truth
 - `_archive/` is never used for active decisions
 - Code and control files stay aligned
-- `pytest -v` must be green after every change
+- `pytest -v` must be green after every code change
+- Real-world validation evidence now takes priority over abstract expansion
