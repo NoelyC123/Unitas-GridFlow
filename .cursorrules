@@ -1,38 +1,77 @@
 # Unitas-GridFlow — Cursor Rules
 
 ## First action — read this before anything else
-Read: `AI_CONTROL/00_MASTER_SOURCE_OF_TRUTH.md`
-That file is the single source of truth for the entire project. It holds current test count, check-type count, rulepacks, and current priority.
+
+Read these files in this order:
+
+1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
+
+2. `AI_CONTROL/01_CURRENT_STATE.md`
+
+3. `AI_CONTROL/02_CURRENT_TASK.md`
+
+4. `AI_CONTROL/03_WORKING_RULES.md`
+
+5. `AI_CONTROL/04_SESSION_HANDOFF.md`
+
+6. `AI_CONTROL/05_PROJECT_REFERENCE.md`
+
+These files are the active control layer for the project.
 
 ## Then also read
-- `AI_CONTROL/03_CURRENT_TASK.md` — what to do this session
-- `AI_CONTROL/04_SESSION_HANDOFF.md` — what changed last session
+
 - `CHANGELOG.md` — rolling history of what shipped
 
+- `README.md` — project overview and setup
+
+- `_archive/docs/PROJECT_SYNTHESIS/` only if historical strategic context is needed
+
+- `_archive/control_layer/old_ai_control/` only if old control-layer history is needed
+
 ## Project identity
+
 Unitas GridFlow — narrow pre-CAD QA and compliance tool for UK electricity
-network survey-to-design handoffs. A DNO survey compliance gatekeeper.
+
+network survey-to-design handoffs.
 
 Location: `/Users/noelcollins/Unitas-GridFlow/`
+
 GitHub: `https://github.com/NoelyC123/Unitas-GridFlow`
-Port: 5001 | Venv: `.venv312` | Python: 3.13
+
+Port: 5001
+
+Venv: `.venv312`
+
+Python: 3.13
 
 ## Tech stack
+
 Flask, pandas, geopandas, reportlab, pyproj, Leaflet, Bootstrap 5
 
-## Hard rules (full list in master truth §7)
-- Never broaden scope beyond narrow MVP.
-- Always read a file before editing it — never assume contents.
-- After any change: `pytest -v` (all tests must pass).
-- After tests pass: `git add / commit / push`.
-- Commit messages must be clear and descriptive.
-- Never add features not tied to the current task.
-- Never restore from `_quarantine/` blindly.
-- Never treat autocomplete suggestions as authoritative for DNO-specific values.
+## Key live files
 
-## Key files
-- `app/dno_rules.py`         — QA rulepacks (current priority: add more DNOs)
-- `app/qa_engine.py`         — QA engine (check types in master truth §4)
+- `app/dno_rules.py` — QA rulepacks
+
+- `app/qa_engine.py` — QA engine
+
 - `app/routes/api_intake.py` — main CSV processing pipeline
-- `app/routes/api_rulepacks.py` — rulepack API (stub — needs wiring)
-- `tests/`                   — pytest suite, must stay green
+
+- `app/routes/api_rulepacks.py` — rulepack API
+
+- `tests/` — pytest suite, must stay green
+
+## Hard rules
+
+- Never broaden scope beyond the current task.
+
+- Always read a file before editing it.
+
+- After any code change: `pytest -v`.
+
+- Keep the active control layer and live code aligned.
+
+- Do not treat archived files as active instructions.
+
+- Never restore from `_archive/quarantine/old_quarantine/` blindly.
+
+- Never treat autocomplete or AI suggestions as authoritative for DNO-specific values.
