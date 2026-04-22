@@ -148,6 +148,91 @@ def test_build_feature_collection_counts_pass_and_fail_correctly() -> None:
     assert feature_collection["metadata"]["issue_count"] == 1
 
 
+def test_normalize_dataframe_handles_capitalised_headers() -> None:
+    # "Latitude", "Structure Type", "Asset ID" etc. — common in Excel exports
+    df = pd.DataFrame(
+        [
+            {
+                "Asset ID": "P-2001",
+                "Structure Type": "Wood Pole",
+                "Height M": 10.0,
+                "Material": "Wood",
+                "Location Name": "Test Site",
+                "Easting": 352841,
+                "Northing": 503122,
+                "Latitude": 54.521,
+                "Longitude": -3.014,
+            }
+        ]
+    )
+
+    normalized_df, auto_normalized = _normalize_dataframe(df)
+
+    assert auto_normalized is True
+    assert normalized_df.loc[0, "pole_id"] == "P-2001"
+    assert normalized_df.loc[0, "structure_type"] == "Wood Pole"
+    assert normalized_df.loc[0, "height"] == 10.0
+    assert normalized_df.loc[0, "material"] == "Wood"
+    assert normalized_df.loc[0, "location"] == "Test Site"
+    assert normalized_df.loc[0, "lat"] == 54.521
+    assert normalized_df.loc[0, "lon"] == -3.014
+    assert normalized_df.loc[0, "easting"] == 352841
+    assert normalized_df.loc[0, "northing"] == 503122
+
+
+def test_normalize_dataframe_handles_common_aliases() -> None:
+    # "long" for longitude, "mat" for material, "ht_m" for height, "pole_type"
+    df = pd.DataFrame(
+        [
+            {
+                "pole_ref": "P-3001",
+                "pole_type": "Steel Pole",
+                "ht_m": 12.0,
+                "mat": "Steel",
+                "site": "Moorside",
+                "lat": 54.529,
+                "long": -3.010,
+                "easting": 352975,
+                "northing": 503200,
+            }
+        ]
+    )
+
+    normalized_df, auto_normalized = _normalize_dataframe(df)
+
+    assert auto_normalized is True
+    assert normalized_df.loc[0, "pole_id"] == "P-3001"
+    assert normalized_df.loc[0, "structure_type"] == "Steel Pole"
+    assert normalized_df.loc[0, "height"] == 12.0
+    assert normalized_df.loc[0, "material"] == "Steel"
+    assert normalized_df.loc[0, "location"] == "Moorside"
+    assert normalized_df.loc[0, "lon"] == -3.010
+
+
+def test_normalize_dataframe_handles_osgb_aliases() -> None:
+    # "os_easting" / "grid_n" — OS-prefixed and grid-prefixed OSGB variants
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-4001",
+                "structure_type": "Wood Pole",
+                "height": 9.0,
+                "material": "Wood",
+                "location": "Grid Test",
+                "lat": 54.521,
+                "lon": -3.014,
+                "os_easting": 352841,
+                "grid_n": 503122,
+            }
+        ]
+    )
+
+    normalized_df, auto_normalized = _normalize_dataframe(df)
+
+    assert normalized_df.loc[0, "easting"] == 352841
+    assert normalized_df.loc[0, "northing"] == 503122
+
+
 def test_feature_collection_is_json_serializable_without_nan() -> None:
     df = pd.DataFrame(
         [

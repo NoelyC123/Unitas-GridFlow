@@ -1,165 +1,106 @@
 # Current Task
 
-## Immediate task
+## Phase 1 — COMPLETE
 
-**Improve QA rules so the tool becomes genuinely useful**
+**QA rule improvements** are done.
+
+### What was delivered
+- 10 QA check types in `app/qa_engine.py`
+- 4 DNO rulepacks in `app/dno_rules.py` (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV)
+- 35 tests passing
+- Rules catch real survey problems: missing fields, out-of-range values, coordinate
+  inconsistencies, duplicate entries, impossible span lengths, material/type mismatches
+
+### Success condition met
+The tool now flags issues a surveyor or CAD engineer would recognise as real problems.
+
+---
+
+## Current task — Phase 2: Input schema breadth
+
+**Make the tool accept real-world survey CSV data**
 
 Primary file:
-- `app/dno_rules.py`
+- `app/routes/api_intake.py`
 
 ---
 
 ## Why this is the current task
 
-The project has completed:
+Phase 1 produced a capable QA engine — but it only works on one specific CSV column
+schema. Real survey exports from different instruments and teams arrive with different
+column names, capitalisations, and layouts.
 
-- working MVP
-- repository cleanup
-- control layer redesign
-- testing and CI setup
-
-The remaining limitation is now:
-
-**lack of meaningful validation**
-
-The tool runs correctly, but it does not yet provide real value.
-
-That is because:
-- QA rules are placeholder-level
-- real-world problems are not being caught
+Until this is solved, the tool cannot be used on actual survey data without manual
+preprocessing. That is the main blocker to real-world usefulness.
 
 ---
 
-## Task definition
-
-This task is NOT:
-
-- adding large numbers of rules
-- redesigning the QA engine
-- expanding scope
+## What Phase 2 means
 
 This task IS:
 
-**Adding a small number of high-value, realistic validation rules**
+- Normalising incoming column names to the internal schema
+  (e.g. `Latitude` → `lat`, `Height (m)` → `height`, `Asset ID` → `pole_id`)
+- Handling missing optional columns gracefully
+- Supporting a wider range of real survey export formats
+- Keeping the QA engine untouched — it receives normalised data, nothing changes there
 
----
+This task is NOT:
 
-## What “good QA rules” means
-
-Rules should:
-
-- reflect real survey/design issues
-- catch common mistakes early
-- be simple, clear, and testable
-- produce meaningful error messages
-
----
-
-## Examples of valid rule types
-
-- physically impossible values (e.g. unrealistic heights)
-- missing required fields
-- invalid coordinate ranges
-- coordinate inconsistencies (lat/lon vs easting/northing)
-- invalid asset/type combinations
-- structurally inconsistent data
+- Redesigning the QA engine
+- Adding new QA rules (Phase 1 is closed)
+- Building a general ETL pipeline
+- Supporting every possible format — focus on common real-world patterns
 
 ---
 
 ## Expected outcome
 
-After this task:
+After Phase 2:
 
-**The tool should clearly catch real problems in survey data**
-
-A user should be able to say:
-
-> “This actually flags issues I care about”
+A user should be able to upload a survey CSV from a common field instrument or
+spreadsheet export and get meaningful QA results without reformatting the file first.
 
 ---
 
 ## Execution approach
 
-1. Read the current implementation:
-   - `app/dno_rules.py`
-   - `app/qa_engine.py` (if needed)
-
-2. Add 1–2 meaningful rules at a time
-
-3. For each rule:
-   - keep logic simple
-   - ensure clear error messages
-   - ensure deterministic behaviour
-
-4. Test locally:
-   ```bash
-   python run.py
-   ```
-
-5. Validate via UI:
-   - upload CSV
-   - confirm issues are correctly flagged
-
-6. Run full checks:
-   ```bash
-   pytest -v
-   pre-commit run --all-files
-   ```
-
-7. Commit:
-   ```bash
-   git add .
-   git commit -m "Add meaningful QA rule(s)"
-   git push
-   ```
+1. Collect 2–3 realistic column name variants for each core field
+2. Add a normalisation mapping in `app/routes/api_intake.py`
+3. Test with sample CSVs that use non-standard column names
+4. Run `pytest -v` — existing tests must stay green
+5. Commit, push
 
 ---
 
-## Constraints (important)
+## Constraints
 
 Do NOT:
-
-- broaden scope beyond QA rules
-- redesign architecture
-- introduce new features
-- attempt to cover every edge case
-- modify schema handling (that is Phase 2)
-- add UI or browser tests (that is Phase 3)
-
----
-
-## Success condition
-
-This task is complete when:
-
-- 5–10 meaningful validation rules exist
-- rules reflect real-world survey problems
-- outputs are clearly useful
-
-NOT when:
-- rule count is high
-- complexity increases unnecessarily
+- modify `app/qa_engine.py` (Phase 1 is closed)
+- modify `app/dno_rules.py` (Phase 1 is closed)
+- attempt to support every possible schema variant
+- introduce new dependencies unless essential
 
 ---
 
 ## What comes next (do not start yet)
 
-### Phase 2
-Broader input handling
-(`app/routes/api_intake.py`)
-
 ### Phase 3
-Browser automation testing
-(Playwright)
+Browser automation testing (Playwright) — full upload → QA → map → PDF flow.
+
+### Later
+- NGED and UKPN rulepacks
+- Issue severity levels (critical / warning / info)
+- Output quality improvements (PDF, map, issues.csv)
 
 ---
 
 ## When to update this file
 
-Update only when:
-
-- Phase 1 is complete
-- priority changes
+Update when:
+- Phase 2 is complete
 - a blocker changes the plan
+- priority shifts
 
-Otherwise, leave this file unchanged.
+Otherwise leave unchanged.

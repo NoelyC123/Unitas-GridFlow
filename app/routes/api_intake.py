@@ -114,40 +114,90 @@ def _copy_if_missing(df: pd.DataFrame, target: str, candidates: list[str]) -> bo
 
 
 def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
-    """
-    Normalize a representative survey CSV schema into the internal fields used
-    by the current MVP QA engine.
-
-    Canonical external schema:
-    - asset_id
-    - structure_type
-    - height_m
-    - material
-    - location_name
-    - easting
-    - northing
-    - latitude
-    - longitude
-
-    Internal QA target fields:
-    - pole_id
-    - height
-    - material
-    - location
-    - lat
-    - lon
-    """
     df = df.copy()
     normalized = False
 
-    normalized |= _copy_if_missing(df, "pole_id", ["asset_id", "pole_id"])
+    # Normalise column names first: strip whitespace, lowercase, spaces→underscores.
+    # This handles capitalised exports ("Latitude", "Structure Type", "Asset ID")
+    # before the alias mapping runs.
+    original_cols = list(df.columns)
+    df.columns = [col.strip().lower().replace(" ", "_") for col in df.columns]
+    if list(df.columns) != original_cols:
+        normalized = True
+
     normalized |= _copy_if_missing(
-        df, "height", ["height_m", "height", "pole_height_m", "pole_height"]
+        df,
+        "pole_id",
+        [
+            "asset_id",
+            "pole_id",
+            "id",
+            "pole_ref",
+            "asset_ref",
+        ],
     )
-    normalized |= _copy_if_missing(df, "material", ["material", "pole_material"])
-    normalized |= _copy_if_missing(df, "location", ["location_name", "location"])
+    normalized |= _copy_if_missing(
+        df,
+        "height",
+        [
+            "height_m",
+            "height",
+            "pole_height_m",
+            "pole_height",
+            "ht_m",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "structure_type",
+        [
+            "structure_type",
+            "pole_type",
+            "type",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "material",
+        [
+            "material",
+            "pole_material",
+            "mat",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "location",
+        [
+            "location_name",
+            "location",
+            "site",
+            "site_name",
+            "description",
+        ],
+    )
     normalized |= _copy_if_missing(df, "lat", ["latitude", "lat"])
-    normalized |= _copy_if_missing(df, "lon", ["longitude", "lon"])
+    normalized |= _copy_if_missing(df, "lon", ["longitude", "lon", "long"])
+    normalized |= _copy_if_missing(
+        df,
+        "easting",
+        [
+            "easting",
+            "os_easting",
+            "grid_easting",
+            "grid_e",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "northing",
+        [
+            "northing",
+            "os_northing",
+            "grid_northing",
+            "grid_n",
+        ],
+    )
 
     _coerce_numeric_column(df, "height")
     _coerce_numeric_column(df, "lat")

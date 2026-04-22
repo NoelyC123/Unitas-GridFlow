@@ -7,6 +7,46 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-22 (Phase 2A)
+
+### Added
+- Column name normalisation in `app/routes/api_intake.py`. Headers are now stripped,
+  lowercased, and have spaces replaced with underscores before alias mapping runs.
+  This handles capitalised exports (`Latitude`, `Structure Type`, `Asset ID`, etc.)
+  automatically without any manual reformatting.
+- Extended alias lists in `_normalize_dataframe`:
+  - `pole_id`: adds `id`, `pole_ref`, `asset_ref`
+  - `height`: adds `ht_m`
+  - `structure_type`: new — covers `pole_type`, `type`
+  - `material`: adds `mat`
+  - `location`: adds `site`, `site_name`, `description`
+  - `lon`: adds `long`
+  - `easting`: new — covers `os_easting`, `grid_easting`, `grid_e`
+  - `northing`: new — covers `os_northing`, `grid_northing`, `grid_n`
+- Three new tests in `tests/test_api_intake.py`: capitalised headers, common
+  abbreviations, OSGB aliases.
+
+### State at end of session
+- 38 tests passing.
+- Column normalisation handles the most common real-world survey CSV variants.
+- No changes to QA engine or rulepacks (Phase 1 closed).
+
+---
+
+## 2026-04-22 (Phase 1 closed)
+
+### Changed
+- `AI_CONTROL/02_CURRENT_TASK.md` rewritten: Phase 1 formally closed, Phase 2
+  (input schema breadth) defined as the current task.
+- `AI_CONTROL/04_SESSION_HANDOFF.md` updated to reflect Phase 1 closure and Phase 2
+  entry point.
+
+### State
+- Phase 1 complete: 10 QA check types, 4 DNO rulepacks, 35 tests passing.
+- Phase 2 next: normalise incoming CSV column names in `app/routes/api_intake.py`.
+
+---
+
 ## 2026-04-22 (continued)
 
 ### Added

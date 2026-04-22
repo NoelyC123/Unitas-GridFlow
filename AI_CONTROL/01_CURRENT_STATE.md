@@ -126,18 +126,18 @@ Goal:
 
 - **DNO rulepacks live:** 4 (SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV)
 - **QA check types:** 10
-- **Tests passing:** 35
+- **Tests passing:** 38
 
 ---
 
 ## What changed recently
 
-### Phase 1 progress — QA rule improvements
+### Phase 2A — Input schema normalisation
 
-- `ENWL_11kV` rulepack added to `app/dno_rules.py`
-- `unique_pair` check added to `app/qa_engine.py` and all 4 DNO rulepacks — flags two poles sharing the same lat/lon
-- `span_distance` check added to `app/qa_engine.py` and all 4 DNO rulepacks — flags spans < 10m (likely duplicate) or > 500m (likely GPS error)
-- 4 new tests added; 35 total passing
+- Column name normalisation added to `_normalize_dataframe` in `app/routes/api_intake.py`
+- Headers are stripped, lowercased, and spaces replaced with underscores before alias mapping
+- Alias lists extended for all core fields; `structure_type`, `easting`, `northing` now normalised
+- 3 new tests; 38 total passing
 
 ---
 

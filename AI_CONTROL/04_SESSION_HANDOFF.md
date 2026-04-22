@@ -64,18 +64,32 @@ One rulepack was added cleanly with no architecture changes.
 
 ## Current phase
 
-**Phase 1: QA rule improvements — substantially complete**
+**Phase 2A complete: input column normalisation delivered**
 
-The original goal was 5–10 meaningful rules. The tool now has 10 check types applied across 4 DNO rulepacks, catching real-world survey problems.
+Phase 2 is in progress. The input normalisation layer now handles the most common
+real-world survey CSV header variants.
+
+---
+
+## What was done (Phase 2A)
+
+- `_normalize_dataframe` in `app/routes/api_intake.py` updated:
+  - Added column name normalisation step (strip, lowercase, spaces→underscores)
+  - Extended alias lists for all 9 core fields
+  - `structure_type`, `easting`, `northing` now have explicit alias coverage
+- 3 new tests in `tests/test_api_intake.py` (capitalised headers, abbreviations, OSGB aliases)
+- 38 tests passing
 
 ---
 
 ## Next session should
 
-1. Read `02_CURRENT_TASK.md` — assess whether Phase 1 success condition is met
-2. If met: update `02_CURRENT_TASK.md` to mark Phase 1 complete and define Phase 2
-3. If more rules needed: consider `dependent_range` (height/material cross-check)
-4. Do not start Phase 2 (input handling) until Phase 1 is explicitly closed
+1. Read `02_CURRENT_TASK.md` to confirm Phase 2 scope and decide whether Phase 2A
+   is sufficient or further input handling work is needed
+2. Candidate next steps (do not start without reviewing 02_CURRENT_TASK.md):
+   - Test against real survey CSV samples to find remaining gaps
+   - Add NGED or UKPN rulepacks (follows established pattern)
+   - Begin issue severity work
 
 ---
 
