@@ -18,6 +18,8 @@ Validation batch 2 is also complete:
 - First real-job (NIE job 28-14 513) was analysed — tool could not parse the raw controller format
 - Raw GNSS controller dump parser added and shipped
 - Completeness summary tightened: now reports CRS, height/remarks coverage, feature codes found
+- End-to-end integration test added confirming the raw dump path works through the finalize route
+- 67 tests passing
 
 The tool can now process the real file format. The next uncertainty is whether the
 completeness summary output is genuinely useful when a designer sees it in practice.

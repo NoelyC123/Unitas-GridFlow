@@ -243,6 +243,64 @@ def test_import_finalize_returns_500_when_uploaded_path_missing(tmp_path, monkey
     assert updated_meta["status"] == "error"
 
 
+def test_import_finalize_handles_raw_controller_dump(tmp_path, monkeypatch) -> None:
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J50099"
+    job_dir.mkdir(parents=True)
+
+    # Minimal raw controller dump matching 28-14 513 (2).csv format.
+    # Coordinates are TM65 Irish Grid (Strabane area, Northern Ireland).
+    raw_dump = (
+        "Job:28-14 513,Version:24.00,Units:Metres\n"
+        "PRS485572899536,219497.298,413575.610,118.985,\n"
+        "1,242186.075,402362.807,99.505,Angle,Angle:STRING,1,"
+        "Angle:TAG,5,Angle:REMARK,convert to tee\n"
+        "2,242218.756,402321.523,97.200,Pol,Pol:HEIGHT,6.1,Pol:REMARK,new term pole pos\n"
+        "3,242245.112,402276.834,95.800,Hedge,Hedge:STRING,2,Hedge:TAG,3\n"
+    )
+    csv_path = job_dir / "28-14_513.csv"
+    csv_path.write_text(raw_dump, encoding="utf-8")
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J50099",
+            "uploaded_path": str(csv_path),
+            "filename": "28-14_513.csv",
+            "status": "uploaded",
+        },
+    )
+
+    monkeypatch.setattr(api_intake, "_jobs_root", lambda: jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/api/import/J50099", json={"dno": "NIE_11kV"})
+
+    assert response.status_code == 200
+    data = response.get_json()
+
+    assert data["ok"] is True
+    assert data["file_type"] == "controller"
+    assert data["auto_normalized"] is True
+
+    completeness = data["completeness"]
+    assert completeness["total_records"] == 3
+    assert completeness["fields"]["height"]["present"] == 1  # only Pol has HEIGHT attribute
+    assert completeness["fields"]["location"]["present"] == 2  # Angle and Pol have REMARK
+
+    assert "feature_codes_found" in completeness
+    assert set(completeness["feature_codes_found"]) == {"Angle", "Pol", "Hedge"}
+
+    assert (job_dir / "issues.csv").exists()
+    assert (job_dir / "map_data.json").exists()
+
+    updated_meta = json.loads((job_dir / "meta.json").read_text(encoding="utf-8"))
+    assert updated_meta["status"] == "complete"
+    assert updated_meta["file_type"] == "controller"
+
+
 def test_import_finalize_returns_500_when_csv_file_missing(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     job_dir = jobs_root / "J50007"

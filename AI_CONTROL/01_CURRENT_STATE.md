@@ -83,11 +83,12 @@ The project is NOT in:
 
 ---
 
-### 3. Input handling is still narrow
+### 3. Input handling — raw controller format now supported
 
-- Phase 2A improved column/header normalisation substantially.
-- However, the intake pipeline is still based on a limited structured CSV model.
-- Real-world survey inputs may contain more variation, messier headers, missing context, or non-CSV information that the current tool does not yet handle.
+- Phase 2A improved column/header normalisation for structured CSVs.
+- Validation batch 2 added support for raw GNSS controller dump CSVs (Job:/Version:/Units: metadata-header format).
+- Irish Grid TM65 (EPSG:29900) and ITM (EPSG:2157) detection and conversion to WGS84 is now implemented.
+- Real-world survey inputs with other formats (Leica GSI, Trimble JXL, non-CSV) are still not handled.
 
 ---
 
@@ -134,7 +135,7 @@ Goal:
 
 - **DNO rulepacks live:** 4 (`SPEN_11kV`, `SSEN_11kV`, `NIE_11kV`, `ENWL_11kV`)
 - **QA check types:** 10
-- **Tests passing:** 66
+- **Tests passing:** 67
 
 ---
 
@@ -224,4 +225,6 @@ Update this file when:
 
 This file should next be updated when:
 
-**The tool has been tested on one or more real survey files and the validation findings are known**
+**The tool is tested on further real survey files, or when the next development phase (rules refinement, output improvements) is informed by real-file evidence.**
+
+The first real-file validation (job 28-14 513) is now complete. The intake gap has been fixed. The next material update will come from testing on additional files or from a user reviewing the completeness output on a real job.

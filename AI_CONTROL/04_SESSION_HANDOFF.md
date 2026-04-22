@@ -44,8 +44,10 @@ The key outcome is:
 
 ### Tests
 
-- 8 new tests added, 66 total (up from 38)
-- All tests green
+- 8 new unit tests added (is_raw_controller_dump, parse_raw_controller_dump, completeness summary edge cases)
+- 1 end-to-end integration test added confirming the raw dump path works through the finalize route
+- 67 total tests passing (up from 38)
+- All tests green, pre-commit clean
 
 ---
 

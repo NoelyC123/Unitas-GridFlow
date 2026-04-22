@@ -36,11 +36,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   EXpole) — the one piece of structural context digitally available. Only included
   when at least one non-null code is present.
 
-- 8 new tests in `tests/test_controller_intake.py` covering: `is_raw_controller_dump`
+- 8 new unit tests in `tests/test_controller_intake.py` covering: `is_raw_controller_dump`
   detection, `parse_raw_controller_dump` record count, PRS/metadata row exclusion,
   HEIGHT attribute vs GPS elevation mapping, REMARK → location mapping, feature code
   → structure_type mapping, numeric column coercion, and `feature_codes_found` in
   completeness summary.
+
+- 1 end-to-end integration test in `tests/test_app_routes.py` (`test_import_finalize_handles_raw_controller_dump`).
+  Sends a minimal raw controller dump matching 28-14 513 format through the full `/api/import/<job_id>`
+  route and confirms: `ok=True`, `file_type="controller"`, correct per-field completeness,
+  `feature_codes_found`, and output files written.
 
 ### Validated
 
@@ -53,7 +58,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### State at end of session
 
-- 66 tests passing (up from 38).
+- 67 tests passing (up from 38).
 - Raw GNSS controller dump format now parseable end-to-end.
 - Completeness summary surfaces record count, position status, CRS, per-field coverage,
   and feature codes found.
