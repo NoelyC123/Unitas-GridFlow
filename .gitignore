@@ -48,6 +48,10 @@ htmlcov/
 dmypy.json
 
 # Optional local archives / scratch
-*.zip
 *.tar.gz
 *.tgz
+
+# AI upload/review bundles
+CHATGPT_UPLOAD_BUNDLES/
+CLAUDE_APP_UPLOAD_BUNDLES/
+CLAUDE_REVIEW_BUNDLES/
