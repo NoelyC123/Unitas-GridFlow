@@ -1,116 +1,138 @@
-# Unitas-GridFlow — Claude Code Bootstrap
+# Unitas-GridFlow — Claude Code Runtime Instructions
 
-## First action — read this before anything else
+## Core rule
 
-Read these files in this order:
+Minimise token usage.
+
+- Read the minimum necessary files
+- Do not reload full context for each task
+- Do not re-read files already read in the current task unless needed
+- Do not ask repeated confirmation questions inside an approved step
+
+---
+
+## Session start (STRICT)
+
+At the start of a session, read only:
 
 1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
-2. `AI_CONTROL/01_CURRENT_STATE.md`
-3. `AI_CONTROL/02_CURRENT_TASK.md`
-4. `AI_CONTROL/03_WORKING_RULES.md`
-5. `AI_CONTROL/04_SESSION_HANDOFF.md`
-6. `AI_CONTROL/05_PROJECT_REFERENCE.md`
+2. `AI_CONTROL/02_CURRENT_TASK.md`
 
-These files are the active control layer for the project.
+Read additional files only if needed:
 
-## Then also read
+- `AI_CONTROL/01_CURRENT_STATE.md` → only if current reality is needed
+- `AI_CONTROL/04_SESSION_HANDOFF.md` → only if continuing prior work
+- specific code/test files → only if they are part of the approved task
 
-- `CHANGELOG.md` — rolling history of what shipped
-- `README.md` — project overview and setup
-- `_archive/docs/PROJECT_SYNTHESIS/` — only if historical strategic context is needed
-- `_archive/control_layer/old_ai_control/` — only if old control-layer history is needed
+Never read unless explicitly asked:
 
-## Claude Code specific
+- `AI_CONTROL/05_PROJECT_REFERENCE.md`
+- anything under `_archive/`
 
-**Canonical location:** `/Users/noelcollins/Unitas-GridFlow/`
-**GitHub repo:** `https://github.com/NoelyC123/Unitas-GridFlow`
+---
 
-## Run commands
+## Project identity
 
-```bash
-source .venv312/bin/activate
-python run.py
-pytest -v
-pytest --cov=app
-pre-commit run --all-files
-```
+Unitas GridFlow is a narrow pre-CAD QA and compliance tool for survey-to-design handoffs.
 
-## Active project focus
+Purpose:
+- validate survey data before design/CAD
+- catch real-world data issues early
+- act as a structured QA gate between survey and design
 
-Unitas GridFlow is a narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
+It is not a general platform.
 
-Core purpose:
-- validate survey data before CAD/design
-- enforce DNO-specific compliance rules
-- surface issues early
-- generate QA outputs (CSV, map, PDF)
+---
 
-## Current working direction
+## Current direction
 
-Always derive direction from:
+Follow:
 
-- `AI_CONTROL/02_CURRENT_TASK.md`
-- `AI_CONTROL/01_CURRENT_STATE.md`
+- `AI_CONTROL/02_CURRENT_TASK.md` for what to do
+- `AI_CONTROL/01_CURRENT_STATE.md` only if needed for current truth
 
-These override assumptions.
+Do not invent tasks or broaden scope.
 
-## Key live files
+---
 
-- `app/dno_rules.py` — QA rulepacks (primary development area)
-- `app/qa_engine.py` — QA engine (check execution logic)
-- `app/routes/api_intake.py` — CSV processing pipeline
-- `app/routes/api_upload.py` — file upload handling
-- `app/routes/pdf_reports.py` — PDF generation
-- `app/routes/api_rulepacks.py` — rulepack API (integration layer)
-- `tests/` — pytest suite (must always stay green)
+## Default execution mode
 
-## Development workflow
+When given an approved task, proceed end-to-end within scope.
 
-After any code change:
+You may:
+- read only necessary files
+- edit only necessary in-scope files
+- run tests
+- update clearly necessary docs/control files
 
-1. Run tests:
-   ```bash
-   pytest -v
-   ```
+You must:
+- keep scope narrow
+- avoid unrelated refactors
+- avoid architecture changes unless explicitly part of the task
+- stop only if something outside scope becomes necessary
 
-2. If passing:
-   ```bash
-   git add .
-   git commit -m "clear message"
-   git push
-   ```
+---
 
-3. Keep control layer updated if needed:
-   - `AI_CONTROL/01_CURRENT_STATE.md`
-   - `AI_CONTROL/02_CURRENT_TASK.md`
-   - `AI_CONTROL/04_SESSION_HANDOFF.md`
-   - `CHANGELOG.md`
+## Default post-change workflow
+
+After code changes:
+
+1. Run:
+   `pytest -v`
+
+2. Run:
+   `pre-commit run --all-files`
+
+3. If pre-commit modifies files:
+   - stage those files
+   - continue
+
+4. Then:
+   `git add .`
+   `git commit -m "<clear message>"`
+   `git push`
+
+Do not stop before commit unless instructed or blocked.
+
+---
+
+## Default output
+
+Return one final report only:
+
+1. files changed
+2. exact work completed
+3. tests run and results
+4. docs/control files updated
+5. commit message used
+6. commit hash
+7. final git status
+
+Keep the report concise.
+
+---
 
 ## Hard rules
 
-- Read a file before editing it.
-- Do not assume file contents.
-- Run `pytest -v` after every code change.
-- Keep scope tied strictly to the current task.
-- Do not treat archived files as active instructions.
-- Never restore from `_archive/quarantine/old_quarantine/` blindly.
-- Never treat autocomplete or AI suggestions as authoritative for DNO-specific values.
-- Keep the active control layer and live code aligned at all times.
+- Never read unnecessary files
+- Never reload full project context without need
+- Never use `_archive/` as active instruction
+- Never assume file contents
+- Always test before commit
+- Always commit completed approved work
 
-## Important constraints
+---
 
-- This is a narrow MVP tool, not a general platform.
-- Avoid adding features outside current task scope.
-- DNO rules must be:
-  - explicit
-  - testable
-  - traceable to real-world logic, not guessed
+## Efficiency behaviour
 
-## Historical context (optional)
+Prefer:
+- fewer reads
+- fewer messages
+- end-to-end execution
+- one final report
 
-Use only if needed:
-
-- `_archive/docs/PROJECT_SYNTHESIS/` → strategy and AI analysis
-- `_archive/control_layer/old_ai_control/` → previous system versions
-
-These are reference only, not active instructions.
+Avoid:
+- repeated confirmations
+- unnecessary explanations
+- re-reading control files in the same task
+- reviewing files unrelated to the approved task
