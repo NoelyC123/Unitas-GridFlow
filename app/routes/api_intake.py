@@ -8,6 +8,12 @@ from typing import Any
 import pandas as pd
 from flask import Blueprint, jsonify, request
 
+from app.controller_intake import (
+    build_completeness_summary,
+    convert_grid_to_wgs84,
+    is_controller_csv,
+    parse_controller_csv,
+)
 from app.dno_rules import DNO_RULES, RULEPACKS
 from app.qa_engine import run_qa_checks
 
@@ -388,7 +394,19 @@ def finalize(job_short: str):
             raise FileNotFoundError(f"Uploaded CSV not found: {csv_path}")
 
         df = pd.read_csv(csv_path)
+
+        file_type = "structured"
+        if is_controller_csv(df):
+            df = parse_controller_csv(df)
+            file_type = "controller"
+
         df, auto_normalized = _normalize_dataframe(df)
+        if file_type == "controller":
+            auto_normalized = True
+
+        df = convert_grid_to_wgs84(df)
+
+        completeness = build_completeness_summary(df)
 
         # Add row index before QA so issue rows can be mapped back onto the map output.
         df = df.reset_index(drop=True)
@@ -417,7 +435,9 @@ def finalize(job_short: str):
             {
                 "status": "complete",
                 "rulepack_id": requested_dno,
+                "file_type": file_type,
                 "auto_normalized": auto_normalized,
+                "completeness": completeness,
                 "issue_count": len(map_issues_df),
                 "pole_count": feature_collection["metadata"]["pole_count"],
                 "span_count": feature_collection["metadata"]["span_count"],
@@ -434,9 +454,11 @@ def finalize(job_short: str):
             {
                 "ok": True,
                 "job_id": job_id,
+                "file_type": file_type,
                 "auto_normalized": auto_normalized,
                 "rulepack_id": requested_dno,
                 "issue_count": len(map_issues_df),
+                "completeness": completeness,
             }
         )
 
