@@ -8,6 +8,41 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (batch 14 — EX/PR narrative linking and warn_texts fix)
+
+### Added
+
+- **`asset_intent` label in GeoJSON feature properties (api_intake.py)**:
+  EXpole records receive `asset_intent="Existing asset"` (derived from `structure_type`).
+  Non-EXpole records that have a replacement-pair WARN receive `asset_intent="Proposed support"`.
+  All other records receive `asset_intent=None`. No new engineering logic — purely presentation.
+
+- **`warn_count` / `warn_texts` serialised into GeoJSON properties (api_intake.py)**:
+  Batch 12 computed these values but never wrote them into `feature["properties"]`, making
+  angle/stay WARNs invisible in the map popup. Both fields now appear in the GeoJSON output.
+
+- **Improved replacement cluster narrative (api_intake.py `finalize` route)**:
+  Cluster summary line changed from `"N replacement pairs detected — likely EX → PR design intent"`
+  to `"N probable replacement pairs detected — consistent with replacement survey work"`.
+
+- **Improved replacement-pair popup wording (map-viewer.js)**:
+  `replacementLine` now reads: `"Likely replacement pair — existing asset with nearby proposed support"`.
+
+- **`asset_intent` surfaced in popup and record panel (map-viewer.js)**:
+  New `assetIntentLine` in popup (after Type row) and `intentHtml` in record panel items.
+
+- **JS cache-bust bump**: `map-viewer.js?v=7` → `?v=8` in `map_viewer.html`.
+
+### Tests added
+
+- `test_build_feature_collection_expole_gets_existing_asset_intent` — EXpole → `"Existing asset"`
+- `test_build_feature_collection_replacement_pair_non_expole_gets_proposed_support` — Pol with WARN → `"Proposed support"` + `relationship="replacement_pair"`
+- `test_build_feature_collection_regular_pole_has_no_asset_intent` — regular Pol → `asset_intent is None`
+- `test_build_feature_collection_warn_texts_populated_in_properties` — Angle WARN → `warn_count=1`, `warn_texts` populated, `issue_count=0`
+- Test count: **114 passing** (was 110).
+
+---
+
 ## 2026-04-23 (batch 13 — confidence-aware QA refinements)
 
 ### Changed
