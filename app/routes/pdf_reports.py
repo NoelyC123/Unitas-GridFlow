@@ -124,6 +124,17 @@ def qa_pdf(job_id: str):
                     pdf.showPage()
                     y = top
 
+        what_supports = design_readiness.get("what_this_supports") or []
+        if what_supports:
+            _draw_line(pdf, "This file supports:", left, y)
+            y -= line_gap
+            for item in what_supports:
+                _draw_line(pdf, f"  + {str(item)[:110]}", left, y, size=9)
+                y -= line_gap
+                if y < 30 * mm:
+                    pdf.showPage()
+                    y = top
+
         y -= 4 * mm
 
     completeness = meta.get("completeness") or {}
@@ -134,6 +145,18 @@ def qa_pdf(job_id: str):
         total = completeness.get("total_records", 0)
         _draw_line(pdf, f"Total records: {total}", left, y)
         y -= line_gap
+
+        s_count = completeness.get("structural_count")
+        c_count = completeness.get("context_count")
+        a_count = completeness.get("anchor_count")
+        if s_count is not None:
+            parts = [f"{s_count} structural"]
+            if c_count:
+                parts.append(f"{c_count} context")
+            if a_count:
+                parts.append(f"{a_count} anchor")
+            _draw_line(pdf, f"Composition: {', '.join(parts)}", left, y, size=9)
+            y -= line_gap
 
         pos = completeness.get("position_status", "unknown")
         _draw_line(pdf, f"Position: {pos}", left, y)

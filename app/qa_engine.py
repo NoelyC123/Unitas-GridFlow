@@ -8,11 +8,64 @@ from pyproj import Transformer
 
 _OSGB_TRANSFORMER = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
 
-# Feature codes for contextual/environmental survey markers (not structural poles).
-# These are excluded from structural span checks and from structural-only rules
-# (height range, required height) so that Hedge/Tree/etc never trigger pole FAILs.
+# Contextual/environmental survey markers — not structural poles.
+# Excluded from structural span checks and structural-only rules so that
+# Gate, Hedge, Track, Stream etc never trigger height or structural FAILs.
 _CONTEXT_FEATURE_CODES: frozenset[str] = frozenset(
-    {"Hedge", "hedge", "HEDGE", "Tree", "tree", "Wall", "wall", "Fence", "fence", "Post", "post"}
+    {
+        "Hedge",
+        "hedge",
+        "HEDGE",
+        "Tree",
+        "tree",
+        "TREE",
+        "Wall",
+        "wall",
+        "WALL",
+        "Fence",
+        "fence",
+        "FENCE",
+        "Post",
+        "post",
+        "POST",
+        "Gate",
+        "gate",
+        "GATE",
+        "Track",
+        "track",
+        "TRACK",
+        "Stream",
+        "stream",
+        "STREAM",
+    }
+)
+
+# Explicit structural support records — informational, used by callers that
+# need to distinguish structural from unknown feature codes.
+_STRUCTURAL_FEATURE_CODES: frozenset[str] = frozenset(
+    {
+        "Pol",
+        "pol",
+        "POL",
+        "Angle",
+        "angle",
+        "ANGLE",
+        "EXpole",
+        "expole",
+        "EXPOLE",
+        "Terminal",
+        "terminal",
+        "TERMINAL",
+        "Stay pole",
+        "Service pole",
+        "Pole",
+        "pole",
+        "POLE",
+        "Wood Pole",
+        "Steel Pole",
+        "Concrete Pole",
+        "Composite Pole",
+    }
 )
 
 
@@ -72,15 +125,28 @@ def _is_missing_scalar(value: object) -> bool:
 def run_qa_checks(df, rules):
     issues = []
 
+    # Exclude anchor rows from all checks except span_distance.
+    # Anchor rows (grid reference control points like GB_Kelso) must never
+    # generate QA issues. span_distance receives the full df so it can detect
+    # the route chain break at anchor locations.
+    if "_record_role" in df.columns:
+        _df_no_anchor = df[df["_record_role"] != "anchor"].copy()
+    else:
+        _df_no_anchor = df
+
     for rule in rules:
         check = rule.get("check")
         field = rule.get("field")
+
+        # span_distance uses the full df to handle anchor-based chain breaks;
+        # all other checks use the anchor-filtered view.
+        qc = df if check == "span_distance" else _df_no_anchor
 
         # --- checks that don't use a single `field` key ---
 
         if check == "paired_required":
             fields = rule.get("fields") or []
-            missing_columns = [name for name in fields if name not in df.columns]
+            missing_columns = [name for name in fields if name not in qc.columns]
             if missing_columns:
                 for missing in missing_columns:
                     issues.append({"Issue": f"Missing column: {missing}", "Row": {}})
@@ -90,7 +156,7 @@ def run_qa_checks(df, rules):
                 issues.append({"Issue": "Invalid paired_required rule: need 2+ fields", "Row": {}})
                 continue
 
-            for _, row in df.iterrows():
+            for _, row in qc.iterrows():
                 values = [row.get(name) for name in fields]
                 present = [not _is_missing_scalar(v) for v in values]
                 if any(present) and not all(present):
@@ -105,7 +171,7 @@ def run_qa_checks(df, rules):
         elif check == "dependent_allowed_values":
             if_field = rule.get("if_field")
             then_field = rule.get("then_field")
-            missing_cols = [c for c in (if_field, then_field) if not c or c not in df.columns]
+            missing_cols = [c for c in (if_field, then_field) if not c or c not in qc.columns]
             if missing_cols:
                 for missing in missing_cols:
                     issues.append({"Issue": f"Missing column: {missing}", "Row": {}})
@@ -113,7 +179,7 @@ def run_qa_checks(df, rules):
 
             mapping = rule.get("mapping") or {}
 
-            for _, row in df.iterrows():
+            for _, row in qc.iterrows():
                 if_value = row.get(if_field)
                 then_value = row.get(then_field)
                 if _is_missing_scalar(if_value) or _is_missing_scalar(then_value):
@@ -138,8 +204,8 @@ def run_qa_checks(df, rules):
             # reprojects lat/lon to EPSG:27700 and compares against declared
             # easting/northing; for TM65/ITM files the comparison is across
             # different coordinate spaces and always produces false positives.
-            if "_grid_crs" in df.columns:
-                detected_crs = df["_grid_crs"].dropna()
+            if "_grid_crs" in qc.columns:
+                detected_crs = qc["_grid_crs"].dropna()
                 if len(detected_crs) and str(detected_crs.iloc[0]) != "EPSG:27700":
                     continue
 
@@ -150,7 +216,7 @@ def run_qa_checks(df, rules):
             tolerance_m = rule.get("tolerance_m", 100)
 
             required_cols = [lat_field, lon_field, easting_field, northing_field]
-            missing_cols = [c for c in required_cols if c not in df.columns]
+            missing_cols = [c for c in required_cols if c not in qc.columns]
             if missing_cols:
                 for mc in missing_cols:
                     issues.append({"Issue": f"Missing column: {mc}", "Row": {}})
@@ -158,7 +224,7 @@ def run_qa_checks(df, rules):
 
             transformer = _OSGB_TRANSFORMER
 
-            for _, row in df.iterrows():
+            for _, row in qc.iterrows():
                 lat = row.get(lat_field)
                 lon = row.get(lon_field)
                 easting = row.get(easting_field)
@@ -192,7 +258,7 @@ def run_qa_checks(df, rules):
 
         elif check == "unique_pair":
             fields = rule.get("fields") or []
-            missing_columns = [name for name in fields if name not in df.columns]
+            missing_columns = [name for name in fields if name not in qc.columns]
             if missing_columns:
                 for missing in missing_columns:
                     issues.append({"Issue": f"Missing column: {missing}", "Row": {}})
@@ -202,8 +268,8 @@ def run_qa_checks(df, rules):
                 issues.append({"Issue": "Invalid unique_pair rule: need 2+ fields", "Row": {}})
                 continue
 
-            all_present = ~df[fields].apply(_is_missing_value).any(axis=1)
-            df_present = df[all_present]
+            all_present = ~qc[fields].apply(_is_missing_value).any(axis=1)
+            df_present = qc[all_present]
 
             duplicate_mask = df_present.duplicated(subset=fields, keep="first")
             for _, row in df_present[duplicate_mask].iterrows():
@@ -216,29 +282,32 @@ def run_qa_checks(df, rules):
                 )
 
         elif check == "span_distance":
+            # qc == df here (full DataFrame including anchor rows)
             lat_field = rule.get("lat_field", "lat")
             lon_field = rule.get("lon_field", "lon")
             min_m = rule.get("min_m", 10)
             max_m = rule.get("max_m", 500)
 
             required_cols = [lat_field, lon_field]
-            missing_cols = [c for c in required_cols if c not in df.columns]
+            missing_cols = [c for c in required_cols if c not in qc.columns]
             if missing_cols:
                 for mc in missing_cols:
                     issues.append({"Issue": f"Missing column: {mc}", "Row": {}})
                 continue
 
             transformer = _OSGB_TRANSFORMER
-            has_structure_type = "structure_type" in df.columns
+            has_structure_type = "structure_type" in qc.columns
+            has_record_role = "_record_role" in qc.columns
 
             prev_e = prev_n = None
-            for _, row in df.iterrows():
-                # Skip context-only markers (Hedge, Tree, etc.) without resetting
-                # prev_e/prev_n so spans bridge correctly across them.
-                if has_structure_type:
-                    st = row.get("structure_type")
-                    if isinstance(st, str) and st in _CONTEXT_FEATURE_CODES:
-                        continue
+            for _, row in qc.iterrows():
+                # Anchor rows are at unrelated reference locations — reset chain.
+                if has_record_role and row.get("_record_role") == "anchor":
+                    prev_e = prev_n = None
+                    continue
+                # Context rows bridge the span — skip without resetting chain.
+                if _is_context_row(row, has_structure_type):
+                    continue
 
                 lat = row.get(lat_field)
                 lon = row.get(lon_field)
@@ -276,15 +345,15 @@ def run_qa_checks(df, rules):
 
         # --- checks that use a single `field` key ---
 
-        elif field not in df.columns:
+        elif field not in qc.columns:
             issues.append({"Issue": f"Missing column: {field}", "Row": {}})
 
         elif check == "unique":
-            duplicate_mask = df[field].duplicated(keep="first")
-            duplicates = df.loc[duplicate_mask, field].tolist()
+            duplicate_mask = qc[field].duplicated(keep="first")
+            duplicates = qc.loc[duplicate_mask, field].tolist()
 
             for dup in duplicates:
-                rows = df[df[field] == dup].to_dict(orient="records")
+                rows = qc[qc[field] == dup].to_dict(orient="records")
                 for row in rows:
                     issues.append({"Issue": f"Duplicate value in '{field}': {dup}", "Row": row})
 
@@ -292,10 +361,10 @@ def run_qa_checks(df, rules):
             min_val = rule.get("min", float("-inf"))
             max_val = rule.get("max", float("inf"))
             structural_only = rule.get("structural_only", False)
-            has_st = "structure_type" in df.columns
+            has_st = "structure_type" in qc.columns
 
-            numeric_series = pd.to_numeric(df[field], errors="coerce")
-            out_of_range = df[
+            numeric_series = pd.to_numeric(qc[field], errors="coerce")
+            out_of_range = qc[
                 numeric_series.notna() & ((numeric_series < min_val) | (numeric_series > max_val))
             ]
 
@@ -311,8 +380,8 @@ def run_qa_checks(df, rules):
 
         elif check == "required":
             structural_only = rule.get("structural_only", False)
-            has_st = "structure_type" in df.columns
-            missing = df[_is_missing_value(df[field])]
+            has_st = "structure_type" in qc.columns
+            missing = qc[_is_missing_value(qc[field])]
 
             for _, row in missing.iterrows():
                 if structural_only and _is_context_row(row, has_st):
@@ -322,7 +391,7 @@ def run_qa_checks(df, rules):
         elif check == "allowed_values":
             allowed = rule.get("values", [])
 
-            invalid = df[~_is_missing_value(df[field]) & ~df[field].isin(allowed)]
+            invalid = qc[~_is_missing_value(qc[field]) & ~qc[field].isin(allowed)]
 
             for _, row in invalid.iterrows():
                 issues.append(
@@ -339,8 +408,8 @@ def run_qa_checks(df, rules):
                 continue
 
             compiled = re.compile(pattern)
-            series = df[field]
-            non_missing = df[~_is_missing_value(series)]
+            series = qc[field]
+            non_missing = qc[~_is_missing_value(series)]
 
             for _, row in non_missing.iterrows():
                 value = row.get(field)

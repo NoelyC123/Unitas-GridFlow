@@ -315,6 +315,8 @@
               </div>
             </div>
 
+            <div id="role-breakdown" style="display:none; font-size:0.8rem; color:#6b7280; text-align:center; margin-bottom:10px;"></div>
+
             <div class="status-grid">
               <div class="status-filter-btn" data-filter="PASS" title="Click to show only PASS records">
                 <div id="pass-count" class="status-value status-pass">0</div>
@@ -388,6 +390,16 @@
                 {% endfor %}
               </div>
               {% endif %}
+              {% if design_readiness.what_this_supports %}
+              <div style="margin-top: 8px;">
+                <div style="font-weight: 600; font-size: 0.82rem; color: #374151; margin-bottom: 4px;">This file supports:</div>
+                <ul style="margin: 0; padding-left: 16px; font-size: 0.8rem; color: #2e8b57;">
+                  {% for item in design_readiness.what_this_supports %}
+                  <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endif %}
             </div>
             {% endif %}
 
@@ -436,6 +448,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=5"></script>
+  <script src="/static/js/map-viewer.js?v=6"></script>
 </body>
 </html>

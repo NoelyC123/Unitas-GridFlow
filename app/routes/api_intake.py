@@ -11,6 +11,7 @@ from flask import Blueprint, jsonify, request
 from app.controller_intake import (
     build_completeness_summary,
     build_design_readiness,
+    classify_record_roles,
     convert_grid_to_wgs84,
     is_controller_csv,
     is_raw_controller_dump,
@@ -318,6 +319,11 @@ def _build_feature_collection(
     fail_count = 0
 
     for _, row in df.reset_index(drop=True).iterrows():
+        # Exclude anchor rows (reference control points) from the map output.
+        # They are not survey records and may be at distant unrelated locations.
+        if row.get("_record_role") == "anchor":
+            continue
+
         row_index = row.get("__row_index__")
         lat = _safe_float(row.get("lat"))
         lon = _safe_float(row.get("lon"))
@@ -359,6 +365,7 @@ def _build_feature_collection(
                 "northing": _safe_value(row.get("northing")),
                 "issue_count": row_issue_count,
                 "issue_texts": row_issue_texts,
+                "record_role": _safe_value(row.get("_record_role")),
             },
         }
         features.append(feature)
@@ -432,6 +439,7 @@ def finalize(job_short: str):
             auto_normalized = True
 
         df = convert_grid_to_wgs84(df)
+        df = classify_record_roles(df)
 
         completeness = build_completeness_summary(df)
         design_readiness = build_design_readiness(completeness)
@@ -464,6 +472,9 @@ def finalize(job_short: str):
 
         feature_collection = _build_feature_collection(df, map_issues_df, job_id, requested_dno)
         feature_collection["metadata"]["auto_normalized"] = auto_normalized
+        for _rkey in ("structural_count", "context_count", "anchor_count"):
+            if _rkey in completeness:
+                feature_collection["metadata"][_rkey] = completeness[_rkey]
 
         map_data_path = job_dir / "map_data.json"
         map_data_path.write_text(

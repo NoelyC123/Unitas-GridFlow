@@ -1,9 +1,12 @@
 const CONTEXT_FEATURE_CODES = new Set([
   'Hedge', 'hedge', 'HEDGE',
-  'Tree', 'tree',
-  'Wall', 'wall',
-  'Fence', 'fence',
-  'Post', 'post',
+  'Tree', 'tree', 'TREE',
+  'Wall', 'wall', 'WALL',
+  'Fence', 'fence', 'FENCE',
+  'Post', 'post', 'POST',
+  'Gate', 'gate', 'GATE',
+  'Track', 'track', 'TRACK',
+  'Stream', 'stream', 'STREAM',
 ]);
 
 class MapViewer {
@@ -72,6 +75,17 @@ class MapViewer {
       } else {
         this.issueNoteEl.textContent = 'No issues recorded for this job.';
       }
+    }
+
+    // File composition breakdown — structural / context / anchor counts.
+    const roleEl = document.getElementById('role-breakdown');
+    if (roleEl) {
+      const parts = [];
+      if (meta.structural_count != null) parts.push(`<span style="color:#2e8b57;">■ ${meta.structural_count} structural</span>`);
+      if (meta.context_count != null && meta.context_count > 0) parts.push(`<span style="color:#9ca3af;">■ ${meta.context_count} context</span>`);
+      if (meta.anchor_count != null && meta.anchor_count > 0) parts.push(`<span style="color:#6b7280;">◇ ${meta.anchor_count} anchor</span>`);
+      roleEl.innerHTML = parts.join('<span style="margin:0 5px;color:#d1d5db;">·</span>');
+      roleEl.style.display = parts.length > 0 ? 'block' : 'none';
     }
   }
 

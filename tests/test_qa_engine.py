@@ -607,3 +607,100 @@ def test_deduplication_collapses_same_logical_issue_per_row() -> None:
     assert len(height_issues) == 1, (
         f"Expected deduplication to collapse to 1 height issue, got: {height_issues}"
     )
+
+
+def test_anchor_row_excluded_from_required_check() -> None:
+    """Anchor rows must never trigger QA issues, even when required fields are absent.
+
+    A row with _record_role='anchor' and no height must produce no issue.
+    A row with _record_role='structural' and no height must still be flagged.
+    """
+    df = pd.DataFrame(
+        [
+            {"_record_role": "anchor", "pole_id": "GB_Kelso", "height": None},
+            {"_record_role": "structural", "pole_id": "1", "height": None},
+        ]
+    )
+    rules = [{"check": "required", "field": "height", "structural_only": False}]
+
+    issues = run_qa_checks(df, rules)
+
+    issue_texts = issues["Issue"].tolist()
+    assert len(issues) == 1, f"Expected exactly one issue (structural row), got: {issue_texts}"
+    assert "Missing required field: height" in issue_texts[0]
+
+
+def test_span_distance_resets_chain_at_anchor_row() -> None:
+    """An anchor row between two structural poles must break the span chain.
+
+    Without the anchor, a Pol at 54.52 and a Pol at 54.60 (≈8.9km) would fire
+    span_too_long. With an anchor row in between the chain resets at the anchor,
+    so no span issue is raised for the second Pol.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "_record_role": "structural",
+                "pole_id": "1",
+                "lat": 54.5200,
+                "lon": -3.0,
+                "structure_type": "Pol",
+            },
+            {
+                "_record_role": "anchor",
+                "pole_id": "GB_Kelso",
+                "lat": 55.6000,
+                "lon": -2.5,
+                "structure_type": None,
+            },
+            {
+                "_record_role": "structural",
+                "pole_id": "2",
+                "lat": 54.6000,
+                "lon": -3.0,
+                "structure_type": "Pol",
+            },
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0, (
+        f"Expected no span issues after anchor chain reset, got {len(issues)} issue(s)"
+    )
+
+
+def test_gate_track_stream_no_height_range_fail() -> None:
+    """Gate, Track and Stream with below-minimum heights must not produce FAIL issues.
+
+    These feature codes were added to _CONTEXT_FEATURE_CODES in Batch 9.
+    With structural_only=True, none of them should trigger a height range issue.
+    A Pol with the same low height must still be flagged.
+    """
+    df = pd.DataFrame(
+        [
+            {"structure_type": "Gate", "height": 1.5},
+            {"structure_type": "Track", "height": 0.0},
+            {"structure_type": "Stream", "height": 0.5},
+            {"structure_type": "Pol", "height": 3.0},
+        ]
+    )
+    rules = [{"check": "range", "field": "height", "min": 7, "max": 25, "structural_only": True}]
+
+    issues = run_qa_checks(df, rules)
+
+    issue_texts = issues["Issue"].tolist()
+    assert len(issues) == 1, f"Expected one issue (Pol only), got: {issue_texts}"
+    row = issues.iloc[0]["Row"]
+    assert row.get("structure_type") == "Pol", (
+        f"Expected the flagged row to be Pol, got: {row.get('structure_type')}"
+    )

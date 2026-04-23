@@ -52,6 +52,93 @@ _KEY_SCHEMA_FIELDS = [
     "location",
 ]
 
+# Feature codes used to classify record roles during intake.
+# Keep in sync with qa_engine._CONTEXT_FEATURE_CODES and _STRUCTURAL_FEATURE_CODES.
+_STRUCTURAL_CODES: frozenset[str] = frozenset(
+    {
+        "Pol",
+        "pol",
+        "POL",
+        "Angle",
+        "angle",
+        "ANGLE",
+        "EXpole",
+        "expole",
+        "EXPOLE",
+        "Terminal",
+        "terminal",
+        "TERMINAL",
+        "Stay pole",
+        "Service pole",
+        "Pole",
+        "pole",
+        "POLE",
+        "Wood Pole",
+        "Steel Pole",
+        "Concrete Pole",
+        "Composite Pole",
+    }
+)
+
+_CONTEXT_CODES: frozenset[str] = frozenset(
+    {
+        "Hedge",
+        "hedge",
+        "HEDGE",
+        "Tree",
+        "tree",
+        "TREE",
+        "Wall",
+        "wall",
+        "WALL",
+        "Fence",
+        "fence",
+        "FENCE",
+        "Post",
+        "post",
+        "POST",
+        "Gate",
+        "gate",
+        "GATE",
+        "Track",
+        "track",
+        "TRACK",
+        "Stream",
+        "stream",
+        "STREAM",
+    }
+)
+
+
+def _classify_role(row: "pd.Series") -> str:
+    """Return 'structural', 'context', or 'anchor' for a single survey row."""
+    st = row.get("structure_type")
+    if st is None or (isinstance(st, str) and st.strip() == ""):
+        # No feature code: distinguish anchor reference points from uncoded survey rows.
+        # Pure-numeric pole IDs (1, 2, 20, ...) are survey points — treat conservatively.
+        # Non-numeric IDs without a feature code are anchor/reference markers.
+        pole_id = str(row.get("pole_id") or "")
+        if pole_id.replace("-", "").replace(".", "").isdigit():
+            return "structural"
+        return "anchor"
+    st_str = str(st).strip()
+    if st_str in _STRUCTURAL_CODES:
+        return "structural"
+    if st_str in _CONTEXT_CODES:
+        return "context"
+    return "structural"  # unknown feature code → conservative
+
+
+def classify_record_roles(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a _record_role column ('structural', 'context', 'anchor') to df.
+
+    The column gates structural QA rules and powers the file composition
+    summary shown in the map side panel and PDF report.
+    """
+    df = df.copy()
+    df["_record_role"] = df.apply(_classify_role, axis=1)
+    return df
+
 
 def detect_grid_crs(easting: float, northing: float) -> str:
     """Return the most likely EPSG CRS code for a representative easting/northing pair."""
@@ -251,7 +338,8 @@ def parse_controller_csv(df: pd.DataFrame) -> pd.DataFrame:
 def build_completeness_summary(df: pd.DataFrame) -> dict:
     """
     Return a completeness/capture summary for a parsed survey dataframe.
-    Reports per-field coverage and overall position data status.
+    Reports per-field coverage, overall position status, and record-role breakdown
+    when _record_role is present.
     """
     total = len(df)
     if total == 0:
@@ -306,14 +394,38 @@ def build_completeness_summary(df: pd.DataFrame) -> dict:
     }
 
     # Surface unique feature/structure codes present in the digital file.
-    # For controller dumps these are the surveyor-assigned feature codes (Angle, Pol, etc.)
-    # which are the one piece of structural context available digitally.
     if "structure_type" in df.columns:
         unique_codes = sorted(
             str(v) for v in df["structure_type"].dropna().unique().tolist() if str(v).strip()
         )
         if unique_codes:
             result["feature_codes_found"] = unique_codes
+
+    # Role-based breakdown and structural-specific field coverage.
+    if "_record_role" in df.columns:
+        role_counts = df["_record_role"].value_counts().to_dict()
+        structural_count = int(role_counts.get("structural", 0))
+        context_count = int(role_counts.get("context", 0))
+        anchor_count = int(role_counts.get("anchor", 0))
+        result["structural_count"] = structural_count
+        result["context_count"] = context_count
+        result["anchor_count"] = anchor_count
+
+        # Per-field coverage on structural records only — avoids context features
+        # (Gate height 1.2m, Fence height 1.8m) polluting the structural stats.
+        if structural_count > 0:
+            s_df = df[df["_record_role"] == "structural"]
+            structural_fields: dict[str, dict] = {}
+            for fld in ("height", "material", "location"):
+                if fld in s_df.columns:
+                    present = int(s_df[fld].notna().sum())
+                    structural_fields[fld] = {
+                        "present": present,
+                        "missing": structural_count - present,
+                        "coverage_pct": round(100 * present / structural_count, 1),
+                    }
+            if structural_fields:
+                result["structural_fields"] = structural_fields
 
     return result
 
@@ -344,17 +456,33 @@ def build_design_readiness(completeness: dict) -> dict:
     Derive a design readiness verdict and per-category coverage ratings from
     existing completeness data. No new inputs required.
 
+    Uses structural-specific field coverage (structural_fields) when available
+    so that context-feature heights (Gate=1.2m, Fence=1.8m) do not distort the
+    assessment of whether structural pole data is complete.
+
     Returns:
         verdict: NOT READY / PARTIALLY READY / LIKELY READY
-        reasons: short bullet points explaining the verdict
+        reasons: list explaining what this file does and does not support
+        what_this_supports: positive list of what the file enables
         coverage: category → Strong / Partial / Missing
     """
     fields = completeness.get("fields") or {}
+    # Use structural-specific coverage where available; fall back to all-record fields.
+    s_fields = completeness.get("structural_fields") or fields
 
     pos_pct = _position_pct(fields)
-    height_pct = fields.get("height", {}).get("coverage_pct", 0.0)
-    material_pct = fields.get("material", {}).get("coverage_pct", 0.0)
+    height_pct = s_fields.get("height", {}).get("coverage_pct", 0.0)
+    material_pct = s_fields.get("material", {}).get("coverage_pct", 0.0)
     structural_pct = round((height_pct + material_pct) / 2, 1)
+
+    structural_count = completeness.get("structural_count")
+    total = completeness.get("total_records", 0)
+    # Descriptor used in reason text: prefer structural count if available.
+    rec_noun = (
+        f"{structural_count} structural record{'s' if structural_count != 1 else ''}"
+        if structural_count is not None
+        else f"{total} record{'s' if total != 1 else ''}"
+    )
 
     coverage: dict[str, str] = {
         "Position & Identity": _coverage_rating(pos_pct),
@@ -369,38 +497,52 @@ def build_design_readiness(completeness: dict) -> dict:
     structural_rating = coverage["Structural Data"]
 
     reasons: list[str] = []
+    what_supports: list[str] = []
 
     if position_rating == "Missing":
-        reasons.append(
-            "records cannot be located on the network — position data absent from digital file"
-        )
+        reasons.append(f"{rec_noun} cannot be located — position data absent from digital file")
     elif position_rating == "Partial":
         reasons.append(
-            "not all records can be reliably located — position data incomplete in digital file"
+            f"not all {rec_noun} can be reliably located — position data incomplete in digital file"
         )
+    else:
+        what_supports.append(f"locating {rec_noun} on the network")
 
     if height_pct == 0.0 and material_pct == 0.0:
         reasons.append(
-            "clearance, sag, and structural suitability checks cannot be supported"
-            " — height and material absent from digital file"
+            "height and material absent from digital file"
+            " — clearance, sag, and structural checks cannot be run"
         )
     else:
-        if height_pct < 70.0:
-            label = "absent" if height_pct == 0.0 else f"{height_pct}% coverage"
-            reasons.append(
-                f"clearance and sag-related design checks not fully supported from this"
-                f" file — height data incomplete ({label})"
+        if height_pct >= 70.0:
+            h_present = s_fields.get("height", {}).get("present", 0)
+            what_supports.append(
+                f"height-based clearance checks for {h_present} of {structural_count or total}"
+                f" structural records"
             )
+        else:
+            h_present = s_fields.get("height", {}).get("present", 0)
+            s_total = structural_count or total
+            label = (
+                "not captured in digital file"
+                if height_pct == 0.0
+                else f"recorded for {h_present} of {s_total} structural records"
+            )
+            reasons.append(f"height {label} — clearance and sag design checks not fully supported")
         if material_pct < 70.0:
-            label = "absent" if material_pct == 0.0 else f"{material_pct}% coverage"
+            label = (
+                "not captured in digital file"
+                if material_pct == 0.0
+                else f"{material_pct}% of structural records"
+            )
             reasons.append(
-                f"structural suitability cannot be confirmed from digital handoff"
-                f" — material data incomplete ({label})"
+                f"material {label}"
+                f" — structural loading and suitability require field notes or plan markups"
             )
 
     reasons.append(
-        "stability, clearances, electrical configuration, and environment context"
-        " not captured digitally — field notes and plans still required for design"
+        "stays, clearances, conductor scope, and loading data are not in the digital"
+        " export — field notes and plans required for design"
     )
 
     if position_rating == "Missing":
@@ -410,8 +552,11 @@ def build_design_readiness(completeness: dict) -> dict:
     else:
         verdict = "PARTIALLY READY"
 
-    return {
+    result: dict = {
         "verdict": verdict,
         "reasons": reasons,
         "coverage": coverage,
     }
+    if what_supports:
+        result["what_this_supports"] = what_supports
+    return result
