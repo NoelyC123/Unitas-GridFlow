@@ -706,6 +706,100 @@ def test_gate_track_stream_no_height_range_fail() -> None:
     )
 
 
+def test_replacement_cluster_detection() -> None:
+    """EXpole + structural Pol within min distance must emit WARN, not FAIL.
+
+    Surveyors place PRpole 2–5m from EXpole for replacement jobs. This short
+    offset must not trigger a false 'span too short' FAIL. A WARN with
+    'Replacement pair detected' must appear instead, with Severity='WARN'.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "structure_type": "EXpole",
+            },
+            {
+                # 0.00003 deg lat ≈ 3.3m — EXpole → Pol replacement pair
+                "pole_id": "PR-1",
+                "lat": 54.52003,
+                "lon": -3.0000,
+                "structure_type": "Pol",
+            },
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    span_fails = [t for t in issue_texts if "Span too short" in t]
+    assert len(span_fails) == 0, f"Unexpected FAIL for replacement pair: {span_fails}"
+
+    warn_issues = [t for t in issue_texts if "Replacement pair detected" in t]
+    assert len(warn_issues) == 1, f"Expected one replacement pair WARN, got: {issue_texts}"
+
+    assert "Severity" in issues.columns
+    sev = issues[issues["Issue"].str.contains("Replacement pair")]["Severity"].iloc[0]
+    assert sev == "WARN", f"Expected Severity='WARN', got: {sev}"
+
+
+def test_span_suppression_does_not_apply_to_pol_pol() -> None:
+    """Two Pol records within min distance must still emit FAIL span-too-short.
+
+    Replacement-pair suppression fires only when exactly one record is EXpole.
+    Pol→Pol at close distance is a genuine duplicate-entry error and must
+    remain a FAIL with no replacement pair WARN.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "1",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "structure_type": "Pol",
+            },
+            {
+                # 0.00003 deg lat ≈ 3.3m — Pol → Pol, not a replacement pair
+                "pole_id": "2",
+                "lat": 54.52003,
+                "lon": -3.0000,
+                "structure_type": "Pol",
+            },
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    span_fails = [t for t in issue_texts if "Span too short" in t]
+    assert len(span_fails) == 1, f"Expected FAIL for Pol→Pol short span, got: {issue_texts}"
+
+    warn_issues = [t for t in issue_texts if "Replacement pair" in t]
+    assert len(warn_issues) == 0, f"Unexpected WARN for Pol→Pol: {warn_issues}"
+
+
 def test_span_distance_message_shows_one_decimal_precision() -> None:
     """Span issue text must show distances to 1 decimal place.
 

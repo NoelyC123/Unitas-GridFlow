@@ -141,6 +141,10 @@ class MapViewer {
            ${props.issue_count > issueTexts.length ? `<div class="popup-row" style="color:#b91c1c;font-size:0.8em;margin-left:6px;">… and ${props.issue_count - issueTexts.length} more</div>` : ''}`
         : '';
 
+      const replacementLine = props.relationship === 'replacement_pair'
+        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Replacement Pair (Existing &#8594; Proposed)</div>`
+        : '';
+
       const popupHtml = `
         <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
@@ -150,6 +154,7 @@ class MapViewer {
         ${materialLine}
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
         ${coordLine}
+        ${replacementLine}
         ${issueBlock}
       `;
 

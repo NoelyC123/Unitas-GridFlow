@@ -40,6 +40,10 @@ _CONTEXT_FEATURE_CODES: frozenset[str] = frozenset(
     }
 )
 
+# EXpole codes — existing poles being replaced. Detected in span_distance to
+# suppress false 'span too short' FAILs for EX→PR replacement pairs.
+_EXPOLE_CODES: frozenset[str] = frozenset({"EXpole", "expole", "EXPOLE"})
+
 # Explicit structural support records — informational, used by callers that
 # need to distinguish structural from unknown feature codes.
 _STRUCTURAL_FEATURE_CODES: frozenset[str] = frozenset(
@@ -75,6 +79,17 @@ def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
         return False
     st = row.get("structure_type")
     return isinstance(st, str) and st in _CONTEXT_FEATURE_CODES
+
+
+def _is_replacement_pair(prev_st: str | None, curr_st: str | None) -> bool:
+    """Return True when prev and curr form an EXpole ↔ structural replacement pair.
+
+    Exactly one of the two structure_type values must be an EXpole code.
+    This covers EX→PR and PR→EX orderings (XOR logic).
+    """
+    if not isinstance(prev_st, str) or not isinstance(curr_st, str):
+        return False
+    return (prev_st in _EXPOLE_CODES) != (curr_st in _EXPOLE_CODES)
 
 
 def _deduplicate_issues(issues: list[dict]) -> list[dict]:
@@ -300,10 +315,12 @@ def run_qa_checks(df, rules):
             has_record_role = "_record_role" in qc.columns
 
             prev_e = prev_n = None
+            prev_st: str | None = None
             for _, row in qc.iterrows():
                 # Anchor rows are at unrelated reference locations — reset chain.
                 if has_record_role and row.get("_record_role") == "anchor":
                     prev_e = prev_n = None
+                    prev_st = None
                     continue
                 # Context rows bridge the span — skip without resetting chain.
                 if _is_context_row(row, has_structure_type):
@@ -313,24 +330,41 @@ def run_qa_checks(df, rules):
                 lon = row.get(lon_field)
                 if any(_is_missing_scalar(v) for v in (lat, lon)):
                     prev_e = prev_n = None
+                    prev_st = None
                     continue
                 try:
                     e, n = transformer.transform(float(lon), float(lat))
                 except Exception:
                     prev_e = prev_n = None
+                    prev_st = None
                     continue
+
+                _st_raw = row.get("structure_type") if has_structure_type else None
+                curr_st = str(_st_raw) if isinstance(_st_raw, str) else None
+
                 if prev_e is not None:
                     dist = math.sqrt((e - prev_e) ** 2 + (n - prev_n) ** 2)
                     if dist < min_m:
-                        issues.append(
-                            {
-                                "Issue": (
-                                    f"Span too short: {dist:.1f}m between structural records "
-                                    f"(min {min_m}m) — possible duplicate entry"
-                                ),
-                                "Row": row.to_dict(),
-                            }
-                        )
+                        if _is_replacement_pair(prev_st, curr_st):
+                            issues.append(
+                                {
+                                    "Issue": (
+                                        f"Replacement pair detected (EX → PR, {dist:.1f}m offset)"
+                                    ),
+                                    "Row": row.to_dict(),
+                                    "Severity": "WARN",
+                                }
+                            )
+                        else:
+                            issues.append(
+                                {
+                                    "Issue": (
+                                        f"Span too short: {dist:.1f}m between structural records "
+                                        f"(min {min_m}m) — possible duplicate entry"
+                                    ),
+                                    "Row": row.to_dict(),
+                                }
+                            )
                     elif dist > max_m:
                         issues.append(
                             {
@@ -342,6 +376,7 @@ def run_qa_checks(df, rules):
                             }
                         )
                 prev_e, prev_n = e, n
+                prev_st = curr_st
 
         # --- checks that use a single `field` key ---
 

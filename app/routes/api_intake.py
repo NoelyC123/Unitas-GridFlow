@@ -286,8 +286,9 @@ def _sanitize_issues_for_csv(issues_df: pd.DataFrame) -> pd.DataFrame:
 
 def _collect_per_row_issues(issues_df: pd.DataFrame) -> dict[int, dict[str, Any]]:
     """
-    Return {row_index: {"count": int, "texts": list[str]}} for each flagged row.
-    Stores up to 3 issue descriptions per row, truncated to 80 chars each.
+    Return {row_index: {"count": int, "texts": list, "warn_count": int, "warn_texts": list}}
+    for each flagged row. WARN issues (Severity="WARN") are tracked separately.
+    Stores up to 3 descriptions per row per severity, truncated to 80 chars each.
     """
     result: dict[int, dict[str, Any]] = {}
     if issues_df.empty or "Row" not in issues_df.columns:
@@ -295,14 +296,26 @@ def _collect_per_row_issues(issues_df: pd.DataFrame) -> dict[int, dict[str, Any]
     for _, issue_row in issues_df.iterrows():
         row_payload = issue_row.get("Row")
         issue_text = str(issue_row.get("Issue", ""))
+        _sev = issue_row.get("Severity", None)
+        severity = str(_sev).upper() if isinstance(_sev, str) else "FAIL"
         if isinstance(row_payload, dict):
             row_index = row_payload.get("__row_index__")
             if isinstance(row_index, int):
                 if row_index not in result:
-                    result[row_index] = {"count": 0, "texts": []}
-                result[row_index]["count"] += 1
-                if len(result[row_index]["texts"]) < 3:
-                    result[row_index]["texts"].append(issue_text[:80])
+                    result[row_index] = {
+                        "count": 0,
+                        "texts": [],
+                        "warn_count": 0,
+                        "warn_texts": [],
+                    }
+                if severity == "WARN":
+                    result[row_index]["warn_count"] += 1
+                    if len(result[row_index]["warn_texts"]) < 3:
+                        result[row_index]["warn_texts"].append(issue_text[:80])
+                else:
+                    result[row_index]["count"] += 1
+                    if len(result[row_index]["texts"]) < 3:
+                        result[row_index]["texts"].append(issue_text[:80])
     return result
 
 
@@ -316,6 +329,7 @@ def _build_feature_collection(
     features: list[dict[str, Any]] = []
 
     pass_count = 0
+    warn_count = 0
     fail_count = 0
 
     for _, row in df.reset_index(drop=True).iterrows():
@@ -331,17 +345,30 @@ def _build_feature_collection(
         if lat is None or lon is None:
             continue
 
-        _empty: dict[str, Any] = {"count": 0, "texts": []}
+        _empty: dict[str, Any] = {
+            "count": 0,
+            "texts": [],
+            "warn_count": 0,
+            "warn_texts": [],
+        }
         row_data = per_row.get(row_index, _empty) if isinstance(row_index, int) else _empty
         row_issue_count = row_data["count"]
         row_issue_texts = row_data["texts"]
+        row_warn_count = row_data.get("warn_count", 0)
+        row_warn_texts = row_data.get("warn_texts", [])
 
         if row_issue_count > 0:
             qa_status = "FAIL"
             fail_count += 1
+        elif row_warn_count > 0:
+            qa_status = "WARN"
+            warn_count += 1
         else:
             qa_status = "PASS"
             pass_count += 1
+
+        # Mark replacement pairs so the map popup can show a contextual note.
+        is_replacement = any("Replacement pair" in t for t in row_warn_texts)
 
         feature = {
             "type": "Feature",
@@ -366,6 +393,7 @@ def _build_feature_collection(
                 "issue_count": row_issue_count,
                 "issue_texts": row_issue_texts,
                 "record_role": _safe_value(row.get("_record_role")),
+                "relationship": "replacement_pair" if is_replacement else None,
             },
         }
         features.append(feature)
@@ -377,7 +405,7 @@ def _build_feature_collection(
         "pole_count": len(features),
         "span_count": 0,
         "pass_count": pass_count,
-        "warn_count": 0,
+        "warn_count": warn_count,
         "fail_count": fail_count,
         "issue_count": len(issues_df),
     }
@@ -463,6 +491,23 @@ def finalize(job_short: str):
             selected_rules = filter_rules_for_controller(selected_rules)
         issues_df = run_qa_checks(df, selected_rules)
         issues_df = _postprocess_issues(issues_df, df)
+
+        # Count replacement pairs and surface in design readiness.
+        replacement_cluster_count = 0
+        if not issues_df.empty and "Severity" in issues_df.columns and "Issue" in issues_df.columns:
+            replacement_cluster_count = int(
+                (
+                    (issues_df["Severity"] == "WARN")
+                    & issues_df["Issue"].str.contains("Replacement pair", na=False)
+                ).sum()
+            )
+        if replacement_cluster_count > 0:
+            noun = "cluster" if replacement_cluster_count == 1 else "clusters"
+            design_readiness.setdefault("what_this_supports", []).append(
+                f"{replacement_cluster_count} replacement {noun} detected"
+                f" — likely EX → PR design intent"
+            )
+            design_readiness["replacement_cluster_count"] = replacement_cluster_count
 
         map_issues_df = issues_df.copy()
         csv_issues_df = _sanitize_issues_for_csv(issues_df)
