@@ -8,6 +8,40 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (docs alignment — WORKFLOW_SYSTEM.md integration)
+
+### Added
+
+- `WORKFLOW_SYSTEM.md` — defines the operating model across all AI tools. Records
+  tool roles (human domain authority, ChatGPT orchestrator, Claude Code execution
+  engine, Claude Desktop verification layer), source of truth hierarchy, core
+  workflow loop, and current phase context.
+
+### Changed
+
+- `AI_CONTROL/00_PROJECT_CANONICAL.md`: core principle statement added (trusted gate,
+  reliability/clarity/design-readiness framing from WORKFLOW_SYSTEM.md); WORKFLOW_SYSTEM.md
+  and `app/controller_intake.py` added to project structure and key source files;
+  phase status updated to include validation batches 2 and 3; navigation pointer added.
+
+- `README.md`: test count corrected (38 → 70); completed steps updated to include
+  validation batches 2 and 3; stale limitation removed ("intake centered on structured
+  CSV only" — raw controller dumps now supported); WORKFLOW_SYSTEM.md added to project
+  structure section.
+
+- `AI_CONTROL/04_SESSION_HANDOFF.md`: rewritten to reflect current state (batch 3
+  complete, WORKFLOW_SYSTEM.md added, 70 tests passing).
+
+- `CLAUDE.md`: WORKFLOW_SYSTEM.md added to optional session-start reads; core principle
+  statement and tool-role clarification added to project identity section.
+
+### State at end of session
+
+- 70 tests passing. No code changes. All docs aligned with current repo truth.
+- Control layer, README, CLAUDE.md, and WORKFLOW_SYSTEM.md consistent.
+
+---
+
 ## 2026-04-23 (validation batch 3 — coord_consistency fix + QA noise suppression)
 
 ### Fixed

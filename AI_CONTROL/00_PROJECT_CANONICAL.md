@@ -6,6 +6,10 @@
 
 **Identity:** A survey-to-design QA gatekeeper for structured pre-CAD validation.
 
+**Core principle:** Act as the trusted gate between survey and design — improving the reliability, clarity, and design-readiness of real survey data before office work begins.
+
+Every step must answer: *"Does this improve the reliability, clarity, and design-readiness of real survey data?"*
+
 ---
 
 ## Why this project exists
@@ -85,6 +89,7 @@ The repository is intentionally split into three layers:
 - `README.md`
 - `CHANGELOG.md`
 - `CLAUDE.md`
+- `WORKFLOW_SYSTEM.md`
 - `PROJECT_DEEP_CONTEXT.md`
 - root config/runtime files
 
@@ -166,7 +171,7 @@ These are environment-specific and not part of the shared project truth.
 
 ## Current phase
 
-**Working MVP + Phase 1 complete + Phase 2A complete + next: validation-led product improvement**
+**Working MVP + Phase 1 complete + Phase 2A complete + Validation batch 2 complete + Validation batch 3 complete + current: validation-led proof-of-value work (Phase 2C)**
 
 This means:
 
@@ -238,6 +243,7 @@ Important secondary weakness:
 
 ### Intake / pipeline
 
+- `app/controller_intake.py`
 - `app/routes/api_intake.py`
 - `app/routes/api_upload.py`
 - `app/routes/map_preview.py`
@@ -287,3 +293,4 @@ Important secondary weakness:
 - How do I work? → `03_WORKING_RULES.md`
 - What changed last session? → `04_SESSION_HANDOFF.md`
 - What did the strategic review conclude? → `06_STRATEGIC_REVIEW_2026-04-22.md`
+- How does the project operate across all tools? → `WORKFLOW_SYSTEM.md`

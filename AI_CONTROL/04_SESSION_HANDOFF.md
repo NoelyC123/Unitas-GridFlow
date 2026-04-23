@@ -2,52 +2,63 @@
 
 ## Session summary
 
-This session completed validation batch 2: analysed the first real-job survey file
-(NIE job 28-14 513, Strabane area) through the current intake path, identified the
-raw controller dump format as the critical parsing gap, and shipped the fix.
+This session completed two things:
 
-The key outcome is:
+1. **Validation batch 3** — fixed coord_consistency false positives for non-OSGB
+   grid-derived files and suppressed structurally meaningless QA noise for raw
+   controller dump inputs.
 
-**The tool can now parse real GNSS controller dump files and produce a meaningful completeness summary for design-handoff purposes.**
+2. **Docs alignment batch** — aligned core project documents (00_PROJECT_CANONICAL.md,
+   README.md, CLAUDE.md, CHANGELOG.md) with WORKFLOW_SYSTEM.md and the current
+   validation-led project position.
 
 ---
 
 ## What was completed this session
 
-### Real-job validation analysis
+### Validation batch 3 — coord_consistency fix + QA noise suppression
 
-- Analysed first real job (NIE Networks, job 28-14 513, Strabane area) through the current intake path
-- Confirmed the tool could not parse the raw GNSS controller dump format
-- The raw format has a metadata header row (`Job:X,Version:Y,Units:Z`) where `pd.read_csv` treats the metadata as column names, making all field detection fail
-- Completeness output before this fix: 0% coverage on all fields, `position_status: "no_position"` — completely useless
+- `coord_consistency` CRS guard added to `app/qa_engine.py`. When `_grid_crs` is
+  set and is not `EPSG:27700`, the check is skipped. Without this, every real NIE
+  job (TM65 coordinates) produced a false positive on every pole — the check was
+  converting lat/lon to OSGB27700 and comparing against TM65 easting/northing values
+  which are in a different coordinate space.
 
-### Raw controller dump parser shipped
+- `filter_rules_for_controller()` added to `app/dno_rules.py`. Removes checks that
+  produce noise rather than signal for controller dump files: `required`/`allowed_values`
+  for `material` (absent from format), `allowed_values` for `structure_type` (feature
+  codes Angle/Pol/Hedge are valid surveyor codes, not schema values), and
+  `dependent_allowed_values` (structure_type → material mapping meaningless without
+  material). Span distance, unique_pair, coordinate bounds, regex, and required pole_id
+  are preserved.
 
-- `is_raw_controller_dump(first_line)` added — detects metadata-header format before `pd.read_csv` is called
-- `parse_raw_controller_dump(path)` added — uses Python's `csv` module (not `pd.read_csv`) because raw dumps have variable column counts per row that pandas C parser cannot handle
-- GPS elevation (col 3) deliberately NOT mapped to height — only explicit `FeatureCode:HEIGHT` inline attribute maps there
-- `FeatureCode:REMARK` attribute maps to `location`
-- Feature code (col 4) maps to `structure_type`
+- Filter applied in `app/routes/api_intake.py` when `file_type == "controller"`.
+  Structured CSV path unchanged.
 
-### Completeness summary tightened
+- 3 new focused tests added. 70 total tests passing (up from 67).
 
-- `feature_codes_found` added to `build_completeness_summary` output — surfaces unique feature/structure codes (Angle, Pol, Hedge, EXpole etc.)
-- After the fix, completeness summary for job 28-14 513 would report:
-  - total_records: 11
-  - grid_crs_detected: EPSG:29900 (TM65 — Irish Grid)
-  - height coverage: 2/11 (18.2%)
-  - location/remarks: 2/11 (18.2%)
-  - material: 0/11 (0%)
-  - structure_type: 11/11 (100%)
-  - feature_codes_found: [Angle, EXpole, Hedge, Pol]
-- This matches the VALIDATION_ANALYSIS intent exactly
+### Docs alignment batch
 
-### Tests
+- `WORKFLOW_SYSTEM.md` added to repo by user — defines the operating model across all
+  AI tools (ChatGPT orchestrator, Claude Code builder, Claude Desktop verifier).
 
-- 8 new unit tests added (is_raw_controller_dump, parse_raw_controller_dump, completeness summary edge cases)
-- 1 end-to-end integration test added confirming the raw dump path works through the finalize route
-- 67 total tests passing (up from 38)
-- All tests green, pre-commit clean
+- `AI_CONTROL/00_PROJECT_CANONICAL.md` updated:
+  - core principle statement added (trusted gate, reliability/clarity/design-readiness)
+  - `WORKFLOW_SYSTEM.md` added to active project structure and navigation
+  - `app/controller_intake.py` added to key source files
+  - phase status updated to include validation batches 2 and 3
+
+- `README.md` updated:
+  - test count corrected (38 → 70)
+  - completed steps updated to include batches 2 and 3
+  - stale limitation removed ("intake centered on structured CSV only")
+  - `WORKFLOW_SYSTEM.md` added to project structure
+
+- `AI_CONTROL/04_SESSION_HANDOFF.md` (this file) rewritten to current state.
+
+- `CLAUDE.md` updated with WORKFLOW_SYSTEM.md reference.
+
+- `CHANGELOG.md` updated with docs alignment entry.
 
 ---
 
@@ -56,63 +67,40 @@ The key outcome is:
 ### Project state
 
 - Working local MVP exists
-- Phase 1 (QA rule improvements) is complete
-- Phase 2A (input/header normalisation) is complete
-- Validation batch 2 (raw controller intake + completeness tightening) is complete
-- pytest, Ruff, pre-commit, and CI remain active
-- The tool can now parse real GNSS controller dump files
+- Phase 1 (QA rule improvements) complete
+- Phase 2A (input/header normalisation) complete
+- Validation batch 2 (raw controller intake + completeness) complete
+- Validation batch 3 (coord_consistency fix + QA noise suppression) complete
+- 70 tests passing, pre-commit clean, CI active
+- Raw GNSS controller dump files can be parsed end-to-end
+- NIE real jobs no longer generate false positives from coord_consistency
+- Controller dump QA output contains only meaningful signal
 
 ### Strategic state
 
-- The project should continue
-- The project should remain narrow
-- Real-file intake gap is now resolved for the raw controller dump format
-- The next meaningful question is whether the completeness output is useful to real users
-
-### Main unresolved question
-
-The central unresolved question is now:
-
-**Is the completeness summary output useful enough that a designer would actually trust and act on it?**
+- WORKFLOW_SYSTEM.md now defines the operating model for all tools
+- Core principle: trusted gate between survey and design
+- Project remains validation-led, not feature-led
+- Next meaningful question: is the completeness output useful to a real designer?
 
 ---
 
 ## Current phase
 
-**Working MVP + Phase 1 complete + Phase 2A complete + next: validation-led proof-of-value work**
-
----
-
-## What changed in project understanding
-
-Previously, the project direction was still largely feature-led:
-
-- improve QA rules
-- broaden schema handling
-- continue roadmap execution
-
-The strategic review changed that emphasis.
-
-The project is now understood as being in a **proof-risk** phase rather than a **concept-risk** phase.
-
-That means:
-
-- the concept is strong enough
-- the MVP is credible enough
-- the main uncertainty is now whether it proves useful in real-world use
+**Working MVP + Phase 1 complete + Phase 2A complete + Validation batches 2 and 3 complete + current: Phase 2C — validation-led proof-of-value work**
 
 ---
 
 ## Next session should
 
 1. Read `02_CURRENT_TASK.md`
-2. Obtain user feedback on whether the completeness summary output is useful in practice
-3. If more real files are available, run them through the parser and record:
-   - whether the parser handles them correctly
-   - whether the completeness output is the right level of detail
+2. Obtain user feedback on whether the completeness summary output is useful
+3. If more real files are available, run them through the system and record:
+   - whether intake handles them correctly
+   - whether completeness output is the right level of detail
    - what a designer would actually need to act on the report
-4. Use that evidence to define the next precise development step
-5. If no new evidence is available, the tool is at a stable state and does not need further speculative improvement
+4. Consider Phase 3: surfacing completeness summary in the map view UI
+5. Use real evidence to define the next precise development step
 
 ---
 
@@ -121,9 +109,9 @@ That means:
 Do NOT:
 
 - broaden the product into a larger platform
-- add more superficial rulepacks just for coverage
+- add more rulepacks without validation evidence
 - focus on commercial packaging before proof-of-value exists
-- treat more feature work as the default next step without validation evidence
+- treat more feature work as the default next step
 
 ---
 
@@ -132,6 +120,6 @@ Do NOT:
 - Scope stays narrow (pre-CAD QA only)
 - Control layer remains the single source of truth
 - `_archive/` is never used for active decisions
-- Code and control files stay aligned
 - `pytest -v` must be green after every code change
-- Real-world validation evidence now takes priority over abstract expansion
+- Real-world validation evidence takes priority over abstract expansion
+- WORKFLOW_SYSTEM.md defines tool roles — Claude Code is the execution engine only

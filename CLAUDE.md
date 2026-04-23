@@ -23,6 +23,7 @@ Read additional files only if needed:
 - `AI_CONTROL/01_CURRENT_STATE.md` → only if current reality is needed
 - `AI_CONTROL/04_SESSION_HANDOFF.md` → only if continuing prior work
 - `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` → only if strategic direction is relevant to the current step
+- `WORKFLOW_SYSTEM.md` → only if tool roles or operating model are relevant
 - specific code/test files → only if they are part of the approved task
 
 Never read unless explicitly asked:
@@ -36,6 +37,8 @@ Never read unless explicitly asked:
 
 Unitas GridFlow is a narrow pre-CAD QA and compliance tool for survey-to-design handoffs.
 
+Core principle: act as the trusted gate between survey and design — improving the reliability, clarity, and design-readiness of real survey data before office work begins.
+
 Purpose:
 
 - validate survey data before design/CAD
@@ -43,6 +46,8 @@ Purpose:
 - act as a structured QA gate between survey and design
 
 It is not a general platform.
+
+In the workflow system (see `WORKFLOW_SYSTEM.md`), Claude Code is the **execution engine**: implement tasks exactly as defined, keep tests passing, make minimal targeted changes. Decisions about what to build are made by the human and ChatGPT orchestrator.
 
 ---
 

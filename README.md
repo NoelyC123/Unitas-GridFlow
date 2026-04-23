@@ -83,7 +83,9 @@ The project has moved beyond setup and baseline scaffolding.
 - 10 QA check types
 - Phase 1 complete: QA rule improvements
 - Phase 2A complete: input/header normalisation improvements
-- 38 passing tests
+- Validation batch 2 complete: raw GNSS controller dump intake + completeness reporting
+- Validation batch 3 complete: coord_consistency fix for non-OSGB grids + QA noise suppression for controller files
+- 70 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue
@@ -121,7 +123,6 @@ This is now more important than abstract feature expansion.
 - issue modelling is still lightweight
 - browser E2E coverage not yet implemented
 - output model is still MVP-level, not production-grade
-- current intake model is still centered on structured CSV workflows only
 
 ---
 
@@ -154,6 +155,7 @@ The repository is intentionally split into three layers:
 - `README.md`
 - `CHANGELOG.md`
 - `CLAUDE.md`
+- `WORKFLOW_SYSTEM.md` → how the project operates across all tools
 - `PROJECT_DEEP_CONTEXT.md`
 - root config files
 
