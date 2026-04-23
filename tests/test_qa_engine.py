@@ -830,3 +830,192 @@ def test_span_distance_message_shows_one_decimal_precision() -> None:
     assert len(span_short) == 1
     # Message must contain a decimal point for the distance value
     assert "." in span_short[0], f"Expected decimal precision in span message, got: {span_short[0]}"
+
+
+def test_angle_no_stay_emits_warn() -> None:
+    """An Angle record with no stay-evidence record nearby must emit a WARN.
+
+    A Pol at 100m distance is not stay evidence. The Angle has no stay in
+    its remarks either. Exactly one WARN must be emitted, Severity='WARN'.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A-1",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "structure_type": "Angle",
+                "location": None,
+            },
+            {
+                # 0.001 deg lat ≈ 111m away — not stay evidence
+                "pole_id": "P-1",
+                "lat": 54.5210,
+                "lon": -3.0000,
+                "structure_type": "Pol",
+                "location": None,
+            },
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "angle_stay",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "proximity_m": 30,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    assert len(warn_issues) == 1, f"Expected one angle/stay WARN, got: {issue_texts}"
+    assert "Severity" in issues.columns
+    sev = issues[issues["Issue"].str.contains("Angle structure with no stay")]["Severity"].iloc[0]
+    assert sev == "WARN", f"Expected Severity='WARN', got: {sev}"
+
+
+def test_angle_with_stay_within_proximity_no_warn() -> None:
+    """An Angle record with a Stay record within proximity_m must produce no issues.
+
+    Stay at 20m (well inside the 30m threshold) satisfies the check.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A-1",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "structure_type": "Angle",
+                "location": None,
+            },
+            {
+                # 0.00018 deg lat ≈ 20m — within 30m proximity
+                "pole_id": "S-1",
+                "lat": 54.52018,
+                "lon": -3.0000,
+                "structure_type": "Stay",
+                "location": None,
+            },
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "angle_stay",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "proximity_m": 30,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist() if "Issue" in issues.columns else []
+
+    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    assert len(warn_issues) == 0, f"Unexpected WARN with stay in proximity: {issue_texts}"
+
+
+def test_angle_with_stay_beyond_proximity_emits_warn() -> None:
+    """Stay record beyond proximity_m must not satisfy the angle/stay check.
+
+    Stay at 60m (beyond the 30m threshold) is too far — WARN must be emitted.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A-1",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "structure_type": "Angle",
+                "location": None,
+            },
+            {
+                # 0.0006 deg lat ≈ 67m — outside 30m proximity
+                "pole_id": "S-1",
+                "lat": 54.5206,
+                "lon": -3.0000,
+                "structure_type": "Stay",
+                "location": None,
+            },
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "angle_stay",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "proximity_m": 30,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    assert len(warn_issues) == 1, f"Expected WARN when stay is beyond proximity, got: {issue_texts}"
+
+
+def test_angle_stay_remarks_evidence_suppresses_warn() -> None:
+    """Stay mention in the angle record's own remarks must suppress the WARN.
+
+    If no stay-code record exists but the angle pole's location/remarks
+    contains 'stay', that secondary evidence is sufficient to pass the check.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A-1",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "structure_type": "Angle",
+                "location": "stay installed 3m west",
+            },
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "angle_stay",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "proximity_m": 30,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist() if "Issue" in issues.columns else []
+
+    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    assert len(warn_issues) == 0, f"Expected no WARN when remarks mention stay, got: {issue_texts}"
+
+
+def test_angle_stay_no_issue_for_pol_only_file() -> None:
+    """Files with no Angle records must produce no angle_stay issues.
+
+    The check silently skips when _ANGLE_CODES finds no matches.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "2", "lat": 54.5210, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    df["__row_index__"] = df.index
+    rules = [
+        {
+            "check": "angle_stay",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "proximity_m": 30,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist() if "Issue" in issues.columns else []
+
+    warn_issues = [t for t in issue_texts if "Angle structure" in t]
+    assert len(warn_issues) == 0, f"Unexpected angle_stay issues for Pol-only file: {issue_texts}"

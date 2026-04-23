@@ -44,6 +44,26 @@ _CONTEXT_FEATURE_CODES: frozenset[str] = frozenset(
 # suppress false 'span too short' FAILs for EX→PR replacement pairs.
 _EXPOLE_CODES: frozenset[str] = frozenset({"EXpole", "expole", "EXPOLE"})
 
+# Angle/deviation structure codes — structures that typically require a stay.
+_ANGLE_CODES: frozenset[str] = frozenset({"Angle", "angle", "ANGLE"})
+
+# Structure codes that constitute stay evidence when found near an angle record.
+# Also covers "Stay pole" (a combined angle+stay structure).
+_STAY_EVIDENCE_CODES: frozenset[str] = frozenset(
+    {
+        "Stay",
+        "stay",
+        "STAY",
+        "Staywire",
+        "staywire",
+        "STAYWIRE",
+        "Stay wire",
+        "stay wire",
+        "Stay pole",
+        "stay pole",
+    }
+)
+
 # Explicit structural support records — informational, used by callers that
 # need to distinguish structural from unknown feature codes.
 _STRUCTURAL_FEATURE_CODES: frozenset[str] = frozenset(
@@ -377,6 +397,63 @@ def run_qa_checks(df, rules):
                         )
                 prev_e, prev_n = e, n
                 prev_st = curr_st
+
+        elif check == "angle_stay":
+            # For each Angle record, check whether any stay-evidence record
+            # is within proximity_m. If none found (and no stay mention in
+            # the angle record's own remarks), emit a cautious WARN.
+            lat_field = rule.get("lat_field", "lat")
+            lon_field = rule.get("lon_field", "lon")
+            proximity_m = rule.get("proximity_m", 30)
+
+            if "structure_type" not in qc.columns:
+                continue
+            if lat_field not in qc.columns or lon_field not in qc.columns:
+                continue
+
+            transformer = _OSGB_TRANSFORMER
+            angle_records: list[tuple] = []  # (row, e, n)
+            stay_positions: list[tuple] = []  # (e, n)
+
+            for _, row in qc.iterrows():
+                st = row.get("structure_type")
+                if not isinstance(st, str):
+                    continue
+                lat = row.get(lat_field)
+                lon = row.get(lon_field)
+                if _is_missing_scalar(lat) or _is_missing_scalar(lon):
+                    continue
+                try:
+                    e, n = transformer.transform(float(lon), float(lat))
+                except Exception:
+                    continue
+                if st in _ANGLE_CODES:
+                    angle_records.append((row, e, n))
+                elif st in _STAY_EVIDENCE_CODES:
+                    stay_positions.append((e, n))
+
+            for angle_row, ae, an in angle_records:
+                has_stay = any(
+                    math.sqrt((ae - se) ** 2 + (an - sn) ** 2) <= proximity_m
+                    for se, sn in stay_positions
+                )
+                # Secondary evidence: stay mentioned in the angle record's own remarks.
+                if not has_stay:
+                    loc = angle_row.get("location", "")
+                    if isinstance(loc, str) and "stay" in loc.lower():
+                        has_stay = True
+                if not has_stay:
+                    issues.append(
+                        {
+                            "Issue": (
+                                "Angle structure with no stay evidence detected"
+                                " — verify whether stay capture is missing"
+                                " or not required for this job"
+                            ),
+                            "Row": angle_row.to_dict(),
+                            "Severity": "WARN",
+                        }
+                    )
 
         # --- checks that use a single `field` key ---
 

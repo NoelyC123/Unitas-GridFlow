@@ -145,6 +145,14 @@ class MapViewer {
         ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Replacement Pair (Existing &#8594; Proposed)</div>`
         : '';
 
+      // General WARN block — shown for WARN features that are not replacement pairs
+      // (replacement pairs have their own dedicated replacementLine above).
+      const warnTexts = props.warn_texts || [];
+      const warnBlock = (props.warn_count > 0 && props.relationship !== 'replacement_pair')
+        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Design Note${props.warn_count > 1 ? 's' : ''} (${props.warn_count}):</div>
+           ${warnTexts.map(t => `<div class="popup-row" style="color:#92400e;font-size:0.8em;margin-left:6px;">&#8226; ${this.escapeHtml(t)}</div>`).join('')}`
+        : '';
+
       const popupHtml = `
         <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
@@ -155,6 +163,7 @@ class MapViewer {
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
         ${coordLine}
         ${replacementLine}
+        ${warnBlock}
         ${issueBlock}
       `;
 
@@ -274,6 +283,11 @@ class MapViewer {
         ? `<div style="color:#b91c1c;font-size:0.78em;margin-top:2px;">• ${this.escapeHtml(firstIssue.substring(0, 65))}</div>`
         : '';
 
+      const firstWarn = (p.warn_texts || [])[0] || '';
+      const warnHtml = fd.status === 'WARN' && firstWarn && p.relationship !== 'replacement_pair'
+        ? `<div style="color:#92400e;font-size:0.78em;margin-top:2px;">&#9888; ${this.escapeHtml(firstWarn.substring(0, 65))}</div>`
+        : '';
+
       item.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
           <span style="font-weight:600;font-size:0.82rem;">${idText}</span>
@@ -281,6 +295,7 @@ class MapViewer {
         </div>
         <div style="color:#6b7280;font-size:0.78rem;">${typeText}${detailText ? ' · ' + detailText : ''}</div>
         ${issueHtml}
+        ${warnHtml}
       `;
 
       item.addEventListener('click', () => {

@@ -509,6 +509,23 @@ def finalize(job_short: str):
             )
             design_readiness["replacement_cluster_count"] = replacement_cluster_count
 
+        # Count angle-without-stay WARNs and surface in design readiness.
+        angle_no_stay_count = 0
+        if not issues_df.empty and "Severity" in issues_df.columns and "Issue" in issues_df.columns:
+            angle_no_stay_count = int(
+                (
+                    (issues_df["Severity"] == "WARN")
+                    & issues_df["Issue"].str.contains("Angle structure with no stay", na=False)
+                ).sum()
+            )
+        if angle_no_stay_count > 0:
+            noun = "structure" if angle_no_stay_count == 1 else "structures"
+            design_readiness.setdefault("reasons", []).append(
+                f"{angle_no_stay_count} angle {noun} with no stay evidence"
+                f" — check whether stay capture is missing from this survey"
+            )
+            design_readiness["angle_no_stay_count"] = angle_no_stay_count
+
         map_issues_df = issues_df.copy()
         csv_issues_df = _sanitize_issues_for_csv(issues_df)
 

@@ -201,8 +201,10 @@ def qa_pdf(job_id: str):
         for idx, issue in enumerate(issues[:max_rows], start=1):
             issue_text = str(issue.get("Issue", "Unknown issue")).strip()
             row_text = str(issue.get("Row", "")).strip()
+            sev = str(issue.get("Severity", "")).strip().upper()
+            sev_prefix = "[WARN] " if sev == "WARN" else ""
 
-            _draw_line(pdf, f"{idx}. {issue_text}", left, y)
+            _draw_line(pdf, f"{idx}. {sev_prefix}{issue_text}", left, y)
             y -= line_gap
 
             if row_text:

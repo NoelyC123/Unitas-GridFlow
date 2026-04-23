@@ -28,6 +28,15 @@ BASE_RULES = [
         "field": "structure_type",
         "values": STRUCTURE_TYPE_VALUES,
     },
+    # Angle/stay evidence check: flags angle structures with no detected stay.
+    # Silently produces no issues for structured CSVs where structure_type is
+    # "Wood Pole" etc. (no match in _ANGLE_CODES), so safe in all rulepacks.
+    {
+        "check": "angle_stay",
+        "lat_field": "lat",
+        "lon_field": "lon",
+        "proximity_m": 30,
+    },
 ]
 
 
