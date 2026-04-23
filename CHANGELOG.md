@@ -8,6 +8,76 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 9 — record-role classification + anchor handling + role breakdown UI)
+
+### Added
+
+- `_classify_role()` and `classify_record_roles()` in `app/controller_intake.py`.
+  Assigns every row one of three roles: `structural` (Pol, Angle, EXpole, etc.),
+  `context` (Hedge, Tree, Gate, Track, Stream, etc.), or `anchor` (grid reference
+  control points like GB_Kelso / GB_Selkirk — identified by absent structure_type and
+  non-numeric pole_id).
+
+- `_STRUCTURAL_CODES` and `_CONTEXT_CODES` frozensets in `app/controller_intake.py`,
+  mirroring `app/qa_engine.py` so both modules share consistent classification.
+
+- `_df_no_anchor` filter at the top of `run_qa_checks()` in `app/qa_engine.py`.
+  Anchor rows are excluded from every QA check except `span_distance`, which needs
+  them to detect chain breaks at reference locations.
+
+- Anchor chain-reset logic in the `span_distance` handler: when an anchor row is
+  encountered `prev_e / prev_n` are cleared to `None`, preventing cross-anchor span
+  comparisons (e.g. the ~20 km jump from a GB_Kelso reference point to the first
+  survey pole no longer fires a false span-too-long issue).
+
+- `what_this_supports` positive list in `build_design_readiness()` output, answering
+  what the file enables rather than only listing gaps.
+
+- Structural/context/anchor counts (`structural_count`, `context_count`,
+  `anchor_count`) in `build_completeness_summary()` output.
+
+- `structural_fields` per-field coverage in completeness summary — height/material
+  capture rates are now calculated against structural records only, so a Gate with
+  height 1.6 m does not pollute the structural height coverage percentage.
+
+- `#role-breakdown` div in `app/templates/map_viewer.html` showing "■ N structural
+  · ■ N context · ◇ N anchor" inline in the map side panel.
+
+- `what_this_supports` bullet list under Design Readiness in the map side panel and
+  in PDF reports.
+
+- Composition line in the Survey Completeness section of the PDF report
+  (e.g. "Composition: 40 structural, 12 context, 2 anchor").
+
+- JS cache version bumped to `?v=6` in `map_viewer.html`.
+
+### Changed
+
+- `_CONTEXT_FEATURE_CODES` in `app/qa_engine.py` and the `CONTEXT_FEATURE_CODES` set
+  in `app/static/js/map-viewer.js` expanded to include Gate, Track, and Stream (all
+  three case variants). Previously these codes were not listed, causing Gate/Track/
+  Stream rows to be evaluated as unknown structural features and triggering false
+  height FAILs.
+
+- `api_intake.py` finalize route now calls `classify_record_roles(df)` after CRS
+  conversion, propagates role counts into map metadata, and skips anchor rows when
+  building the GeoJSON feature collection (anchor rows are not map markers).
+
+- `build_design_readiness()` uses `structural_fields` (structural-only coverage) for
+  height and material percentage calculations instead of whole-file coverage.
+
+### Tests
+
+- `test_anchor_row_excluded_from_required_check` — anchor row with absent height
+  produces no issue; structural row with absent height is still flagged.
+- `test_span_distance_resets_chain_at_anchor_row` — anchor row between two poles
+  8.9 km apart breaks the chain; no span-too-long issue is raised.
+- `test_gate_track_stream_no_height_range_fail` — Gate, Track, Stream below minimum
+  height produce no FAIL with `structural_only: True`; Pol below minimum still flags.
+- Test count: **92 passing** (was 89).
+
+---
+
 ## 2026-04-23 (validation batch 8 — strict feature-aware QA + issue deduplication)
 
 ### Changed
