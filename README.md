@@ -86,7 +86,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Validation batch 2 complete: raw GNSS controller dump intake + completeness reporting
 - Validation batch 3 complete: coord_consistency fix for non-OSGB grids + QA noise suppression for controller files
 - Validation batch 4 complete: NIE_11kV rulepack auto-detection from Irish Grid CRS + completeness surfacing in map view and PDF
-- 74 passing tests
+- Validation batch 5 complete: design readiness verdict + survey coverage categories + enhanced map popups
+- 79 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue

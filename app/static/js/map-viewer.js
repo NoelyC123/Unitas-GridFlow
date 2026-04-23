@@ -90,12 +90,22 @@ class MapViewer {
         fillOpacity: 0.9
       });
 
+      const locName = props.name && props.name !== props.id ? props.name : null;
+      const hasEasting = props.easting != null && props.easting !== '';
+      const coordLine = hasEasting
+        ? `<div class="popup-row" style="font-size:0.85em"><strong>E/N:</strong> ${this.escapeHtml(props.easting)}, ${this.escapeHtml(props.northing)}</div>`
+        : `<div class="popup-row" style="font-size:0.85em"><strong>Lat/Lon:</strong> ${lat.toFixed(5)}, ${lon.toFixed(5)}</div>`;
+
       const popupHtml = `
         <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
-        <div class="popup-row"><strong>Pole ID:</strong> ${this.escapeHtml(props.pole_id || '')}</div>
-        <div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material || '')}</div>
-        <div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height || '')}</div>
+        ${props.pole_id != null ? `<div class="popup-row"><strong>Pole ID:</strong> ${this.escapeHtml(props.pole_id)}</div>` : ''}
+        ${props.structure_type != null ? `<div class="popup-row"><strong>Type:</strong> ${this.escapeHtml(props.structure_type)}</div>` : ''}
+        ${props.height != null && props.height !== '' ? `<div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height)}m</div>` : ''}
+        ${props.material != null && props.material !== '' ? `<div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material)}</div>` : ''}
+        ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
+        ${coordLine}
+        ${props.issue_count > 0 ? `<div class="popup-row" style="color:#d94141;font-weight:600;">Issues: ${props.issue_count}</div>` : ''}
       `;
 
       marker.bindPopup(popupHtml);

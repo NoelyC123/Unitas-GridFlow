@@ -10,6 +10,7 @@ from flask import Blueprint, jsonify, request
 
 from app.controller_intake import (
     build_completeness_summary,
+    build_design_readiness,
     convert_grid_to_wgs84,
     is_controller_csv,
     is_raw_controller_dump,
@@ -282,19 +283,16 @@ def _sanitize_issues_for_csv(issues_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(cleaned_rows)
 
 
-def _infer_issue_rows(issues_df: pd.DataFrame) -> set[int]:
-    flagged_rows: set[int] = set()
-
+def _count_issues_per_row(issues_df: pd.DataFrame) -> dict[int, int]:
+    counts: dict[int, int] = {}
     if issues_df.empty or "Row" not in issues_df.columns:
-        return flagged_rows
-
+        return counts
     for row_payload in issues_df["Row"].tolist():
         if isinstance(row_payload, dict):
             row_index = row_payload.get("__row_index__")
             if isinstance(row_index, int):
-                flagged_rows.add(row_index)
-
-    return flagged_rows
+                counts[row_index] = counts.get(row_index, 0) + 1
+    return counts
 
 
 def _build_feature_collection(
@@ -303,7 +301,7 @@ def _build_feature_collection(
     job_id: str,
     rulepack_id: str,
 ) -> dict[str, Any]:
-    flagged_rows = _infer_issue_rows(issues_df)
+    issue_counts = _count_issues_per_row(issues_df)
     features: list[dict[str, Any]] = []
 
     pass_count = 0
@@ -317,7 +315,8 @@ def _build_feature_collection(
         if lat is None or lon is None:
             continue
 
-        if row_index in flagged_rows:
+        row_issue_count = issue_counts.get(row_index, 0) if isinstance(row_index, int) else 0
+        if row_issue_count > 0:
             qa_status = "FAIL"
             fail_count += 1
         else:
@@ -344,6 +343,7 @@ def _build_feature_collection(
                 "structure_type": _safe_value(row.get("structure_type")),
                 "easting": _safe_value(row.get("easting")),
                 "northing": _safe_value(row.get("northing")),
+                "issue_count": row_issue_count,
             },
         }
         features.append(feature)
@@ -419,6 +419,7 @@ def finalize(job_short: str):
         df = convert_grid_to_wgs84(df)
 
         completeness = build_completeness_summary(df)
+        design_readiness = build_design_readiness(completeness)
 
         # If no DNO was explicitly supplied, infer NIE_11kV from Irish Grid CRS.
         # TM65 (EPSG:29900) and ITM (EPSG:2157) both indicate Northern Ireland;
@@ -463,6 +464,7 @@ def finalize(job_short: str):
                 "file_type": file_type,
                 "auto_normalized": auto_normalized,
                 "completeness": completeness,
+                "design_readiness": design_readiness,
                 "issue_count": len(map_issues_df),
                 "pole_count": feature_collection["metadata"]["pole_count"],
                 "span_count": feature_collection["metadata"]["span_count"],
@@ -485,6 +487,7 @@ def finalize(job_short: str):
                 "rulepack_inferred": rulepack_inferred,
                 "issue_count": len(map_issues_df),
                 "completeness": completeness,
+                "design_readiness": design_readiness,
             }
         )
 

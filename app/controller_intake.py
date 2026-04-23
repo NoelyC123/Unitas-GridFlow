@@ -316,3 +316,88 @@ def build_completeness_summary(df: pd.DataFrame) -> dict:
             result["feature_codes_found"] = unique_codes
 
     return result
+
+
+def _coverage_rating(pct: float) -> str:
+    if pct > 70:
+        return "Strong"
+    if pct > 20:
+        return "Partial"
+    return "Missing"
+
+
+def _position_pct(fields: dict) -> float:
+    """
+    Position & Identity coverage: best coordinate field (lat preferred, else easting)
+    averaged with pole_id and structure_type coverage.
+    """
+    lat_pct = fields.get("lat", {}).get("coverage_pct", 0.0)
+    easting_pct = fields.get("easting", {}).get("coverage_pct", 0.0)
+    coord_pct = max(lat_pct, easting_pct)
+    pole_id_pct = fields.get("pole_id", {}).get("coverage_pct", 0.0)
+    structure_pct = fields.get("structure_type", {}).get("coverage_pct", 0.0)
+    return round((coord_pct + pole_id_pct + structure_pct) / 3, 1)
+
+
+def build_design_readiness(completeness: dict) -> dict:
+    """
+    Derive a design readiness verdict and per-category coverage ratings from
+    existing completeness data. No new inputs required.
+
+    Returns:
+        verdict: NOT READY / PARTIALLY READY / LIKELY READY
+        reasons: short bullet points explaining the verdict
+        coverage: category → Strong / Partial / Missing
+    """
+    fields = completeness.get("fields") or {}
+
+    pos_pct = _position_pct(fields)
+    height_pct = fields.get("height", {}).get("coverage_pct", 0.0)
+    material_pct = fields.get("material", {}).get("coverage_pct", 0.0)
+    structural_pct = round((height_pct + material_pct) / 2, 1)
+
+    coverage: dict[str, str] = {
+        "Position & Identity": _coverage_rating(pos_pct),
+        "Structural Data": _coverage_rating(structural_pct),
+        "Electrical Configuration": "Missing",
+        "Stability & Safety": "Missing",
+        "Clearances": "Missing",
+        "Environment & Access": "Missing",
+    }
+
+    position_rating = coverage["Position & Identity"]
+    structural_rating = coverage["Structural Data"]
+
+    reasons: list[str] = []
+
+    if position_rating == "Missing":
+        reasons.append("position data absent — records cannot be placed on network")
+    elif position_rating == "Partial":
+        reasons.append("position data incomplete — some records cannot be located")
+
+    if height_pct == 0.0 and material_pct == 0.0:
+        reasons.append("no structural data captured (height and material absent from digital file)")
+    else:
+        if height_pct < 70.0:
+            label = "absent" if height_pct == 0.0 else f"{height_pct}% coverage"
+            reasons.append(f"height data incomplete ({label})")
+        if material_pct < 70.0:
+            label = "absent" if material_pct == 0.0 else f"{material_pct}% coverage"
+            reasons.append(f"material data incomplete ({label})")
+
+    reasons.append(
+        "electrical, stability, clearances, and environment data not captured in digital file"
+    )
+
+    if position_rating == "Missing":
+        verdict = "NOT READY"
+    elif position_rating == "Strong" and structural_rating == "Strong":
+        verdict = "LIKELY READY"
+    else:
+        verdict = "PARTIALLY READY"
+
+    return {
+        "verdict": verdict,
+        "reasons": reasons,
+        "coverage": coverage,
+    }

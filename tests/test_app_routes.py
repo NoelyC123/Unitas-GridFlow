@@ -506,6 +506,98 @@ def test_map_view_passes_completeness_to_template(tmp_path, monkeypatch) -> None
     assert "Angle" in html
 
 
+def test_pdf_report_includes_design_readiness_when_present(tmp_path, monkeypatch) -> None:
+    """PDF route must produce a valid PDF when meta contains a design_readiness dict."""
+    from app.routes import pdf_reports
+
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J60002"
+    job_dir.mkdir(parents=True)
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J60002",
+            "status": "complete",
+            "rulepack_id": "NIE_11kV",
+            "auto_normalized": True,
+            "pole_count": 3,
+            "issue_count": 0,
+            "design_readiness": {
+                "verdict": "PARTIALLY READY",
+                "reasons": [
+                    "height data incomplete (18.2% coverage)",
+                    "material data incomplete (absent)",
+                    "electrical, stability, clearances, and environment data not captured",
+                ],
+                "coverage": {
+                    "Position & Identity": "Strong",
+                    "Structural Data": "Missing",
+                    "Electrical Configuration": "Missing",
+                    "Stability & Safety": "Missing",
+                    "Clearances": "Missing",
+                    "Environment & Access": "Missing",
+                },
+            },
+        },
+    )
+    (job_dir / "issues.csv").write_text("Issue,Row\n", encoding="utf-8")
+
+    monkeypatch.setattr(pdf_reports, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/pdf/qa/J60002")
+
+    assert response.status_code == 200
+    assert response.mimetype == "application/pdf"
+    assert response.data.startswith(b"%PDF")
+
+
+def test_map_view_includes_design_readiness_verdict(tmp_path, monkeypatch) -> None:
+    """Map view must render design readiness verdict in HTML when meta.json contains it."""
+    from app.routes import map_preview
+
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J70002"
+    job_dir.mkdir(parents=True)
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J70002",
+            "status": "complete",
+            "design_readiness": {
+                "verdict": "PARTIALLY READY",
+                "reasons": ["height data incomplete (18.2% coverage)"],
+                "coverage": {
+                    "Position & Identity": "Strong",
+                    "Structural Data": "Missing",
+                    "Electrical Configuration": "Missing",
+                    "Stability & Safety": "Missing",
+                    "Clearances": "Missing",
+                    "Environment & Access": "Missing",
+                },
+            },
+        },
+    )
+
+    monkeypatch.setattr(map_preview, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/map/view/J70002")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Design Readiness" in html
+    assert "PARTIALLY READY" in html
+    assert "Survey Coverage" in html
+    assert "Position &amp; Identity" in html
+
+
 def test_import_finalize_returns_500_when_csv_file_missing(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     job_dir = jobs_root / "J50007"

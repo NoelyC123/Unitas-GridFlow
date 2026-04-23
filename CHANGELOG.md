@@ -8,6 +8,59 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 5 — design readiness + survey coverage + enhanced map popups)
+
+### Added
+
+- `build_design_readiness(completeness)` in `app/controller_intake.py`. Derives a
+  design readiness verdict (NOT READY / PARTIALLY READY / LIKELY READY) and
+  per-category survey coverage ratings (Strong / Partial / Missing) entirely from
+  existing completeness data. No new inputs. Categories: Position & Identity,
+  Structural Data, Electrical Configuration, Stability & Safety, Clearances,
+  Environment & Access. Position & Identity rating uses the best coordinate field
+  (lat preferred, then easting) averaged with pole_id and structure_type coverage.
+  Structural Data rating uses the mean of height and material coverage.
+  Always-absent categories (Electrical etc.) are shown as Missing, reflecting what
+  real survey digital files do not contain, without penalising the verdict.
+
+- Design Readiness section in map view side panel (Jinja2 server-side). Shows
+  verdict in a colour-coded label (green/amber/red), a bullet list of reasons, and
+  the full Survey Coverage category breakdown with colour-coded ratings.
+
+- Design Readiness section in PDF QA report. Shows verdict, reasons, and survey
+  coverage category table; page-overflow guard included.
+
+- `_count_issues_per_row(issues_df)` in `app/routes/api_intake.py`. Replaces
+  `_infer_issue_rows` in `_build_feature_collection`; returns a dict mapping
+  row_index → issue_count so each GeoJSON feature now carries an `issue_count`
+  property rather than just a binary PASS/FAIL flag.
+
+- Enhanced map marker popups in `app/static/js/map-viewer.js`. Each popup now
+  shows: pole_id, structure_type / feature code, height (with "m" unit), material,
+  remarks/location (if distinct from id), easting/northing (or lat/lon if no grid
+  coords), and issue count (highlighted red when > 0). Fields absent from the
+  record are omitted cleanly.
+
+- `design_readiness` stored in `meta.json` and returned in the finalize route
+  JSON response alongside `completeness`.
+
+- 5 new focused tests (3 unit, 2 route-level):
+  - `test_build_design_readiness_likely_ready`
+  - `test_build_design_readiness_partially_ready_missing_structural`
+  - `test_build_design_readiness_not_ready_missing_position`
+  - `test_pdf_report_includes_design_readiness_when_present`
+  - `test_map_view_includes_design_readiness_verdict`
+
+### State at end of session
+
+- 79 tests passing (up from 74).
+- Map view and PDF both surface design readiness verdict, reasons, and survey
+  coverage categories alongside existing completeness detail.
+- Each map marker popup shows full record detail including issue count.
+- design_readiness persisted in meta.json and returned in finalize response.
+
+---
+
 ## 2026-04-23 (validation batch 4 — rulepack auto-detection + completeness surfacing)
 
 ### Fixed

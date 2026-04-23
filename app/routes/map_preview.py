@@ -33,13 +33,20 @@ def _empty_feature_collection(job_id: str) -> dict:
 def map_view(job_id: str):
     meta_path = JOBS_ROOT / job_id / "meta.json"
     completeness: dict = {}
+    design_readiness: dict = {}
     if meta_path.exists():
         try:
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
             completeness = meta.get("completeness") or {}
+            design_readiness = meta.get("design_readiness") or {}
         except Exception:
             pass
-    return render_template("map_viewer.html", job_id=job_id, completeness=completeness)
+    return render_template(
+        "map_viewer.html",
+        job_id=job_id,
+        completeness=completeness,
+        design_readiness=design_readiness,
+    )
 
 
 @map_preview_bp.get("/data/<job_id>")

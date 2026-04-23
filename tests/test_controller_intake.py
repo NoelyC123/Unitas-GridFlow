@@ -5,6 +5,7 @@ import pytest
 
 from app.controller_intake import (
     build_completeness_summary,
+    build_design_readiness,
     convert_grid_to_wgs84,
     detect_grid_crs,
     is_controller_csv,
@@ -340,3 +341,57 @@ def test_parse_raw_controller_dump_easting_northing_are_numeric(tmp_path) -> Non
     assert df["northing"].dtype.kind == "f"
     assert df.loc[0, "easting"] == pytest.approx(242186.075)
     assert df.loc[0, "northing"] == pytest.approx(402362.807)
+
+
+# ---------------------------------------------------------------------------
+# build_design_readiness
+# ---------------------------------------------------------------------------
+
+_FULL_FIELDS = {
+    "pole_id": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "lat": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "lon": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "easting": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "northing": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "structure_type": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "height": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+    "material": {"present": 5, "missing": 0, "coverage_pct": 100.0},
+}
+
+
+def test_build_design_readiness_likely_ready() -> None:
+    result = build_design_readiness({"total_records": 5, "fields": _FULL_FIELDS})
+
+    assert result["verdict"] == "LIKELY READY"
+    assert result["coverage"]["Position & Identity"] == "Strong"
+    assert result["coverage"]["Structural Data"] == "Strong"
+    assert result["coverage"]["Electrical Configuration"] == "Missing"
+    assert isinstance(result["reasons"], list)
+
+
+def test_build_design_readiness_partially_ready_missing_structural() -> None:
+    fields = {
+        **_FULL_FIELDS,
+        "height": {"present": 2, "missing": 9, "coverage_pct": 18.2},
+        "material": {"present": 0, "missing": 11, "coverage_pct": 0.0},
+    }
+    result = build_design_readiness({"total_records": 11, "fields": fields})
+
+    assert result["verdict"] == "PARTIALLY READY"
+    assert result["coverage"]["Position & Identity"] == "Strong"
+    assert result["coverage"]["Structural Data"] == "Missing"
+    assert any("structural" in r or "height" in r or "material" in r for r in result["reasons"])
+
+
+def test_build_design_readiness_not_ready_missing_position() -> None:
+    fields = {
+        "pole_id": {"present": 0, "missing": 5, "coverage_pct": 0.0},
+        "lat": {"present": 0, "missing": 5, "coverage_pct": 0.0},
+        "easting": {"present": 0, "missing": 5, "coverage_pct": 0.0},
+        "structure_type": {"present": 0, "missing": 5, "coverage_pct": 0.0},
+    }
+    result = build_design_readiness({"total_records": 5, "fields": fields})
+
+    assert result["verdict"] == "NOT READY"
+    assert result["coverage"]["Position & Identity"] == "Missing"
+    assert any("position" in r for r in result["reasons"])

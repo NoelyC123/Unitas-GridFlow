@@ -98,6 +98,34 @@ def qa_pdf(job_id: str):
     _draw_line(pdf, f"Issue count: {meta.get('issue_count', 0)}", left, y)
     y -= 8 * mm
 
+    design_readiness = meta.get("design_readiness") or {}
+    if design_readiness:
+        verdict = design_readiness.get("verdict", "")
+        _draw_line(pdf, "Design Readiness", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+        _draw_line(pdf, f"Verdict: {verdict}", left, y, font="Helvetica-Bold", size=11)
+        y -= line_gap
+
+        for reason in design_readiness.get("reasons") or []:
+            _draw_line(pdf, f"  - {str(reason)[:110]}", left, y, size=9)
+            y -= line_gap
+            if y < 30 * mm:
+                pdf.showPage()
+                y = top
+
+        coverage = design_readiness.get("coverage") or {}
+        if coverage:
+            _draw_line(pdf, "Survey Coverage:", left, y)
+            y -= line_gap
+            for cat, rating in coverage.items():
+                _draw_line(pdf, f"  {cat}: {rating}", left, y, size=9)
+                y -= line_gap
+                if y < 30 * mm:
+                    pdf.showPage()
+                    y = top
+
+        y -= 4 * mm
+
     completeness = meta.get("completeness") or {}
     if completeness:
         _draw_line(pdf, "Survey Completeness", left, y, font="Helvetica-Bold", size=12)

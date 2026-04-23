@@ -307,6 +307,33 @@
               This job contains flagged issues. Click markers to inspect record details, then use the PDF for the full issue list.
             </div>
 
+            {% if design_readiness and design_readiness.verdict %}
+            <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Design Readiness</div>
+              <div style="font-weight: 700; font-size: 1.0rem; margin-bottom: 6px; color: {% if design_readiness.verdict == 'LIKELY READY' %}#2e8b57{% elif design_readiness.verdict == 'PARTIALLY READY' %}#d39e00{% else %}#d94141{% endif %};">
+                {{ design_readiness.verdict }}
+              </div>
+              {% if design_readiness.reasons %}
+              <ul style="margin: 0 0 8px 0; padding-left: 16px; font-size: 0.82rem; color: #475569;">
+                {% for reason in design_readiness.reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+              {% if design_readiness.coverage %}
+              <div style="margin-top: 6px;">
+                <div style="font-weight: 600; font-size: 0.82rem; color: #374151; margin-bottom: 4px;">Survey Coverage:</div>
+                {% for category, rating in design_readiness.coverage.items() %}
+                <div class="meta-row" style="font-size: 0.8rem;">
+                  <span>{{ category }}</span>
+                  <span style="font-weight: 600; color: {% if rating == 'Strong' %}#2e8b57{% elif rating == 'Partial' %}#d39e00{% else %}#9ca3af{% endif %};">{{ rating }}</span>
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+
             {% if completeness and completeness.total_records %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
               <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Survey Completeness</div>
