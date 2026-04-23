@@ -93,6 +93,15 @@ def run_qa_checks(df, rules):
                     )
 
         elif check == "coord_consistency":
+            # Skip when easting/northing are in a non-OSGB CRS. This check
+            # reprojects lat/lon to EPSG:27700 and compares against declared
+            # easting/northing; for TM65/ITM files the comparison is across
+            # different coordinate spaces and always produces false positives.
+            if "_grid_crs" in df.columns:
+                detected_crs = df["_grid_crs"].dropna()
+                if len(detected_crs) and str(detected_crs.iloc[0]) != "EPSG:27700":
+                    continue
+
             lat_field = rule.get("lat_field", "lat")
             lon_field = rule.get("lon_field", "lon")
             easting_field = rule.get("easting_field", "easting")

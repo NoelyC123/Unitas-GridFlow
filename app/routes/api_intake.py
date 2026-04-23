@@ -16,7 +16,7 @@ from app.controller_intake import (
     parse_controller_csv,
     parse_raw_controller_dump,
 )
-from app.dno_rules import DNO_RULES, RULEPACKS
+from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.qa_engine import run_qa_checks
 
 api_intake_bp = Blueprint("api_intake", __name__)
@@ -424,6 +424,8 @@ def finalize(job_short: str):
         df["__row_index__"] = df.index
 
         selected_rules = RULEPACKS.get(requested_dno) or RULEPACKS.get("DEFAULT") or DNO_RULES
+        if file_type == "controller":
+            selected_rules = filter_rules_for_controller(selected_rules)
         issues_df = run_qa_checks(df, selected_rules)
         issues_df = _postprocess_issues(issues_df, df)
 

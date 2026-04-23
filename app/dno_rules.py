@@ -319,6 +319,37 @@ ENWL_11KV_RULES = [
 ]
 
 
+def filter_rules_for_controller(rules: list[dict]) -> list[dict]:
+    """
+    Remove checks that produce noise rather than signal for raw controller dump
+    files. Material is absent from the format; structure_type holds surveyor
+    feature codes (Angle, Pol, Hedge) rather than schema values. Per-row
+    required checks for height and location are already covered more usefully
+    by the completeness summary.
+    """
+    _noise_keys: frozenset[tuple[str, str | None]] = frozenset(
+        {
+            ("required", "material"),
+            ("required", "height"),
+            ("required", "location"),
+            ("allowed_values", "material"),
+            ("allowed_values", "structure_type"),
+        }
+    )
+    result = []
+    for rule in rules:
+        check = rule.get("check")
+        field = rule.get("field")
+        if check == "dependent_allowed_values":
+            # All current instances map structure_type → material — meaningless
+            # for controller files where material is not a digital field.
+            continue
+        if (check, field) in _noise_keys:
+            continue
+        result.append(rule)
+    return result
+
+
 RULEPACKS: dict[str, list[dict]] = {
     "DEFAULT": BASE_RULES,
     "SPEN_11kV": SPEN_11KV_RULES,

@@ -388,6 +388,74 @@ def test_span_distance_flags_poles_too_close() -> None:
     assert "Span too short" in issues.iloc[0]["Issue"]
 
 
+def test_coord_consistency_skips_for_non_osgb_grid_crs() -> None:
+    """coord_consistency must produce no issues when _grid_crs is a non-OSGB CRS.
+
+    TM65 easting/northing (Strabane area) with WGS84 lat/lon derived from them.
+    Comparing OSGB27700-projected lat/lon against TM65 easting/northing values
+    would produce a ~27 km apparent mismatch on every pole — a false positive.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "lat": 54.827,
+                "lon": -7.378,
+                "easting": 242186.0,
+                "northing": 402362.0,
+                "_grid_crs": "EPSG:29900",
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "coord_consistency",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "easting_field": "easting",
+            "northing_field": "northing",
+            "tolerance_m": 100,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0
+
+
+def test_coord_consistency_still_runs_for_explicit_osgb27700_grid_crs() -> None:
+    """coord_consistency must still catch mismatches when _grid_crs is EPSG:27700.
+
+    Glasgow lat/lon paired with London easting/northing — clear mismatch that
+    must be flagged even when _grid_crs is explicitly set to EPSG:27700.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "lat": 55.861,
+                "lon": -4.251,
+                "easting": 530000,
+                "northing": 180000,
+                "_grid_crs": "EPSG:27700",
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "coord_consistency",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "easting_field": "easting",
+            "northing_field": "northing",
+            "tolerance_m": 100,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert "Coordinate mismatch" in issues.iloc[0]["Issue"]
+
+
 def test_span_distance_passes_normal_span() -> None:
     # 0.001 degree lat ≈ 111m — within 10–500m range
     df = pd.DataFrame(

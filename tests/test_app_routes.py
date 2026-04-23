@@ -301,6 +301,53 @@ def test_import_finalize_handles_raw_controller_dump(tmp_path, monkeypatch) -> N
     assert updated_meta["file_type"] == "controller"
 
 
+def test_import_finalize_controller_dump_suppresses_noise_issues(tmp_path, monkeypatch) -> None:
+    """Raw controller dump through NIE_11kV must not produce material or
+    structure_type noise. Coord consistency must not fire on TM65 files.
+    """
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J50100"
+    job_dir.mkdir(parents=True)
+
+    raw_dump = (
+        "Job:28-14 513,Version:24.00,Units:Metres\n"
+        "PRS485572899536,219497.298,413575.610,118.985,\n"
+        "1,242186.075,402362.807,99.505,Angle,Angle:REMARK,convert to tee\n"
+        "2,242218.756,402321.523,97.200,Pol,Pol:HEIGHT,6.1\n"
+        "3,242245.112,402276.834,95.800,Hedge\n"
+    )
+    csv_path = job_dir / "dump.csv"
+    csv_path.write_text(raw_dump, encoding="utf-8")
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J50100",
+            "uploaded_path": str(csv_path),
+            "filename": "dump.csv",
+            "status": "uploaded",
+        },
+    )
+
+    monkeypatch.setattr(api_intake, "_jobs_root", lambda: jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/api/import/J50100", json={"dno": "NIE_11kV"})
+    assert response.status_code == 200
+    assert response.get_json()["ok"] is True
+
+    issues_text = (job_dir / "issues.csv").read_text(encoding="utf-8")
+
+    # material is absent from the controller format — must not appear in issues
+    assert "material" not in issues_text.lower()
+    # feature codes (Angle, Pol, Hedge) are valid surveyor codes — not invalid structure_type
+    assert "Invalid value for 'structure_type'" not in issues_text
+    # TM65 easting/northing must not be compared against OSGB27700-projected lat/lon
+    assert "Coordinate mismatch" not in issues_text
+
+
 def test_import_finalize_returns_500_when_csv_file_missing(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     job_dir = jobs_root / "J50007"
