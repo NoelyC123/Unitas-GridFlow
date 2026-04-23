@@ -379,7 +379,8 @@ def test_build_design_readiness_partially_ready_missing_structural() -> None:
 
     assert result["verdict"] == "PARTIALLY READY"
     assert result["coverage"]["Position & Identity"] == "Strong"
-    assert result["coverage"]["Structural Data"] == "Missing"
+    # structural_pct = (18.2 + 0.0) / 2 = 9.1 — any nonzero coverage is "Partial"
+    assert result["coverage"]["Structural Data"] == "Partial"
     assert any("structural" in r or "height" in r or "material" in r for r in result["reasons"])
 
 
@@ -395,3 +396,33 @@ def test_build_design_readiness_not_ready_missing_position() -> None:
     assert result["verdict"] == "NOT READY"
     assert result["coverage"]["Position & Identity"] == "Missing"
     assert any("position" in r for r in result["reasons"])
+
+
+def test_coverage_rating_partial_for_low_nonzero_coverage() -> None:
+    """Any coverage > 0% must return 'Partial', not 'Missing'.
+
+    This verifies the fix for overly harsh binary labelling: a file where
+    even a small number of records have a field captured should show 'Partial'
+    rather than the same 'Missing' label as truly absent data.
+    """
+    from app.controller_intake import _coverage_rating
+
+    assert _coverage_rating(5.0) == "Partial"
+    assert _coverage_rating(15.0) == "Partial"
+    assert _coverage_rating(20.0) == "Partial"
+    assert _coverage_rating(0.1) == "Partial"
+
+
+def test_coverage_rating_missing_only_at_zero() -> None:
+    """Only 0% coverage must produce 'Missing'."""
+    from app.controller_intake import _coverage_rating
+
+    assert _coverage_rating(0.0) == "Missing"
+
+
+def test_coverage_rating_strong_above_threshold() -> None:
+    """Coverage above 70% must remain 'Strong'."""
+    from app.controller_intake import _coverage_rating
+
+    assert _coverage_rating(71.0) == "Strong"
+    assert _coverage_rating(100.0) == "Strong"

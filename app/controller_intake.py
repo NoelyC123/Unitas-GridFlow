@@ -433,7 +433,7 @@ def build_completeness_summary(df: pd.DataFrame) -> dict:
 def _coverage_rating(pct: float) -> str:
     if pct > 70:
         return "Strong"
-    if pct > 20:
+    if pct > 0:
         return "Partial"
     return "Missing"
 
@@ -499,6 +499,9 @@ def build_design_readiness(completeness: dict) -> dict:
     reasons: list[str] = []
     what_supports: list[str] = []
 
+    st_pct = fields.get("structure_type", {}).get("coverage_pct", 0.0)
+    context_count_n = completeness.get("context_count") or 0
+
     if position_rating == "Missing":
         reasons.append(f"{rec_noun} cannot be located — position data absent from digital file")
     elif position_rating == "Partial":
@@ -507,6 +510,15 @@ def build_design_readiness(completeness: dict) -> dict:
         )
     else:
         what_supports.append(f"locating {rec_noun} on the network")
+
+    if st_pct > 70:
+        what_supports.append("identifying pole types and network roles along the route")
+
+    if context_count_n > 0:
+        noun = "feature" if context_count_n == 1 else "features"
+        what_supports.append(
+            f"locating {context_count_n} environmental and crossing {noun} along the route"
+        )
 
     if height_pct == 0.0 and material_pct == 0.0:
         reasons.append(

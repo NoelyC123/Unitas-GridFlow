@@ -704,3 +704,35 @@ def test_gate_track_stream_no_height_range_fail() -> None:
     assert row.get("structure_type") == "Pol", (
         f"Expected the flagged row to be Pol, got: {row.get('structure_type')}"
     )
+
+
+def test_span_distance_message_shows_one_decimal_precision() -> None:
+    """Span issue text must show distances to 1 decimal place.
+
+    Previously the format was {dist:.0f}m, which could produce messages like
+    'Span too short: 10m (min 10m)' for a 9.6m span, misleading designers.
+    The fix uses {dist:.1f}m so the actual value is always unambiguous.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000},
+            # 0.00003 deg lat ≈ 3.3m — well below 10m minimum
+            {"pole_id": "2", "lat": 54.52003, "lon": -3.0000},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    span_short = [i for i in issues["Issue"].tolist() if "Span too short" in i]
+    assert len(span_short) == 1
+    # Message must contain a decimal point for the distance value
+    assert "." in span_short[0], f"Expected decimal precision in span message, got: {span_short[0]}"

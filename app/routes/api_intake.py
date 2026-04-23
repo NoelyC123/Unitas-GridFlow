@@ -492,7 +492,9 @@ def finalize(job_short: str):
                 "completeness": completeness,
                 "design_readiness": design_readiness,
                 "issue_count": len(map_issues_df),
-                "pole_count": feature_collection["metadata"]["pole_count"],
+                "pole_count": completeness.get(
+                    "total_records", feature_collection["metadata"]["pole_count"]
+                ),
                 "span_count": feature_collection["metadata"]["span_count"],
                 "pass_count": feature_collection["metadata"]["pass_count"],
                 "warn_count": feature_collection["metadata"]["warn_count"],

@@ -325,7 +325,7 @@ def run_qa_checks(df, rules):
                         issues.append(
                             {
                                 "Issue": (
-                                    f"Span too short: {dist:.0f}m between structural records "
+                                    f"Span too short: {dist:.1f}m between structural records "
                                     f"(min {min_m}m) — possible duplicate entry"
                                 ),
                                 "Row": row.to_dict(),
@@ -335,7 +335,7 @@ def run_qa_checks(df, rules):
                         issues.append(
                             {
                                 "Issue": (
-                                    f"Span too long: {dist:.0f}m between structural records "
+                                    f"Span too long: {dist:.1f}m between structural records "
                                     f"(max {max_m}m) — possible GPS error or missing record"
                                 ),
                                 "Row": row.to_dict(),

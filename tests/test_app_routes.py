@@ -693,3 +693,46 @@ def test_import_finalize_returns_500_when_csv_file_missing(tmp_path, monkeypatch
 
     updated_meta = json.loads((job_dir / "meta.json").read_text(encoding="utf-8"))
     assert updated_meta["status"] == "error"
+
+
+def test_meta_pole_count_matches_completeness_total_records(tmp_path, monkeypatch) -> None:
+    """meta.json pole_count must equal completeness.total_records (all rows in file).
+
+    When a controller dump contains anchor rows, completeness.total_records
+    includes them but map features exclude them. The meta pole_count must reflect
+    the full file total so the PDF header and completeness section are consistent.
+    """
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J50008"
+    job_dir.mkdir(parents=True)
+
+    # Raw dump: 1 anchor row (GB_Selkirk) + 2 structural poles
+    raw_dump = (
+        "Job:TestJob,Version:24.00,Units:Metres\n"
+        "GB_Selkirk,352789.208,627382.398,105.000,\n"
+        "1,352841.000,503122.000,99.000,Pol,Pol:HEIGHT,9.5\n"
+        "2,352910.000,503088.000,98.000,Pol,Pol:HEIGHT,10.0\n"
+    )
+    csv_path = job_dir / "test.csv"
+    csv_path.write_text(raw_dump, encoding="utf-8")
+
+    _write_json(
+        job_dir / "meta.json",
+        {"job_id": "J50008", "uploaded_path": str(csv_path), "status": "uploaded"},
+    )
+
+    monkeypatch.setattr(api_intake, "_jobs_root", lambda: jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/api/import/J50008", json={"dno": "SPEN_11kV"})
+    assert response.status_code == 200
+
+    updated_meta = json.loads((job_dir / "meta.json").read_text(encoding="utf-8"))
+    completeness = updated_meta.get("completeness", {})
+
+    # total_records = 3 (anchor + 2 structural)
+    assert completeness["total_records"] == 3
+    # pole_count in meta must equal total_records, not map-feature count
+    assert updated_meta["pole_count"] == completeness["total_records"]
