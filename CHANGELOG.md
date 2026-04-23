@@ -8,6 +8,48 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 8 — strict feature-aware QA + issue deduplication)
+
+### Changed
+
+- `range` check handler in `app/qa_engine.py` now respects a `structural_only: True`
+  flag on rules. When set, rows where `structure_type` is a context feature (Hedge,
+  Tree, Wall, Fence, Post) are skipped entirely — they never trigger height-out-of-range
+  or any other structural range failure.
+
+- `required` check handler applies the same `structural_only` gate. A Hedge or Tree
+  row with no height value no longer triggers "Missing required field: height".
+
+- All height `range` rules across BASE_RULES and all four rulepacks (SPEN, SSEN, NIE,
+  ENWL) now carry `"structural_only": True`. The base generic rule (7–25m) and each
+  rulepack-specific rule (7–20m) both scope to structural features only.
+
+- `required: height` in BASE_RULES now carries `"structural_only": True`.
+
+### Added
+
+- `_is_context_row(row, has_structure_type)` helper in `app/qa_engine.py` — centralises
+  the context-feature check used by the `structural_only` gate.
+
+- `_deduplicate_issues(issues)` function in `app/qa_engine.py`. Normalises issue text
+  by stripping the parenthesised parameter suffix (e.g. "(7-25)" from "height out of
+  range (7-25)"), then deduplicates by (row_index, normalised_prefix) key. This
+  collapses the duplicate height-range issues that BASE_RULES and a rulepack both fire
+  for the same structural record. Applied at the end of `run_qa_checks` before
+  returning the DataFrame.
+
+- 3 new tests in `tests/test_qa_engine.py`:
+  - `test_structural_only_range_skips_context_features`
+  - `test_structural_only_required_skips_context_features`
+  - `test_deduplication_collapses_same_logical_issue_per_row`
+
+- Updated `test_import_finalize_returns_success_for_valid_job` expected issue count
+  from 11 to 10, reflecting that the duplicate height-range issue for P-1003 (height
+  28.0, which previously fired both 7–25 and 7–20 rules) is now correctly deduplicated
+  to one issue.
+
+---
+
 ## 2026-04-23 (validation batch 7 — feature-aware QA + record inspection panel)
 
 ### Changed

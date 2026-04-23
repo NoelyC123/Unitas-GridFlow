@@ -7,7 +7,7 @@ STRUCTURE_TYPE_VALUES = ["Wood Pole", "Steel Pole", "Concrete Pole", "Composite 
 BASE_RULES = [
     {"check": "unique", "field": "pole_id"},
     {"check": "required", "field": "pole_id"},
-    {"check": "required", "field": "height"},
+    {"check": "required", "field": "height", "structural_only": True},
     {"check": "required", "field": "material"},
     {"check": "required", "field": "location"},
     {"check": "required", "field": "structure_type"},
@@ -16,7 +16,7 @@ BASE_RULES = [
     {"check": "required", "field": "easting"},
     {"check": "required", "field": "northing"},
     # Generic height range (overridden per DNO rulepack)
-    {"check": "range", "field": "height", "min": 7, "max": 25},
+    {"check": "range", "field": "height", "min": 7, "max": 25, "structural_only": True},
     # UK-wide coordinate bounds
     {"check": "range", "field": "lat", "min": 49, "max": 62},
     {"check": "range", "field": "lon", "min": -9, "max": 3},
@@ -42,7 +42,7 @@ SPEN_11KV_RULES = [
     #   Wood poles: 7m-14m standard for 11kV distribution
     #   Steel poles: 8m-20m
     #   Using 7-20m to cover both materials without per-material branching
-    {"check": "range", "field": "height", "min": 7, "max": 20},
+    {"check": "range", "field": "height", "min": 7, "max": 20, "structural_only": True},
     # --- Pole ID format ---
     {
         "check": "regex",
@@ -113,7 +113,7 @@ SSEN_11KV_RULES = [
     #   Wood poles: 7m-14m standard for 11kV distribution
     #   Steel poles: 8m-20m
     #   Using 7-20m to cover both materials without per-material branching
-    {"check": "range", "field": "height", "min": 7, "max": 20},
+    {"check": "range", "field": "height", "min": 7, "max": 20, "structural_only": True},
     # --- Pole ID format ---
     {
         "check": "regex",
@@ -193,7 +193,7 @@ NIE_11KV_RULES = [
     #   Wood poles: 7m-14m standard for 11kV distribution
     #   Steel poles: 8m-20m
     #   Using 7-20m to cover both materials without per-material branching
-    {"check": "range", "field": "height", "min": 7, "max": 20},
+    {"check": "range", "field": "height", "min": 7, "max": 20, "structural_only": True},
     # --- Pole ID format ---
     {
         "check": "regex",
@@ -262,7 +262,7 @@ NIE_11KV_RULES = [
 ENWL_11KV_RULES = [
     *BASE_RULES,
     # ENA TS 43-8 / ENWL 11kV: 7-20m covers wood (7-14m) and steel (8-20m)
-    {"check": "range", "field": "height", "min": 7, "max": 20},
+    {"check": "range", "field": "height", "min": 7, "max": 20, "structural_only": True},
     {
         "check": "regex",
         "field": "pole_id",

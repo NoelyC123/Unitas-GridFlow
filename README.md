@@ -89,7 +89,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Validation batch 5 complete: design readiness verdict + survey coverage categories + enhanced map popups
 - Validation batch 6 complete: issue-text popup explanation + interactive pass/fail filter + Records label + design-readiness wording + overlap detection
 - Validation batch 7 complete: feature-aware QA (Hedge skipped in span checks) + record inspection panel + "not captured" height in popups
-- 86 passing tests
+- Validation batch 8 complete: strict structural_only scoping for height rules + issue deduplication (no duplicate height FAILs per record)
+- 89 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue

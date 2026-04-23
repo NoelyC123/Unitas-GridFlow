@@ -9,11 +9,45 @@ from pyproj import Transformer
 _OSGB_TRANSFORMER = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
 
 # Feature codes for contextual/environmental survey markers (not structural poles).
-# These are excluded from structural span checks so a Hedge between two poles does
-# not create a false-positive "span too short" issue.
+# These are excluded from structural span checks and from structural-only rules
+# (height range, required height) so that Hedge/Tree/etc never trigger pole FAILs.
 _CONTEXT_FEATURE_CODES: frozenset[str] = frozenset(
     {"Hedge", "hedge", "HEDGE", "Tree", "tree", "Wall", "wall", "Fence", "fence", "Post", "post"}
 )
+
+
+def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
+    """Return True when this row represents a non-structural contextual feature."""
+    if not has_structure_type:
+        return False
+    st = row.get("structure_type")
+    return isinstance(st, str) and st in _CONTEXT_FEATURE_CODES
+
+
+def _deduplicate_issues(issues: list[dict]) -> list[dict]:
+    """Collapse duplicate issues that fire for the same row with the same logical check.
+
+    Two issues are considered duplicates when they share the same row index and the
+    same issue-text prefix (text before the first opening parenthesis). This handles
+    the case where BASE_RULES and a rulepack both define a height-range rule: both
+    fire independently and produce messages like "height out of range (7-25)" and
+    "height out of range (7-20)" for the same row — only the first should surface.
+    """
+    seen: set[tuple] = set()
+    result: list[dict] = []
+    for issue in issues:
+        row_dict = issue.get("Row") or {}
+        row_idx = row_dict.get("__row_index__", None)
+        text = issue.get("Issue", "")
+        # Normalise by stripping the parenthesised parameter suffix so that
+        # "height out of range (7-25)" and "height out of range (7-20)" share a key.
+        prefix = text.split(" (")[0].strip()
+        key = (row_idx, prefix)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(issue)
+    return result
 
 
 def _is_missing_value(series: pd.Series) -> pd.Series:
@@ -257,6 +291,8 @@ def run_qa_checks(df, rules):
         elif check == "range":
             min_val = rule.get("min", float("-inf"))
             max_val = rule.get("max", float("inf"))
+            structural_only = rule.get("structural_only", False)
+            has_st = "structure_type" in df.columns
 
             numeric_series = pd.to_numeric(df[field], errors="coerce")
             out_of_range = df[
@@ -264,6 +300,8 @@ def run_qa_checks(df, rules):
             ]
 
             for _, row in out_of_range.iterrows():
+                if structural_only and _is_context_row(row, has_st):
+                    continue
                 issues.append(
                     {
                         "Issue": f"{field} out of range ({min_val}-{max_val})",
@@ -272,9 +310,13 @@ def run_qa_checks(df, rules):
                 )
 
         elif check == "required":
+            structural_only = rule.get("structural_only", False)
+            has_st = "structure_type" in df.columns
             missing = df[_is_missing_value(df[field])]
 
             for _, row in missing.iterrows():
+                if structural_only and _is_context_row(row, has_st):
+                    continue
                 issues.append({"Issue": f"Missing required field: {field}", "Row": row.to_dict()})
 
         elif check == "allowed_values":
@@ -315,4 +357,4 @@ def run_qa_checks(df, rules):
         else:
             issues.append({"Issue": f"Unknown check type: {check}", "Row": {}})
 
-    return pd.DataFrame(issues)
+    return pd.DataFrame(_deduplicate_issues(issues))

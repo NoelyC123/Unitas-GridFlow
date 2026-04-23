@@ -535,3 +535,75 @@ def test_span_distance_context_feature_bridges_span_to_next_structural_record() 
 
     span_long = [i for i in issues["Issue"].tolist() if "Span too long" in i]
     assert len(span_long) == 1, f"Expected one span-too-long issue, got: {issues['Issue'].tolist()}"
+
+
+def test_structural_only_range_skips_context_features() -> None:
+    """structural_only: True on a range rule must not fire for Hedge/Tree rows.
+
+    Hedge has height=2 (below min=7). With structural_only it must produce zero issues.
+    Pol has height=26 (above max=25). With structural_only it must still be flagged.
+    """
+    df = pd.DataFrame(
+        [
+            {"structure_type": "Hedge", "height": 2.0},
+            {"structure_type": "Pol", "height": 26.0},
+        ]
+    )
+    rules = [{"check": "range", "field": "height", "min": 7, "max": 25, "structural_only": True}]
+
+    issues = run_qa_checks(df, rules)
+
+    issue_texts = issues["Issue"].tolist()
+    hedge_issues = [t for t in issue_texts if "height" in t.lower()]
+    assert len(hedge_issues) == 1, (
+        f"Expected exactly one height issue (for Pol), got: {hedge_issues}"
+    )
+    pol_issues = [i for i in issues.to_dict("records") if "out of range" in i["Issue"]]
+    assert len(pol_issues) == 1
+
+
+def test_structural_only_required_skips_context_features() -> None:
+    """structural_only: True on a required rule must not fire for Hedge rows missing height.
+
+    Hedge with no height set must not trigger 'Missing required field: height'.
+    Pol with no height set must still be flagged.
+    """
+    df = pd.DataFrame(
+        [
+            {"structure_type": "Hedge", "height": None},
+            {"structure_type": "Pol", "height": None},
+        ]
+    )
+    rules = [{"check": "required", "field": "height", "structural_only": True}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1, (
+        f"Expected one missing-height issue (for Pol), got: {issues['Issue'].tolist()}"
+    )
+    assert "Missing required field: height" in issues.iloc[0]["Issue"]
+
+
+def test_deduplication_collapses_same_logical_issue_per_row() -> None:
+    """Two height range rules for the same row must produce only one issue after dedup.
+
+    BASE_RULES has height range (7-25); SPEN adds (7-20). A pole with height=22
+    passes the (7-25) rule but fails (7-20). A pole with height=26 fails both.
+    After deduplication, each pole should show at most one height-out-of-range issue.
+    """
+    df = pd.DataFrame(
+        [
+            {"__row_index__": 0, "structure_type": "Pol", "height": 26.0},
+        ]
+    )
+    rules = [
+        {"check": "range", "field": "height", "min": 7, "max": 25, "structural_only": True},
+        {"check": "range", "field": "height", "min": 7, "max": 20, "structural_only": True},
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    height_issues = [t for t in issues["Issue"].tolist() if "height out of range" in t]
+    assert len(height_issues) == 1, (
+        f"Expected deduplication to collapse to 1 height issue, got: {height_issues}"
+    )
