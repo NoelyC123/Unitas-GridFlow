@@ -92,7 +92,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Validation batch 8 complete: strict structural_only scoping for height rules + issue deduplication (no duplicate height FAILs per record)
 - Validation batch 9 complete: record-role classification (structural/context/anchor), anchor chain-reset in span checks, Gate/Track/Stream as context, role breakdown in map UI and PDF
 - Validation batch 10 complete: record count consistency, span threshold decimal precision, coverage label fix (any data → Partial), expanded what_this_supports
-- 97 passing tests
+- Validation batch 11 complete: EX/PR replacement cluster detection — EXpole + nearby structural emits WARN instead of false span-too-short FAIL; relationship metadata in map popup and design readiness
+- 99 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue

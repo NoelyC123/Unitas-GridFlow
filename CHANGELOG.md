@@ -8,6 +8,57 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 11 — EX/PR replacement cluster detection)
+
+### Added
+
+- **Replacement pair detection**: adjacent structural records where exactly one
+  is an EXpole code (EXpole, expole, EXPOLE) and the distance is below the
+  minimum span threshold are now classified as replacement pairs rather than
+  flagged as "Span too short" FAILs. These emit a `Severity: WARN` issue:
+  `"Replacement pair detected (EX → PR, X.Xm offset)"`.
+
+- **`_is_replacement_pair()` helper in `qa_engine.py`**: XOR logic — fires when
+  exactly one of the two adjacent structure_type values is an EXpole code.
+  Covers both EX→PR and PR→EX orderings.
+
+- **`_EXPOLE_CODES` constant in `qa_engine.py`**: frozenset of EXpole variants
+  used by the replacement pair helper.
+
+- **WARN severity on issues**: WARN issues carry `{"Severity": "WARN"}` in the
+  issue dict. Code that doesn't know about the field defaults to FAIL treatment.
+
+- **WARN tracking in `_collect_per_row_issues`**: WARN issues are accumulated
+  separately in `warn_count`/`warn_texts` alongside the existing `count`/`texts`
+  (FAIL) keys.
+
+- **WARN marker status**: map features where only WARN (no FAIL) issues exist
+  receive `qa_status = "WARN"`, shown in amber on the map.
+
+- **`relationship` property on map features**: features involved in a replacement
+  pair get `"relationship": "replacement_pair"` in their GeoJSON properties.
+
+- **Map popup replacement line**: when `props.relationship === 'replacement_pair'`,
+  the popup shows "⚠ Replacement Pair (Existing → Proposed)" in amber.
+
+- **Design Readiness replacement bullet**: when replacement clusters are detected,
+  `design_readiness.what_this_supports` gains a bullet
+  `"N replacement clusters detected — likely EX → PR design intent"`, and
+  `replacement_cluster_count` is set on the design readiness dict.
+
+- **Actual `warn_count` in map metadata**: `feature_collection.metadata.warn_count`
+  now reflects the real count of WARN-status features rather than always being 0.
+
+### Tests
+
+- `test_replacement_cluster_detection` — EXpole + Pol at 3.3m → WARN
+  "Replacement pair detected", no FAIL; Severity column contains "WARN"
+- `test_span_suppression_does_not_apply_to_pol_pol` — Pol + Pol at 3.3m →
+  FAIL "Span too short", no replacement pair WARN
+- Test count: **99 passing** (was 97).
+
+---
+
 ## 2026-04-23 (validation batch 10 — consistency and threshold cleanup)
 
 ### Fixed
