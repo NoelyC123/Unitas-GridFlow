@@ -6,6 +6,7 @@ import pandas as pd
 
 from app.routes.api_intake import (
     _build_feature_collection,
+    _collect_per_row_issues,
     _normalize_dataframe,
     _postprocess_issues,
     _sanitize_issues_for_csv,
@@ -231,6 +232,83 @@ def test_normalize_dataframe_handles_osgb_aliases() -> None:
 
     assert normalized_df.loc[0, "easting"] == 352841
     assert normalized_df.loc[0, "northing"] == 503122
+
+
+def test_collect_per_row_issues_returns_count_and_texts() -> None:
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Missing required field: material",
+                "Row": {"pole_id": "P-1004", "__row_index__": 3},
+            },
+            {
+                "Issue": "height out of range (10-25)",
+                "Row": {"pole_id": "P-1004", "__row_index__": 3},
+            },
+            {
+                "Issue": "Missing required field: structure_type",
+                "Row": {"pole_id": "P-1005", "__row_index__": 4},
+            },
+        ]
+    )
+
+    result = _collect_per_row_issues(issues_df)
+
+    assert 3 in result
+    assert result[3]["count"] == 2
+    assert len(result[3]["texts"]) == 2
+    assert "material" in result[3]["texts"][0]
+    assert 4 in result
+    assert result[4]["count"] == 1
+    assert result[4]["texts"][0] == "Missing required field: structure_type"
+
+
+def test_collect_per_row_issues_truncates_to_three_texts() -> None:
+    issues_df = pd.DataFrame(
+        [{"Issue": f"Issue {i}", "Row": {"pole_id": "P-1", "__row_index__": 0}} for i in range(5)]
+    )
+
+    result = _collect_per_row_issues(issues_df)
+
+    assert result[0]["count"] == 5
+    assert len(result[0]["texts"]) == 3
+
+
+def test_build_feature_collection_includes_issue_texts() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-1001",
+                "location": "Dalton Road",
+                "material": None,
+                "height": 11.0,
+                "structure_type": "Wood Pole",
+                "easting": 352841,
+                "northing": 503122,
+                "lat": 54.5210,
+                "lon": -3.0140,
+                "__row_index__": 0,
+            }
+        ]
+    )
+
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Missing required field: material",
+                "Row": {"pole_id": "P-1001", "__row_index__": 0},
+            }
+        ]
+    )
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    props = fc["features"][0]["properties"]
+    assert "issue_texts" in props
+    assert len(props["issue_texts"]) == 1
+    assert "material" in props["issue_texts"][0]
 
 
 def test_feature_collection_is_json_serializable_without_nan() -> None:

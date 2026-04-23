@@ -598,6 +598,68 @@ def test_map_view_includes_design_readiness_verdict(tmp_path, monkeypatch) -> No
     assert "Position &amp; Identity" in html
 
 
+def test_map_view_shows_records_label_not_poles(tmp_path, monkeypatch) -> None:
+    """Map view must use 'Records' label, not 'Poles'."""
+    from app.routes import map_preview
+
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J80001"
+    job_dir.mkdir(parents=True)
+
+    _write_json(job_dir / "meta.json", {"job_id": "J80001", "status": "complete"})
+
+    monkeypatch.setattr(map_preview, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/map/view/J80001")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Records" in html
+    assert "Poles" not in html
+
+
+def test_import_finalize_includes_issue_texts_in_map_data(tmp_path, monkeypatch) -> None:
+    """map_data.json features must include issue_texts list for flagged records."""
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J80002"
+    job_dir.mkdir(parents=True)
+
+    csv_path = job_dir / "survey.csv"
+    csv_path.write_text(
+        "\n".join(
+            [
+                "asset_id,structure_type,height_m,material,location_name,latitude,longitude",
+                "P-1001,Wood Pole,11.0,Wood,Dalton Road,54.5210,-3.0140",
+                "P-1002,Wood Pole,7.5,,Back Lane,54.5183,-3.0121",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    _write_json(
+        job_dir / "meta.json",
+        {"job_id": "J80002", "uploaded_path": str(csv_path), "status": "uploaded"},
+    )
+
+    monkeypatch.setattr(api_intake, "_jobs_root", lambda: jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/api/import/J80002", json={"dno": "SPEN_11kV"})
+    assert response.status_code == 200
+
+    map_data = json.loads((job_dir / "map_data.json").read_text(encoding="utf-8"))
+    features = map_data["features"]
+
+    for feat in features:
+        assert "issue_texts" in feat["properties"]
+        assert isinstance(feat["properties"]["issue_texts"], list)
+
+
 def test_import_finalize_returns_500_when_csv_file_missing(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     job_dir = jobs_root / "J50007"

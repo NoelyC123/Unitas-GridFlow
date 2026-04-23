@@ -371,22 +371,36 @@ def build_design_readiness(completeness: dict) -> dict:
     reasons: list[str] = []
 
     if position_rating == "Missing":
-        reasons.append("position data absent — records cannot be placed on network")
+        reasons.append(
+            "records cannot be located on the network — position data absent from digital file"
+        )
     elif position_rating == "Partial":
-        reasons.append("position data incomplete — some records cannot be located")
+        reasons.append(
+            "not all records can be reliably located — position data incomplete in digital file"
+        )
 
     if height_pct == 0.0 and material_pct == 0.0:
-        reasons.append("no structural data captured (height and material absent from digital file)")
+        reasons.append(
+            "clearance, sag, and structural suitability checks cannot be supported"
+            " — height and material absent from digital file"
+        )
     else:
         if height_pct < 70.0:
             label = "absent" if height_pct == 0.0 else f"{height_pct}% coverage"
-            reasons.append(f"height data incomplete ({label})")
+            reasons.append(
+                f"clearance and sag-related design checks not fully supported from this"
+                f" file — height data incomplete ({label})"
+            )
         if material_pct < 70.0:
             label = "absent" if material_pct == 0.0 else f"{material_pct}% coverage"
-            reasons.append(f"material data incomplete ({label})")
+            reasons.append(
+                f"structural suitability cannot be confirmed from digital handoff"
+                f" — material data incomplete ({label})"
+            )
 
     reasons.append(
-        "electrical, stability, clearances, and environment data not captured in digital file"
+        "stability, clearances, electrical configuration, and environment context"
+        " not captured digitally — field notes and plans still required for design"
     )
 
     if position_rating == "Missing":

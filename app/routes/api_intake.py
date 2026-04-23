@@ -283,16 +283,26 @@ def _sanitize_issues_for_csv(issues_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(cleaned_rows)
 
 
-def _count_issues_per_row(issues_df: pd.DataFrame) -> dict[int, int]:
-    counts: dict[int, int] = {}
+def _collect_per_row_issues(issues_df: pd.DataFrame) -> dict[int, dict[str, Any]]:
+    """
+    Return {row_index: {"count": int, "texts": list[str]}} for each flagged row.
+    Stores up to 3 issue descriptions per row, truncated to 80 chars each.
+    """
+    result: dict[int, dict[str, Any]] = {}
     if issues_df.empty or "Row" not in issues_df.columns:
-        return counts
-    for row_payload in issues_df["Row"].tolist():
+        return result
+    for _, issue_row in issues_df.iterrows():
+        row_payload = issue_row.get("Row")
+        issue_text = str(issue_row.get("Issue", ""))
         if isinstance(row_payload, dict):
             row_index = row_payload.get("__row_index__")
             if isinstance(row_index, int):
-                counts[row_index] = counts.get(row_index, 0) + 1
-    return counts
+                if row_index not in result:
+                    result[row_index] = {"count": 0, "texts": []}
+                result[row_index]["count"] += 1
+                if len(result[row_index]["texts"]) < 3:
+                    result[row_index]["texts"].append(issue_text[:80])
+    return result
 
 
 def _build_feature_collection(
@@ -301,7 +311,7 @@ def _build_feature_collection(
     job_id: str,
     rulepack_id: str,
 ) -> dict[str, Any]:
-    issue_counts = _count_issues_per_row(issues_df)
+    per_row = _collect_per_row_issues(issues_df)
     features: list[dict[str, Any]] = []
 
     pass_count = 0
@@ -315,7 +325,11 @@ def _build_feature_collection(
         if lat is None or lon is None:
             continue
 
-        row_issue_count = issue_counts.get(row_index, 0) if isinstance(row_index, int) else 0
+        _empty: dict[str, Any] = {"count": 0, "texts": []}
+        row_data = per_row.get(row_index, _empty) if isinstance(row_index, int) else _empty
+        row_issue_count = row_data["count"]
+        row_issue_texts = row_data["texts"]
+
         if row_issue_count > 0:
             qa_status = "FAIL"
             fail_count += 1
@@ -344,6 +358,7 @@ def _build_feature_collection(
                 "easting": _safe_value(row.get("easting")),
                 "northing": _safe_value(row.get("northing")),
                 "issue_count": row_issue_count,
+                "issue_texts": row_issue_texts,
             },
         }
         features.append(feature)

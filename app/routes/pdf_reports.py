@@ -93,7 +93,7 @@ def qa_pdf(job_id: str):
     y -= line_gap
     _draw_line(pdf, f"Auto-normalized: {meta.get('auto_normalized', False)}", left, y)
     y -= line_gap
-    _draw_line(pdf, f"Pole count: {meta.get('pole_count', 0)}", left, y)
+    _draw_line(pdf, f"Record count: {meta.get('pole_count', 0)}", left, y)
     y -= line_gap
     _draw_line(pdf, f"Issue count: {meta.get('issue_count', 0)}", left, y)
     y -= 8 * mm

@@ -12,9 +12,11 @@ class MapViewer {
     this.autoNormalizedEl = document.getElementById('auto-normalized');
     this.issueCountEl = document.getElementById('issue-count');
     this.issueNoteEl = document.getElementById('issue-note');
+    this.filterNoteEl = document.getElementById('filter-note');
 
     this.map = null;
-    this.markers = [];
+    this.featureData = [];
+    this.activeFilter = null;
   }
 
   init() {
@@ -96,6 +98,13 @@ class MapViewer {
         ? `<div class="popup-row" style="font-size:0.85em"><strong>E/N:</strong> ${this.escapeHtml(props.easting)}, ${this.escapeHtml(props.northing)}</div>`
         : `<div class="popup-row" style="font-size:0.85em"><strong>Lat/Lon:</strong> ${lat.toFixed(5)}, ${lon.toFixed(5)}</div>`;
 
+      const issueTexts = props.issue_texts || [];
+      const issueBlock = props.issue_count > 0
+        ? `<div class="popup-row" style="color:#d94141;font-weight:600;margin-top:4px;">Issues (${props.issue_count}):</div>
+           ${issueTexts.map(t => `<div class="popup-row" style="color:#b91c1c;font-size:0.8em;margin-left:6px;">• ${this.escapeHtml(t)}</div>`).join('')}
+           ${props.issue_count > issueTexts.length ? `<div class="popup-row" style="color:#b91c1c;font-size:0.8em;margin-left:6px;">… and ${props.issue_count - issueTexts.length} more</div>` : ''}`
+        : '';
+
       const popupHtml = `
         <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
@@ -105,18 +114,70 @@ class MapViewer {
         ${props.material != null && props.material !== '' ? `<div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material)}</div>` : ''}
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
         ${coordLine}
-        ${props.issue_count > 0 ? `<div class="popup-row" style="color:#d94141;font-weight:600;">Issues: ${props.issue_count}</div>` : ''}
+        ${issueBlock}
       `;
 
       marker.bindPopup(popupHtml);
       marker.addTo(this.map);
-      this.markers.push(marker);
+      this.featureData.push({ marker, status, lat, lon });
     }
+
+    // Detect overlapping coordinates (to 4 decimal places).
+    const coordCounts = {};
+    for (const fd of this.featureData) {
+      const key = `${fd.lat.toFixed(4)},${fd.lon.toFixed(4)}`;
+      coordCounts[key] = (coordCounts[key] || 0) + 1;
+    }
+    const overlapCount = Object.values(coordCounts).filter(c => c > 1).length;
+    if (overlapCount > 0 && this.issueNoteEl) {
+      const note = document.createElement('div');
+      note.style.marginTop = '6px';
+      note.style.color = '#6b7280';
+      note.textContent = `Note: ${overlapCount} location(s) have overlapping markers — zoom in to separate them.`;
+      this.issueNoteEl.appendChild(note);
+    }
+
+    this.bindFilterButtons();
 
     if (bounds.length === 1) {
       this.map.setView(bounds[0], 13);
     } else if (bounds.length > 1) {
       this.map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }
+
+  bindFilterButtons() {
+    document.querySelectorAll('.status-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.setFilter(btn.dataset.filter);
+      });
+    });
+  }
+
+  setFilter(status) {
+    if (this.activeFilter === status) {
+      this.activeFilter = null;
+      for (const fd of this.featureData) {
+        if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
+      }
+      document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
+      if (this.filterNoteEl) this.filterNoteEl.textContent = '';
+    } else {
+      this.activeFilter = status;
+      for (const fd of this.featureData) {
+        if (fd.status === status) {
+          if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
+        } else {
+          if (this.map.hasLayer(fd.marker)) this.map.removeLayer(fd.marker);
+        }
+      }
+      document.querySelectorAll('.status-filter-btn').forEach(btn => {
+        btn.classList.toggle('filter-active', btn.dataset.filter === status);
+      });
+      const count = this.featureData.filter(fd => fd.status === status).length;
+      if (this.filterNoteEl) {
+        this.filterNoteEl.textContent = `Showing ${count} ${status} record${count !== 1 ? 's' : ''} — click again to reset`;
+      }
     }
   }
 

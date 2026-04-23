@@ -156,6 +156,22 @@
       color: #374151;
     }
 
+    .status-filter-btn {
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 4px;
+      transition: background 0.15s;
+    }
+
+    .status-filter-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .filter-active {
+      background: #f9fafb;
+      box-shadow: 0 0 0 2px #111827;
+    }
+
     .meta-row {
       display: flex;
       justify-content: space-between;
@@ -255,7 +271,7 @@
             <div class="stat-grid">
               <div class="stat-block">
                 <div id="pole-count" class="stat-value">0</div>
-                <div class="stat-label">Poles</div>
+                <div class="stat-label">Records</div>
               </div>
               <div class="stat-block">
                 <div id="span-count" class="stat-value">0</div>
@@ -264,19 +280,20 @@
             </div>
 
             <div class="status-grid">
-              <div>
+              <div class="status-filter-btn" data-filter="PASS" title="Click to show only PASS records">
                 <div id="pass-count" class="status-value status-pass">0</div>
                 <div class="status-label">PASS</div>
               </div>
-              <div>
+              <div class="status-filter-btn" data-filter="WARN" title="Click to show only WARN records">
                 <div id="warn-count" class="status-value status-warn">0</div>
                 <div class="status-label">WARN</div>
               </div>
-              <div>
+              <div class="status-filter-btn" data-filter="FAIL" title="Click to show only FAIL records">
                 <div id="fail-count" class="status-value status-fail">0</div>
                 <div class="status-label">FAIL</div>
               </div>
             </div>
+            <div id="filter-note" style="font-size:0.82rem;color:#6b7280;text-align:center;margin-top:6px;min-height:1.2em;"></div>
 
             <div class="meta-row">
               <span>Rulepack</span>
@@ -379,6 +396,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=3"></script>
+  <script src="/static/js/map-viewer.js?v=4"></script>
 </body>
 </html>

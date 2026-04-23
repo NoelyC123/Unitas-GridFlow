@@ -8,6 +8,55 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 6 — explain, filter, and clarify)
+
+### Added
+
+- `_collect_per_row_issues()` in `app/routes/api_intake.py` replaces
+  `_count_issues_per_row`. Now returns `{row_index: {"count": int, "texts": list[str]}}`
+  storing up to 3 issue description strings per row (truncated to 80 chars each).
+
+- `issue_texts` property on each GeoJSON feature in `map_data.json`. Allows map
+  popups to display the actual issue descriptions without any additional requests.
+
+- Interactive pass/fail filter on map view. Each status block (PASS / WARN / FAIL)
+  in the side panel is now a clickable button (`status-filter-btn`). Clicking a status
+  filters the map to show only markers of that status. Clicking again resets to all.
+  Active filter is highlighted with a CSS `filter-active` style.
+
+- Overlapping marker detection in `map-viewer.js`. After rendering, detects coordinates
+  that share the same position to 4 decimal places and appends a note to the issue-note
+  element if any are found.
+
+- `filter-note` element below the status grid shows the current filter state and
+  record count.
+
+### Changed
+
+- Map view side panel: "Poles" stat label changed to "Records" (more accurate for
+  mixed-feature files including angle poles, hedge markers, etc.).
+
+- PDF QA report: "Pole count:" label changed to "Record count:".
+
+- `build_design_readiness()` reason strings rewritten to be design-consequence-focused.
+  e.g. "clearance and sag-related design checks not fully supported from this file —
+  height data incomplete (18.2% coverage)" instead of "height data incomplete (18.2%)".
+
+- Map marker popup updated to show actual issue descriptions (up to 3) with a "… and N
+  more" note, replacing the previous plain issue count.
+
+- JS version bumped: `map-viewer.js?v=3` → `?v=4`.
+
+### Tests
+
+- 84 passing (up from 79). Added: `test_collect_per_row_issues_returns_count_and_texts`,
+  `test_collect_per_row_issues_truncates_to_three_texts`,
+  `test_build_feature_collection_includes_issue_texts`,
+  `test_map_view_shows_records_label_not_poles`,
+  `test_import_finalize_includes_issue_texts_in_map_data`.
+
+---
+
 ## 2026-04-23 (validation batch 5 — design readiness + survey coverage + enhanced map popups)
 
 ### Added

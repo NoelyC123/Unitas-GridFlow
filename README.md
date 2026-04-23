@@ -87,7 +87,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Validation batch 3 complete: coord_consistency fix for non-OSGB grids + QA noise suppression for controller files
 - Validation batch 4 complete: NIE_11kV rulepack auto-detection from Irish Grid CRS + completeness surfacing in map view and PDF
 - Validation batch 5 complete: design readiness verdict + survey coverage categories + enhanced map popups
-- 79 passing tests
+- Validation batch 6 complete: issue-text popup explanation + interactive pass/fail filter + Records label + design-readiness wording + overlap detection
+- 84 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue
