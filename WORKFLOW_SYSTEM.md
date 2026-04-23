@@ -283,13 +283,13 @@ Avoid:
 
 You are currently in:
 
-➡️ **Validation Phase (Phase 2C)**
+➡️ **Validation Phase (Phase 2C complete — ongoing refinement)**
 
 Focus:
 
 - run real files through system
 - verify usefulness
-- refine outputs
+- refine outputs based on real evidence
 
 NOT focus:
 

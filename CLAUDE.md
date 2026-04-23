@@ -133,6 +133,9 @@ Do not read `_archive/` unless explicitly asked.
 - Phase 1 is complete
 - Phase 2A is complete
 - Phase 2B is complete
+- Validation batch 2 is complete (raw controller intake + completeness)
+- Validation batch 3 is complete (coord_consistency fix + QA noise suppression)
+- Validation batch 4 is complete (NIE rulepack inference + completeness surfacing)
 - Validation-led refinement is active
 
 ---
