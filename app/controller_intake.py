@@ -557,6 +557,12 @@ def build_design_readiness(completeness: dict) -> dict:
         " export — field notes and plans required for design"
     )
 
+    if material_pct == 0.0:
+        reasons.insert(
+            0,
+            "This file cannot support full design — critical design data missing",
+        )
+
     if position_rating == "Missing":
         verdict = "NOT READY"
     elif position_rating == "Strong" and structural_rating == "Strong":

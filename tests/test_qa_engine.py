@@ -365,7 +365,7 @@ def test_unique_pair_passes_unique_coordinates() -> None:
 
 
 def test_span_distance_flags_poles_too_close() -> None:
-    # 0.0001 degree lat ≈ 11m — below min_m=50 so flagged as too short
+    # 0.0001 degree lat ≈ 11.1m — below min_m=50, in the 8–min_m borderline tier
     df = pd.DataFrame(
         [
             {"pole_id": "P-001", "lat": 54.5000, "lon": -3.0000},
@@ -385,7 +385,8 @@ def test_span_distance_flags_poles_too_close() -> None:
     issues = run_qa_checks(df, rules)
 
     assert len(issues) == 1
-    assert "Span too short" in issues.iloc[0]["Issue"]
+    assert "Span borderline short" in issues.iloc[0]["Issue"]
+    assert issues.iloc[0].get("Severity") == "WARN"
 
 
 def test_coord_consistency_skips_for_non_osgb_grid_crs() -> None:
@@ -756,11 +757,11 @@ def test_replacement_cluster_detection() -> None:
 
 
 def test_span_suppression_does_not_apply_to_pol_pol() -> None:
-    """Two Pol records within min distance must still emit FAIL span-too-short.
+    """Two Pol records within min distance must emit a span WARN (not a replacement WARN).
 
     Replacement-pair suppression fires only when exactly one record is EXpole.
-    Pol→Pol at close distance is a genuine duplicate-entry error and must
-    remain a FAIL with no replacement pair WARN.
+    Pol→Pol at close distance is a genuine data concern and must emit a span
+    tier WARN — not a replacement pair WARN.
     """
     df = pd.DataFrame(
         [
@@ -793,24 +794,26 @@ def test_span_suppression_does_not_apply_to_pol_pol() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    span_fails = [t for t in issue_texts if "Span too short" in t]
-    assert len(span_fails) == 1, f"Expected FAIL for Pol→Pol short span, got: {issue_texts}"
+    # 3.3m sits in the 3–8m tier → "Span unusually short"
+    span_issues = [t for t in issue_texts if "Span unusually short" in t]
+    assert len(span_issues) == 1, f"Expected span WARN for Pol→Pol short span, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "WARN"
 
     warn_issues = [t for t in issue_texts if "Replacement pair" in t]
-    assert len(warn_issues) == 0, f"Unexpected WARN for Pol→Pol: {warn_issues}"
+    assert len(warn_issues) == 0, f"Unexpected replacement pair WARN for Pol→Pol: {warn_issues}"
 
 
 def test_span_distance_message_shows_one_decimal_precision() -> None:
     """Span issue text must show distances to 1 decimal place.
 
-    Previously the format was {dist:.0f}m, which could produce messages like
-    'Span too short: 10m (min 10m)' for a 9.6m span, misleading designers.
-    The fix uses {dist:.1f}m so the actual value is always unambiguous.
+    0.00003 deg lat ≈ 3.3m sits in the 3–8m tier → 'Span unusually short'.
+    The distance value must contain a decimal point so the actual measured
+    value is unambiguous to the designer.
     """
     df = pd.DataFrame(
         [
             {"pole_id": "1", "lat": 54.5200, "lon": -3.0000},
-            # 0.00003 deg lat ≈ 3.3m — well below 10m minimum
+            # 0.00003 deg lat ≈ 3.3m — in the 3–8m unusual tier
             {"pole_id": "2", "lat": 54.52003, "lon": -3.0000},
         ]
     )
@@ -826,10 +829,12 @@ def test_span_distance_message_shows_one_decimal_precision() -> None:
 
     issues = run_qa_checks(df, rules)
 
-    span_short = [i for i in issues["Issue"].tolist() if "Span too short" in i]
-    assert len(span_short) == 1
+    span_issues = [i for i in issues["Issue"].tolist() if "Span unusually short" in i]
+    assert len(span_issues) == 1
     # Message must contain a decimal point for the distance value
-    assert "." in span_short[0], f"Expected decimal precision in span message, got: {span_short[0]}"
+    assert "." in span_issues[0], (
+        f"Expected decimal precision in span message, got: {span_issues[0]}"
+    )
 
 
 def test_angle_no_stay_emits_warn() -> None:
@@ -1019,3 +1024,199 @@ def test_angle_stay_no_issue_for_pol_only_file() -> None:
 
     warn_issues = [t for t in issue_texts if "Angle structure" in t]
     assert len(warn_issues) == 0, f"Unexpected angle_stay issues for Pol-only file: {issue_texts}"
+
+
+# ---------------------------------------------------------------------------
+# Batch 13: span tier tests
+# ---------------------------------------------------------------------------
+
+
+def test_short_span_very_close_emits_warn_very_short_tier() -> None:
+    """Span < 3m must emit WARN with 'Span very short' message.
+
+    0.00002 deg lat ≈ 2.2m — in the sub-3m tier.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000},
+            {"pole_id": "2", "lat": 54.52002, "lon": -3.0000},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    very_short = [t for t in issue_texts if "Span very short" in t]
+    assert len(very_short) == 1, f"Expected 'Span very short' WARN, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "WARN"
+
+
+def test_short_span_unusual_tier_emits_warn() -> None:
+    """Span 3–8m must emit WARN with 'Span unusually short' message.
+
+    0.00005 deg lat ≈ 5.6m — in the 3–8m tier.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000},
+            {"pole_id": "2", "lat": 54.52005, "lon": -3.0000},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    unusual = [t for t in issue_texts if "Span unusually short" in t]
+    assert len(unusual) == 1, f"Expected 'Span unusually short' WARN, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "WARN"
+
+
+def test_short_span_borderline_tier_emits_warn() -> None:
+    """Span 8–min_m must emit WARN with 'Span borderline short' message.
+
+    0.00008 deg lat ≈ 8.9m with min_m=10 — in the 8–10m borderline tier.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000},
+            {"pole_id": "2", "lat": 54.52008, "lon": -3.0000},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    borderline = [t for t in issue_texts if "Span borderline short" in t]
+    assert len(borderline) == 1, f"Expected 'Span borderline short' WARN, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "WARN"
+
+
+# ---------------------------------------------------------------------------
+# Batch 13: EXpole height downgrade tests
+# ---------------------------------------------------------------------------
+
+
+def test_expole_height_below_min_emits_warn() -> None:
+    """EXpole with height below the minimum must emit WARN, not a hard FAIL.
+
+    EXpole heights are often estimated or not properly captured in the field.
+    height=5.0 with min=7 should produce 'Height likely estimated / not captured'.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "height": 5.0,
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "range",
+            "field": "height",
+            "min": 7,
+            "max": 25,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    assert len(issues) == 1, f"Expected exactly one issue, got: {issue_texts}"
+    assert "Height likely estimated" in issue_texts[0], f"Unexpected message: {issue_texts[0]}"
+    assert issues.iloc[0].get("Severity") == "WARN"
+
+
+def test_expole_height_above_max_remains_range_fail() -> None:
+    """EXpole with height above the maximum must still emit a standard range issue.
+
+    The downgrade only applies when height is below the minimum. An EXpole with
+    an unusually high height value is a genuine data concern.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "height": 30.0,
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "range",
+            "field": "height",
+            "min": 7,
+            "max": 25,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    assert len(issues) == 1, f"Expected one range issue, got: {issue_texts}"
+    assert "out of range" in issue_texts[0], (
+        f"Expected standard range message, got: {issue_texts[0]}"
+    )
+
+
+def test_non_expole_height_below_min_remains_range_issue() -> None:
+    """A regular Pol with height below the minimum must not receive the EXpole downgrade.
+
+    Only EXpole records get the 'Height likely estimated' WARN. A Pol with
+    height=5.0 must still emit the standard 'height out of range' message.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-1",
+                "structure_type": "Pol",
+                "height": 5.0,
+            }
+        ]
+    )
+    rules = [
+        {
+            "check": "range",
+            "field": "height",
+            "min": 7,
+            "max": 25,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+    issue_texts = issues["Issue"].tolist()
+
+    assert len(issues) == 1, f"Expected one range issue, got: {issue_texts}"
+    assert "out of range" in issue_texts[0], (
+        f"Expected standard range message, got: {issue_texts[0]}"
+    )
+    assert "EXpole" not in issue_texts[0]

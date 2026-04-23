@@ -376,13 +376,26 @@ def run_qa_checks(df, rules):
                                 }
                             )
                         else:
+                            if dist < 3:
+                                msg = (
+                                    f"Span very short: {dist:.1f}m"
+                                    f" — likely duplicate or co-located pair, verify"
+                                )
+                            elif dist < 8:
+                                msg = (
+                                    f"Span unusually short: {dist:.1f}m (min {min_m}m)"
+                                    f" — verify no duplicate entry"
+                                )
+                            else:
+                                msg = (
+                                    f"Span borderline short: {dist:.1f}m (min {min_m}m)"
+                                    f" — verify no missing record"
+                                )
                             issues.append(
                                 {
-                                    "Issue": (
-                                        f"Span too short: {dist:.1f}m between structural records "
-                                        f"(min {min_m}m) — possible duplicate entry"
-                                    ),
+                                    "Issue": msg,
                                     "Row": row.to_dict(),
+                                    "Severity": "WARN",
                                 }
                             )
                     elif dist > max_m:
@@ -483,12 +496,27 @@ def run_qa_checks(df, rules):
             for _, row in out_of_range.iterrows():
                 if structural_only and _is_context_row(row, has_st):
                     continue
-                issues.append(
-                    {
-                        "Issue": f"{field} out of range ({min_val}-{max_val})",
-                        "Row": row.to_dict(),
-                    }
-                )
+                height_val = pd.to_numeric(row.get(field), errors="coerce")
+                if (
+                    field == "height"
+                    and row.get("structure_type") in _EXPOLE_CODES
+                    and not pd.isna(height_val)
+                    and height_val < min_val
+                ):
+                    issues.append(
+                        {
+                            "Issue": "Height likely estimated / not captured (EXpole)",
+                            "Row": row.to_dict(),
+                            "Severity": "WARN",
+                        }
+                    )
+                else:
+                    issues.append(
+                        {
+                            "Issue": f"{field} out of range ({min_val}-{max_val})",
+                            "Row": row.to_dict(),
+                        }
+                    )
 
         elif check == "required":
             structural_only = rule.get("structural_only", False)
