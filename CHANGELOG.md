@@ -8,6 +8,54 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (batch 12 — angle/stay evidence logic)
+
+### Added
+
+- **`_ANGLE_CODES` and `_STAY_EVIDENCE_CODES` frozensets in `qa_engine.py`**:
+  `_ANGLE_CODES` = {"Angle", "angle", "ANGLE"}; `_STAY_EVIDENCE_CODES` covers
+  "Stay", "Staywire", "Stay wire", "Stay pole" and lowercase/uppercase variants.
+
+- **`angle_stay` check type in `qa_engine.py`**: dataset-level proximity scan.
+  For each angle record, checks whether any `_STAY_EVIDENCE_CODES` record exists
+  within 30m (OSGB projected), or whether the angle record's own `location`/
+  remarks text contains "stay". If neither, emits a `Severity: WARN` issue with
+  cautious wording: `"Angle structure with no stay evidence detected — verify
+  whether stay capture is missing or not required for this job"`.
+
+- **`angle_stay` rule added to `BASE_RULES` in `dno_rules.py`**: all four
+  rulepacks now carry this rule. Files with no angle records produce no issues —
+  the check silently skips.
+
+- **`angle_no_stay_count` injected into `design_readiness`** in
+  `api_intake.py`: when angle/no-stay WARNs exist, a bullet is added to
+  `design_readiness.reasons` and `angle_no_stay_count` is set on the dict.
+
+- **`warnBlock` in map popup** (`map-viewer.js`): WARN features that are not
+  replacement pairs now show a "Design Notes (N):" section in amber in their
+  popup, listing warn_texts from the feature properties.
+
+- **`warnHtml` in record panel** (`map-viewer.js`): WARN feature items in the
+  record panel show the first warn text (truncated to 65 chars) for non-
+  replacement-pair records.
+
+- **`[WARN]` prefix in PDF** (`pdf_reports.py`): the issues table reads the
+  `Severity` column from issues.csv and prepends `[WARN] ` for WARN issues.
+
+- **JS version bumped** (`map_viewer.html`): `?v=7` to force cache refresh.
+
+### Tests
+
+- `test_angle_no_stay_emits_warn` — Angle + Pol at 111m, no stay → 1 WARN
+- `test_angle_with_stay_within_proximity_no_warn` — Angle + Stay at 20m → 0
+- `test_angle_with_stay_beyond_proximity_emits_warn` — Stay at 67m (>30m) → 1 WARN
+- `test_angle_stay_remarks_evidence_suppresses_warn` — "stay installed 3m west"
+  in location → 0 issues
+- `test_angle_stay_no_issue_for_pol_only_file` — Pol-only file → 0 issues
+- Test count: **104 passing** (was 99).
+
+---
+
 ## 2026-04-23 (validation batch 11 — EX/PR replacement cluster detection)
 
 ### Added
