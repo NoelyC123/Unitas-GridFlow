@@ -8,6 +8,54 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 10 — consistency and threshold cleanup)
+
+### Fixed
+
+- **Record count consistency**: `meta["pole_count"]` now uses
+  `completeness.total_records` (all rows in the file) rather than the count of
+  map-visible features (which excluded anchor rows). The PDF header "Record
+  count" and the Survey Completeness "Total records" line now show the same value.
+  The structural/context/anchor composition totals sum to that same value.
+
+- **Span threshold wording**: span distance issue messages now use `{dist:.1f}m`
+  (1 decimal place) instead of `{dist:.0f}m`. A 9.6 m span previously displayed
+  as "Span too short: 10m (min 10m)", which looked like a false positive. It now
+  displays as "Span too short: 9.6m (min 10m)", making the threshold comparison
+  unambiguous.
+
+- **Coverage labels**: `_coverage_rating()` threshold for "Partial" changed from
+  `> 20%` to `> 0%`. Any nonzero coverage is now "Partial" rather than "Missing",
+  so a file where 15% of structural records have height recorded no longer shows
+  the same "Missing" label as a file with 0% height data. Only truly absent data
+  (0%) produces "Missing".
+
+### Changed
+
+- `build_design_readiness()` adds up to two more items to `what_this_supports`:
+  - "identifying pole types and network roles along the route" when
+    `structure_type` coverage exceeds 70%
+  - "locating N environmental and crossing features along the route" when
+    context records (Gate, Hedge, Track, etc.) are present in the file
+
+### Tests
+
+- `test_coverage_rating_partial_for_low_nonzero_coverage` — 5%, 15%, 20%, 0.1%
+  all return "Partial" with the new threshold
+- `test_coverage_rating_missing_only_at_zero` — 0% returns "Missing"
+- `test_coverage_rating_strong_above_threshold` — >70% returns "Strong"
+- `test_span_distance_message_shows_one_decimal_precision` — span issue text
+  contains a decimal point, confirming `.1f` format is in effect
+- `test_meta_pole_count_matches_completeness_total_records` — controller dump
+  with an anchor row: meta.pole_count equals completeness.total_records (3),
+  not the map-visible feature count (2)
+- Updated `test_build_design_readiness_partially_ready_missing_structural`:
+  assertion changed from `"Missing"` to `"Partial"` for Structural Data
+  (structural_pct = 9.1% is nonzero → "Partial")
+- Test count: **97 passing** (was 92).
+
+---
+
 ## 2026-04-23 (validation batch 9 — record-role classification + anchor handling + role breakdown UI)
 
 ### Added

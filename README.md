@@ -91,7 +91,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Validation batch 7 complete: feature-aware QA (Hedge skipped in span checks) + record inspection panel + "not captured" height in popups
 - Validation batch 8 complete: strict structural_only scoping for height rules + issue deduplication (no duplicate height FAILs per record)
 - Validation batch 9 complete: record-role classification (structural/context/anchor), anchor chain-reset in span checks, Gate/Track/Stream as context, role breakdown in map UI and PDF
-- 92 passing tests
+- Validation batch 10 complete: record count consistency, span threshold decimal precision, coverage label fix (any data → Partial), expanded what_this_supports
+- 97 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue

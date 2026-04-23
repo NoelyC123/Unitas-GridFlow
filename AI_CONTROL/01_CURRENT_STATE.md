@@ -135,7 +135,7 @@ Goal:
 
 - **DNO rulepacks live:** 4 (`SPEN_11kV`, `SSEN_11kV`, `NIE_11kV`, `ENWL_11kV`)
 - **QA check types:** 10
-- **Tests passing:** 92
+- **Tests passing:** 97
 
 ---
 
@@ -181,7 +181,7 @@ Goal:
 - GPS instrument elevation (col 3) intentionally not mapped to height — only explicit HEIGHT inline attributes map there
 - Added `feature_codes_found` to `build_completeness_summary` output
 - Completeness summary now correctly surfaces: record count, position status, CRS, per-field coverage, and feature codes found
-- Test count increased from 38 to 67 (raw controller batch); further to 70 after QA noise fix batch; further to 74 after batch 4 (rulepack inference + completeness surfacing); further to 79 after batch 5 (design readiness + enhanced map popups); further to 84 after batch 6 (explain, filter, and clarify); further to 86 after batch 7 (feature-aware QA + record inspection panel); further to 89 after batch 8 (strict structural_only height scoping + issue deduplication); further to 92 after batch 9 (record-role classification + anchor handling + Gate/Track/Stream as context)
+- Test count increased from 38 to 67 (raw controller batch); further to 70 after QA noise fix batch; further to 74 after batch 4 (rulepack inference + completeness surfacing); further to 79 after batch 5 (design readiness + enhanced map popups); further to 84 after batch 6 (explain, filter, and clarify); further to 86 after batch 7 (feature-aware QA + record inspection panel); further to 89 after batch 8 (strict structural_only height scoping + issue deduplication); further to 92 after batch 9 (record-role classification + anchor handling + Gate/Track/Stream as context); further to 97 after batch 10 (consistency and threshold cleanup)
 
 ---
 
