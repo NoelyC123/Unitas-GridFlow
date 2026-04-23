@@ -477,3 +477,61 @@ def test_span_distance_passes_normal_span() -> None:
     issues = run_qa_checks(df, rules)
 
     assert len(issues) == 0
+
+
+def test_span_distance_skips_context_feature_codes() -> None:
+    """Hedge adjacent to a Pol must not trigger a false 'span too short' issue.
+
+    Pol at 54.5200, Hedge at 54.52002 (~2m away), Pol at 54.5207 (~78m from first).
+    Without the context filter: Pol→Hedge = 2m < min_m=10 → false positive.
+    With the filter: Hedge is skipped, Pol→Pol = 78m → no issue.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "H", "lat": 54.52002, "lon": -3.0000, "structure_type": "Hedge"},
+            {"pole_id": "2", "lat": 54.5207, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0, f"Unexpected span issues: {issues['Issue'].tolist()}"
+
+
+def test_span_distance_context_feature_bridges_span_to_next_structural_record() -> None:
+    """Span between two Pols bridging over a Hedge must still be checked for max distance.
+
+    Pol at 54.5200, Hedge at 54.5300 (skipped), Pol at 54.5310.
+    Pol-to-Pol span (bridging Hedge) ≈ 1221m > max_m=500 → must be flagged.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "H", "lat": 54.5300, "lon": -3.0000, "structure_type": "Hedge"},
+            {"pole_id": "2", "lat": 54.5310, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    span_long = [i for i in issues["Issue"].tolist() if "Span too long" in i]
+    assert len(span_long) == 1, f"Expected one span-too-long issue, got: {issues['Issue'].tolist()}"

@@ -1,3 +1,11 @@
+const CONTEXT_FEATURE_CODES = new Set([
+  'Hedge', 'hedge', 'HEDGE',
+  'Tree', 'tree',
+  'Wall', 'wall',
+  'Fence', 'fence',
+  'Post', 'post',
+]);
+
 class MapViewer {
   constructor() {
     this.jobId = document.querySelector('meta[name="job-id"]')?.content;
@@ -89,7 +97,7 @@ class MapViewer {
         color: '#ffffff',
         weight: 2,
         fillColor: color,
-        fillOpacity: 0.9
+        fillOpacity: 0.9,
       });
 
       const locName = props.name && props.name !== props.id ? props.name : null;
@@ -97,6 +105,20 @@ class MapViewer {
       const coordLine = hasEasting
         ? `<div class="popup-row" style="font-size:0.85em"><strong>E/N:</strong> ${this.escapeHtml(props.easting)}, ${this.escapeHtml(props.northing)}</div>`
         : `<div class="popup-row" style="font-size:0.85em"><strong>Lat/Lon:</strong> ${lat.toFixed(5)}, ${lon.toFixed(5)}</div>`;
+
+      const isContext = CONTEXT_FEATURE_CODES.has(props.structure_type || '');
+
+      // For structural (non-context) features, show "not captured" when height is absent
+      // so a designer can immediately see gaps without opening the issues list.
+      const heightLine = !isContext
+        ? (props.height != null && props.height !== ''
+            ? `<div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height)}m</div>`
+            : `<div class="popup-row" style="color:#9ca3af;font-size:0.85em;"><strong>Height:</strong> not captured</div>`)
+        : '';
+
+      const materialLine = props.material != null && props.material !== ''
+        ? `<div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material)}</div>`
+        : '';
 
       const issueTexts = props.issue_texts || [];
       const issueBlock = props.issue_count > 0
@@ -108,10 +130,10 @@ class MapViewer {
       const popupHtml = `
         <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
-        ${props.pole_id != null ? `<div class="popup-row"><strong>Pole ID:</strong> ${this.escapeHtml(props.pole_id)}</div>` : ''}
+        ${props.pole_id != null ? `<div class="popup-row"><strong>ID:</strong> ${this.escapeHtml(props.pole_id)}</div>` : ''}
         ${props.structure_type != null ? `<div class="popup-row"><strong>Type:</strong> ${this.escapeHtml(props.structure_type)}</div>` : ''}
-        ${props.height != null && props.height !== '' ? `<div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height)}m</div>` : ''}
-        ${props.material != null && props.material !== '' ? `<div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material)}</div>` : ''}
+        ${heightLine}
+        ${materialLine}
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
         ${coordLine}
         ${issueBlock}
@@ -119,7 +141,7 @@ class MapViewer {
 
       marker.bindPopup(popupHtml);
       marker.addTo(this.map);
-      this.featureData.push({ marker, status, lat, lon });
+      this.featureData.push({ marker, status, lat, lon, props });
     }
 
     // Detect overlapping coordinates (to 4 decimal places).
@@ -138,6 +160,7 @@ class MapViewer {
     }
 
     this.bindFilterButtons();
+    this.bindAllRecordsButton();
 
     if (bounds.length === 1) {
       this.map.setView(bounds[0], 13);
@@ -154,6 +177,23 @@ class MapViewer {
     });
   }
 
+  bindAllRecordsButton() {
+    const btn = document.getElementById('all-records-btn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      // Clear any active status filter without hiding the panel.
+      if (this.activeFilter) {
+        this.activeFilter = null;
+        for (const fd of this.featureData) {
+          if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
+        }
+        document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('filter-active'));
+        if (this.filterNoteEl) this.filterNoteEl.textContent = '';
+      }
+      this._showRecordPanel(this.featureData, `All Records (${this.featureData.length})`);
+    });
+  }
+
   setFilter(status) {
     if (this.activeFilter === status) {
       this.activeFilter = null;
@@ -162,6 +202,7 @@ class MapViewer {
       }
       document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
       if (this.filterNoteEl) this.filterNoteEl.textContent = '';
+      this._hideRecordPanel();
     } else {
       this.activeFilter = status;
       for (const fd of this.featureData) {
@@ -174,11 +215,69 @@ class MapViewer {
       document.querySelectorAll('.status-filter-btn').forEach(btn => {
         btn.classList.toggle('filter-active', btn.dataset.filter === status);
       });
-      const count = this.featureData.filter(fd => fd.status === status).length;
+      const filtered = this.featureData.filter(fd => fd.status === status);
+      const count = filtered.length;
       if (this.filterNoteEl) {
         this.filterNoteEl.textContent = `Showing ${count} ${status} record${count !== 1 ? 's' : ''} — click again to reset`;
       }
+      this._showRecordPanel(filtered, `${status} Records (${count})`);
     }
+  }
+
+  _showRecordPanel(items, title) {
+    const panelEl = document.getElementById('record-panel');
+    const listEl = document.getElementById('record-list');
+    const titleEl = document.getElementById('record-panel-title');
+    if (!panelEl || !listEl) return;
+
+    if (titleEl) titleEl.textContent = title;
+    listEl.innerHTML = '';
+
+    for (const fd of items) {
+      const p = fd.props;
+      const item = document.createElement('div');
+      item.className = `record-item status-${fd.status}`;
+
+      const idText = this.escapeHtml(String(p.pole_id || p.id || 'Record'));
+      const typeText = p.structure_type ? this.escapeHtml(p.structure_type) : '—';
+      const statusColor = this.getMarkerColor(fd.status);
+
+      const detailParts = [];
+      if (p.height != null && p.height !== '') detailParts.push(`H: ${p.height}m`);
+      if (p.material) detailParts.push(this.escapeHtml(p.material));
+      if (p.name && p.name !== p.id && p.name !== p.pole_id) {
+        detailParts.push(this.escapeHtml(String(p.name).substring(0, 30)));
+      }
+      const detailText = detailParts.join(' · ');
+
+      const firstIssue = (p.issue_texts || [])[0] || '';
+      const issueHtml = fd.status === 'FAIL' && firstIssue
+        ? `<div style="color:#b91c1c;font-size:0.78em;margin-top:2px;">• ${this.escapeHtml(firstIssue.substring(0, 65))}</div>`
+        : '';
+
+      item.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="font-weight:600;font-size:0.82rem;">${idText}</span>
+          <span style="font-size:0.75rem;font-weight:700;color:${statusColor};">${fd.status}</span>
+        </div>
+        <div style="color:#6b7280;font-size:0.78rem;">${typeText}${detailText ? ' · ' + detailText : ''}</div>
+        ${issueHtml}
+      `;
+
+      item.addEventListener('click', () => {
+        fd.marker.openPopup();
+        this.map.setView([fd.lat, fd.lon], Math.max(this.map.getZoom(), 15));
+      });
+
+      listEl.appendChild(item);
+    }
+
+    panelEl.style.display = items.length > 0 ? 'block' : 'none';
+  }
+
+  _hideRecordPanel() {
+    const panelEl = document.getElementById('record-panel');
+    if (panelEl) panelEl.style.display = 'none';
   }
 
   getMarkerColor(status) {

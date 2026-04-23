@@ -8,6 +8,13 @@ from pyproj import Transformer
 
 _OSGB_TRANSFORMER = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
 
+# Feature codes for contextual/environmental survey markers (not structural poles).
+# These are excluded from structural span checks so a Hedge between two poles does
+# not create a false-positive "span too short" issue.
+_CONTEXT_FEATURE_CODES: frozenset[str] = frozenset(
+    {"Hedge", "hedge", "HEDGE", "Tree", "tree", "Wall", "wall", "Fence", "fence", "Post", "post"}
+)
+
 
 def _is_missing_value(series: pd.Series) -> pd.Series:
     if series.dtype == "object":
@@ -188,9 +195,17 @@ def run_qa_checks(df, rules):
                 continue
 
             transformer = _OSGB_TRANSFORMER
+            has_structure_type = "structure_type" in df.columns
 
             prev_e = prev_n = None
             for _, row in df.iterrows():
+                # Skip context-only markers (Hedge, Tree, etc.) without resetting
+                # prev_e/prev_n so spans bridge correctly across them.
+                if has_structure_type:
+                    st = row.get("structure_type")
+                    if isinstance(st, str) and st in _CONTEXT_FEATURE_CODES:
+                        continue
+
                 lat = row.get(lat_field)
                 lon = row.get(lon_field)
                 if any(_is_missing_scalar(v) for v in (lat, lon)):
@@ -207,7 +222,7 @@ def run_qa_checks(df, rules):
                         issues.append(
                             {
                                 "Issue": (
-                                    f"Span too short: {dist:.0f}m between consecutive poles "
+                                    f"Span too short: {dist:.0f}m between structural records "
                                     f"(min {min_m}m) — possible duplicate entry"
                                 ),
                                 "Row": row.to_dict(),
@@ -217,8 +232,8 @@ def run_qa_checks(df, rules):
                         issues.append(
                             {
                                 "Issue": (
-                                    f"Span too long: {dist:.0f}m between consecutive poles "
-                                    f"(max {max_m}m) — possible GPS error or missing pole"
+                                    f"Span too long: {dist:.0f}m between structural records "
+                                    f"(max {max_m}m) — possible GPS error or missing record"
                                 ),
                                 "Row": row.to_dict(),
                             }

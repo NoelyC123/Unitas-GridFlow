@@ -8,6 +8,51 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 7 — feature-aware QA + record inspection panel)
+
+### Changed
+
+- `span_distance` in `app/qa_engine.py` now skips context-only feature codes (Hedge,
+  Tree, Wall, Fence, Post) when measuring spans between structural records. Spans
+  bridge correctly over context markers — a Hedge between two poles no longer produces
+  a false "span too short" issue. Non-pole records are excluded; pole-to-pole spans
+  are still checked including when a context feature sits between them.
+
+- Span distance issue text changed from "between consecutive poles" to "between
+  structural records" to reflect mixed-feature survey files accurately.
+
+- Added `_CONTEXT_FEATURE_CODES` frozenset constant to `app/qa_engine.py` to define
+  which surveyor feature codes represent environmental/contextual markers.
+
+- Map marker popup now shows "Height: not captured" (muted style) for structural
+  (non-context) features where height is absent, rather than silently omitting the
+  field. This immediately surfaces height gaps without requiring the designer to open
+  the issues list. Context features (Hedge etc.) do not show height at all.
+
+### Added
+
+- Record inspection panel in map view side panel. Clicking PASS / WARN / FAIL now
+  also opens a scrollable record list below the filter note, showing each record's ID,
+  feature type, status, key fields (height, material, remarks if present), and first
+  issue description for FAIL records. Each list item is clickable to open that
+  marker's popup and zoom to it on the map.
+
+- "Records" stat block is now clickable (`#all-records-btn`). Clicking it clears any
+  active status filter and shows all records in the inspection panel.
+
+- `_showRecordPanel` / `_hideRecordPanel` / `bindAllRecordsButton` methods added to
+  `MapViewer` class in `map-viewer.js`. `setFilter` now calls show/hide automatically.
+
+- CSS: `.record-item` (compact list card with coloured left border by status),
+  `#all-records-btn` hover style.
+
+### Tests
+
+- 86 passing (up from 84). Added: `test_span_distance_skips_context_feature_codes`,
+  `test_span_distance_context_feature_bridges_span_to_next_structural_record`.
+
+---
+
 ## 2026-04-23 (validation batch 6 — explain, filter, and clarify)
 
 ### Added
