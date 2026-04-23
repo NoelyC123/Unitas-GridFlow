@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -9,8 +10,10 @@ import pandas as pd
 from flask import Blueprint, jsonify, request
 
 from app.controller_intake import (
+    build_circuit_summary,
     build_completeness_summary,
     build_design_readiness,
+    build_top_design_risks,
     classify_record_roles,
     convert_grid_to_wgs84,
     is_controller_csv,
@@ -20,6 +23,9 @@ from app.controller_intake import (
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.qa_engine import run_qa_checks
+
+# Compiled once at module level for replacement-pair offset extraction.
+_REPL_OFFSET_RE = re.compile(r"([\d.]+)m offset")
 
 api_intake_bp = Blueprint("api_intake", __name__)
 
@@ -433,6 +439,87 @@ def _build_feature_collection(
     )
 
 
+def _build_replacement_narratives(
+    df: pd.DataFrame,
+    issues_df: pd.DataFrame,
+) -> list[str]:
+    """Build readable narrative strings for each detected replacement pair.
+
+    Each WARN row in issues_df is the second record in the pair; the function
+    looks backward through structural rows to find the first, then emits text
+    like 'EXpole 99 is likely being replaced by nearby proposed support 100
+    (3.2m offset).'
+    """
+    narratives: list[str] = []
+    if issues_df.empty or "Issue" not in issues_df.columns:
+        return narratives
+
+    _expole_codes = {"EXpole", "expole", "EXPOLE"}
+
+    # Build sorted list of structural (non-context, non-anchor) row indices.
+    structural_indices: list[int] = sorted(
+        int(row.get("__row_index__"))
+        for _, row in df.iterrows()
+        if isinstance(row.get("__row_index__"), int)
+        and row.get("_record_role") not in ("context", "anchor")
+    )
+
+    # Map: row_index → immediately preceding structural row_index.
+    prev_of: dict[int, int] = {}
+    for i in range(1, len(structural_indices)):
+        prev_of[structural_indices[i]] = structural_indices[i - 1]
+
+    row_by_index: dict[int, Any] = {
+        int(row.get("__row_index__")): row
+        for _, row in df.iterrows()
+        if isinstance(row.get("__row_index__"), int)
+    }
+
+    for _, issue_row in issues_df.iterrows():
+        issue_text = str(issue_row.get("Issue", ""))
+        if "Replacement pair" not in issue_text:
+            continue
+        row_payload = issue_row.get("Row", {})
+        if not isinstance(row_payload, dict):
+            continue
+        curr_idx = row_payload.get("__row_index__")
+        if not isinstance(curr_idx, int):
+            continue
+
+        curr_row = row_by_index.get(curr_idx)
+        prev_idx = prev_of.get(curr_idx)
+        if curr_row is None or prev_idx is None:
+            continue
+        prev_row = row_by_index.get(prev_idx)
+        if prev_row is None:
+            continue
+
+        curr_id = str(_safe_value(curr_row.get("pole_id")) or curr_idx)
+        prev_id = str(_safe_value(prev_row.get("pole_id")) or prev_idx)
+        curr_st = str(_safe_value(curr_row.get("structure_type")) or "")
+
+        if curr_st in _expole_codes:
+            ex_id, pr_id = curr_id, prev_id
+        else:
+            ex_id, pr_id = prev_id, curr_id
+
+        offset_match = _REPL_OFFSET_RE.search(issue_text)
+        if offset_match:
+            offset = float(offset_match.group(1))
+            loc = "at the same surveyed position" if offset < 0.5 else f"{offset:.1f}m offset"
+            narrative = (
+                f"EXpole {ex_id} is likely being replaced by nearby proposed"
+                f" support {pr_id} ({loc})."
+            )
+        else:
+            narrative = (
+                f"EXpole {ex_id} is likely being replaced by nearby proposed support {pr_id}."
+            )
+        narratives.append(narrative)
+
+    return narratives
+
+
 @api_intake_bp.post("/import/<job_short>")
 def finalize(job_short: str):
     bare_id = job_short[1:] if job_short.startswith("J") else job_short
@@ -506,6 +593,11 @@ def finalize(job_short: str):
         issues_df = run_qa_checks(df, selected_rules)
         issues_df = _postprocess_issues(issues_df, df)
 
+        # Designer summary layer — derived purely from existing completeness + issues.
+        circuit_summary = build_circuit_summary(df, completeness)
+        top_design_risks = build_top_design_risks(issues_df, completeness)
+        replacement_narratives = _build_replacement_narratives(df, issues_df)
+
         # Count replacement pairs and surface in design readiness.
         replacement_cluster_count = 0
         if not issues_df.empty and "Severity" in issues_df.columns and "Issue" in issues_df.columns:
@@ -567,6 +659,9 @@ def finalize(job_short: str):
                 "auto_normalized": auto_normalized,
                 "completeness": completeness,
                 "design_readiness": design_readiness,
+                "circuit_summary": circuit_summary,
+                "top_design_risks": top_design_risks,
+                "replacement_narratives": replacement_narratives,
                 "issue_count": len(map_issues_df),
                 "pole_count": completeness.get(
                     "total_records", feature_collection["metadata"]["pole_count"]

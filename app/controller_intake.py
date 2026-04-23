@@ -451,6 +451,162 @@ def _position_pct(fields: dict) -> float:
     return round((coord_pct + pole_id_pct + structure_pct) / 3, 1)
 
 
+def build_circuit_summary(df: pd.DataFrame, completeness: dict) -> dict:
+    """Build a compact job-level circuit summary from current structural evidence.
+
+    Uses role counts from completeness — no new spatial analysis.
+    """
+    structural_count = int(completeness.get("structural_count") or 0)
+    context_count = int(completeness.get("context_count") or 0)
+    anchor_count = int(completeness.get("anchor_count") or 0)
+    total_count = int(completeness.get("total_records") or len(df))
+
+    if structural_count == 0:
+        summary_text = "No structural records detected in this survey file."
+    elif structural_count == 1:
+        summary_text = "1 structural record detected in this survey file."
+    else:
+        summary_text = (
+            f"{structural_count} structural records detected along a broadly"
+            f" continuous overhead line route."
+        )
+
+    return {
+        "summary_text": summary_text,
+        "structural_count": structural_count,
+        "context_count": context_count,
+        "anchor_count": anchor_count,
+        "total_count": total_count,
+    }
+
+
+def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[dict]:
+    """Build a grouped list of top design-review risks from issues and completeness.
+
+    Each item: title, count, summary, designer_impact, severity.
+    Severity maps into the existing PASS/WARN/FAIL world — no new model.
+    """
+    risks: list[dict] = []
+
+    s_fields = completeness.get("structural_fields") or completeness.get("fields") or {}
+    structural_count = int(
+        completeness.get("structural_count") or completeness.get("total_records") or 0
+    )
+    has_issues = not issues_df.empty and "Issue" in issues_df.columns
+
+    # Risk: Angle structures with no stay evidence
+    angle_count = 0
+    if has_issues:
+        angle_count = int(
+            issues_df["Issue"].str.contains("Angle structure with no stay", na=False).sum()
+        )
+    if angle_count > 0:
+        noun = "structure" if angle_count == 1 else "structures"
+        risks.append(
+            {
+                "title": "Angle structures — stay evidence missing",
+                "count": angle_count,
+                "summary": f"{angle_count} angle {noun} with no proximate stay evidence.",
+                "designer_impact": ("Verify whether stay capture is missing before design."),
+                "severity": "WARN",
+            }
+        )
+
+    # Risk: Structural heights missing
+    height_info = s_fields.get("height", {})
+    height_missing = int(height_info.get("missing", 0))
+    height_pct = float(height_info.get("coverage_pct", 100.0))
+    if height_missing > 0:
+        risks.append(
+            {
+                "title": "Structural heights missing",
+                "count": height_missing,
+                "summary": (
+                    f"Height not captured for {height_missing}"
+                    f" of {structural_count} structural records."
+                ),
+                "designer_impact": ("Height data required for clearance and sag assessments."),
+                "severity": "WARN" if height_pct > 0 else "FAIL",
+            }
+        )
+
+    # Risk: Material data missing
+    material_info = s_fields.get("material", {})
+    material_missing = int(material_info.get("missing", 0))
+    material_pct = float(material_info.get("coverage_pct", 100.0))
+    if material_missing > 0:
+        risks.append(
+            {
+                "title": "Material data missing",
+                "count": material_missing,
+                "summary": (
+                    f"Material not captured for {material_missing}"
+                    f" of {structural_count} structural records."
+                ),
+                "designer_impact": ("Material required for structural loading specification."),
+                "severity": "WARN" if material_pct > 0 else "FAIL",
+            }
+        )
+
+    # Risk: Short spans requiring review
+    short_span_count = 0
+    if has_issues:
+        span_mask = (
+            issues_df["Issue"].str.contains("Span very short", na=False)
+            | issues_df["Issue"].str.contains("Span unusually short", na=False)
+            | issues_df["Issue"].str.contains("Span borderline short", na=False)
+        )
+        short_span_count = int(span_mask.sum())
+    if short_span_count > 0:
+        noun = "span" if short_span_count == 1 else "spans"
+        risks.append(
+            {
+                "title": "Short spans requiring review",
+                "count": short_span_count,
+                "summary": f"{short_span_count} {noun} below expected minimum detected.",
+                "designer_impact": (
+                    "Verify whether short spans indicate duplicates or missing records."
+                ),
+                "severity": "WARN",
+            }
+        )
+
+    # Risk: Proposed supports with missing required field data
+    if has_issues and "Severity" in issues_df.columns:
+        repl_row_indices: set = set()
+        for _, irow in issues_df.iterrows():
+            if "Replacement pair" in str(irow.get("Issue", "")):
+                payload = irow.get("Row", {})
+                if isinstance(payload, dict):
+                    repl_row_indices.add(payload.get("__row_index__"))
+        if repl_row_indices:
+            proposed_fail_count = 0
+            for _, irow in issues_df.iterrows():
+                payload = irow.get("Row", {})
+                if isinstance(payload, dict) and payload.get("__row_index__") in repl_row_indices:
+                    sev_raw = irow.get("Severity", None)
+                    sev = str(sev_raw).upper() if isinstance(sev_raw, str) else "FAIL"
+                    if sev != "WARN" and "Missing required" in str(irow.get("Issue", "")):
+                        proposed_fail_count += 1
+            if proposed_fail_count > 0:
+                risks.append(
+                    {
+                        "title": "Proposed supports — specification incomplete",
+                        "count": proposed_fail_count,
+                        "summary": (
+                            f"{proposed_fail_count} proposed support record(s)"
+                            f" missing required field data."
+                        ),
+                        "designer_impact": (
+                            "Proposed supports without full data cannot be specified for design."
+                        ),
+                        "severity": "FAIL",
+                    }
+                )
+
+    return risks
+
+
 def build_design_readiness(completeness: dict) -> dict:
     """
     Derive a design readiness verdict and per-category coverage ratings from

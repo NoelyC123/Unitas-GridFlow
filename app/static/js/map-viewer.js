@@ -77,6 +77,21 @@ class MapViewer {
       }
     }
 
+    // Framing line: "N review signals: W warn, F fail" — shown below the status grid.
+    const frameSummaryEl = document.getElementById('frame-summary');
+    if (frameSummaryEl) {
+      const totalSignals = (meta.warn_count ?? 0) + (meta.fail_count ?? 0);
+      if (totalSignals > 0) {
+        const parts = [];
+        if ((meta.warn_count ?? 0) > 0) parts.push(`${meta.warn_count} warn`);
+        if ((meta.fail_count ?? 0) > 0) parts.push(`${meta.fail_count} fail`);
+        frameSummaryEl.textContent = `${totalSignals} review signal${totalSignals !== 1 ? 's' : ''}: ${parts.join(', ')}`;
+        frameSummaryEl.style.display = 'block';
+      } else {
+        frameSummaryEl.style.display = 'none';
+      }
+    }
+
     // File composition breakdown — structural / context / anchor counts.
     const roleEl = document.getElementById('role-breakdown');
     if (roleEl) {

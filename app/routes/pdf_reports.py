@@ -98,6 +98,14 @@ def qa_pdf(job_id: str):
     _draw_line(pdf, f"Issue count: {meta.get('issue_count', 0)}", left, y)
     y -= 8 * mm
 
+    circuit_summary = meta.get("circuit_summary") or {}
+    if circuit_summary.get("summary_text"):
+        _draw_line(pdf, "Circuit Summary", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+        _draw_line(pdf, str(circuit_summary["summary_text"])[:110], left, y, size=10)
+        y -= line_gap
+        y -= 4 * mm
+
     design_readiness = meta.get("design_readiness") or {}
     if design_readiness:
         verdict = design_readiness.get("verdict", "")
@@ -135,6 +143,38 @@ def qa_pdf(job_id: str):
                     pdf.showPage()
                     y = top
 
+        y -= 4 * mm
+
+    top_design_risks = meta.get("top_design_risks") or []
+    if top_design_risks:
+        _draw_line(pdf, "Top Design Risks", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+        for risk in top_design_risks:
+            title = str(risk.get("title", ""))
+            count = risk.get("count", 0)
+            impact = str(risk.get("designer_impact", ""))
+            sev_prefix = "[FAIL] " if risk.get("severity") == "FAIL" else "[WARN] "
+            _draw_line(
+                pdf, f"{sev_prefix}{title} ({count})", left, y, font="Helvetica-Bold", size=10
+            )
+            y -= line_gap
+            _draw_line(pdf, f"  {impact[:110]}", left, y, size=9)
+            y -= line_gap
+            if y < 30 * mm:
+                pdf.showPage()
+                y = top
+        y -= 4 * mm
+
+    replacement_narratives = meta.get("replacement_narratives") or []
+    if replacement_narratives:
+        _draw_line(pdf, "Replacement Pairs", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+        for narrative in replacement_narratives:
+            _draw_line(pdf, f"  {str(narrative)[:110]}", left, y, size=9)
+            y -= line_gap
+            if y < 30 * mm:
+                pdf.showPage()
+                y = top
         y -= 4 * mm
 
     completeness = meta.get("completeness") or {}

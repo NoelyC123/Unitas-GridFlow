@@ -6,6 +6,7 @@ import pandas as pd
 
 from app.routes.api_intake import (
     _build_feature_collection,
+    _build_replacement_narratives,
     _collect_per_row_issues,
     _normalize_dataframe,
     _postprocess_issues,
@@ -490,3 +491,101 @@ def test_build_feature_collection_warn_texts_populated_in_properties() -> None:
     assert len(props["warn_texts"]) == 1
     assert "Angle structure" in props["warn_texts"][0]
     assert props["issue_count"] == 0  # WARN, not FAIL
+
+
+# ---------------------------------------------------------------------------
+# Batch 15: _build_replacement_narratives
+# ---------------------------------------------------------------------------
+
+
+def test_build_replacement_narratives_returns_readable_text_for_pair() -> None:
+    """EXpole→Pol pair must produce a narrative including both IDs and the offset."""
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "_record_role": "structural",
+                "__row_index__": 0,
+                "lat": 54.52,
+                "lon": -3.01,
+            },
+            {
+                "pole_id": "PR-2",
+                "structure_type": "Pol",
+                "_record_role": "structural",
+                "__row_index__": 1,
+                "lat": 54.5201,
+                "lon": -3.0098,
+            },
+        ]
+    )
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Replacement pair detected (EX → PR, 3.2m offset)",
+                "Row": {"pole_id": "PR-2", "__row_index__": 1},
+                "Severity": "WARN",
+            }
+        ]
+    )
+
+    narratives = _build_replacement_narratives(df, issues_df)
+
+    assert len(narratives) == 1
+    assert "EX-1" in narratives[0]
+    assert "PR-2" in narratives[0]
+    assert "3.2m" in narratives[0]
+
+
+def test_build_replacement_narratives_same_position_wording() -> None:
+    """Offset < 0.5m must use 'at the same surveyed position' wording."""
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-10",
+                "structure_type": "EXpole",
+                "_record_role": "structural",
+                "__row_index__": 0,
+            },
+            {
+                "pole_id": "PR-11",
+                "structure_type": "Pol",
+                "_record_role": "structural",
+                "__row_index__": 1,
+            },
+        ]
+    )
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Replacement pair detected (EX → PR, 0.0m offset)",
+                "Row": {"pole_id": "PR-11", "__row_index__": 1},
+                "Severity": "WARN",
+            }
+        ]
+    )
+
+    narratives = _build_replacement_narratives(df, issues_df)
+
+    assert len(narratives) == 1
+    assert "same surveyed position" in narratives[0]
+
+
+def test_build_replacement_narratives_returns_empty_for_no_pairs() -> None:
+    """No replacement-pair WARNs must return an empty list."""
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-1",
+                "structure_type": "Pol",
+                "_record_role": "structural",
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row", "Severity"])
+
+    narratives = _build_replacement_narratives(df, issues_df)
+
+    assert narratives == []

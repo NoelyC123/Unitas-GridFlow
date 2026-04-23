@@ -332,6 +332,7 @@
               </div>
             </div>
             <div id="filter-note" style="font-size:0.82rem;color:#6b7280;text-align:center;margin-top:6px;min-height:1.2em;"></div>
+            <div id="frame-summary" style="display:none;font-size:0.78rem;color:#6b7280;text-align:center;margin-top:2px;"></div>
             <div id="record-panel" style="display:none; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 8px;">
               <div id="record-panel-title" style="font-weight:700; font-size:0.85rem; color:#111827; margin-bottom:6px;"></div>
               <div id="record-list" style="max-height:200px; overflow-y:auto;"></div>
@@ -403,6 +404,25 @@
             </div>
             {% endif %}
 
+            {% if circuit_summary and circuit_summary.summary_text %}
+            <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Circuit Summary</div>
+              <div style="font-size: 0.85rem; color: #374151;">{{ circuit_summary.summary_text }}</div>
+            </div>
+            {% endif %}
+
+            {% if top_design_risks %}
+            <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Top Design Risks</div>
+              {% for risk in top_design_risks[:3] %}
+              <div style="margin-bottom: 7px; padding: 6px 9px; border-radius: 7px; background: {% if risk.severity == 'FAIL' %}#fff5f5{% else %}#fffbeb{% endif %}; border-left: 3px solid {% if risk.severity == 'FAIL' %}#d94141{% else %}#d39e00{% endif %}; font-size: 0.82rem;">
+                <div style="font-weight: 600; color: #111827;">{{ risk.title }} <span style="color: #6b7280; font-weight: 400;">({{ risk.count }})</span></div>
+                <div style="color: #475569; margin-top: 2px;">{{ risk.designer_impact }}</div>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
             {% if completeness and completeness.total_records %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
               <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Survey Completeness</div>
@@ -441,6 +461,18 @@
               {% endif %}
             </div>
             {% endif %}
+
+            {% if replacement_narratives %}
+            <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Replacement Pairs</div>
+              {% for narrative in replacement_narratives[:5] %}
+              <div style="font-size: 0.82rem; color: #374151; margin-bottom: 4px; padding-left: 4px; border-left: 2px solid #d39e00;">{{ narrative }}</div>
+              {% endfor %}
+              {% if replacement_narratives|length > 5 %}
+              <div style="font-size: 0.78rem; color: #6b7280; margin-top: 3px;">… and {{ replacement_narratives|length - 5 }} more</div>
+              {% endif %}
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -448,6 +480,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=8"></script>
+  <script src="/static/js/map-viewer.js?v=9"></script>
 </body>
 </html>

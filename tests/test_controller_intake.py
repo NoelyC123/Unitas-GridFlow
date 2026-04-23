@@ -4,8 +4,10 @@ import pandas as pd
 import pytest
 
 from app.controller_intake import (
+    build_circuit_summary,
     build_completeness_summary,
     build_design_readiness,
+    build_top_design_risks,
     convert_grid_to_wgs84,
     detect_grid_crs,
     is_controller_csv,
@@ -426,3 +428,69 @@ def test_coverage_rating_strong_above_threshold() -> None:
 
     assert _coverage_rating(71.0) == "Strong"
     assert _coverage_rating(100.0) == "Strong"
+
+
+# ---------------------------------------------------------------------------
+# Batch 15: build_circuit_summary + build_top_design_risks
+# ---------------------------------------------------------------------------
+
+
+def test_build_circuit_summary_multiple_structural_returns_route_text() -> None:
+    completeness = {
+        "structural_count": 15,
+        "context_count": 3,
+        "anchor_count": 1,
+        "total_records": 19,
+    }
+    result = build_circuit_summary(pd.DataFrame(), completeness)
+
+    assert "15 structural records" in result["summary_text"]
+    assert "overhead line route" in result["summary_text"]
+    assert result["structural_count"] == 15
+    assert result["context_count"] == 3
+
+
+def test_build_circuit_summary_zero_structural_returns_no_structural_text() -> None:
+    completeness = {"structural_count": 0, "context_count": 2, "total_records": 2}
+    result = build_circuit_summary(pd.DataFrame(), completeness)
+
+    assert "No structural records" in result["summary_text"]
+    assert result["structural_count"] == 0
+
+
+def test_build_top_design_risks_includes_angle_no_stay_warn() -> None:
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Angle structure with no stay evidence detected — verify",
+                "Row": {"__row_index__": 0},
+                "Severity": "WARN",
+            }
+        ]
+    )
+    completeness = {"structural_count": 10, "fields": {}}
+
+    risks = build_top_design_risks(issues_df, completeness)
+
+    angle_risks = [r for r in risks if "Angle" in r["title"]]
+    assert len(angle_risks) == 1
+    assert angle_risks[0]["count"] == 1
+    assert angle_risks[0]["severity"] == "WARN"
+
+
+def test_build_top_design_risks_includes_missing_height_risk() -> None:
+    issues_df = pd.DataFrame(columns=["Issue", "Row", "Severity"])
+    completeness = {
+        "structural_count": 10,
+        "structural_fields": {
+            "height": {"present": 4, "missing": 6, "coverage_pct": 40.0},
+            "material": {"present": 10, "missing": 0, "coverage_pct": 100.0},
+        },
+    }
+
+    risks = build_top_design_risks(issues_df, completeness)
+
+    height_risks = [r for r in risks if r["title"] == "Structural heights missing"]
+    assert len(height_risks) == 1
+    assert height_risks[0]["count"] == 6
+    assert height_risks[0]["severity"] == "WARN"
