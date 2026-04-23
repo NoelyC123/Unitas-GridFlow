@@ -96,7 +96,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Batch 12 complete: angle/stay evidence logic — angle structures with no proximate stay evidence emit a cautious WARN; surfaced in popup, record panel, PDF, and design readiness
 - Batch 13 complete: confidence-aware QA refinements — short span tiers (very short/unusual/borderline, all WARN); EXpole height-below-min downgrades to WARN; design readiness strong summary when material absent
 - Batch 14 complete: EX/PR narrative linking — asset_intent labels (Existing asset / Proposed support) in GeoJSON and map UI; warn_count/warn_texts now correctly serialised to GeoJSON (Batch 12 gap fixed); improved replacement-pair popup/panel wording
-- 114 passing tests
+- Batch 15 complete: designer summary layer — circuit summary, top design risks (grouped), replacement narratives; map side panel and PDF report now present a pre-design briefing rather than a raw QA dump
+- 121 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue

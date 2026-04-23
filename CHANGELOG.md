@@ -8,6 +8,52 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (batch 15 — designer summary layer)
+
+### Added
+
+- **`build_circuit_summary` (controller_intake.py)**: compact job-level summary derived
+  from structural count in completeness. Emits `summary_text` such as
+  "15 structural records detected along a broadly continuous overhead line route."
+
+- **`build_top_design_risks` (controller_intake.py)**: groups existing issues and
+  completeness gaps into ranked risk items: angle/stay evidence missing, structural
+  heights missing, material missing, short spans, proposed supports with spec gaps.
+  Each item: `title`, `count`, `summary`, `designer_impact`, `severity` (WARN/FAIL).
+
+- **`_build_replacement_narratives` (api_intake.py)**: converts each replacement-pair
+  WARN into a readable sentence, e.g. "EXpole 99 is likely being replaced by nearby
+  proposed support 100 (3.2m offset)." or "…at the same surveyed position."
+  Uses `_REPL_OFFSET_RE` (compiled module-level regex) to extract offset from the WARN text.
+
+- **Map side panel (map_viewer.html + map-viewer.js)**:
+  - Circuit Summary block (server-side Jinja) showing the route summary sentence
+  - Top Design Risks block showing up to 3 risk items with severity colouring
+  - Replacement Pairs block listing individual narratives (capped at 5)
+  - JS framing line: "N review signals: W warn, F fail" rendered in `#frame-summary`
+  - JS cache-bust bumped to `?v=9`
+
+- **PDF report (pdf_reports.py)**:
+  - Circuit Summary section added after header, before Design Readiness
+  - Top Design Risks section added after Design Readiness, before Completeness
+  - Replacement Pairs section added after Completeness, before Issues
+
+- **meta.json storage**: `circuit_summary`, `top_design_risks`, and
+  `replacement_narratives` all persisted in meta.json and passed to map template.
+
+### Tests added
+
+- `test_build_circuit_summary_multiple_structural_returns_route_text`
+- `test_build_circuit_summary_zero_structural_returns_no_structural_text`
+- `test_build_top_design_risks_includes_angle_no_stay_warn`
+- `test_build_top_design_risks_includes_missing_height_risk`
+- `test_build_replacement_narratives_returns_readable_text_for_pair`
+- `test_build_replacement_narratives_same_position_wording`
+- `test_build_replacement_narratives_returns_empty_for_no_pairs`
+- Test count: **121 passing** (was 114).
+
+---
+
 ## 2026-04-23 (batch 14 — EX/PR narrative linking and warn_texts fix)
 
 ### Added
