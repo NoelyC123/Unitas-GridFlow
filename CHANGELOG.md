@@ -8,6 +8,51 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 3 — coord_consistency fix + QA noise suppression)
+
+### Fixed
+
+- `coord_consistency` false positives for non-OSGB grid-derived files. The check
+  reprojects lat/lon to EPSG:27700 and compares against declared easting/northing;
+  when `_grid_crs` is set to a non-OSGB CRS (TM65 EPSG:29900, ITM EPSG:2157),
+  easting/northing are in a different coordinate space and the comparison always
+  produces a large apparent mismatch. Any real NIE job would have generated a false
+  positive on every pole. Guard added to `run_qa_checks` in `app/qa_engine.py`:
+  if `_grid_crs` is present and is not `EPSG:27700`, the `coord_consistency` block
+  is skipped entirely. Existing OSGB27700 behaviour unchanged.
+
+### Added
+
+- `filter_rules_for_controller(rules)` in `app/dno_rules.py`. Removes checks that
+  produce noise rather than signal for raw controller dump files: `required` and
+  `allowed_values` for `material` (absent from the format), `allowed_values` for
+  `structure_type` (surveyor feature codes such as Angle, Pol, Hedge are valid but
+  do not match schema values), and `dependent_allowed_values` (structure_type →
+  material mapping is meaningless when material has no digital representation).
+  Meaningful checks preserved: span distance, unique_pair, coordinate bounds, regex,
+  required pole_id.
+
+- Filter applied in `app/routes/api_intake.py` finalize route when
+  `file_type == "controller"`. Structured CSV path is unchanged.
+
+- 3 new focused tests:
+  - `test_coord_consistency_skips_for_non_osgb_grid_crs` — TM65 file with
+    `_grid_crs=EPSG:29900` produces no coord_consistency issues.
+  - `test_coord_consistency_still_runs_for_explicit_osgb27700_grid_crs` — mismatch
+    is still caught when `_grid_crs=EPSG:27700`.
+  - `test_import_finalize_controller_dump_suppresses_noise_issues` — end-to-end
+    route test confirming no material, structure_type, or coord mismatch issues in
+    issues.csv for a TM65 raw dump through NIE_11kV.
+
+### State at end of session
+
+- 70 tests passing (up from 67).
+- NIE real jobs no longer produce coord_consistency false positives.
+- Controller dump QA output contains only meaningful signal.
+- Structured CSV QA path unchanged.
+
+---
+
 ## 2026-04-22 (validation batch 2 — raw controller intake + completeness tightening)
 
 ### Added
