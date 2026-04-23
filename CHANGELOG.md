@@ -8,6 +8,49 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (batch 13 — confidence-aware QA refinements)
+
+### Changed
+
+- **Short span tiers (qa_engine.py)**: short spans are no longer a flat FAIL.
+  Three distance tiers now emit calibrated WARN messages:
+  - `< 3m` → `"Span very short: Xm — likely duplicate or co-located pair, verify"`
+  - `3–8m` → `"Span unusually short: Xm (min Ym) — verify no duplicate entry"`
+  - `8–min_m` → `"Span borderline short: Xm (min Ym) — verify no missing record"`
+  All tiers emit `Severity: WARN`. Replacement-pair detection is unchanged.
+
+- **EXpole height downgrade (qa_engine.py `range` check)**: when `field="height"`,
+  `structure_type` is an EXpole code, and the value is below `min_val`, the issue
+  is downgraded from a standard range FAIL to:
+  `"Height likely estimated / not captured (EXpole)"` with `Severity: WARN`.
+  Heights above `max_val` are still emitted as standard range issues.
+
+- **Design readiness strong summary (controller_intake.py `build_design_readiness`)**:
+  when `material_pct == 0.0` (material completely absent from digital file), prepends
+  `"This file cannot support full design — critical design data missing"` as the
+  first reason in the design readiness output.
+
+### Tests updated
+
+- `test_span_distance_flags_poles_too_close` — updated to assert "Span borderline
+  short" and `Severity="WARN"` (was checking "Span too short" with implicit FAIL)
+- `test_span_suppression_does_not_apply_to_pol_pol` — updated to assert "Span
+  unusually short" WARN (was checking "Span too short" FAIL)
+- `test_span_distance_message_shows_one_decimal_precision` — updated to match new
+  "Span unusually short" tier message
+
+### Tests added
+
+- `test_short_span_very_close_emits_warn_very_short_tier` — span < 3m → WARN
+- `test_short_span_unusual_tier_emits_warn` — span 3–8m → WARN
+- `test_short_span_borderline_tier_emits_warn` — span 8–min_m → WARN
+- `test_expole_height_below_min_emits_warn` — EXpole height=5, min=7 → WARN
+- `test_expole_height_above_max_remains_range_fail` — EXpole height=30 > max → FAIL
+- `test_non_expole_height_below_min_remains_range_issue` — Pol height=5 → FAIL
+- Test count: **110 passing** (was 104).
+
+---
+
 ## 2026-04-23 (batch 12 — angle/stay evidence logic)
 
 ### Added

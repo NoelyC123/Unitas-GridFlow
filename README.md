@@ -94,7 +94,8 @@ The project has moved beyond setup and baseline scaffolding.
 - Validation batch 10 complete: record count consistency, span threshold decimal precision, coverage label fix (any data → Partial), expanded what_this_supports
 - Validation batch 11 complete: EX/PR replacement cluster detection — EXpole + nearby structural emits WARN instead of false span-too-short FAIL; relationship metadata in map popup and design readiness
 - Batch 12 complete: angle/stay evidence logic — angle structures with no proximate stay evidence emit a cautious WARN; surfaced in popup, record panel, PDF, and design readiness
-- 104 passing tests
+- Batch 13 complete: confidence-aware QA refinements — short span tiers (very short/unusual/borderline, all WARN); EXpole height-below-min downgrades to WARN; design readiness strong summary when material absent
+- 110 passing tests
 - active control layer for project truth and direction
 
 ### Current main unresolved issue
