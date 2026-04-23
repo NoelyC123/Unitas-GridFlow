@@ -348,3 +348,145 @@ def test_feature_collection_is_json_serializable_without_nan() -> None:
     payload = json.dumps(feature_collection, allow_nan=False)
     assert isinstance(payload, str)
     assert "Hartley Bridge" in payload
+
+
+# ---------------------------------------------------------------------------
+# Batch 14: asset_intent labels + warn_texts in feature properties
+# ---------------------------------------------------------------------------
+
+
+def test_build_feature_collection_expole_gets_existing_asset_intent() -> None:
+    """An EXpole record must receive asset_intent='Existing asset'.
+
+    The label is derived from structure_type alone — no WARN issue is required.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "height": None,
+                "material": None,
+                "location": None,
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    props = fc["features"][0]["properties"]
+    assert props["asset_intent"] == "Existing asset"
+
+
+def test_build_feature_collection_replacement_pair_non_expole_gets_proposed_support() -> None:
+    """Non-EXpole with replacement-pair WARN must receive asset_intent='Proposed support'.
+
+    The WARN issue text 'Replacement pair detected' is what triggers the label.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "PR-1",
+                "structure_type": "Pol",
+                "height": None,
+                "material": None,
+                "location": None,
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Replacement pair detected (EX → PR, 3.3m offset)",
+                "Row": {"pole_id": "PR-1", "__row_index__": 0},
+                "Severity": "WARN",
+            }
+        ]
+    )
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    props = fc["features"][0]["properties"]
+    assert props["asset_intent"] == "Proposed support"
+    assert props["relationship"] == "replacement_pair"
+
+
+def test_build_feature_collection_regular_pole_has_no_asset_intent() -> None:
+    """A regular Pol with no replacement-pair issues must have asset_intent=None."""
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-1",
+                "structure_type": "Pol",
+                "height": 10.0,
+                "material": "Wood",
+                "location": "Test site",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    props = fc["features"][0]["properties"]
+    assert props["asset_intent"] is None
+
+
+def test_build_feature_collection_warn_texts_populated_in_properties() -> None:
+    """WARN issues must populate warn_count and warn_texts in feature properties.
+
+    Previously these were computed but not serialised into the GeoJSON properties,
+    so angle/stay and other WARN issues were invisible in the map popup.
+    """
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A-1",
+                "structure_type": "Angle",
+                "height": None,
+                "material": None,
+                "location": None,
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": (
+                    "Angle structure with no stay evidence detected"
+                    " — verify whether stay capture is missing"
+                ),
+                "Row": {"pole_id": "A-1", "__row_index__": 0},
+                "Severity": "WARN",
+            }
+        ]
+    )
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    props = fc["features"][0]["properties"]
+    assert props["warn_count"] == 1
+    assert len(props["warn_texts"]) == 1
+    assert "Angle structure" in props["warn_texts"][0]
+    assert props["issue_count"] == 0  # WARN, not FAIL

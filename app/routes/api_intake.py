@@ -370,6 +370,17 @@ def _build_feature_collection(
         # Mark replacement pairs so the map popup can show a contextual note.
         is_replacement = any("Replacement pair" in t for t in row_warn_texts)
 
+        # Derive a cautious asset-intent label from existing data only.
+        # EXpole structure_type → existing asset being replaced.
+        # Non-EXpole with a replacement-pair WARN → proposed support record.
+        _st = str(_safe_value(row.get("structure_type")) or "")
+        if _st in ("EXpole", "expole", "EXPOLE"):
+            asset_intent: str | None = "Existing asset"
+        elif is_replacement:
+            asset_intent = "Proposed support"
+        else:
+            asset_intent = None
+
         feature = {
             "type": "Feature",
             "geometry": {
@@ -392,8 +403,11 @@ def _build_feature_collection(
                 "northing": _safe_value(row.get("northing")),
                 "issue_count": row_issue_count,
                 "issue_texts": row_issue_texts,
+                "warn_count": row_warn_count,
+                "warn_texts": row_warn_texts,
                 "record_role": _safe_value(row.get("_record_role")),
                 "relationship": "replacement_pair" if is_replacement else None,
+                "asset_intent": asset_intent,
             },
         }
         features.append(feature)
@@ -504,8 +518,8 @@ def finalize(job_short: str):
         if replacement_cluster_count > 0:
             noun = "cluster" if replacement_cluster_count == 1 else "clusters"
             design_readiness.setdefault("what_this_supports", []).append(
-                f"{replacement_cluster_count} replacement {noun} detected"
-                f" — likely EX → PR design intent"
+                f"{replacement_cluster_count} probable replacement {noun} detected"
+                f" — consistent with replacement survey work"
             )
             design_readiness["replacement_cluster_count"] = replacement_cluster_count
 

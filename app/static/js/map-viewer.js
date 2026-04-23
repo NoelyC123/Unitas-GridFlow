@@ -142,7 +142,11 @@ class MapViewer {
         : '';
 
       const replacementLine = props.relationship === 'replacement_pair'
-        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Replacement Pair (Existing &#8594; Proposed)</div>`
+        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Likely replacement pair &#8212; existing asset with nearby proposed support</div>`
+        : '';
+
+      const assetIntentLine = props.asset_intent
+        ? `<div class="popup-row" style="color:#9ca3af;font-size:0.85em;margin-top:1px;"><em>Asset role: ${this.escapeHtml(props.asset_intent)}</em></div>`
         : '';
 
       // General WARN block — shown for WARN features that are not replacement pairs
@@ -158,6 +162,7 @@ class MapViewer {
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
         ${props.pole_id != null ? `<div class="popup-row"><strong>ID:</strong> ${this.escapeHtml(props.pole_id)}</div>` : ''}
         ${props.structure_type != null ? `<div class="popup-row"><strong>Type:</strong> ${this.escapeHtml(props.structure_type)}</div>` : ''}
+        ${assetIntentLine}
         ${heightLine}
         ${materialLine}
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
@@ -288,12 +293,17 @@ class MapViewer {
         ? `<div style="color:#92400e;font-size:0.78em;margin-top:2px;">&#9888; ${this.escapeHtml(firstWarn.substring(0, 65))}</div>`
         : '';
 
+      const intentHtml = p.asset_intent
+        ? `<div style="color:#9ca3af;font-size:0.75em;margin-top:1px;font-style:italic;">${this.escapeHtml(p.asset_intent)}</div>`
+        : '';
+
       item.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
           <span style="font-weight:600;font-size:0.82rem;">${idText}</span>
           <span style="font-size:0.75rem;font-weight:700;color:${statusColor};">${fd.status}</span>
         </div>
         <div style="color:#6b7280;font-size:0.78rem;">${typeText}${detailText ? ' · ' + detailText : ''}</div>
+        ${intentHtml}
         ${issueHtml}
         ${warnHtml}
       `;
