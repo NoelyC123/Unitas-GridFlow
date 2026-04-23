@@ -348,6 +348,164 @@ def test_import_finalize_controller_dump_suppresses_noise_issues(tmp_path, monke
     assert "Coordinate mismatch" not in issues_text
 
 
+def test_import_finalize_infers_nie_11kv_for_irish_grid_without_explicit_dno(
+    tmp_path, monkeypatch
+) -> None:
+    """TM65 raw dump with no DNO specified must auto-select NIE_11kV."""
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J50200"
+    job_dir.mkdir(parents=True)
+
+    raw_dump = (
+        "Job:28-14 513,Version:24.00,Units:Metres\n"
+        "PRS485572899536,219497.298,413575.610,118.985,\n"
+        "1,242186.075,402362.807,99.505,Angle,Angle:REMARK,convert to tee\n"
+        "2,242218.756,402321.523,97.200,Pol,Pol:HEIGHT,6.1\n"
+    )
+    csv_path = job_dir / "dump.csv"
+    csv_path.write_text(raw_dump, encoding="utf-8")
+
+    _write_json(
+        job_dir / "meta.json",
+        {"job_id": "J50200", "uploaded_path": str(csv_path), "status": "uploaded"},
+    )
+
+    monkeypatch.setattr(api_intake, "_jobs_root", lambda: jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/api/import/J50200", json={})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["ok"] is True
+    assert data["rulepack_id"] == "NIE_11kV"
+    assert data["rulepack_inferred"] is True
+
+    updated_meta = json.loads((job_dir / "meta.json").read_text(encoding="utf-8"))
+    assert updated_meta["rulepack_id"] == "NIE_11kV"
+    assert updated_meta["rulepack_inferred"] is True
+
+
+def test_import_finalize_preserves_explicit_dno_over_crs_inference(tmp_path, monkeypatch) -> None:
+    """Explicit DNO in request must not be overridden by CRS auto-detection."""
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J50201"
+    job_dir.mkdir(parents=True)
+
+    raw_dump = (
+        "Job:28-14 513,Version:24.00,Units:Metres\n"
+        "PRS485572899536,219497.298,413575.610,118.985,\n"
+        "1,242186.075,402362.807,99.505,Angle\n"
+    )
+    csv_path = job_dir / "dump.csv"
+    csv_path.write_text(raw_dump, encoding="utf-8")
+
+    _write_json(
+        job_dir / "meta.json",
+        {"job_id": "J50201", "uploaded_path": str(csv_path), "status": "uploaded"},
+    )
+
+    monkeypatch.setattr(api_intake, "_jobs_root", lambda: jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.post("/api/import/J50201", json={"dno": "SSEN_11kV"})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["ok"] is True
+    assert data["rulepack_id"] == "SSEN_11kV"
+    assert data["rulepack_inferred"] is False
+
+
+def test_pdf_report_includes_completeness_when_present(tmp_path, monkeypatch) -> None:
+    """PDF route must return a valid PDF when meta includes a completeness dict."""
+    from app.routes import pdf_reports
+
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J60001"
+    job_dir.mkdir(parents=True)
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J60001",
+            "status": "complete",
+            "rulepack_id": "NIE_11kV",
+            "auto_normalized": True,
+            "pole_count": 3,
+            "issue_count": 0,
+            "completeness": {
+                "total_records": 3,
+                "position_status": "grid_only",
+                "grid_crs_detected": "EPSG:29900",
+                "fields": {
+                    "pole_id": {"present": 3, "missing": 0, "coverage_pct": 100.0},
+                    "height": {"present": 1, "missing": 2, "coverage_pct": 33.3},
+                    "structure_type": {"present": 3, "missing": 0, "coverage_pct": 100.0},
+                    "material": {"present": 0, "missing": 3, "coverage_pct": 0.0},
+                    "location": {"present": 1, "missing": 2, "coverage_pct": 33.3},
+                },
+                "feature_codes_found": ["Angle", "Hedge", "Pol"],
+            },
+        },
+    )
+    (job_dir / "issues.csv").write_text("Issue,Row\n", encoding="utf-8")
+
+    monkeypatch.setattr(pdf_reports, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/pdf/qa/J60001")
+
+    assert response.status_code == 200
+    assert response.mimetype == "application/pdf"
+    assert response.data.startswith(b"%PDF")
+
+
+def test_map_view_passes_completeness_to_template(tmp_path, monkeypatch) -> None:
+    """Map view must render completeness data when meta.json contains it."""
+    from app.routes import map_preview
+
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J70001"
+    job_dir.mkdir(parents=True)
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J70001",
+            "status": "complete",
+            "completeness": {
+                "total_records": 3,
+                "position_status": "grid_only",
+                "grid_crs_detected": "EPSG:29900",
+                "fields": {
+                    "height": {"present": 1, "missing": 2, "coverage_pct": 33.3},
+                },
+                "feature_codes_found": ["Angle", "Pol"],
+            },
+        },
+    )
+
+    monkeypatch.setattr(map_preview, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/map/view/J70001")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Survey Completeness" in html
+    assert "EPSG:29900" in html
+    assert "Angle" in html
+
+
 def test_import_finalize_returns_500_when_csv_file_missing(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     job_dir = jobs_root / "J50007"

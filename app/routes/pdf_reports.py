@@ -96,7 +96,47 @@ def qa_pdf(job_id: str):
     _draw_line(pdf, f"Pole count: {meta.get('pole_count', 0)}", left, y)
     y -= line_gap
     _draw_line(pdf, f"Issue count: {meta.get('issue_count', 0)}", left, y)
-    y -= 10 * mm
+    y -= 8 * mm
+
+    completeness = meta.get("completeness") or {}
+    if completeness:
+        _draw_line(pdf, "Survey Completeness", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+
+        total = completeness.get("total_records", 0)
+        _draw_line(pdf, f"Total records: {total}", left, y)
+        y -= line_gap
+
+        pos = completeness.get("position_status", "unknown")
+        _draw_line(pdf, f"Position: {pos}", left, y)
+        y -= line_gap
+
+        crs = completeness.get("grid_crs_detected")
+        if crs:
+            _draw_line(pdf, f"Grid CRS: {crs}", left, y)
+            y -= line_gap
+
+        fields = completeness.get("fields") or {}
+        skip_fields = {"lat", "lon", "easting", "northing"}
+        coverage_fields = {k: v for k, v in fields.items() if k not in skip_fields}
+        if coverage_fields:
+            _draw_line(pdf, "Field coverage:", left, y)
+            y -= line_gap
+            for field_name, info in coverage_fields.items():
+                present = info.get("present", 0)
+                pct = info.get("coverage_pct", 0.0)
+                _draw_line(pdf, f"  {field_name}: {present}/{total} ({pct}%)", left, y, size=9)
+                y -= line_gap
+                if y < 30 * mm:
+                    pdf.showPage()
+                    y = top
+
+        codes = completeness.get("feature_codes_found") or []
+        if codes:
+            _draw_line(pdf, f"Feature codes: {', '.join(codes)}", left, y)
+            y -= line_gap
+
+        y -= 4 * mm
 
     _draw_line(pdf, "Issues", left, y, font="Helvetica-Bold", size=12)
     y -= 8 * mm

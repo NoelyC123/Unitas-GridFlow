@@ -306,6 +306,45 @@
             <div id="issue-note" class="issue-note">
               This job contains flagged issues. Click markers to inspect record details, then use the PDF for the full issue list.
             </div>
+
+            {% if completeness and completeness.total_records %}
+            <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Survey Completeness</div>
+              <div class="meta-row">
+                <span>Records</span>
+                <strong>{{ completeness.total_records }}</strong>
+              </div>
+              {% if completeness.grid_crs_detected %}
+              <div class="meta-row">
+                <span>Grid CRS</span>
+                <strong style="font-size: 0.82rem;">{{ completeness.grid_crs_detected }}</strong>
+              </div>
+              {% endif %}
+              {% if completeness.fields %}
+              {% for field, info in completeness.fields.items() %}
+              {% if field not in ['lat', 'lon', 'easting', 'northing', 'pole_id'] %}
+              <div class="meta-row" style="font-size: 0.88rem;">
+                <span>{{ field }}</span>
+                <span>
+                  {{ info.present }}/{{ completeness.total_records }}
+                  {% if info.coverage_pct < 100 %}
+                  <span style="color: #d94141;">({{ info.coverage_pct }}%)</span>
+                  {% else %}
+                  <span style="color: #2e8b57;">✓</span>
+                  {% endif %}
+                </span>
+              </div>
+              {% endif %}
+              {% endfor %}
+              {% endif %}
+              {% if completeness.feature_codes_found %}
+              <div class="meta-row" style="font-size: 0.85rem;">
+                <span>Codes</span>
+                <span>{{ completeness.feature_codes_found | join(', ') }}</span>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>

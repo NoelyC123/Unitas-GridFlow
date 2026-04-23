@@ -375,7 +375,8 @@ def finalize(job_short: str):
     job_id = f"J{bare_id}"
 
     data = request.get_json(silent=True) or {}
-    requested_dno = data.get("dno") or "SPEN_11kV"
+    explicit_dno = data.get("dno")
+    requested_dno = explicit_dno or "SPEN_11kV"
 
     job_dir = _job_dir(job_id)
     meta_path = _meta_path(job_id)
@@ -419,6 +420,16 @@ def finalize(job_short: str):
 
         completeness = build_completeness_summary(df)
 
+        # If no DNO was explicitly supplied, infer NIE_11kV from Irish Grid CRS.
+        # TM65 (EPSG:29900) and ITM (EPSG:2157) both indicate Northern Ireland;
+        # the default SPEN_11kV coordinate bounds would reject valid NIE poles.
+        rulepack_inferred = False
+        if not explicit_dno and "_grid_crs" in df.columns:
+            detected_crs = df["_grid_crs"].dropna()
+            if len(detected_crs) and str(detected_crs.iloc[0]) in ("EPSG:29900", "EPSG:2157"):
+                requested_dno = "NIE_11kV"
+                rulepack_inferred = True
+
         # Add row index before QA so issue rows can be mapped back onto the map output.
         df = df.reset_index(drop=True)
         df["__row_index__"] = df.index
@@ -448,6 +459,7 @@ def finalize(job_short: str):
             {
                 "status": "complete",
                 "rulepack_id": requested_dno,
+                "rulepack_inferred": rulepack_inferred,
                 "file_type": file_type,
                 "auto_normalized": auto_normalized,
                 "completeness": completeness,
@@ -470,6 +482,7 @@ def finalize(job_short: str):
                 "file_type": file_type,
                 "auto_normalized": auto_normalized,
                 "rulepack_id": requested_dno,
+                "rulepack_inferred": rulepack_inferred,
                 "issue_count": len(map_issues_df),
                 "completeness": completeness,
             }

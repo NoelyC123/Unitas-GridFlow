@@ -8,6 +8,54 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-23 (validation batch 4 — rulepack auto-detection + completeness surfacing)
+
+### Fixed
+
+- Wrong rulepack applied to NIE/TM65 uploads when no explicit DNO was supplied.
+  `api_intake.py` finalize route now tracks `explicit_dno` separately from
+  `requested_dno`. After `convert_grid_to_wgs84()` writes the `_grid_crs` column,
+  if no explicit DNO was supplied and the detected CRS is `EPSG:29900` (TM65) or
+  `EPSG:2157` (ITM), `requested_dno` is switched to `NIE_11kV` and
+  `rulepack_inferred: true` is recorded in both `meta.json` and the JSON response.
+  The SPEN_11kV default is only retained for non-Irish-grid uploads with no explicit DNO.
+
+### Added
+
+- Completeness summary surfaced in map view side panel. `map_preview.py` `map_view`
+  route now reads `meta.json` and passes the `completeness` dict to the Jinja2
+  template. `map_viewer.html` renders a "Survey Completeness" section below the
+  action buttons: total records, Grid CRS (if detected), per-field coverage with
+  red percentage for partial fills and green tick for 100%, and feature codes found.
+  No changes to `map-viewer.js`.
+
+- Completeness summary surfaced in PDF QA report. `pdf_reports.py` reads the
+  `completeness` key from `meta.json` and renders a "Survey Completeness" section
+  after the job header block: total records, position status, Grid CRS, field
+  coverage table, and feature codes found. Page overflow guard added for long field
+  lists.
+
+- `rulepack_inferred` field added to `meta.json` and finalize route JSON response.
+
+- 4 new focused tests in `tests/test_app_routes.py`:
+  - `test_import_finalize_infers_nie_11kv_for_irish_grid_without_explicit_dno` —
+    TM65 raw dump with no explicit DNO returns `NIE_11kV` and `rulepack_inferred: true`.
+  - `test_import_finalize_preserves_explicit_dno_over_crs_inference` — explicit
+    `dno: "SPEN_11kV"` in request body overrides CRS-based inference.
+  - `test_pdf_report_includes_completeness_when_present` — PDF route renders
+    completeness section when `meta.json` contains completeness data.
+  - `test_map_view_passes_completeness_to_template` — map view route passes
+    completeness dict to the template context.
+
+### State at end of session
+
+- 74 tests passing (up from 70).
+- NIE/TM65 uploads now receive NIE_11kV rulepack automatically when no explicit DNO supplied.
+- Completeness summary visible in both map view side panel and PDF QA report.
+- Rulepack inference traceable via `rulepack_inferred` flag in meta.json and API response.
+
+---
+
 ## 2026-04-23 (docs alignment — WORKFLOW_SYSTEM.md integration)
 
 ### Added

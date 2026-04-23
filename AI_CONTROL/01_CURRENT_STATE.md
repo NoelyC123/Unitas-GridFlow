@@ -181,7 +181,7 @@ Goal:
 - GPS instrument elevation (col 3) intentionally not mapped to height — only explicit HEIGHT inline attributes map there
 - Added `feature_codes_found` to `build_completeness_summary` output
 - Completeness summary now correctly surfaces: record count, position status, CRS, per-field coverage, and feature codes found
-- Test count increased from 38 to 67 (raw controller batch); further to 70 after QA noise fix batch
+- Test count increased from 38 to 67 (raw controller batch); further to 70 after QA noise fix batch; further to 74 after batch 4 (rulepack inference + completeness surfacing)
 
 ---
 
