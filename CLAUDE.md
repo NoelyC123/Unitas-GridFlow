@@ -1,156 +1,264 @@
-# Unitas-GridFlow — Claude Code Runtime Instructions
+# CLAUDE.md
 
-## Core rule
-
-Minimise token usage.
-
-- Read the minimum necessary files
-- Do not reload full context for each task
-- Do not re-read files already read in the current task unless needed
-- Do not ask repeated confirmation questions inside an approved step
-
----
-
-## Session start (STRICT)
-
-At the start of a session, read only:
-
-1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
-2. `AI_CONTROL/02_CURRENT_TASK.md`
-
-Read additional files only if needed:
-
-- `AI_CONTROL/01_CURRENT_STATE.md` → only if current reality is needed
-- `AI_CONTROL/04_SESSION_HANDOFF.md` → only if continuing prior work
-- `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` → only if strategic direction is relevant to the current step
-- `WORKFLOW_SYSTEM.md` → only if tool roles or operating model are relevant
-- specific code/test files → only if they are part of the approved task
-
-Never read unless explicitly asked:
-
-- `AI_CONTROL/05_PROJECT_REFERENCE.md`
-- anything under `_archive/`
-
----
+# Unitas-GridFlow — Claude Working File
 
 ## Project identity
 
-Unitas GridFlow is a narrow pre-CAD QA and compliance tool for survey-to-design handoffs.
+You are working on **Unitas-GridFlow**, a narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
 
-Core principle: act as the trusted gate between survey and design — improving the reliability, clarity, and design-readiness of real survey data before office work begins.
+The system currently:
 
-Purpose:
+- ingests survey CSV and raw controller survey data
+- normalises input into a working schema
+- applies rule-based QA validation
+- generates structured issues
+- visualises outputs on a Leaflet map
+- produces PDF QA reports
 
-- validate survey data before design/CAD
-- catch real-world data issues early
-- act as a structured QA gate between survey and design
+Short identity:
 
-It is not a general platform.
-
-In the workflow system (see `WORKFLOW_SYSTEM.md`), Claude Code is the **execution engine**: implement tasks exactly as defined, keep tests passing, make minimal targeted changes. Decisions about what to build are made by the human and ChatGPT orchestrator.
-
----
-
-## Current direction
-
-Follow:
-
-- `AI_CONTROL/02_CURRENT_TASK.md` for what to do
-- `AI_CONTROL/01_CURRENT_STATE.md` only if needed for current truth
-
-Important strategic update:
-
-- The project should continue
-- The next phase must be validation-led
-- Do not assume more features are the right next step without real survey-file evidence
-
-Do not invent tasks or broaden scope.
+**A survey-to-design validation system and pre-CAD QA gatekeeper for electrical infrastructure workflows.**
 
 ---
 
-## Default execution mode
+## Core principle
 
-When given an approved task, proceed end-to-end within scope.
+This project is **validation-led, not feature-led**.
 
-You may:
+Its purpose is to act as the trusted gate between survey and design — turning raw, inconsistent, incomplete survey data into something a designer can confidently assess and use.
 
-- read only necessary files
-- edit only necessary in-scope files
-- run tests
-- update clearly necessary docs/control files
+Every step must answer:
 
-You must:
-
-- keep scope narrow
-- avoid unrelated refactors
-- avoid architecture changes unless explicitly part of the task
-- stop only if something outside scope becomes necessary
+> **Does this improve the reliability, clarity, and design-readiness of real survey data?**
 
 ---
 
-## Default post-change workflow
+## Critical context
 
-After code changes:
+This project is not software-first.
 
-1. Run:
-   `pytest -v`
+It comes from direct real-world experience of:
 
-2. Run:
-   `pre-commit run --all-files`
+- survey → design handoff failures
+- messy data intake
+- designers doing hidden QA instead of design
+- downstream office time being wasted on input repair instead of actual design
 
-3. If pre-commit modifies files:
-   - stage those files
-   - continue
+The project is not just for surveyors.
 
-4. Then:
-   `git add .`
-   `git commit -m "<clear message>"`
-   `git push`
-
-Do not stop before commit unless instructed or blocked.
+It is useful across the survey, planning, and design workflow because it improves the quality and trustworthiness of the digital handoff that downstream engineering decisions depend on.
 
 ---
 
-## Default output
+## Canonical locations
 
-Return one final report only:
-
-1. files changed
-2. exact work completed
-3. tests run and results
-4. docs/control files updated
-5. commit message used
-6. commit hash
-7. final git status
-
-Keep the report concise.
+- Local: `/Users/noelcollins/Unitas-GridFlow/`
+- GitHub: `NoelyC123/Unitas-GridFlow`
+- Branch: `master`
 
 ---
 
-## Hard rules
+## Repository structure (CRITICAL)
 
-- Never read unnecessary files
-- Never reload full project context without need
-- Never use `_archive/` as active instruction
-- Never assume file contents
-- Always test before commit
-- Always commit completed approved work
-- Never replace real-world validation with abstract feature work
+### ACTIVE PROJECT (use only this)
+
+- `AI_CONTROL/`
+- `app/`
+- `tests/`
+- `sample_data/`
+- `README.md`
+- `CHANGELOG.md`
+- `CLAUDE.md`
+- `PROJECT_DEEP_CONTEXT.md`
+- `WORKFLOW_SYSTEM.md`
+
+### ARCHIVE (DO NOT USE)
+
+- `_archive/`
+
+### LOCAL / TOOL FILES (ignore as project truth)
+
+- `.env`
+- `.vscode`
+- `.claude`
+- `.venv312`
+- caches
 
 ---
 
-## Efficiency behaviour
+## Control layer (source of truth for project direction)
+
+Read in this order when needed:
+
+1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
+2. `AI_CONTROL/02_CURRENT_TASK.md`
+3. `AI_CONTROL/01_CURRENT_STATE.md` (only if needed)
+4. `AI_CONTROL/04_SESSION_HANDOFF.md` (only if needed)
+5. `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` (only if strategic direction is relevant)
+
+Use:
+
+- canonical = what the project is
+- current task = what to do next
+- current state = what is true right now
+- strategic review = why the next phase is validation-led
+
+---
+
+## Session start behaviour
+
+At the start of work:
+
+1. Read:
+   - `AI_CONTROL/00_PROJECT_CANONICAL.md`
+   - `AI_CONTROL/02_CURRENT_TASK.md`
+
+2. Then optionally:
+   - `AI_CONTROL/01_CURRENT_STATE.md`
+   - `AI_CONTROL/04_SESSION_HANDOFF.md`
+   - `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
+   - `CHANGELOG.md`
+   - `README.md`
+   - `WORKFLOW_SYSTEM.md`
+
+Do not read `_archive/` unless explicitly asked.
+
+---
+
+## Current state
+
+- MVP works end-to-end
+- Tests must remain green
+- CI is active
+- Phase 1 is complete
+- Phase 2A is complete
+- Phase 2B is complete
+- Validation-led refinement is active
+
+---
+
+## Current strategic position (STRICT)
+
+The project should continue, but the next phase must be validation-led.
+
+The main unresolved question is:
+
+> **Does the current tool provide meaningful value on real survey files for real users?**
+
+That means the current focus is no longer broad rule expansion by default.
+
+The focus is now:
+
+- test the current tool against real survey files
+- identify what works
+- identify what breaks
+- identify what users actually care about
+- use that evidence to define the next development step
+
+Do not assume more features are the right next step without validation evidence.
+
+---
+
+## Validation-phase position
+
+The first real-job validation pack showed that:
+
+- real survey inputs may arrive as raw controller exports rather than clean structured CSVs
+- NIE jobs may require Irish Grid handling
+- the next useful value may come from showing what the digital survey file does and does not contain for design purposes
+
+The project has now already implemented:
+
+- raw controller dump intake support
+- Irish Grid handling
+- completeness/capture summary generation
+- initial controller-file QA refinement
+- user-facing completeness visibility
+- corrected Irish/NIE rulepack inference for relevant uploads
+
+The current phase is now about proving usefulness, clarifying design readiness, and refining outputs from real evidence.
+
+---
+
+## Working style
+
+- stay strictly narrow in scope
+- make small, targeted changes
+- do not redesign architecture
+- do not expand scope
+- always read before editing
+- prioritise real-world usefulness over theoretical completeness
+- prioritise validation evidence over abstract feature expansion
+- when a real validation analysis file exists, use it as current evidence for next-step decisions
+
+---
+
+## Tooling / workflow role
+
+Use the current workflow model in `WORKFLOW_SYSTEM.md`.
+
+In practice:
+
+- GitHub-connected repository = current code source of truth
+- Claude Code / VS Code = live implementation, tests, commit, push
+- Claude Desktop / project context = stable context, control layer, workflow, and validation evidence
+- ChatGPT = project orchestration, review, prioritisation, and next-step planning
+- Codex = optional secondary coding/review agent for bounded tasks
+
+Do not assume that uploaded project snapshots are always fresher than the connected repo.
 
 Prefer:
 
-- fewer reads
-- fewer messages
-- end-to-end execution
-- one final report
+- control files for direction
+- repo truth for implementation
+- real validation evidence for product decisions
 
-Avoid:
+---
 
-- repeated confirmations
-- unnecessary explanations
-- re-reading control files in the same task
-- reviewing files unrelated to the approved task
+## Engineering rules
+
+After any approved code change:
+
+- run `pytest -v`
+- run `pre-commit run --all-files`
+- commit clearly
+- push to `master`
+
+---
+
+## Output rule
+
+When editing or improving files:
+
+- provide the full final version of every changed file
+- provide exact terminal commands separately
+- avoid partial patches unless explicitly asked
+
+---
+
+## Key files
+
+- `app/controller_intake.py`
+- `app/routes/api_intake.py`
+- `app/qa_engine.py`
+- `app/dno_rules.py`
+- `tests/`
+
+Strategic / control files:
+
+- `AI_CONTROL/00_PROJECT_CANONICAL.md`
+- `AI_CONTROL/01_CURRENT_STATE.md`
+- `AI_CONTROL/02_CURRENT_TASK.md`
+- `AI_CONTROL/03_WORKING_RULES.md`
+- `AI_CONTROL/04_SESSION_HANDOFF.md`
+- `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
+
+---
+
+## Final rule
+
+Operate strictly within the active project.
+
+Do not rely on archive or assumptions.
+
+Do not replace real-world validation with abstract feature work.
