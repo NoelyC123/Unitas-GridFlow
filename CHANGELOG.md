@@ -8,6 +8,45 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 20C — recommended designer actions)
+
+### Added
+
+- **`app/issue_model.py`**:
+  - `build_recommended_actions(issues_df)` — groups and deduplicates `recommended_action`
+    values from an enriched issues DataFrame. Returns `[{"action": str, "severity": str}, ...]`
+    ordered: critical → warning → observation. Issues with no action text are excluded.
+    Each unique action text appears once.
+
+- **`app/routes/api_intake.py`**:
+  - `build_recommended_actions()` called after `enrich_issues()`.
+  - `"recommended_actions"` stored in `meta.json` for every completed job.
+
+- **`app/routes/map_preview.py`**:
+  - `recommended_actions` read from `meta.json` and passed to the map template.
+
+- **`app/templates/map_viewer.html`**:
+  - New "Recommended Actions" section in the sidebar (between Top Design Risks and
+    Survey Completeness). Critical actions shown with red left border, warnings with amber.
+
+- **`app/routes/pdf_reports.py`**:
+  - New "Recommended Actions" section in the QA report (after Top Design Risks, before
+    Replacement Pairs). Prefix `[!]` for critical, `[ ]` for warning actions.
+
+- **`tests/test_issue_model.py`**: 8 new tests covering `build_recommended_actions`:
+  - empty DataFrame
+  - null action exclusion
+  - output dict keys
+  - deduplication of repeated action text
+  - critical-before-warning ordering
+  - observation-after-warning ordering
+  - missing column guard
+  - integration with `enrich_issues()`
+
+156 tests passing. Pre-commit clean. No QA logic changes.
+
+---
+
 ## 2026-04-24 (batch 20B — structured issue model)
 
 ### Added

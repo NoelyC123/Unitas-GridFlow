@@ -4,9 +4,9 @@
 
 The immediate task is:
 
-**Batch 20C — Recommended designer actions.**
+**Batch 20D — Scoped design evidence gates.**
 
-Batch 20A and Batch 20B are complete and pushed to `master`.
+Batches 20A, 20B, and 20C are complete and pushed to `master`.
 
 ---
 
