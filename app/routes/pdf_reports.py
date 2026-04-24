@@ -165,6 +165,21 @@ def qa_pdf(job_id: str):
                 y = top
         y -= 4 * mm
 
+    recommended_actions = meta.get("recommended_actions") or []
+    if recommended_actions:
+        _draw_line(pdf, "Recommended Actions", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+        for item in recommended_actions:
+            action_text = str(item.get("action", "")).strip()
+            sev = str(item.get("severity", "warning"))
+            prefix = "[!] " if sev == "critical" else "[ ] "
+            _draw_line(pdf, f"  {prefix}{action_text[:105]}", left, y, size=9)
+            y -= line_gap
+            if y < 30 * mm:
+                pdf.showPage()
+                y = top
+        y -= 4 * mm
+
     replacement_narratives = meta.get("replacement_narratives") or []
     if replacement_narratives:
         _draw_line(pdf, "Replacement Pairs", left, y, font="Helvetica-Bold", size=12)

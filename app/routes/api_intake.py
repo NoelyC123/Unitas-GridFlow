@@ -22,7 +22,7 @@ from app.controller_intake import (
     parse_raw_controller_dump,
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
-from app.issue_model import enrich_issues
+from app.issue_model import build_recommended_actions, enrich_issues
 from app.qa_engine import run_qa_checks
 
 # Compiled once at module level for replacement-pair offset extraction.
@@ -604,6 +604,7 @@ def finalize(job_short: str):
         issues_df = run_qa_checks(df, selected_rules)
         issues_df = _postprocess_issues(issues_df, df)
         issues_df = enrich_issues(issues_df)
+        recommended_actions = build_recommended_actions(issues_df)
 
         # Designer summary layer — derived purely from existing completeness + issues.
         circuit_summary = build_circuit_summary(df, completeness)
@@ -696,6 +697,7 @@ def finalize(job_short: str):
                 "circuit_summary": circuit_summary,
                 "top_design_risks": top_design_risks,
                 "replacement_narratives": replacement_narratives,
+                "recommended_actions": recommended_actions,
                 "issue_groups": issue_groups,
                 "issue_count": len(map_issues_df),
                 "pole_count": completeness.get(

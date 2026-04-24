@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.issue_model import classify_issue, enrich_issues
+from app.issue_model import build_recommended_actions, classify_issue, enrich_issues
 
 # ---------------------------------------------------------------------------
 # classify_issue
@@ -218,3 +218,117 @@ def test_enrich_issues_row_count_unchanged() -> None:
     )
     enriched = enrich_issues(issues_df)
     assert len(enriched) == 3
+
+
+# ---------------------------------------------------------------------------
+# build_recommended_actions
+# ---------------------------------------------------------------------------
+
+
+def _make_enriched(rows: list[dict]) -> pd.DataFrame:
+    """Helper — build a minimal enriched issues DataFrame."""
+    return pd.DataFrame(rows)
+
+
+def test_build_recommended_actions_empty_df_returns_empty() -> None:
+    result = build_recommended_actions(pd.DataFrame())
+    assert result == []
+
+
+def test_build_recommended_actions_excludes_null_actions() -> None:
+    df = _make_enriched(
+        [
+            {"Issue": "x", "severity": "warning", "recommended_action": None},
+            {"Issue": "y", "severity": "critical", "recommended_action": None},
+        ]
+    )
+    assert build_recommended_actions(df) == []
+
+
+def test_build_recommended_actions_returns_action_and_severity_keys() -> None:
+    df = _make_enriched(
+        [{"Issue": "x", "severity": "warning", "recommended_action": "Check the field notes"}]
+    )
+    result = build_recommended_actions(df)
+    assert len(result) == 1
+    assert result[0]["action"] == "Check the field notes"
+    assert result[0]["severity"] == "warning"
+
+
+def test_build_recommended_actions_deduplicates_same_action_text() -> None:
+    df = _make_enriched(
+        [
+            {"Issue": "a", "severity": "warning", "recommended_action": "Check heights"},
+            {"Issue": "b", "severity": "warning", "recommended_action": "Check heights"},
+            {"Issue": "c", "severity": "warning", "recommended_action": "Check heights"},
+        ]
+    )
+    result = build_recommended_actions(df)
+    assert len(result) == 1
+    assert result[0]["action"] == "Check heights"
+
+
+def test_build_recommended_actions_orders_critical_before_warning() -> None:
+    df = _make_enriched(
+        [
+            {
+                "Issue": "w",
+                "severity": "warning",
+                "recommended_action": "Review field notes",
+            },
+            {
+                "Issue": "c",
+                "severity": "critical",
+                "recommended_action": "Fix coordinate error",
+            },
+        ]
+    )
+    result = build_recommended_actions(df)
+    assert result[0]["severity"] == "critical"
+    assert result[1]["severity"] == "warning"
+
+
+def test_build_recommended_actions_observation_after_warning() -> None:
+    df = _make_enriched(
+        [
+            {
+                "Issue": "o",
+                "severity": "observation",
+                "recommended_action": "Note for record",
+            },
+            {
+                "Issue": "w",
+                "severity": "warning",
+                "recommended_action": "Action needed",
+            },
+        ]
+    )
+    result = build_recommended_actions(df)
+    severities = [r["severity"] for r in result]
+    assert severities.index("warning") < severities.index("observation")
+
+
+def test_build_recommended_actions_missing_columns_returns_empty() -> None:
+    df = pd.DataFrame([{"Issue": "x", "severity": "warning"}])
+    assert build_recommended_actions(df) == []
+
+
+def test_build_recommended_actions_integration_with_enrich_issues() -> None:
+    raw = pd.DataFrame(
+        [
+            {"Issue": "Missing required field: height", "Row": {}, "Severity": None},
+            {"Issue": "Missing required field: height", "Row": {}, "Severity": None},
+            {
+                "Issue": "Angle structure with no stay evidence detected",
+                "Row": {},
+                "Severity": "WARN",
+            },
+        ]
+    )
+    enriched = enrich_issues(raw)
+    result = build_recommended_actions(enriched)
+
+    actions = [r["action"] for r in result]
+    assert len(result) == 2
+    assert any("height" in a.lower() for a in actions)
+    assert any("stay" in a.lower() for a in actions)

@@ -287,6 +287,45 @@ _FALLBACK: dict = {
 }
 
 
+_SEVERITY_ORDER: dict[str, int] = {"critical": 0, "warning": 1, "observation": 2}
+
+
+def build_recommended_actions(issues_df: pd.DataFrame) -> list[dict]:
+    """Return a deduplicated, severity-prioritised list of recommended designer actions.
+
+    Each entry is {"action": str, "severity": str}.
+    Order: critical → warning → observation.
+    Issues with no recommended_action are skipped.
+    Each unique action text appears once — first occurrence by severity order wins.
+    """
+    if issues_df.empty:
+        return []
+    if "recommended_action" not in issues_df.columns or "severity" not in issues_df.columns:
+        return []
+
+    seen: set[str] = set()
+    actions: list[dict] = []
+
+    for sev in ("critical", "warning", "observation"):
+        subset = issues_df[issues_df["severity"] == sev]
+        for _, row in subset.iterrows():
+            action = row.get("recommended_action")
+            if action is None:
+                continue
+            try:
+                if pd.isna(action):
+                    continue
+            except Exception:
+                pass
+            action_str = str(action).strip()
+            if not action_str or action_str in seen:
+                continue
+            seen.add(action_str)
+            actions.append({"action": action_str, "severity": sev})
+
+    return actions
+
+
 def classify_issue(issue_text: str) -> dict:
     """Return structured metadata for a given issue text string.
 
