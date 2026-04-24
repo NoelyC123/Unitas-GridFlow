@@ -1220,3 +1220,121 @@ def test_non_expole_height_below_min_remains_range_issue() -> None:
         f"Expected standard range message, got: {issue_texts[0]}"
     )
     assert "EXpole" not in issue_texts[0]
+
+
+# ---------------------------------------------------------------------------
+# Phase 3A — context codes and span threshold
+# ---------------------------------------------------------------------------
+
+
+def test_btxing_does_not_trigger_height_required_structural_only() -> None:
+    """BTxing records must not raise a height-required FAIL when structural_only=True.
+
+    BTxing is a crossing height measurement, not a structural pole. The
+    structural_only gate must skip it even if height is absent.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "structure_type": "BTxing", "height": None},
+            {"pole_id": "2", "structure_type": "Pol", "height": 10.0},
+        ]
+    )
+    rules = [{"check": "required", "field": "height", "structural_only": True}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0, (
+        f"BTxing must not trigger height-required; got: {issues.to_dict('records')}"
+    )
+
+
+def test_lvxing_excluded_from_span_distance_bridges_to_next_structural() -> None:
+    """LVxing between two Pols must be skipped — span bridges directly to next Pol.
+
+    Pol→LVxing is ~5m (skipped). LVxing→Pol is ~800m (bridged).
+    Pol-to-Pol span ≈ 805m > max_m=500 → must be flagged as 'Span too long'.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "X", "lat": 54.5200, "lon": -2.9999, "structure_type": "LVxing"},
+            {"pole_id": "2", "lat": 54.5272, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 5,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    long_spans = [i for i in issues["Issue"].tolist() if "Span too long" in i]
+    assert len(long_spans) == 1, (
+        f"Expected one 'Span too long' from bridged LVxing; got: {issues['Issue'].tolist()}"
+    )
+
+
+def test_span_distance_7m_does_not_trigger_with_min_m_5() -> None:
+    """A 7m pole span must produce no issue when min_m=5.
+
+    Phase 3A reduced the threshold from 10m to 5m. A span of ~7m was previously
+    flagged as 'borderline short'; it must now pass cleanly.
+    """
+    # At lat≈54.5, 1 degree lat ≈ 111,320m → 7m ≈ 6.29e-5 degrees.
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200000, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "2", "lat": 54.5200629, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 5,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0, (
+        f"7m span must not trigger with min_m=5; got: {issues.to_dict('records')}"
+    )
+
+
+def test_span_distance_2m_still_triggers_very_short_with_min_m_5() -> None:
+    """A 2m pole span must still produce a 'Span very short' WARN when min_m=5.
+
+    The 'very short' tier fires for dist<3m regardless of min_m. Reducing the
+    outer gate to 5m must not suppress sub-3m spans.
+    """
+    # At lat≈54.5, 2m ≈ 1.80e-5 degrees lat.
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200000, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "2", "lat": 54.5200180, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 5,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    very_short = [i for i in issues["Issue"].tolist() if "Span very short" in i]
+    assert len(very_short) == 1, (
+        f"Expected 'Span very short' for 2m span; got: {issues['Issue'].tolist()}"
+    )

@@ -108,9 +108,9 @@ SPEN_11KV_RULES = [
         "check": "span_distance",
         "lat_field": "lat",
         "lon_field": "lon",
-        "min_m": 10,
+        "min_m": 5,
         "max_m": 500,
-        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+        "description": "Consecutive pole spans must be 5–500m for 11kV distribution.",
     },
 ]
 
@@ -188,9 +188,9 @@ SSEN_11KV_RULES = [
         "check": "span_distance",
         "lat_field": "lat",
         "lon_field": "lon",
-        "min_m": 10,
+        "min_m": 5,
         "max_m": 500,
-        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+        "description": "Consecutive pole spans must be 5–500m for 11kV distribution.",
     },
 ]
 
@@ -261,9 +261,9 @@ NIE_11KV_RULES = [
         "check": "span_distance",
         "lat_field": "lat",
         "lon_field": "lon",
-        "min_m": 10,
+        "min_m": 5,
         "max_m": 500,
-        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+        "description": "Consecutive pole spans must be 5–500m for 11kV distribution.",
     },
 ]
 
@@ -321,9 +321,9 @@ ENWL_11KV_RULES = [
         "check": "span_distance",
         "lat_field": "lat",
         "lon_field": "lon",
-        "min_m": 10,
+        "min_m": 5,
         "max_m": 500,
-        "description": "Consecutive pole spans must be 10–500m for 11kV distribution.",
+        "description": "Consecutive pole spans must be 5–500m for 11kV distribution.",
     },
 ]
 

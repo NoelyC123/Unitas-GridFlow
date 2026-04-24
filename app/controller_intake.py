@@ -106,6 +106,20 @@ _CONTEXT_CODES: frozenset[str] = frozenset(
         "Stream",
         "stream",
         "STREAM",
+        # Crossing height measurements and environmental observations.
+        # Per OHL survey standard section 8.8 — not structural poles.
+        "BTxing",
+        "btxing",
+        "BTXING",
+        "LVxing",
+        "lvxing",
+        "LVXING",
+        "Road",
+        "road",
+        "ROAD",
+        "Ignore",
+        "ignore",
+        "IGNORE",
     }
 )
 
@@ -281,6 +295,15 @@ def parse_raw_controller_dump(path: Path | str) -> pd.DataFrame:
                         pass
                 elif attr_type == "REMARK" and attr_val:
                     remark = attr_val or None
+
+            # Strip raw Trimble attribute labels that were captured as remarks.
+            # "Pol:LAND USE", "EXpole:LAND USE", "Angle:STRING" etc. are controller
+            # noise — they start with a known feature code prefix followed by ":".
+            # Real location notes look like "pole 1", "4a-474 sect", "lv pole 1".
+            if remark and ":" in remark:
+                _remark_prefix = remark.split(":", 1)[0].strip()
+                if _remark_prefix in (_STRUCTURAL_CODES | _CONTEXT_CODES):
+                    remark = None
 
             records.append(
                 {

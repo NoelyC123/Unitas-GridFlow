@@ -8,6 +8,7 @@ from app.controller_intake import (
     build_completeness_summary,
     build_design_readiness,
     build_top_design_risks,
+    classify_record_roles,
     convert_grid_to_wgs84,
     detect_grid_crs,
     is_controller_csv,
@@ -512,3 +513,53 @@ def test_build_top_design_risks_includes_missing_height_risk() -> None:
     assert len(height_risks) == 1
     assert height_risks[0]["count"] == 6
     assert height_risks[0]["severity"] == "WARN"
+
+
+# ---------------------------------------------------------------------------
+# Phase 3A — context codes and location cleanup
+# ---------------------------------------------------------------------------
+
+
+def test_classify_record_roles_road_and_ignore_are_context() -> None:
+    """Road and Ignore feature codes must be classified as context, not structural.
+
+    Both are crossing/environmental observations per OHL survey standard 8.8
+    and must not participate in structural QA or span distance checks.
+    """
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "structure_type": "Road"},
+            {"pole_id": "2", "structure_type": "Ignore"},
+            {"pole_id": "3", "structure_type": "Pol"},
+        ]
+    )
+    result = classify_record_roles(df)
+
+    assert result.loc[result["pole_id"] == "1", "_record_role"].iloc[0] == "context"
+    assert result.loc[result["pole_id"] == "2", "_record_role"].iloc[0] == "context"
+    assert result.loc[result["pole_id"] == "3", "_record_role"].iloc[0] == "structural"
+
+
+def test_parse_raw_controller_dump_cleans_location_remark_contamination(
+    tmp_path,
+) -> None:
+    """Trimble attribute labels like 'Pol:LAND USE' in REMARK position must be stripped.
+
+    The controller export can place compound feature-code strings at the remark
+    column (col index 4+ as attribute values). These should not leak into the
+    location field — the cleaned record must have no location value.
+    """
+    content = """\
+Job:28-14 513,Version:24.00,Units:Metres
+PRS485572899536,219497.298,413575.610,118.985,
+10,242186.075,402362.807,99.505,Pol:LAND USE
+11,242200.000,402380.000,100.000,EXpole
+"""
+    f = tmp_path / "dump.csv"
+    f.write_text(content)
+    df = parse_raw_controller_dump(f).set_index("pole_id")
+
+    # "Pol:LAND USE" at col 4 is the feature code, not a remark — location should be empty
+    assert pd.isna(df.loc["10", "location"]) or df.loc["10", "location"] == ""
+    # Normal EXpole record with no remark — location also empty
+    assert pd.isna(df.loc["11", "location"]) or df.loc["11", "location"] == ""

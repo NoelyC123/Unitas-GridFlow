@@ -37,6 +37,20 @@ _CONTEXT_FEATURE_CODES: frozenset[str] = frozenset(
         "Stream",
         "stream",
         "STREAM",
+        # Crossing height measurements and environmental observations.
+        # Per OHL survey standard section 8.8 — not structural poles.
+        "BTxing",
+        "btxing",
+        "BTXING",
+        "LVxing",
+        "lvxing",
+        "LVXING",
+        "Road",
+        "road",
+        "ROAD",
+        "Ignore",
+        "ignore",
+        "IGNORE",
     }
 )
 
