@@ -425,7 +425,6 @@ def _build_feature_collection(
         "auto_normalized": False,
         "file_type": file_type,
         "pole_count": len(features),
-        "span_count": 0,
         "pass_count": pass_count,
         "warn_count": warn_count,
         "fail_count": fail_count,
@@ -700,7 +699,6 @@ def finalize(job_short: str):
                 "pole_count": completeness.get(
                     "total_records", feature_collection["metadata"]["pole_count"]
                 ),
-                "span_count": feature_collection["metadata"]["span_count"],
                 "pass_count": feature_collection["metadata"]["pass_count"],
                 "warn_count": feature_collection["metadata"]["warn_count"],
                 "fail_count": feature_collection["metadata"]["fail_count"],

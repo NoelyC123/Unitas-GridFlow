@@ -334,6 +334,24 @@ def test_parse_raw_controller_dump_maps_feature_code_to_structure_type(tmp_path)
     assert df.loc["4", "structure_type"] == "EXpole"
 
 
+def test_parse_raw_controller_dump_normalises_compound_feature_code(tmp_path) -> None:
+    """Trimble exports can produce 'Pol:LAND USE' at col 4 — strip suffix to 'Pol'."""
+    content = """\
+Job:28-14 513,Version:24.00,Units:Metres
+PRS485572899536,219497.298,413575.610,118.985,
+10,242186.075,402362.807,99.505,Pol:LAND USE
+11,242200.000,402380.000,100.000,EXpole:BOUNDARY,EXpole:HEIGHT,9.0
+12,242250.000,402400.000,101.000,Angle
+"""
+    f = tmp_path / "dump.csv"
+    f.write_text(content)
+    df = parse_raw_controller_dump(f).set_index("pole_id")
+
+    assert df.loc["10", "structure_type"] == "Pol"
+    assert df.loc["11", "structure_type"] == "EXpole"
+    assert df.loc["12", "structure_type"] == "Angle"
+
+
 def test_parse_raw_controller_dump_easting_northing_are_numeric(tmp_path) -> None:
     f = tmp_path / "dump.csv"
     f.write_text(_RAW_DUMP_CONTENT)

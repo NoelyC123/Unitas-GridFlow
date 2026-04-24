@@ -251,7 +251,13 @@ def parse_raw_controller_dump(path: Path | str) -> pd.DataFrame:
                 continue
 
             # Feature code at col 4 → structure_type
-            feature_code = values[4] if len(values) > 4 else None
+            # Strip compound Trimble codes like "Pol:LAND USE" → "Pol"
+            _raw_code = values[4] if len(values) > 4 else None
+            if _raw_code and ":" in _raw_code:
+                _base = _raw_code.split(":", 1)[0].strip()
+                feature_code = _base if _base else None
+            else:
+                feature_code = _raw_code
 
             # Parse inline attribute pairs from col 5 onwards
             height: float | None = None

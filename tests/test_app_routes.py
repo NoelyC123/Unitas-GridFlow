@@ -736,3 +736,69 @@ def test_meta_pole_count_matches_completeness_total_records(tmp_path, monkeypatc
     assert completeness["total_records"] == 3
     # pole_count in meta must equal total_records, not map-feature count
     assert updated_meta["pole_count"] == completeness["total_records"]
+
+
+# ---------------------------------------------------------------------------
+# Batch 20A — rulepack API truthfulness
+# ---------------------------------------------------------------------------
+
+
+def test_api_rulepacks_list_returns_supported_rulepacks() -> None:
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/api/rulepacks/")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    rulepacks = data["rulepacks"]
+
+    assert "SPEN_11kV" in rulepacks
+    assert "SSEN_11kV" in rulepacks
+    assert "NIE_11kV" in rulepacks
+    assert "ENWL_11kV" in rulepacks
+    # DEFAULT is internal — must not appear
+    assert "DEFAULT" not in rulepacks
+    # Non-existent rulepacks must not appear
+    for unsupported in ("NIE_LV", "SPEN_LV", "SSEN_LV", "ENWL_LV", "UKPN_LV", "UKPN_11kV"):
+        assert unsupported not in rulepacks
+
+
+def test_api_rulepacks_detail_returns_real_check_data() -> None:
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/api/rulepacks/SPEN_11kV")
+
+    assert response.status_code == 200
+    data = response.get_json()
+
+    assert data["rulepack_id"] == "SPEN_11kV"
+    assert data["total_checks"] > 0
+    assert isinstance(data["check_types"], dict)
+    assert "range" in data["check_types"]
+    height = data["height_range_m"]
+    assert height is not None
+    assert height["min_m"] == 7
+    assert height["max_m"] == 20
+
+
+def test_api_rulepacks_detail_returns_404_for_unknown() -> None:
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/api/rulepacks/FAKE_11kV")
+
+    assert response.status_code == 404
+    assert "not found" in response.get_json()["error"].lower()
+
+
+def test_upload_form_does_not_offer_unsupported_rulepacks() -> None:
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/")
+    html = response.data.decode("utf-8")
+
+    for unsupported in ("NIE_LV", "SPEN_LV", "SSEN_LV", "ENWL_LV", "UKPN_LV", "UKPN_11kV"):
+        assert unsupported not in html, f"Unsupported rulepack {unsupported!r} found in upload form"

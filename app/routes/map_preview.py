@@ -21,7 +21,6 @@ def _empty_feature_collection(job_id: str) -> dict:
             "rulepack_id": "SPEN_11kV",
             "auto_normalized": False,
             "pole_count": 0,
-            "span_count": 0,
             "pass_count": 0,
             "warn_count": 0,
             "fail_count": 0,
