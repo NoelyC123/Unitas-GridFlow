@@ -10,17 +10,17 @@
 
 ## 2. Core identity
 
-Unitas-GridFlow is a **pre-design validation and reliability layer** for electrical infrastructure survey-to-design workflows.
+Unitas-GridFlow is a **survey-to-design workflow intelligence tool** for UK electricity network projects.
 
-It is a **narrow pre-CAD QA gatekeeper** that sits between:
+It is a **pre-CAD QA gatekeeper** that sits between:
 
 - field survey output
-- digital survey/controller files
+- digital survey/controller files (Trimble, GIS export, CSV)
 - office-based design and planning work
 
 Its job is not to design the network.
 
-Its job is to determine whether the digital survey handoff is:
+Its job is to interpret, validate, and explain the digital survey handoff — determining whether it is:
 
 - trustworthy
 - understandable
@@ -29,11 +29,13 @@ Its job is to determine whether the digital survey handoff is:
 
 for safe, compliant, and efficient engineering design work to begin with confidence.
 
+The system interprets all record types found in a survey file — structural records (existing and proposed poles), context records (gates, tracks, streams), and anchor records (stays and braces) — and explains what those records mean in design terms: what is present, what is risky, and what is missing from the handoff.
+
 ---
 
 ## 3. Short definition
 
-**A survey-to-design validation system that helps determine whether digital survey data is reliable and design-usable before downstream CAD and engineering work begins.**
+**A survey-to-design workflow intelligence tool that interprets digital survey data, identifies design risks and gaps, and determines whether a survey handoff is ready for engineering design work to begin.**
 
 ---
 
@@ -86,10 +88,12 @@ This principle is the main filter for deciding what the project should and shoul
 
 ### This project IS:
 
-- a survey-to-design validation layer
+- a survey-to-design workflow intelligence tool
 - a pre-CAD QA gatekeeper
 - a data trust engine for real survey handoffs
 - a decision-support tool for design readiness
+- an interpreter of record roles (structural, context, anchor, existing/proposed)
+- a surface for design risks, gaps, and missing evidence before CAD work begins
 
 It answers questions like:
 
@@ -97,6 +101,17 @@ It answers questions like:
 - What is missing from the digital handoff?
 - Can a designer safely proceed from this file alone?
 - What still needs notebook, plan, or follow-up context?
+- Which structures are existing assets and which are proposed?
+- Are there angle structures with insufficient stay evidence?
+
+### This project does NOT claim to replace:
+
+- Trimble or other field capture software
+- PoleCAD, AutoCAD, or other design tools
+- engineering designers or overhead line engineers
+- a full DNO compliance engine or regulatory approval system
+
+It is an intelligence layer sitting before design — not a replacement for any of these tools or roles. It is also not yet a full DNO compliance engine.
 
 ---
 
@@ -133,6 +148,10 @@ The system now also supports:
 - Irish Grid detection and conversion where needed
 - completeness / capture summary generation
 - initial controller-file QA refinement
+- record-role classification (structural, context, anchor)
+- EX/PR replacement cluster detection and narrative linking
+- angle/stay evidence logic for angle structures
+- designer summary layer (circuit summary, top design risks, replacement narratives)
 
 ---
 
@@ -157,17 +176,19 @@ That is the current product test.
 
 Primary users are likely to include:
 
-- designers
-- design engineers
+- designers and design engineers
 - overhead line engineers
-- project engineers
-- planners
+- project engineers and planners
 - survey-to-design coordinators
+- QA leads and checking engineers
+- contractors receiving survey handoffs
 - teams responsible for checking data quality before design release
 
 The project is informed by survey practice, but it is **not only a surveyor tool**.
 
-Its value sits in improving the entire survey-to-design handoff.
+Its value spans the entire survey-to-design handoff — from surveyors handing over better-evidenced data, to designers receiving a clearer picture of what the digital file contains and what is still missing.
+
+Future potential users include DNO asset management teams and network planners who need reliable digital representations of field conditions before committing to design decisions.
 
 ---
 
@@ -209,6 +230,14 @@ During the current phase, the project should avoid broad expansion into:
 - broad platform features
 - speculative workflow systems
 - premature productisation
+
+Longer-term, the project may naturally extend toward:
+
+- field-capture guidance (helping surveyors capture better evidence)
+- structured survey standards for UK electricity network handoffs
+- multi-DNO rulepack expansion based on validated real-world evidence
+
+These are post-validation directions, not current scope.
 
 ---
 

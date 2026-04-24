@@ -39,13 +39,15 @@ This is NOT:
 
 This IS:
 
+- a **survey-to-design workflow intelligence tool**
 - a **pre-CAD QA gatekeeper**
 - a **data trust engine**
-- a **survey-to-design validation layer**
+- an **interpreter of survey record roles** (structural, context, anchor, existing/proposed)
+- a **design risk and gap identifier**
 
 It answers:
 
-> “Can I trust this data enough to design from it?”
+> “What does this survey data actually contain, what is missing, and is it ready for design?”
 
 ---
 

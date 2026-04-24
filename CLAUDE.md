@@ -4,20 +4,22 @@
 
 ## Project identity
 
-You are working on **Unitas-GridFlow**, a narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
+You are working on **Unitas-GridFlow**, a survey-to-design workflow intelligence tool for UK electricity network projects.
 
 The system currently:
 
-- ingests survey CSV and raw controller survey data
+- ingests survey data (CSV, raw controller exports, Trimble dumps)
+- interprets record roles (structural, context, anchor, existing/proposed)
 - normalises input into a working schema
 - applies rule-based QA validation
-- generates structured issues
-- visualises outputs on a Leaflet map
-- produces PDF QA reports
+- identifies design risks and gaps in the survey handoff
+- generates structured issues with design-context explanations
+- visualises outputs on a Leaflet map with design-readiness signals
+- produces PDF pre-design briefing reports
 
 Short identity:
 
-**A survey-to-design validation system and pre-CAD QA gatekeeper for electrical infrastructure workflows.**
+**A survey-to-design workflow intelligence tool that interprets, validates, and explains digital survey data for UK electricity network design handoffs.**
 
 ---
 
@@ -46,7 +48,9 @@ It comes from direct real-world experience of:
 
 The project is not just for surveyors.
 
-It is useful across the survey, planning, and design workflow because it improves the quality and trustworthiness of the digital handoff that downstream engineering decisions depend on.
+It is useful across the survey, planning, and design workflow — surveyors handing over better-evidenced data, designers receiving a clearer picture of the handoff, QA leads checking data quality before design release.
+
+**This tool does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is not yet a full DNO compliance engine. It is a pre-design intelligence layer — the trusted gate between survey and design.**
 
 ---
 

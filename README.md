@@ -6,21 +6,23 @@
 
 ## Overview
 
-Unitas GridFlow is a narrow workflow tool for validating survey inputs before CAD/design handoff.
+Unitas GridFlow is a survey-to-design workflow intelligence tool for UK electricity network projects.
 
 Its role is to:
 
-- ingest survey CSV data
+- ingest survey data (CSV, raw controller exports, Trimble dumps)
+- interpret record roles — structural, context, anchor, existing/proposed
 - normalise input into a consistent internal schema
 - apply rule-based QA validation
-- generate structured issues
-- render mapped outputs
-- produce a PDF QA report
+- identify design risks and gaps in the survey handoff
+- generate structured issues with design-context explanations
+- render mapped outputs with design-readiness signals
+- produce a PDF pre-design briefing report
 - retain job outputs locally for review
 
 Short version:
 
-**A narrow pre-CAD QA gatekeeper for survey-to-design workflows**
+**A survey-to-design workflow intelligence tool for UK electricity network projects**
 
 ---
 
@@ -38,12 +40,20 @@ The main problem is often that incoming survey information is:
 - mixed in quality
 - discovered to be defective too late in the process
 
+In practice, designers are often forced to perform hidden QA before they can begin actual design work — wasting time and increasing the risk of poor assumptions entering the design process.
+
 The project is intended to act as a structured gate between survey and design by:
 
 - validating incoming data early
+- interpreting what record types are present (structural, context, anchor, existing/proposed)
 - catching missing or inconsistent information
 - applying practical workflow / DNO-style checks
-- surfacing issues before office time is wasted downstream
+- surfacing design risks before office time is wasted downstream
+- producing a clear design-readiness signal for PoleCAD/CAD/design teams
+
+It is useful across the survey, planning, and design workflow — not only for surveyors. Its value is in improving the trustworthiness of the digital handoff that downstream engineering decisions depend on.
+
+**This tool does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is a pre-design intelligence layer, not a substitute for any of these.**
 
 ---
 
