@@ -6,13 +6,15 @@ The immediate task is:
 
 **Batch 20C — Recommended designer actions.**
 
-Batch 20B is complete and pushed to `master`.
+Batch 20A and Batch 20B are complete and pushed to `master`.
 
 ---
 
-## Completed previous step: Batch 20A
+## Completed previous steps
 
-Batch 20A fixed the immediate trust issues identified by the April 2026 multi-AI review.
+### Batch 20A — Trust fixes
+
+Batch 20A fixed immediate trust issues identified by the April 2026 multi-AI review.
 
 Completed Batch 20A changes:
 
@@ -24,30 +26,38 @@ Completed Batch 20A changes:
   - `EXpole:BOUNDARY` becomes `EXpole`
 - misleading `span_count: 0` metadata was removed
 - focused tests were added
-- 126 tests passing
 
-Batch 20A is closed.
+### Batch 20B — Structured issue model
 
-Do not redo Batch 20A unless a regression is found.
+Batch 20B introduced structured issue fields:
+
+- `issue_code`
+- `severity`
+- `category`
+- `scope`
+- `confidence`
+- `recommended_action`
+- `is_observation`
+
+This allows the tool to separate design blockers, warnings, and observations.
+
+Batch 20A and Batch 20B are closed.
+
+Do not redo them unless a regression is found.
 
 ---
 
-## Why Batch 20B is now the current task
+## Why Batch 20C is now the current task
 
-Batch 19 validation showed that Unitas GridFlow is genuinely valuable as a working MVP.
+The April 2026 multi-AI review showed that Unitas GridFlow is valuable, but the output must become more actionable.
 
-Batch 20A improved immediate trust issues.
+Batch 20B added structured `recommended_action` fields to individual issues.
 
-The next weakness is that findings are still too flat and noisy.
+The next step is to turn those issue-level actions into a clear designer-facing action summary.
 
-The tool needs to distinguish between:
+The goal is to help a designer or QA lead answer:
 
-- design blockers
-- warnings requiring review
-- useful observations
-- completeness gaps
-
-This will allow the PDF, map, and designer summary to become more actionable without broadening the product.
+**What do I need to do next before design can safely proceed?**
 
 ---
 
@@ -69,81 +79,46 @@ to:
 
 ---
 
-## Batch 20B goal
+## Batch 20C goal
 
-Introduce a structured issue model that supports clearer grouping, severity, and future recommended actions.
+Add a concise recommended designer actions summary derived from structured issue data.
 
-The goal is to improve the output from:
+The output should move from:
 
-**"Here are many issues"**
+**"Here are classified issues."**
 
 to:
 
-**"Here are the blockers, warnings, and observations, each with clear meaning."**
+**"Here are the practical actions required before design."**
 
 ---
 
-## Batch 20B scope
+## Batch 20C scope
 
-Implement a narrow structured issue model.
+Implement a narrow recommended actions layer.
 
-Suggested fields:
+Suggested behaviour:
 
-- `issue_code`
-- `severity`
-- `category`
-- `scope`
-- `confidence`
-- `recommended_action`
-- `is_observation`
-
-Start simple.
-
-Do not over-engineer the model.
+1. Group issue-level `recommended_action` values.
+2. Deduplicate repeated actions.
+3. Prioritise actions by severity:
+   - critical first
+   - warning second
+   - observation last only if useful
+4. Show the actions in designer-facing outputs where practical.
+5. Keep the implementation simple and deterministic.
 
 ---
 
-## Initial severity levels
+## Recommended action examples
 
-Use a small practical severity set:
+Examples of useful actions:
 
-- `critical`
-- `warning`
-- `observation`
-
-Suggested meaning:
-
-- `critical` — likely blocks design or requires clarification before design proceeds
-- `warning` — requires review or confirmation
-- `observation` — useful detected pattern, not necessarily a defect
-
----
-
-## Likely issue categories
-
-Possible categories include:
-
-- `data_completeness`
-- `structural_evidence`
-- `replacement_intent`
-- `span_geometry`
-- `coordinate_quality`
-- `rulepack_validation`
-- `controller_parsing`
-
-Only add categories that are actually needed by current checks.
-
----
-
-## Important examples
-
-Replacement pair detections should usually be observations unless ambiguous.
-
-Ambiguous replacement pairings should be warnings.
-
-Missing structural evidence across many records should be critical or warning depending on context.
-
-Short spans caused by likely existing-to-proposed replacement pairs should not automatically be treated as design failures.
+- request missing pole height evidence before clearance/design checks
+- confirm material evidence for structures where material is missing
+- review coordinate mismatches before relying on map output
+- verify ambiguous EX to proposed replacement groups against field notes or plan markups
+- confirm stay evidence for angle structures before structural review
 
 ---
 
@@ -151,20 +126,19 @@ Short spans caused by likely existing-to-proposed replacement pairs should not a
 
 Likely files include:
 
-- `app/qa_engine.py`
-- `app/controller_intake.py`
+- `app/issue_model.py`
 - `app/routes/api_intake.py`
 - `app/routes/pdf_reports.py`
 - `app/templates/map_viewer.html`
 - relevant tests under `tests/`
 
-Only edit files needed for Batch 20B.
+Only edit files needed for Batch 20C.
 
 Read files before editing.
 
 ---
 
-## Out of scope for Batch 20B
+## Out of scope for Batch 20C
 
 Do not add:
 
@@ -184,22 +158,23 @@ Do not add:
 - large UI redesign
 - broad provenance/audit systems
 
-Do not start Batch 20C until Batch 20B is complete.
+Do not start Batch 20D until Batch 20C is complete.
 
-Recommended actions may be included only if simple and directly tied to the structured model, but the full designer action section belongs to Batch 20C.
+Scoped readiness gates and PDF first-page redesign belong to later Batch 20D / 20E steps.
 
 ---
 
 ## What success looks like
 
-Batch 20B is successful when:
+Batch 20C is successful when:
 
-- issues have stable structured fields
-- existing tests still pass
-- new tests cover severity/category/observation behaviour
+- repeated issue-level recommended actions are grouped and deduplicated
+- top actions are ordered by severity
+- designer-facing output includes a concise recommended action list
 - existing CSV/PDF/map outputs still work
-- replacement observations can be separated from true problems
-- the output is ready for Batch 20C recommended actions
+- tests cover action grouping and prioritisation
+- tests pass
+- pre-commit passes
 
 ---
 
@@ -226,8 +201,8 @@ That memo should be treated as the decision record for this phase.
 
 ## Final rule
 
-Keep Batch 20B narrow.
+Keep Batch 20C narrow.
 
 The goal is not to add more features.
 
-The goal is to make current findings more structured, less noisy, and easier to act on.
+The goal is to turn structured findings into practical next actions for a real designer.
