@@ -145,6 +145,24 @@ def qa_pdf(job_id: str):
 
         y -= 4 * mm
 
+    evidence_gates = meta.get("evidence_gates") or []
+    if evidence_gates:
+        _draw_line(pdf, "Evidence Gates", left, y, font="Helvetica-Bold", size=12)
+        y -= 8 * mm
+        for gate in evidence_gates:
+            label = str(gate.get("label", ""))
+            status = str(gate.get("status", ""))
+            explanation = str(gate.get("explanation", "")).strip()
+            _draw_line(pdf, f"  {label}: {status}", left, y, font="Helvetica-Bold", size=9)
+            y -= line_gap
+            if explanation:
+                _draw_line(pdf, f"    {explanation[:108]}", left, y, size=8)
+                y -= line_gap
+            if y < 30 * mm:
+                pdf.showPage()
+                y = top
+        y -= 4 * mm
+
     top_design_risks = meta.get("top_design_risks") or []
     if top_design_risks:
         _draw_line(pdf, "Top Design Risks", left, y, font="Helvetica-Bold", size=12)

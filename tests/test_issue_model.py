@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.issue_model import build_recommended_actions, classify_issue, enrich_issues
+from app.issue_model import (
+    build_evidence_gates,
+    build_recommended_actions,
+    classify_issue,
+    enrich_issues,
+)
 
 # ---------------------------------------------------------------------------
 # classify_issue
@@ -332,3 +337,108 @@ def test_build_recommended_actions_integration_with_enrich_issues() -> None:
     assert len(result) == 2
     assert any("height" in a.lower() for a in actions)
     assert any("stay" in a.lower() for a in actions)
+
+
+# ---------------------------------------------------------------------------
+# build_evidence_gates
+# ---------------------------------------------------------------------------
+
+
+def _make_completeness(
+    lat_pct: float = 0,
+    east_pct: float = 0,
+    st_pct: float = 0,
+    height_pct: float = 0,
+    material_pct: float = 0,
+    structural_count: int = 0,
+    feature_codes: list | None = None,
+) -> dict:
+    return {
+        "fields": {
+            "lat": {"coverage_pct": lat_pct, "present": 0, "missing": 0},
+            "easting": {"coverage_pct": east_pct, "present": 0, "missing": 0},
+            "structure_type": {"coverage_pct": st_pct, "present": 0, "missing": 0},
+            "height": {"coverage_pct": height_pct, "present": 0, "missing": 0},
+            "material": {"coverage_pct": material_pct, "present": 0, "missing": 0},
+        },
+        "structural_count": structural_count,
+        "feature_codes_found": feature_codes or [],
+    }
+
+
+def _make_issues_with_codes(codes: list[str]) -> pd.DataFrame:
+    return pd.DataFrame([{"issue_code": c, "severity": "warning"} for c in codes])
+
+
+def test_build_evidence_gates_returns_seven_gates() -> None:
+    completeness = _make_completeness(lat_pct=100, structural_count=5)
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    assert len(result) == 7
+    labels = [g["label"] for g in result]
+    assert "Position / Mapping" in labels
+    assert "Overall Handoff Status" in labels
+
+
+def test_build_evidence_gates_each_gate_has_required_keys() -> None:
+    completeness = _make_completeness(lat_pct=100, structural_count=5)
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    for gate in result:
+        assert "label" in gate
+        assert "status" in gate
+        assert "explanation" in gate
+
+
+def test_build_evidence_gates_position_missing_when_no_coords() -> None:
+    completeness = _make_completeness()
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    pos_gate = next(g for g in result if g["label"] == "Position / Mapping")
+    assert pos_gate["status"] == "Missing"
+
+
+def test_build_evidence_gates_position_strong_when_full_coverage_no_issues() -> None:
+    completeness = _make_completeness(lat_pct=100, structural_count=5)
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    pos_gate = next(g for g in result if g["label"] == "Position / Mapping")
+    assert pos_gate["status"] == "Strong"
+
+
+def test_build_evidence_gates_stay_na_when_no_angle_code() -> None:
+    completeness = _make_completeness(lat_pct=100, structural_count=5, feature_codes=["Pol"])
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    stay_gate = next(g for g in result if g["label"] == "Stay Evidence")
+    assert stay_gate["status"] == "N/A"
+
+
+def test_build_evidence_gates_stay_weak_when_angle_no_stay_issues() -> None:
+    completeness = _make_completeness(
+        lat_pct=100,
+        structural_count=5,
+        feature_codes=["Pol", "Angle"],
+    )
+    issues_df = _make_issues_with_codes(["ANGLE_NO_STAY", "ANGLE_NO_STAY"])
+    result = build_evidence_gates(completeness, issues_df)
+    stay_gate = next(g for g in result if g["label"] == "Stay Evidence")
+    assert stay_gate["status"] == "Weak"
+    assert "2" in stay_gate["explanation"]
+
+
+def test_build_evidence_gates_structural_spec_missing_when_both_zero() -> None:
+    completeness = _make_completeness(lat_pct=100, height_pct=0, material_pct=0, structural_count=5)
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    spec_gate = next(g for g in result if g["label"] == "Structural Specification")
+    assert spec_gate["status"] == "Missing"
+
+
+def test_build_evidence_gates_overall_blocked_when_position_missing() -> None:
+    completeness = _make_completeness()
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    overall = next(g for g in result if g["label"] == "Overall Handoff Status")
+    assert overall["status"] == "Blocked"
+
+
+def test_build_evidence_gates_conductor_scope_partial_with_few_span_issues() -> None:
+    completeness = _make_completeness(lat_pct=100, structural_count=10)
+    issues_df = _make_issues_with_codes(["SPAN_VERY_SHORT", "SPAN_LONG"])
+    result = build_evidence_gates(completeness, issues_df)
+    cond_gate = next(g for g in result if g["label"] == "Conductor Scope")
+    assert cond_gate["status"] == "Partial"

@@ -63,7 +63,9 @@ The project currently has a working local MVP.
 
 ### Working flow
 
-    upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
+```
+upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
+```
 
 ### Confirmed working components
 
@@ -233,23 +235,31 @@ These define:
 
 ### Create and activate environment
 
-    python3.13 -m venv .venv312
-    source .venv312/bin/activate
-    python -m pip install --upgrade pip setuptools wheel
-    python -m pip install -r requirements.txt
-    python -m pip install pre-commit ruff pytest
+```
+python3.13 -m venv .venv312
+source .venv312/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
+python -m pip install pre-commit ruff pytest
+```
 
 ### Run the app
 
-    python run.py
+```
+python run.py
+```
 
 ### Run tests
 
-    pytest -v
+```
+pytest -v
+```
 
 ### Run linting
 
-    pre-commit run --all-files
+```
+pre-commit run --all-files
+```
 
 ---
 
@@ -296,14 +306,18 @@ These define:
 
 Always run:
 
-    pytest -v
-    pre-commit run --all-files
+```
+pytest -v
+pre-commit run --all-files
+```
 
 Then:
 
-    git add .
-    git commit -m "clear message"
-    git push
+```
+git add .
+git commit -m "clear message"
+git push
+```
 
 ---
 

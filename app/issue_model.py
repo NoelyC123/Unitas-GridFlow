@@ -9,6 +9,11 @@ import pandas as pd
 # before less specific ones that share a common prefix.
 # ---------------------------------------------------------------------------
 
+_SPAN_ACTION = (
+    "Review span anomalies — confirm whether short or long spans represent"
+    " replacement pairs, duplicate captures, or missing intermediate records"
+)
+
 _ISSUE_PATTERNS: list[tuple[str, dict]] = [
     # --- replacement intent ---
     (
@@ -115,7 +120,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "recommended_action": None,
         },
     ),
-    # --- span geometry: specific tiers first ---
+    # --- span geometry: all tiers share one grouped action so they deduplicate naturally ---
     (
         "Span very short:",
         {
@@ -125,9 +130,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "scope": "structural",
             "confidence": "high",
             "is_observation": False,
-            "recommended_action": (
-                "Confirm whether duplicate capture or co-located replacement pair"
-            ),
+            "recommended_action": _SPAN_ACTION,
         },
     ),
     (
@@ -139,7 +142,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "scope": "structural",
             "confidence": "medium",
             "is_observation": False,
-            "recommended_action": "Verify no duplicate entry",
+            "recommended_action": _SPAN_ACTION,
         },
     ),
     (
@@ -151,7 +154,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "scope": "structural",
             "confidence": "medium",
             "is_observation": False,
-            "recommended_action": "Verify no missing intermediate record",
+            "recommended_action": _SPAN_ACTION,
         },
     ),
     (
@@ -163,7 +166,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "scope": "structural",
             "confidence": "medium",
             "is_observation": False,
-            "recommended_action": "Check for GPS error or missing intermediate record",
+            "recommended_action": _SPAN_ACTION,
         },
     ),
     # --- coordinate quality ---
@@ -286,8 +289,229 @@ _FALLBACK: dict = {
     "recommended_action": None,
 }
 
-
 _SEVERITY_ORDER: dict[str, int] = {"critical": 0, "warning": 1, "observation": 2}
+
+
+def _count_issue_codes(issues_df: pd.DataFrame, codes: set[str]) -> int:
+    """Count rows whose issue_code is in the given set."""
+    if issues_df.empty or "issue_code" not in issues_df.columns:
+        return 0
+    return int(issues_df["issue_code"].isin(codes).sum())
+
+
+def build_evidence_gates(completeness: dict, issues_df: pd.DataFrame) -> list[dict]:
+    """Return a list of scoped design evidence gates.
+
+    Each entry is {"label": str, "status": str, "explanation": str}.
+    Status values: Strong / Partial / Weak / Missing / N/A / Blocked.
+    Derived deterministically from completeness summary and enriched issues.
+    """
+    gates: list[dict] = []
+
+    fields = completeness.get("fields") or {}
+    s_fields = completeness.get("structural_fields") or fields
+    feature_codes: list = completeness.get("feature_codes_found") or []
+    structural_count = int(completeness.get("structural_count") or 0)
+
+    # -------------------------------------------------------------------------
+    # Gate 1 — Position / Mapping Evidence
+    # -------------------------------------------------------------------------
+    lat_pct = float((fields.get("lat") or {}).get("coverage_pct") or 0)
+    east_pct = float((fields.get("easting") or {}).get("coverage_pct") or 0)
+    coord_pct = max(lat_pct, east_pct)
+    coord_issues = _count_issue_codes(
+        issues_df, {"COORD_MISMATCH", "COORD_DUPLICATE", "MISS_PAIRED_FIELD"}
+    )
+
+    if coord_pct == 0:
+        g1 = (
+            "Missing",
+            "No coordinate data found — map output and span calculations are not possible.",
+        )
+    elif coord_issues > 0 and coord_pct < 85:
+        g1 = (
+            "Weak",
+            f"Coordinate coverage low ({coord_pct:.0f}%) with {coord_issues} quality"
+            " issue(s) — map output is unreliable.",
+        )
+    elif coord_issues > 0:
+        g1 = (
+            "Partial",
+            f"Coordinates mostly present ({coord_pct:.0f}%) but {coord_issues} quality"
+            " issue(s) flagged — verify before relying on map output.",
+        )
+    elif coord_pct >= 85:
+        g1 = (
+            "Strong",
+            f"Coordinates present for {coord_pct:.0f}% of records — map output is reliable.",
+        )
+    elif coord_pct >= 50:
+        g1 = (
+            "Partial",
+            f"Coordinates present for {coord_pct:.0f}% of records — partial map output only.",
+        )
+    else:
+        g1 = (
+            "Weak",
+            f"Coordinate coverage low ({coord_pct:.0f}%) — map output is limited.",
+        )
+
+    gates.append({"label": "Position / Mapping", "status": g1[0], "explanation": g1[1]})
+
+    # -------------------------------------------------------------------------
+    # Gate 2 — Structure Identity Evidence
+    # -------------------------------------------------------------------------
+    st_pct = float((s_fields.get("structure_type") or {}).get("coverage_pct") or 0)
+    has_ex = any(c.lower() == "expole" for c in feature_codes)
+    has_pr = any(c.lower() in ("pol", "prpole") for c in feature_codes)
+
+    if st_pct == 0:
+        g2 = (
+            "Missing",
+            "No structure type codes found — EX/proposed intent cannot be determined.",
+        )
+    elif st_pct >= 80 and (has_ex or has_pr):
+        g2 = (
+            "Strong",
+            f"Structure type present for {st_pct:.0f}% of records with recognised EX/PR codes.",
+        )
+    elif st_pct >= 50:
+        g2 = (
+            "Partial",
+            f"Structure type present for {st_pct:.0f}% of records"
+            " — incomplete EX/PR classification.",
+        )
+    else:
+        g2 = (
+            "Weak",
+            f"Structure type coverage low ({st_pct:.0f}%) — asset intent unclear.",
+        )
+
+    gates.append({"label": "Structure Identity", "status": g2[0], "explanation": g2[1]})
+
+    # -------------------------------------------------------------------------
+    # Gate 3 — Structural Specification (Height & Material)
+    # -------------------------------------------------------------------------
+    height_pct = float((s_fields.get("height") or {}).get("coverage_pct") or 0)
+    material_pct = float((s_fields.get("material") or {}).get("coverage_pct") or 0)
+
+    if height_pct == 0 and material_pct == 0:
+        g3 = (
+            "Missing",
+            "No height or material data — structural loading and clearance checks not possible.",
+        )
+    elif height_pct >= 70 and material_pct >= 70:
+        g3 = (
+            "Strong",
+            f"Height ({height_pct:.0f}%) and material ({material_pct:.0f}%) both well covered.",
+        )
+    else:
+        h_part = f"height {height_pct:.0f}%" if height_pct > 0 else "height missing"
+        m_part = f"material {material_pct:.0f}%" if material_pct > 0 else "material missing"
+        g3 = ("Partial", f"Partial specification: {h_part}, {m_part}.")
+
+    gates.append({"label": "Structural Specification", "status": g3[0], "explanation": g3[1]})
+
+    # -------------------------------------------------------------------------
+    # Gate 4 — Stay Evidence
+    # -------------------------------------------------------------------------
+    has_angle = any(c.lower() == "angle" for c in feature_codes)
+    angle_no_stay = _count_issue_codes(issues_df, {"ANGLE_NO_STAY"})
+
+    if not has_angle:
+        g4 = ("N/A", "No angle structures detected — stay evidence gate not applicable.")
+    elif angle_no_stay == 0:
+        g4 = ("Strong", "Angle structures present with stay evidence captured.")
+    else:
+        noun = "structure" if angle_no_stay == 1 else "structures"
+        g4 = (
+            "Weak",
+            f"{angle_no_stay} angle {noun} with no stay evidence — confirm from field notes.",
+        )
+
+    gates.append({"label": "Stay Evidence", "status": g4[0], "explanation": g4[1]})
+
+    # -------------------------------------------------------------------------
+    # Gate 5 — Clearance Design Evidence
+    # Clearance is at most Partial — field verification is always needed.
+    # -------------------------------------------------------------------------
+    if height_pct == 0:
+        g5 = (
+            "Missing",
+            "No height data — clearance design cannot proceed without pole heights.",
+        )
+    elif height_pct >= 70:
+        g5 = (
+            "Partial",
+            f"Height captured for {height_pct:.0f}% of structures — clearance design is"
+            " possible but field verification is recommended.",
+        )
+    else:
+        g5 = (
+            "Weak",
+            f"Height coverage low ({height_pct:.0f}%) — clearance design unreliable"
+            " without additional field evidence.",
+        )
+
+    gates.append({"label": "Clearance Design", "status": g5[0], "explanation": g5[1]})
+
+    # -------------------------------------------------------------------------
+    # Gate 6 — Conductor Scope Evidence
+    # -------------------------------------------------------------------------
+    span_issues = _count_issue_codes(
+        issues_df, {"SPAN_VERY_SHORT", "SPAN_SHORT", "SPAN_BORDERLINE", "SPAN_LONG"}
+    )
+
+    if structural_count < 2:
+        g6 = (
+            "Missing",
+            "Fewer than 2 structural records — conductor scope and span data not derivable.",
+        )
+    elif span_issues == 0:
+        g6 = ("Strong", f"{structural_count} structural records with no span anomalies.")
+    elif span_issues <= 3:
+        g6 = (
+            "Partial",
+            f"{structural_count} structural records with {span_issues} span anomaly(ies)"
+            " — review before design.",
+        )
+    else:
+        g6 = (
+            "Weak",
+            f"{structural_count} structural records but {span_issues} span anomalies"
+            " flagged — review field notes.",
+        )
+
+    gates.append({"label": "Conductor Scope", "status": g6[0], "explanation": g6[1]})
+
+    # -------------------------------------------------------------------------
+    # Gate 7 — Overall Design Handoff Status
+    # Reads prior gate statuses directly instead of re-deriving them.
+    # -------------------------------------------------------------------------
+    actionable = [g1[0], g2[0], g3[0], g5[0], g6[0]]
+    if g4[0] != "N/A":
+        actionable.append(g4[0])
+
+    if g1[0] in ("Missing", "Weak"):
+        g7 = (
+            "Blocked",
+            "Position data is missing or weak — reliable map output and design cannot proceed.",
+        )
+    elif any(s in ("Missing", "Weak") for s in actionable):
+        g7 = (
+            "Partial",
+            "Some evidence gaps remain — review individual gates above before design release.",
+        )
+    else:
+        g7 = (
+            "Partial",
+            "Position and specification evidence is present — verify individual gates"
+            " before final design release.",
+        )
+
+    gates.append({"label": "Overall Handoff Status", "status": g7[0], "explanation": g7[1]})
+
+    return gates
 
 
 def build_recommended_actions(issues_df: pd.DataFrame) -> list[dict]:
