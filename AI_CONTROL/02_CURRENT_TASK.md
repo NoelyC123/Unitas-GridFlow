@@ -4,9 +4,9 @@
 
 The immediate task is:
 
-**Batch 20B — Structured issue model.**
+**Batch 20C — Recommended designer actions.**
 
-Batch 20A is complete and pushed to `master`.
+Batch 20B is complete and pushed to `master`.
 
 ---
 

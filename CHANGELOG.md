@@ -8,6 +8,38 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 20B — structured issue model)
+
+### Added
+
+- **`app/issue_model.py`** (new module):
+  - `classify_issue(text)` — pattern-matches issue text against a priority-ordered
+    lookup to return structured fields: `issue_code`, `severity`, `category`, `scope`,
+    `confidence`, `is_observation`, `recommended_action`.
+  - `enrich_issues(issues_df)` — adds all structured fields to an issues DataFrame
+    as new columns. The existing `Issue` and `Severity` columns are preserved unchanged
+    so all downstream consumers continue to work without modification.
+  - Severity levels: `critical` (coordinate failures, missing columns),
+    `warning` (most rule violations), `observation` (replacement pair detections).
+  - Categories: `replacement_intent`, `structural_evidence`, `data_completeness`,
+    `span_geometry`, `coordinate_quality`, `rulepack_validation`.
+  - `is_observation: True` for replacement pair detections — separates observed
+    patterns from genuine defects.
+  - `recommended_action` populated for height, material, angle/stay, and span issues.
+
+- **`app/routes/api_intake.py`**:
+  - `enrich_issues()` called after `_postprocess_issues()` — structured fields now
+    appear in `issues.csv` for every job.
+
+- **`tests/test_issue_model.py`** (new file):
+  - 22 tests covering: pattern matching for all issue tiers, fallback for unknown text,
+    severity/category/observation correctness, `enrich_issues` column presence,
+    mutation safety, and row-count invariance.
+
+148 tests passing. Pre-commit clean. No QA logic changes.
+
+---
+
 ## 2026-04-24 (batch 20A — trust fixes: rulepack truthfulness, span-count cleanup, controller label normalisation)
 
 ### Changed
