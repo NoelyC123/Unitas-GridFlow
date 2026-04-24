@@ -143,7 +143,7 @@ Goal:
 
 - **DNO rulepacks live:** 4 (`SPEN_11kV`, `SSEN_11kV`, `NIE_11kV`, `ENWL_11kV`)
 - **QA check types:** 10
-- **Tests passing:** 121
+- **Tests passing:** 126
 
 ---
 

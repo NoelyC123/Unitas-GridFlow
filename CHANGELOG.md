@@ -8,6 +8,48 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 20A — trust fixes: rulepack truthfulness, span-count cleanup, controller label normalisation)
+
+### Changed
+
+- **`app/templates/upload.html`**:
+  - Removed 6 non-existent rulepack options from the DNO dropdown:
+    `NIE_LV`, `SPEN_LV`, `SSEN_LV`, `ENWL_LV`, `UKPN_LV`, `UKPN_11kV`.
+  - Upload form now only offers: Auto (detect), SPEN_11kV, SSEN_11kV, NIE_11kV, ENWL_11kV.
+
+- **`app/routes/api_rulepacks.py`**:
+  - Replaced stub implementation (always returned `dno: SPEN`, empty thresholds) with
+    a real implementation that derives metadata directly from the `RULEPACKS` dict in `dno_rules.py`.
+  - `GET /api/rulepacks/` now returns the actual list of supported rulepack IDs (excluding DEFAULT).
+  - `GET /api/rulepacks/<id>` now returns truthful `total_checks`, `check_types`, `height_range_m`,
+    and `coordinate_bounds` derived from real rules. Returns 404 for unknown IDs.
+
+- **`app/controller_intake.py`**:
+  - `parse_raw_controller_dump()`: compound Trimble feature codes at col 4 (e.g. `Pol:LAND USE`,
+    `EXpole:BOUNDARY`) are now normalised to their base code (`Pol`, `EXpole`).
+    This prevents raw location suffixes from appearing in map popups, PDF output, and `feature_codes_found`.
+
+- **`app/routes/api_intake.py`**:
+  - Removed `"span_count": 0` from `_build_feature_collection` metadata and from `meta.update()` in `finalize()`.
+
+- **`app/routes/map_preview.py`**:
+  - Removed `"span_count": 0` from `_empty_feature_collection` fallback.
+
+### Tests
+
+- **`tests/test_app_routes.py`**: Added 4 new tests:
+  - `test_api_rulepacks_list_returns_supported_rulepacks` — verifies correct 4 rulepacks, no DEFAULT, no unsupported
+  - `test_api_rulepacks_detail_returns_real_check_data` — SPEN_11kV returns real height_range and check_types
+  - `test_api_rulepacks_detail_returns_404_for_unknown` — FAKE_11kV returns 404
+  - `test_upload_form_does_not_offer_unsupported_rulepacks` — HTML guard against non-existent options
+
+- **`tests/test_controller_intake.py`**: Added 1 new test:
+  - `test_parse_raw_controller_dump_normalises_compound_feature_code` — `Pol:LAND USE` → `Pol`, `EXpole:BOUNDARY` → `EXpole`
+
+126 tests passing. Pre-commit clean.
+
+---
+
 ## 2026-04-24 (batch 19 — field meaning and designer clarity layer)
 
 ### Changed

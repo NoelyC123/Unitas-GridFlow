@@ -4,116 +4,253 @@
 
 The immediate task is:
 
-**Validate the designer summary layer and narrative outputs on real survey files, then decide the next development step from that evidence.**
+**Batch 20B — Structured issue model.**
+
+Batch 20A is complete (committed 2026-04-24, pushed to master).
+
+---
+
+## Completed: Batch 20A — Trust fixes
+
+Batch 20A delivered:
+- Frontend rulepack dropdown cleaned to only the 4 supported rulepacks
+- `api_rulepacks.py` now derives real metadata from `RULEPACKS` dict (no stub)
+- Compound Trimble feature codes (`Pol:LAND USE` → `Pol`) normalised at parser intake
+- `span_count: 0` removed from `api_intake.py` and `map_preview.py`
+- 5 focused tests added; 126 passing
+
+This is the first implementation step under:
+
+**Batch 20 — Trust, Severity & Actionable Design Briefing**
 
 ---
 
 ## Why this is the current task
 
-Fifteen validation batches and one documentation batch have been completed:
+Batch 19 validation showed that Unitas GridFlow is now genuinely valuable as a working MVP.
 
-- Batch 2: raw GNSS controller dump intake + completeness reporting
-- Batch 3: coord_consistency fix for non-OSGB grids + QA noise suppression
-- Batch 4: NIE_11kV rulepack auto-detection from Irish Grid CRS + completeness surfacing in map and PDF
-- Batch 5: design readiness verdict + survey coverage categories + enhanced map popups
-- Batch 6: issue-text popup explanation + interactive pass/fail filter + Records label + overlap detection
-- Batch 7: feature-aware QA (Hedge skipped in span checks) + record inspection panel
-- Batch 8: strict structural_only height scoping + issue deduplication
-- Batch 9: record-role classification (structural/context/anchor) + anchor chain-reset in span checks + Gate/Track/Stream as context + role breakdown in UI and PDF
-- Batch 10: record count consistency, span threshold decimal precision, coverage label fix, expanded design readiness what_this_supports
-- Batch 11: EX/PR replacement cluster detection — EXpole + nearby structural emits WARN instead of false span-too-short FAIL; relationship metadata in map popup
-- Batch 12: angle/stay evidence logic — angle structures with no proximate stay evidence emit cautious WARN
-- Batch 13: confidence-aware QA — short span tiers (very short/unusual/borderline, all WARN); EXpole height-below-min downgraded to WARN; strong summary when material absent
-- Batch 14: EX/PR narrative linking — asset_intent labels (Existing asset / Proposed support) in GeoJSON and UI; warn_count/warn_texts correctly serialised
-- Batch 15: designer summary layer — circuit summary, top design risks, replacement narratives; map and PDF now present a pre-design briefing rather than a raw QA dump
-- Batch 16: project vision documentation aligned — "survey-to-design workflow intelligence tool" framing established across all control files
+The multi-AI review confirmed that the strongest current value is not broad DNO compliance automation.
 
-**121 tests passing.**
+The strongest current value is:
 
-The tool now produces a structured pre-design briefing from real survey data. The next uncertainty is whether that briefing is genuinely useful to a designer or QA lead receiving a real survey handoff.
+**helping a designer quickly understand what the digital survey handoff contains, what is missing, what looks risky, and what should be checked before design starts.**
+
+However, the review also identified several trust and clarity issues that should be fixed before adding broader features.
+
+The next phase should therefore improve:
+
+- rulepack truthfulness
+- metric consistency
+- designer-facing clarity
+- output trust
+- actionability
+
+It should not broaden the product.
 
 ---
 
-## What this task means
+## Current Batch 20 direction
 
-This task means:
+Batch 20 is:
 
-- obtain one or more real survey files (ideally from recent jobs)
-- run them through the current intake and QA pipeline
-- review the map view, side panel, and PDF output as a designer or QA lead would
-- log what the designer summary actually says on real data
-- log whether the circuit summary, top design risks, and replacement narratives are accurate and useful
-- identify what the tool misses, overflags, or misframes
-- use that evidence to define the next development step
+**Trust, Severity & Actionable Design Briefing**
 
----
+Goal:
 
-## What success looks like
+Improve the Batch 19 output from:
 
-This task is successful when we can answer:
+**"Here are many warnings"**
 
-- Does the designer summary layer accurately describe the job from real data?
-- Do the top design risks surface real concerns or produce noise?
-- Do the replacement narratives correctly identify EX→PR pairs?
-- Is the design readiness verdict accurate?
-- Is the output something a designer or QA lead would trust and act on?
+to:
+
+**"Here is what matters, why it matters, and what action should happen next."**
 
 ---
 
-## What not to do during this task
+## Batch 20A scope
 
-Do NOT:
+Batch 20A is the narrow trust-fix step.
 
-- add new features without evidence from real-file testing
-- broaden the product into a larger platform
-- add more rulepacks just for coverage
-- assume the designer summary layer is good because it passed synthetic test data
+Implement only the following:
 
----
-
-## Approved focus areas
-
-The most likely files involved in any follow-on work are:
-
-- `app/controller_intake.py` — build_circuit_summary, build_top_design_risks, build_design_readiness
-- `app/routes/api_intake.py` — finalize route, _build_replacement_narratives
-- `app/qa_engine.py` — QA rules and severity calibration
-- `app/routes/pdf_reports.py` — PDF pre-design briefing
-- `app/templates/map_viewer.html` — map side panel and designer summary sections
+1. Ensure the frontend only offers backend-supported rulepacks.
+2. Make the rulepack API truthful and auditable.
+3. Fix or remove the map/sidebar span-count contradiction.
+4. Clean or suppress noisy raw controller labels such as `Pol:LAND USE` in designer-facing outputs.
+5. Add or update focused tests.
+6. Run `pytest -v`.
+7. Run `pre-commit run --all-files`.
+8. Commit and push.
 
 ---
 
-## Strategic note
+## Why Batch 20A comes first
 
-The external AI review completed on 2026-04-22 concluded:
+The AI review identified several immediate trust breakers.
 
-- continue the project
-- keep the scope narrow
-- treat the project primarily as an internal tool / consultancy asset for now
-- shift to validation-led development
+These include:
 
-The project has followed that direction through Batches 2–16. The vision is now:
+- unsupported rulepacks appearing selectable in the UI
+- rulepack details that may not reflect actual backend rules
+- span metrics showing contradictory information
+- raw controller labels cluttering the designer-facing report or map
 
-**A survey-to-design workflow intelligence tool for UK electricity network projects.**
+These issues can damage confidence quickly, even if the underlying analysis is useful.
 
-Its purpose is to act as the trusted gate between survey and design — interpreting, validating, and explaining digital survey data so designers receive a clearer, more trustworthy handoff.
-
-It does NOT replace Trimble, PoleCAD, AutoCAD, engineering designers, or surveyors. It is not yet a full DNO compliance engine.
+Batch 20A should fix those issues before larger output restructuring begins.
 
 ---
 
-## Likely next reference task
+## Files likely involved
 
-After real-file validation findings are gathered, a likely next task is:
+Likely files include:
 
-**Produce a real-world survey workflow reference document** — a structured description of what a real survey file from a UK overhead line job should contain, what is typically missing, and what the tool currently surfaces vs misses. This would help define the next rule and output improvements from real evidence.
+- `app/dno_rules.py`
+- `app/routes/api_rulepacks.py`
+- `app/routes/api_intake.py`
+- `app/routes/map_preview.py`
+- `app/routes/pdf_reports.py`
+- `app/templates/upload.html`
+- `app/templates/map_viewer.html`
+- relevant JavaScript files if present
+- relevant tests under `tests/`
+
+Only edit files that are directly required for Batch 20A.
+
+Read each file before editing it.
 
 ---
 
-## When to update this file
+## Out of scope for Batch 20A
 
-Update when:
+Do not add:
 
-- real survey files have been tested against the current designer summary layer
-- validation findings materially change project direction
-- the next development phase becomes clearer from evidence
+- OCR
+- handwritten note parsing
+- plan parsing
+- LiDAR processing
+- UAV imagery processing
+- point-cloud processing
+- vegetation AI
+- broad CAD automation
+- PoleCAD replacement
+- commercial packaging
+- pricing pages
+- new superficial rulepacks
+- broad SaaS/platform features
+- full severity model implementation
+- full PDF redesign
+
+Severity, recommended actions, scoped readiness gates, and PDF first-page redesign are later Batch 20 steps.
+
+---
+
+## Batch 20B next step after Batch 20A
+
+After Batch 20A is complete, the next planned step is:
+
+**Batch 20B — Structured issue model**
+
+Suggested future fields:
+
+- `issue_code`
+- `severity`
+- `category`
+- `scope`
+- `confidence`
+- `recommended_action`
+- `is_observation`
+
+Do not start Batch 20B until Batch 20A is complete and tested.
+
+---
+
+## Batch 20C later step
+
+After the structured issue model exists:
+
+**Batch 20C — Recommended designer actions**
+
+This should add plain-English recommended actions for top design risks.
+
+Example actions:
+
+- request missing pole height evidence
+- confirm stay specifications from field notes or plan markups
+- review ambiguous EX to proposed replacement groups
+- confirm whether 5.0m values are true pole heights or controller-derived values
+
+---
+
+## Batch 20D later step
+
+After recommended actions:
+
+**Batch 20D — Scoped design evidence gates**
+
+This should replace over-broad readiness wording with scoped evidence gates such as:
+
+- position / mapping evidence
+- structure identity evidence
+- structural specification evidence
+- stay evidence
+- clearance design evidence
+- conductor scope evidence
+- overall design handoff status
+
+---
+
+## Batch 20E later step
+
+After evidence gates:
+
+**Batch 20E — PDF first-page briefing redesign**
+
+The first page should read as a professional designer briefing, showing:
+
+- job summary
+- parser used
+- CRS detected
+- rulepack applied
+- record counts
+- top blockers
+- top warnings
+- recommended actions
+- clear statement on whether design can proceed from the digital file alone
+
+---
+
+## Supporting decision memo
+
+The Batch 20 direction is recorded in:
+
+`AI_CONTROL/07_BATCH_20_DECISION_MEMO.md`
+
+That memo should be treated as the decision record for this phase.
+
+---
+
+## What success looks like for Batch 20A
+
+Batch 20A is successful when:
+
+- users cannot select unsupported rulepacks from the frontend
+- the rulepack API only reports real backend rulepacks and real checks
+- the applied rulepack is clear and truthful
+- span metrics no longer contradict span warnings
+- noisy raw controller labels no longer clutter designer-facing outputs
+- tests pass
+- pre-commit passes
+- changes are committed and pushed
+
+---
+
+## Final rule
+
+Keep Batch 20A narrow.
+
+Do not broaden the project.
+
+Do not replace validation-led improvement with speculative feature expansion.
+
+The goal is to make Unitas GridFlow more trustworthy to a real designer within the first 60 seconds of reviewing the output.
