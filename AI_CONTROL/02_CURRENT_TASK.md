@@ -4,25 +4,33 @@
 
 The immediate task is:
 
-**Continue validation-led development by obtaining additional real survey files or user feedback on whether the current completeness output is useful in practice.**
+**Validate the designer summary layer and narrative outputs on real survey files, then decide the next development step from that evidence.**
 
 ---
 
 ## Why this is the current task
 
-Phase 1 (meaningful QA rule improvements) is complete.
+Fifteen validation batches and one documentation batch have been completed:
 
-Phase 2A (column/header normalisation improvements) is also complete.
+- Batch 2: raw GNSS controller dump intake + completeness reporting
+- Batch 3: coord_consistency fix for non-OSGB grids + QA noise suppression
+- Batch 4: NIE_11kV rulepack auto-detection from Irish Grid CRS + completeness surfacing in map and PDF
+- Batch 5: design readiness verdict + survey coverage categories + enhanced map popups
+- Batch 6: issue-text popup explanation + interactive pass/fail filter + Records label + overlap detection
+- Batch 7: feature-aware QA (Hedge skipped in span checks) + record inspection panel
+- Batch 8: strict structural_only height scoping + issue deduplication
+- Batch 9: record-role classification (structural/context/anchor) + anchor chain-reset in span checks + Gate/Track/Stream as context + role breakdown in UI and PDF
+- Batch 10: record count consistency, span threshold decimal precision, coverage label fix, expanded design readiness what_this_supports
+- Batch 11: EX/PR replacement cluster detection — EXpole + nearby structural emits WARN instead of false span-too-short FAIL; relationship metadata in map popup
+- Batch 12: angle/stay evidence logic — angle structures with no proximate stay evidence emit cautious WARN
+- Batch 13: confidence-aware QA — short span tiers (very short/unusual/borderline, all WARN); EXpole height-below-min downgraded to WARN; strong summary when material absent
+- Batch 14: EX/PR narrative linking — asset_intent labels (Existing asset / Proposed support) in GeoJSON and UI; warn_count/warn_texts correctly serialised
+- Batch 15: designer summary layer — circuit summary, top design risks, replacement narratives; map and PDF now present a pre-design briefing rather than a raw QA dump
+- Batch 16: project vision documentation aligned — "survey-to-design workflow intelligence tool" framing established across all control files
 
-Validation batch 2 is also complete:
-- First real-job (NIE job 28-14 513) was analysed — tool could not parse the raw controller format
-- Raw GNSS controller dump parser added and shipped
-- Completeness summary tightened: now reports CRS, height/remarks coverage, feature codes found
-- End-to-end integration test added confirming the raw dump path works through the finalize route
-- 67 tests passing
+**121 tests passing.**
 
-The tool can now process the real file format. The next uncertainty is whether the
-completeness summary output is genuinely useful when a designer sees it in practice.
+The tool now produces a structured pre-design briefing from real survey data. The next uncertainty is whether that briefing is genuinely useful to a designer or QA lead receiving a real survey handoff.
 
 ---
 
@@ -30,25 +38,25 @@ completeness summary output is genuinely useful when a designer sees it in pract
 
 This task means:
 
-- obtain one or more real survey files (ideally anonymised if necessary)
+- obtain one or more real survey files (ideally from recent jobs)
 - run them through the current intake and QA pipeline
-- log what works
-- log what breaks
-- identify what the tool catches that users care about
-- identify what the tool misses that users care about
-- use that evidence to refine the next development phase
+- review the map view, side panel, and PDF output as a designer or QA lead would
+- log what the designer summary actually says on real data
+- log whether the circuit summary, top design risks, and replacement narratives are accurate and useful
+- identify what the tool misses, overflags, or misframes
+- use that evidence to define the next development step
 
 ---
 
 ## What success looks like
 
-This task is successful when we can answer questions like:
+This task is successful when we can answer:
 
-- Did the tool work on a real file without manual reconstruction?
-- Which rules produced meaningful value?
-- Which rules produced noise or false positives?
-- What real issues were missed?
-- What would an actual user most want fixed next?
+- Does the designer summary layer accurately describe the job from real data?
+- Do the top design risks surface real concerns or produce noise?
+- Do the replacement narratives correctly identify EX→PR pairs?
+- Is the design readiness verdict accurate?
+- Is the output something a designer or QA lead would trust and act on?
 
 ---
 
@@ -56,24 +64,22 @@ This task is successful when we can answer questions like:
 
 Do NOT:
 
+- add new features without evidence from real-file testing
 - broaden the product into a larger platform
-- add major new features without validation evidence
-- add more superficial rulepacks just for coverage
-- focus on commercial packaging before proof-of-value exists
+- add more rulepacks just for coverage
+- assume the designer summary layer is good because it passed synthetic test data
 
 ---
 
 ## Approved focus areas
 
-The likely files involved next are:
+The most likely files involved in any follow-on work are:
 
-- `app/routes/api_intake.py`
-- `app/qa_engine.py`
-- `app/dno_rules.py`
-- `tests/test_api_intake.py`
-- `tests/test_qa_engine.py`
-
-along with any safe, anonymised sample data used for validation.
+- `app/controller_intake.py` — build_circuit_summary, build_top_design_risks, build_design_readiness
+- `app/routes/api_intake.py` — finalize route, _build_replacement_narratives
+- `app/qa_engine.py` — QA rules and severity calibration
+- `app/routes/pdf_reports.py` — PDF pre-design briefing
+- `app/templates/map_viewer.html` — map side panel and designer summary sections
 
 ---
 
@@ -84,20 +90,23 @@ The external AI review completed on 2026-04-22 concluded:
 - continue the project
 - keep the scope narrow
 - treat the project primarily as an internal tool / consultancy asset for now
-- shift the next phase toward validation-led development
+- shift to validation-led development
+
+The project has followed that direction through Batches 2–16. The vision is now:
+
+**A survey-to-design workflow intelligence tool for UK electricity network projects.**
+
+Its purpose is to act as the trusted gate between survey and design — interpreting, validating, and explaining digital survey data so designers receive a clearer, more trustworthy handoff.
+
+It does NOT replace Trimble, PoleCAD, AutoCAD, engineering designers, or surveyors. It is not yet a full DNO compliance engine.
 
 ---
 
-## What comes next (do not start yet)
+## Likely next reference task
 
-Possible next work after validation findings are known may include:
+After real-file validation findings are gathered, a likely next task is:
 
-- refining intake handling based on real file structures
-- refining QA rules based on real false positives / false negatives
-- improving output usefulness based on real user feedback
-- adding more genuinely differentiated rule depth only where evidence supports it
-
-This should be decided from validation findings, not assumed in advance.
+**Produce a real-world survey workflow reference document** — a structured description of what a real survey file from a UK overhead line job should contain, what is typically missing, and what the tool currently surfaces vs misses. This would help define the next rule and output improvements from real evidence.
 
 ---
 
@@ -105,8 +114,6 @@ This should be decided from validation findings, not assumed in advance.
 
 Update when:
 
-- one or more real survey files have been tested
-- the most important validation findings are known
-- the next development phase becomes clearer from real evidence
-
-Otherwise leave unchanged.
+- real survey files have been tested against the current designer summary layer
+- validation findings materially change project direction
+- the next development phase becomes clearer from evidence

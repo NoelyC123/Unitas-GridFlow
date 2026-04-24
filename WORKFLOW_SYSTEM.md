@@ -285,7 +285,7 @@ Avoid:
 
 You are currently in:
 
-➡️ **Validation Phase (Phase 2C complete — ongoing refinement)**
+➡️ **Validation Phase (batches 2–16 complete — validation-led refinement active)**
 
 Focus:
 

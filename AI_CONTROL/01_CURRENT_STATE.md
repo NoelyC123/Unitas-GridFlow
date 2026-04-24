@@ -37,13 +37,21 @@ The project is NOT in:
 ### System capabilities
 
 - CSV upload and persistence
-- QA processing pipeline
+- Raw GNSS controller dump intake (Trimble format)
+- QA processing pipeline with confidence-aware severity tiers (WARN vs FAIL)
 - Issue generation (`issues.csv`)
-- Map data generation (`map_data.json`)
-- PDF QA report generation
+- Map data generation (`map_data.json`) with GeoJSON feature properties
+- PDF pre-design briefing report
 - Job storage and browsing
 - Column/header normalisation for core survey fields
 - Multiple regional rulepacks for 11kV validation
+- Record-role classification (structural, context, anchor)
+- Design readiness verdict with per-category survey coverage ratings
+- EX/PR replacement-pair detection and narrative linking
+- Angle/stay evidence logic (proximity scan, cautious WARN)
+- Asset intent labels (Existing asset / Proposed support) in GeoJSON and UI
+- Designer summary layer: circuit summary, top design risks, replacement narratives
+- Interactive map: pass/fail filter, record inspection panel, role breakdown
 
 ---
 
@@ -201,6 +209,23 @@ This conclusion is captured in:
 - `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
 
 ---
+
+### Batch 16 — Project vision documentation aligned
+
+- Updated core identity across all control files to "survey-to-design workflow intelligence tool"
+- `AI_CONTROL/00_PROJECT_CANONICAL.md`: expanded IS/IS-NOT framing, explicit "does NOT replace" constraint, expanded primary users (QA leads, contractors, future DNO teams), future direction (field-capture guidance, structured survey standards)
+- `README.md`, `CLAUDE.md`, `WORKFLOW_SYSTEM.md`: aligned vision language, multi-audience scope, constraint wording
+- No application code or test changes
+
+### Batch 17 — Documentation alignment after audit
+
+- `AI_CONTROL/02_CURRENT_TASK.md`: full rewrite to reflect current state (Batch 16 complete, 121 tests, designer summary layer as the next validation target)
+- `CLAUDE.md`: current state and validation-phase position updated to include Batches 5–16
+- `PROJECT_DEEP_CONTEXT.md`: product framing updated from "narrow pre-CAD QA gatekeeper" to "survey-to-design workflow intelligence tool"; explicit "does NOT replace" constraint added
+- `AI_CONTROL/01_CURRENT_STATE.md`: system capabilities expanded; Batches 16–17 recorded
+- `WORKFLOW_SYSTEM.md`: phase label corrected from "Phase 2C" to "batches 2–16 complete"
+- `README.md`: "Best current framing" updated to remove "narrow productivity / QA layer"
+- `CHANGELOG.md`: Batch 16 and Batch 17 entries added
 
 ### Control layer remains stable
 

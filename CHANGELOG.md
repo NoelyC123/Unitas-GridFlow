@@ -8,6 +8,74 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 17 — documentation alignment after audit)
+
+### Changed
+
+- **`AI_CONTROL/02_CURRENT_TASK.md`**: full rewrite. Removed stale Batch 2 / 67-test
+  wording. Now describes current state (Batch 16 complete, 121 tests passing), lists all
+  15 validation batches, frames the current task as validating the designer summary layer
+  on real files, and names the likely next reference task (real-world survey workflow
+  reference document).
+
+- **`CLAUDE.md`**: updated "Current state" section to list Batches 2–16. Updated
+  "Validation-phase position" to include all capabilities added through Batch 15: record-
+  role classification, design readiness, EX/PR detection, angle/stay logic, asset_intent
+  labels, designer summary layer.
+
+- **`PROJECT_DEEP_CONTEXT.md`**: updated Section 1 executive summary from "narrow pre-CAD
+  QA and compliance gatekeeper" to "survey-to-design workflow intelligence tool". Updated
+  Section 11 framing from "pre-CAD validation and compliance layer" to "survey-to-design
+  workflow intelligence layer". Added explicit "does NOT replace Trimble/PoleCAD/AutoCAD/
+  designers/surveyors" constraint block to Section 8.
+
+- **`AI_CONTROL/01_CURRENT_STATE.md`**: expanded system capabilities list to include post-
+  Batch-4 features (record-role classification, design readiness, EX/PR detection,
+  angle/stay, designer summary layer, interactive map). Added Batch 16 and Batch 17
+  entries to "What changed recently".
+
+- **`WORKFLOW_SYSTEM.md`**: Section 9 phase label changed from "Phase 2C complete" to
+  "batches 2–16 complete — validation-led refinement active".
+
+- **`README.md`**: "Best current framing" updated — removed "narrow productivity / QA
+  layer"; added "survey-to-design workflow intelligence layer" framing and explicit "not a
+  replacement for Trimble/PoleCAD/AutoCAD/designers" as a Less Realistic framing item.
+
+- **`CHANGELOG.md`**: Batch 16 and Batch 17 entries added.
+
+No application code or test changes.
+
+---
+
+## 2026-04-24 (batch 16 — project vision documentation aligned)
+
+### Changed
+
+- **`AI_CONTROL/00_PROJECT_CANONICAL.md`**: core identity updated from "pre-design
+  validation and reliability layer" to "survey-to-design workflow intelligence tool".
+  Short definition updated. IS list expanded to include record-role interpreter and design
+  risk/gap identifier. "Does NOT replace" constraint block added (Trimble, PoleCAD,
+  AutoCAD, designers, DNO compliance engine). System capabilities expanded with Batch 9–15
+  additions. Primary users expanded (QA leads, contractors, future DNO teams). Future
+  direction added (field-capture guidance, structured survey standards). Scope discipline
+  section updated accordingly.
+
+- **`README.md`**: Overview updated to "survey-to-design workflow intelligence tool". Role
+  list expanded (record-role interpretation, design risks and gaps, design-readiness
+  signals). "Why this project exists" section updated with multi-audience scope and
+  explicit non-replacement statement.
+
+- **`CLAUDE.md`**: project identity, short identity, and critical context updated with new
+  framing and explicit "does not replace Trimble/PoleCAD/AutoCAD/designers" constraint.
+
+- **`WORKFLOW_SYSTEM.md`**: IS list updated with record-role interpreter, design risk
+  identifier; central question updated from "Can I trust this data?" to the fuller
+  multi-part formulation.
+
+No application code or test changes.
+
+---
+
 ## 2026-04-23 (batch 15 — designer summary layer)
 
 ### Added

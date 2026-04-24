@@ -132,14 +132,13 @@ Do not read `_archive/` unless explicitly asked.
 ## Current state
 
 - MVP works end-to-end
-- Tests must remain green
+- Tests must remain green (121 passing)
 - CI is active
 - Phase 1 is complete
 - Phase 2A is complete
 - Phase 2B is complete
-- Validation batch 2 is complete (raw controller intake + completeness)
-- Validation batch 3 is complete (coord_consistency fix + QA noise suppression)
-- Validation batch 4 is complete (NIE rulepack inference + completeness surfacing)
+- Validation batches 2–15 complete (raw intake → completeness → design readiness → record roles → EX/PR detection → angle/stay evidence → designer summary layer)
+- Batch 16 complete (project vision documentation aligned)
 - Validation-led refinement is active
 
 ---
@@ -172,18 +171,23 @@ The first real-job validation pack showed that:
 
 - real survey inputs may arrive as raw controller exports rather than clean structured CSVs
 - NIE jobs may require Irish Grid handling
-- the next useful value may come from showing what the digital survey file does and does not contain for design purposes
+- value comes from interpreting what the digital survey file contains for design purposes
 
-The project has now already implemented:
+The project has now implemented through Batches 2–15:
 
 - raw controller dump intake support
-- Irish Grid handling
+- Irish Grid handling (TM65/ITM detection and WGS84 conversion)
 - completeness/capture summary generation
-- initial controller-file QA refinement
-- user-facing completeness visibility
-- corrected Irish/NIE rulepack inference for relevant uploads
+- record-role classification (structural, context, anchor)
+- design readiness verdict with per-category survey coverage
+- EX/PR replacement-pair detection and narrative linking
+- angle/stay evidence logic (proximity scan, cautious WARN)
+- confidence-aware QA severity tiers (WARN vs FAIL calibration)
+- asset_intent labels (Existing asset / Proposed support) in GeoJSON and UI
+- designer summary layer: circuit summary, top design risks, replacement narratives
+- PDF and map outputs now present a pre-design briefing, not a raw QA dump
 
-The current phase is now about proving usefulness, clarifying design readiness, and refining outputs from real evidence.
+The current phase is about validating whether this designer-facing output is genuinely useful on real files.
 
 ---
 

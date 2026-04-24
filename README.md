@@ -152,15 +152,16 @@ This is now more important than abstract feature expansion.
 
 At this stage, the strongest realistic framing is:
 
-- internal workflow tool
-- consultancy leverage asset
-- narrow productivity / QA layer
+- internal workflow tool and consultancy leverage asset
+- survey-to-design workflow intelligence layer for UK electricity network projects
+- trusted pre-CAD gate that interprets, validates, and explains survey handoffs
 
 Less realistic framing right now:
 
 - broad SaaS platform
 - major standalone utility software business
 - fully mature DNO compliance product
+- replacement for Trimble, PoleCAD, AutoCAD, or engineering designers
 
 ---
 

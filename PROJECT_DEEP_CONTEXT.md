@@ -31,7 +31,7 @@ The purpose of the project is to create a **structured gate between survey and d
 
 The strongest framing is:
 
-**A narrow pre-CAD QA and compliance gatekeeper for survey-to-design handoffs.**
+**A survey-to-design workflow intelligence tool for UK electricity network projects.**
 
 ---
 
@@ -283,9 +283,20 @@ This project is **not**:
 - just a file uploader or dashboard
 - a claim that a previous tool has already solved the problem
 
+It is **not** a replacement for:
+
+- Trimble or other field capture software
+- PoleCAD, AutoCAD, or other design tools
+- engineering designers or overhead line engineers
+- surveyors or field capture teams
+
+It is not yet a full DNO compliance engine.
+
 It is a **fresh-start project** built around a clear, narrow operational weakness:
 
 **the point where survey information becomes design input**
+
+It is an intelligence layer that sits before design — not a substitute for any of the tools or roles above.
 
 ---
 
@@ -356,8 +367,8 @@ Many software ideas in technical industries are built from assumptions. This one
 
 The strongest strategic framing is not that the tool does everything.
 
-It is that it becomes a **structured gatekeeper between survey and design**:
-a pre-CAD validation and compliance layer that saves time, improves trust, and reduces avoidable rework.
+It is that it becomes the **trusted gate between survey and design**:
+a survey-to-design workflow intelligence layer that saves time, improves trust, and reduces avoidable rework.
 
 ---
 
