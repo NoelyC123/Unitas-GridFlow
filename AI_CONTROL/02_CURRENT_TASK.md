@@ -2,11 +2,17 @@
 
 ## Immediate task
 
-The immediate task is:
+Batch 20D is complete and pushed to `master`.
 
-**Batch 20D — Scoped design evidence gates.**
+Batches 20A, 20B, 20C, and 20D are all complete.
 
-Batches 20A, 20B, and 20C are complete and pushed to `master`.
+The next task is **Batch 20E** — to be defined.
+
+Candidate directions:
+- Further PDF first-page redesign (put Evidence Gates front and centre)
+- Real-world validation on a second survey file to test evidence gate accuracy
+- Per-gate remediation guidance (what the designer should do for each Weak/Missing gate)
+- Nothing: validate the current output before adding more features
 
 ---
 

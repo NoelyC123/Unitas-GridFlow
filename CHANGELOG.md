@@ -8,6 +8,53 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 20D — scoped design evidence gates)
+
+### Added
+
+- **`app/issue_model.py`**:
+  - `_count_issue_codes(issues_df, codes)` — private helper counting issue codes against a set.
+  - `build_evidence_gates(completeness, issues_df)` — returns 7 deterministic evidence gates:
+    Position/Mapping, Structure Identity, Structural Specification, Stay Evidence,
+    Clearance Design, Conductor Scope, Overall Handoff Status. Each gate has `label`,
+    `status` (Strong/Partial/Weak/Missing/N/A/Blocked), and `explanation`.
+  - All four span-tier `recommended_action` texts unified to one grouped string so they
+    naturally deduplicate into a single actionable item in the sidebar.
+
+- **`app/routes/api_intake.py`**:
+  - `build_evidence_gates()` called after `enrich_issues()`.
+  - `"evidence_gates"` stored in `meta.json` for every completed job.
+
+- **`app/routes/map_preview.py`**:
+  - `evidence_gates` read from `meta.json` and passed to the map template.
+
+- **`app/templates/map_viewer.html`**:
+  - New "Evidence Gates" section in the sidebar (after Design Readiness).
+    Each gate shown as a label/status row with colour-coded status badge
+    (green=Strong, amber=Partial, red=Weak/Missing, gray=N/A, dark-red=Blocked)
+    and a one-line explanation below.
+
+- **`app/routes/pdf_reports.py`**:
+  - New "Evidence Gates" section in the PDF (after Design Readiness, before Top Design Risks).
+    Each gate printed as bold `Label: Status` with the explanation on the next line.
+
+- **`tests/test_issue_model.py`**:
+  - 9 new tests for `build_evidence_gates` covering: gate count, required keys,
+    position Missing/Strong, stay N/A and Weak, structural spec Missing,
+    overall Blocked, and conductor scope Partial with span issues.
+
+### Changed
+
+- Span-related `recommended_action` texts (SPAN_VERY_SHORT, SPAN_SHORT,
+  SPAN_BORDERLINE, SPAN_LONG) now all share one unified action text to prevent
+  duplicate wording in the sidebar and PDF action list.
+
+### Tests
+
+- 165 passing (up from 156 at start of Batch 20D).
+
+---
+
 ## 2026-04-24 (batch 20C — recommended designer actions)
 
 ### Added
