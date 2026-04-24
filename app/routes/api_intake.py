@@ -330,6 +330,7 @@ def _build_feature_collection(
     issues_df: pd.DataFrame,
     job_id: str,
     rulepack_id: str,
+    file_type: str = "structured",
 ) -> dict[str, Any]:
     per_row = _collect_per_row_issues(issues_df)
     features: list[dict[str, Any]] = []
@@ -422,6 +423,7 @@ def _build_feature_collection(
         "job_id": job_id,
         "rulepack_id": rulepack_id,
         "auto_normalized": False,
+        "file_type": file_type,
         "pole_count": len(features),
         "span_count": 0,
         "pass_count": pass_count,
@@ -455,6 +457,7 @@ def _build_replacement_narratives(
         return narratives
 
     _expole_codes = {"EXpole", "expole", "EXPOLE"}
+    ex_id_counts: dict[str, int] = {}
 
     # Build sorted list of structural (non-context, non-anchor) row indices.
     structural_indices: list[int] = sorted(
@@ -516,6 +519,14 @@ def _build_replacement_narratives(
                 f"EXpole {ex_id} is likely being replaced by nearby proposed support {pr_id}."
             )
         narratives.append(narrative)
+        ex_id_counts[ex_id] = ex_id_counts.get(ex_id, 0) + 1
+
+    ambiguous_ids = [eid for eid, cnt in ex_id_counts.items() if cnt > 1]
+    if ambiguous_ids:
+        narratives.append(
+            f"Note: {len(ambiguous_ids)} existing pole(s) have multiple proposed supports nearby"
+            " — verify intended pairings before design proceeds."
+        )
 
     return narratives
 
@@ -608,11 +619,14 @@ def finalize(job_short: str):
                 ).sum()
             )
         if replacement_cluster_count > 0:
-            noun = "cluster" if replacement_cluster_count == 1 else "clusters"
-            design_readiness.setdefault("what_this_supports", []).append(
-                f"{replacement_cluster_count} probable replacement {noun} detected"
-                f" — consistent with replacement survey work"
-            )
+            if replacement_cluster_count == 1:
+                repl_label = "Proposed replacement identified near existing pole"
+            else:
+                repl_label = (
+                    f"{replacement_cluster_count} probable replacement pairs detected"
+                    " — verify intended pairings"
+                )
+            design_readiness.setdefault("what_this_supports", []).append(repl_label)
             design_readiness["replacement_cluster_count"] = replacement_cluster_count
 
         # Count angle-without-stay WARNs and surface in design readiness.
@@ -632,13 +646,32 @@ def finalize(job_short: str):
             )
             design_readiness["angle_no_stay_count"] = angle_no_stay_count
 
+        # Build lightweight issue_groups triage metadata (counts per risk category).
+        s_fields = completeness.get("structural_fields") or completeness.get("fields") or {}
+        issue_groups: dict[str, int] = {
+            "span_issues": 0,
+            "replacement_clusters": replacement_cluster_count,
+            "missing_heights": int(s_fields.get("height", {}).get("missing", 0)),
+            "angle_stay": angle_no_stay_count,
+        }
+        if not issues_df.empty and "Issue" in issues_df.columns:
+            issue_groups["span_issues"] = int(
+                issues_df["Issue"]
+                .str.contains(
+                    "Span very short|Span unusually short|Span borderline short", na=False
+                )
+                .sum()
+            )
+
         map_issues_df = issues_df.copy()
         csv_issues_df = _sanitize_issues_for_csv(issues_df)
 
         issues_path = job_dir / "issues.csv"
         csv_issues_df.to_csv(issues_path, index=False)
 
-        feature_collection = _build_feature_collection(df, map_issues_df, job_id, requested_dno)
+        feature_collection = _build_feature_collection(
+            df, map_issues_df, job_id, requested_dno, file_type
+        )
         feature_collection["metadata"]["auto_normalized"] = auto_normalized
         for _rkey in ("structural_count", "context_count", "anchor_count"):
             if _rkey in completeness:
@@ -662,6 +695,7 @@ def finalize(job_short: str):
                 "circuit_summary": circuit_summary,
                 "top_design_risks": top_design_risks,
                 "replacement_narratives": replacement_narratives,
+                "issue_groups": issue_groups,
                 "issue_count": len(map_issues_df),
                 "pole_count": completeness.get(
                     "total_records", feature_collection["metadata"]["pole_count"]

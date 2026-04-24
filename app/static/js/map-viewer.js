@@ -15,7 +15,6 @@ class MapViewer {
     this.mapEl = document.getElementById('map');
 
     this.poleCountEl = document.getElementById('pole-count');
-    this.spanCountEl = document.getElementById('span-count');
     this.passCountEl = document.getElementById('pass-count');
     this.warnCountEl = document.getElementById('warn-count');
     this.failCountEl = document.getElementById('fail-count');
@@ -28,6 +27,7 @@ class MapViewer {
     this.map = null;
     this.featureData = [];
     this.activeFilter = null;
+    this.fileType = null;
   }
 
   init() {
@@ -60,8 +60,8 @@ class MapViewer {
   }
 
   renderSummary(meta) {
+    this.fileType = meta.file_type || 'structured';
     if (this.poleCountEl) this.poleCountEl.textContent = meta.pole_count ?? 0;
-    if (this.spanCountEl) this.spanCountEl.textContent = meta.span_count ?? 0;
     if (this.passCountEl) this.passCountEl.textContent = meta.pass_count ?? 0;
     if (this.warnCountEl) this.warnCountEl.textContent = meta.warn_count ?? 0;
     if (this.failCountEl) this.failCountEl.textContent = meta.fail_count ?? 0;
@@ -172,11 +172,15 @@ class MapViewer {
            ${warnTexts.map(t => `<div class="popup-row" style="color:#92400e;font-size:0.8em;margin-left:6px;">&#8226; ${this.escapeHtml(t)}</div>`).join('')}`
         : '';
 
+      const idLabel = this.fileType === 'controller' ? 'Point no.' : 'Record ID';
+      const explainedType = props.structure_type != null ? this.explainAssetType(props.structure_type) : null;
+
       const popupHtml = `
         <div class="popup-title">${this.escapeHtml(props.name || props.id || 'Record')}</div>
         <div class="popup-row"><strong>Status:</strong> ${this.statusBadge(status)}</div>
-        ${props.pole_id != null ? `<div class="popup-row"><strong>ID:</strong> ${this.escapeHtml(props.pole_id)}</div>` : ''}
+        ${props.pole_id != null ? `<div class="popup-row"><strong>${idLabel}:</strong> ${this.escapeHtml(props.pole_id)}</div>` : ''}
         ${props.structure_type != null ? `<div class="popup-row"><strong>Type:</strong> ${this.escapeHtml(props.structure_type)}</div>` : ''}
+        ${explainedType ? `<div class="popup-row" style="color:#6b7280;font-size:0.83em;padding-left:8px;">${this.escapeHtml(explainedType)}</div>` : ''}
         ${assetIntentLine}
         ${heightLine}
         ${materialLine}
@@ -288,6 +292,7 @@ class MapViewer {
 
       const idText = this.escapeHtml(String(p.pole_id || p.id || 'Record'));
       const typeText = p.structure_type ? this.escapeHtml(p.structure_type) : '—';
+      const explainedType = p.structure_type ? this.explainAssetType(p.structure_type) : null;
       const statusColor = this.getMarkerColor(fd.status);
 
       const detailParts = [];
@@ -312,12 +317,17 @@ class MapViewer {
         ? `<div style="color:#9ca3af;font-size:0.75em;margin-top:1px;font-style:italic;">${this.escapeHtml(p.asset_intent)}</div>`
         : '';
 
+      const explainedTypeHtml = explainedType
+        ? `<div style="color:#9ca3af;font-size:0.73em;margin-top:1px;font-style:italic;">${this.escapeHtml(explainedType)}</div>`
+        : '';
+
       item.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
           <span style="font-weight:600;font-size:0.82rem;">${idText}</span>
           <span style="font-size:0.75rem;font-weight:700;color:${statusColor};">${fd.status}</span>
         </div>
         <div style="color:#6b7280;font-size:0.78rem;">${typeText}${detailText ? ' · ' + detailText : ''}</div>
+        ${explainedTypeHtml}
         ${intentHtml}
         ${issueHtml}
         ${warnHtml}
@@ -349,6 +359,39 @@ class MapViewer {
     if (status === 'FAIL') return '<span style="color:#d94141;font-weight:700;">FAIL</span>';
     if (status === 'WARN') return '<span style="color:#d39e00;font-weight:700;">WARN</span>';
     return '<span style="color:#2e8b57;font-weight:700;">PASS</span>';
+  }
+
+  explainAssetType(st) {
+    const map = {
+      'EXpole': 'Existing pole being replaced',
+      'expole': 'Existing pole being replaced',
+      'EXPOLE': 'Existing pole being replaced',
+      'PRpole': 'Proposed replacement pole',
+      'prpole': 'Proposed replacement pole',
+      'PRPOLE': 'Proposed replacement pole',
+      'Pol': 'Proposed new pole',
+      'pol': 'Proposed new pole',
+      'POL': 'Proposed new pole',
+      'Angle': 'Angle pole (structural)',
+      'angle': 'Angle pole (structural)',
+      'ANGLE': 'Angle pole (structural)',
+      'Hedge': 'Hedge (environmental context)',
+      'hedge': 'Hedge (environmental context)',
+      'HEDGE': 'Hedge (environmental context)',
+      'Tree': 'Tree (environmental context)',
+      'tree': 'Tree (environmental context)',
+      'TREE': 'Tree (environmental context)',
+      'Gate': 'Gate (crossing context)',
+      'gate': 'Gate (crossing context)',
+      'GATE': 'Gate (crossing context)',
+      'Track': 'Track (crossing context)',
+      'track': 'Track (crossing context)',
+      'TRACK': 'Track (crossing context)',
+      'Stream': 'Stream / watercourse (crossing context)',
+      'stream': 'Stream / watercourse (crossing context)',
+      'STREAM': 'Stream / watercourse (crossing context)',
+    };
+    return map[st] || null;
   }
 
   escapeHtml(value) {

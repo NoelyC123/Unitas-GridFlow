@@ -462,14 +462,23 @@ def build_circuit_summary(df: pd.DataFrame, completeness: dict) -> dict:
     total_count = int(completeness.get("total_records") or len(df))
 
     if structural_count == 0:
-        summary_text = "No structural records detected in this survey file."
+        summary_text = "No poles or support structures detected in this survey file."
     elif structural_count == 1:
-        summary_text = "1 structural record detected in this survey file."
+        summary_text = "1 pole or support structure identified along the surveyed route."
     else:
         summary_text = (
-            f"{structural_count} structural records detected along a broadly"
-            f" continuous overhead line route."
+            f"{structural_count} poles / support structures identified along the surveyed route."
         )
+
+    # Count existing vs proposed poles if the df has the necessary columns.
+    _expole_codes = {"EXpole", "expole", "EXPOLE"}
+    _propole_codes = {"Pol", "pol", "POL", "PRpole", "prpole", "PRPOLE"}
+    existing_count = 0
+    proposed_count = 0
+    if not df.empty and "_record_role" in df.columns and "structure_type" in df.columns:
+        s_df = df[df["_record_role"] == "structural"]
+        existing_count = int(s_df["structure_type"].isin(_expole_codes).sum())
+        proposed_count = int(s_df["structure_type"].isin(_propole_codes).sum())
 
     return {
         "summary_text": summary_text,
@@ -477,6 +486,8 @@ def build_circuit_summary(df: pd.DataFrame, completeness: dict) -> dict:
         "context_count": context_count,
         "anchor_count": anchor_count,
         "total_count": total_count,
+        "existing_count": existing_count,
+        "proposed_count": proposed_count,
     }
 
 
@@ -504,10 +515,13 @@ def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[
         noun = "structure" if angle_count == 1 else "structures"
         risks.append(
             {
-                "title": "Angle structures — stay evidence missing",
+                "title": "Angle structures with no clear stay evidence",
                 "count": angle_count,
                 "summary": f"{angle_count} angle {noun} with no proximate stay evidence.",
-                "designer_impact": ("Verify whether stay capture is missing before design."),
+                "designer_impact": (
+                    "Stay requirements cannot be confirmed — check site notes or plan"
+                    " before design proceeds."
+                ),
                 "severity": "WARN",
             }
         )
@@ -519,13 +533,16 @@ def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[
     if height_missing > 0:
         risks.append(
             {
-                "title": "Structural heights missing",
+                "title": "Heights not captured — clearance design affected",
                 "count": height_missing,
                 "summary": (
                     f"Height not captured for {height_missing}"
                     f" of {structural_count} structural records."
                 ),
-                "designer_impact": ("Height data required for clearance and sag assessments."),
+                "designer_impact": (
+                    "Clearance and sag calculations cannot be completed — confirm heights"
+                    " from field notes or plan."
+                ),
                 "severity": "WARN" if height_pct > 0 else "FAIL",
             }
         )
@@ -537,13 +554,16 @@ def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[
     if material_missing > 0:
         risks.append(
             {
-                "title": "Material data missing",
+                "title": "Material not recorded — structural spec incomplete",
                 "count": material_missing,
                 "summary": (
                     f"Material not captured for {material_missing}"
                     f" of {structural_count} structural records."
                 ),
-                "designer_impact": ("Material required for structural loading specification."),
+                "designer_impact": (
+                    "Structural loading cannot be specified without material data —"
+                    " confirm from field notes or plan."
+                ),
                 "severity": "WARN" if material_pct > 0 else "FAIL",
             }
         )
@@ -561,11 +581,12 @@ def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[
         noun = "span" if short_span_count == 1 else "spans"
         risks.append(
             {
-                "title": "Short spans requiring review",
+                "title": "Short spans detected — possible duplicates or missing poles",
                 "count": short_span_count,
                 "summary": f"{short_span_count} {noun} below expected minimum detected.",
                 "designer_impact": (
-                    "Verify whether short spans indicate duplicates or missing records."
+                    "Confirm whether short spans are replacement pairs, duplicate captures,"
+                    " or missing intermediate poles."
                 ),
                 "severity": "WARN",
             }
@@ -716,7 +737,8 @@ def build_design_readiness(completeness: dict) -> dict:
     if material_pct == 0.0:
         reasons.insert(
             0,
-            "This file cannot support full design — critical design data missing",
+            "Route and structure positions are captured but material data is absent"
+            " from this digital file — structural specification requires field notes or plan",
         )
 
     if position_rating == "Missing":

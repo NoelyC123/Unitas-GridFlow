@@ -304,14 +304,10 @@
           </div>
 
           <div class="summary-body">
-            <div class="stat-grid">
-              <div class="stat-block" id="all-records-btn" title="Click to list all records">
+            <div style="text-align:center; margin-bottom:14px;">
+              <div id="all-records-btn" style="cursor:pointer; display:inline-block; padding:4px; border-radius:8px; transition:background 0.15s;" title="Click to list all records">
                 <div id="pole-count" class="stat-value">0</div>
                 <div class="stat-label">Records</div>
-              </div>
-              <div class="stat-block">
-                <div id="span-count" class="stat-value">0</div>
-                <div class="stat-label">Spans</div>
               </div>
             </div>
 
@@ -408,6 +404,12 @@
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
               <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Circuit Summary</div>
               <div style="font-size: 0.85rem; color: #374151;">{{ circuit_summary.summary_text }}</div>
+              {% if circuit_summary.structural_count is not none or circuit_summary.context_count is not none %}
+              <div style="font-size: 0.78rem; color: #6b7280; margin-top: 3px;">structural: {{ circuit_summary.structural_count }}, context: {{ circuit_summary.context_count }}, anchor: {{ circuit_summary.anchor_count }}</div>
+              {% endif %}
+              {% if circuit_summary.existing_count or circuit_summary.proposed_count %}
+              <div style="font-size: 0.78rem; color: #6b7280; margin-top: 2px;">{{ circuit_summary.existing_count }} existing{% if circuit_summary.proposed_count %}, {{ circuit_summary.proposed_count }} proposed{% endif %}</div>
+              {% endif %}
             </div>
             {% endif %}
 
@@ -480,6 +482,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=9"></script>
+  <script src="/static/js/map-viewer.js?v=10"></script>
 </body>
 </html>

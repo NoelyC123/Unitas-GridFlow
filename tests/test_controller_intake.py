@@ -444,8 +444,8 @@ def test_build_circuit_summary_multiple_structural_returns_route_text() -> None:
     }
     result = build_circuit_summary(pd.DataFrame(), completeness)
 
-    assert "15 structural records" in result["summary_text"]
-    assert "overhead line route" in result["summary_text"]
+    assert "15 poles / support structures" in result["summary_text"]
+    assert "surveyed route" in result["summary_text"]
     assert result["structural_count"] == 15
     assert result["context_count"] == 3
 
@@ -454,7 +454,7 @@ def test_build_circuit_summary_zero_structural_returns_no_structural_text() -> N
     completeness = {"structural_count": 0, "context_count": 2, "total_records": 2}
     result = build_circuit_summary(pd.DataFrame(), completeness)
 
-    assert "No structural records" in result["summary_text"]
+    assert "No poles or support structures" in result["summary_text"]
     assert result["structural_count"] == 0
 
 
@@ -490,7 +490,7 @@ def test_build_top_design_risks_includes_missing_height_risk() -> None:
 
     risks = build_top_design_risks(issues_df, completeness)
 
-    height_risks = [r for r in risks if r["title"] == "Structural heights missing"]
+    height_risks = [r for r in risks if "Heights not captured" in r["title"]]
     assert len(height_risks) == 1
     assert height_risks[0]["count"] == 6
     assert height_risks[0]["severity"] == "WARN"
