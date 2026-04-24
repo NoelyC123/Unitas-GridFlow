@@ -442,3 +442,67 @@ def test_build_evidence_gates_conductor_scope_partial_with_few_span_issues() -> 
     result = build_evidence_gates(completeness, issues_df)
     cond_gate = next(g for g in result if g["label"] == "Conductor Scope")
     assert cond_gate["status"] == "Partial"
+
+
+# ---------------------------------------------------------------------------
+# Gate 2 — Structure Identity fix tests
+# ---------------------------------------------------------------------------
+
+
+def test_structure_identity_strong_when_high_coverage() -> None:
+    completeness = _make_completeness(lat_pct=100, st_pct=99, structural_count=10)
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    gate = next(g for g in result if g["label"] == "Structure Identity")
+    assert gate["status"] == "Strong"
+
+
+def test_structure_identity_partial_when_nonzero_below_80() -> None:
+    completeness = _make_completeness(lat_pct=100, st_pct=65, structural_count=10)
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    gate = next(g for g in result if g["label"] == "Structure Identity")
+    assert gate["status"] == "Partial"
+
+
+def test_structure_identity_missing_when_zero_coverage_no_feature_codes() -> None:
+    completeness = _make_completeness(lat_pct=100, st_pct=0, feature_codes=[])
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    gate = next(g for g in result if g["label"] == "Structure Identity")
+    assert gate["status"] == "Missing"
+
+
+def test_structure_identity_reads_fields_not_structural_fields() -> None:
+    """Regression: production completeness dicts have structural_fields without structure_type.
+
+    structure_type must be read from fields, not structural_fields.
+    155/157 = 98.7% coverage should give Strong, not Missing.
+    """
+    completeness = {
+        "fields": {
+            "lat": {"coverage_pct": 100.0, "present": 157, "missing": 0},
+            "easting": {"coverage_pct": 0.0, "present": 0, "missing": 157},
+            "structure_type": {"coverage_pct": 98.7, "present": 155, "missing": 2},
+            "height": {"coverage_pct": 60.0, "present": 94, "missing": 63},
+            "material": {"coverage_pct": 0.0, "present": 0, "missing": 157},
+        },
+        "structural_fields": {
+            "height": {"coverage_pct": 73.4, "present": 94, "missing": 34},
+            "material": {"coverage_pct": 0.0, "present": 0, "missing": 128},
+            "location": {"coverage_pct": 100.0, "present": 128, "missing": 0},
+        },
+        "structural_count": 128,
+        "feature_codes_found": [
+            "Angle",
+            "EXpole",
+            "Fence",
+            "Gate",
+            "Pol",
+            "Stream",
+            "Track",
+            "Tree",
+            "Wall",
+        ],
+    }
+    result = build_evidence_gates(completeness, pd.DataFrame())
+    gate = next(g for g in result if g["label"] == "Structure Identity")
+    assert gate["status"] != "Missing"
+    assert gate["status"] == "Strong"

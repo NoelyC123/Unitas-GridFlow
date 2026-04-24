@@ -360,31 +360,32 @@ def build_evidence_gates(completeness: dict, issues_df: pd.DataFrame) -> list[di
 
     # -------------------------------------------------------------------------
     # Gate 2 — Structure Identity Evidence
+    # structure_type is NOT included in structural_fields (which only covers
+    # height/material/location to avoid context-record contamination).
+    # It must always be read from the full-dataset fields dict.
     # -------------------------------------------------------------------------
-    st_pct = float((s_fields.get("structure_type") or {}).get("coverage_pct") or 0)
-    has_ex = any(c.lower() == "expole" for c in feature_codes)
-    has_pr = any(c.lower() in ("pol", "prpole") for c in feature_codes)
+    st_pct = float((fields.get("structure_type") or {}).get("coverage_pct") or 0)
 
     if st_pct == 0:
         g2 = (
             "Missing",
             "No structure type codes found — EX/proposed intent cannot be determined.",
         )
-    elif st_pct >= 80 and (has_ex or has_pr):
+    elif st_pct >= 80:
         g2 = (
             "Strong",
-            f"Structure type present for {st_pct:.0f}% of records with recognised EX/PR codes.",
+            f"Structure codes present for {st_pct:.0f}% of records"
+            " — existing/proposed roles can be interpreted.",
         )
     elif st_pct >= 50:
         g2 = (
             "Partial",
-            f"Structure type present for {st_pct:.0f}% of records"
-            " — incomplete EX/PR classification.",
+            f"Partial structure coding ({st_pct:.0f}%) — confirm uncoded records before design.",
         )
     else:
         g2 = (
             "Weak",
-            f"Structure type coverage low ({st_pct:.0f}%) — asset intent unclear.",
+            f"Structure coding low ({st_pct:.0f}%) — asset intent unclear for most records.",
         )
 
     gates.append({"label": "Structure Identity", "status": g2[0], "explanation": g2[1]})
