@@ -99,6 +99,7 @@ Read in this order when needed:
 3. `AI_CONTROL/01_CURRENT_STATE.md` (only if needed)
 4. `AI_CONTROL/04_SESSION_HANDOFF.md` (only if needed)
 5. `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` (only if strategic direction is relevant)
+6. `AI_CONTROL/07_REAL_WORLD_SURVEY_WORKFLOW.md` (core domain reference — read when making QA logic or output language decisions)
 
 Use:
 
@@ -106,6 +107,7 @@ Use:
 - current task = what to do next
 - current state = what is true right now
 - strategic review = why the next phase is validation-led
+- real-world workflow reference = how the actual field→design workflow behaves
 
 ---
 

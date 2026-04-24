@@ -8,6 +8,35 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 18 — real-world survey workflow reference)
+
+### Added
+
+- **`AI_CONTROL/07_REAL_WORLD_SURVEY_WORKFLOW.md`**: new core project truth document
+  capturing how UK overhead line survey-to-design workflows actually operate.
+
+  Sections:
+  1. Purpose of this document — why this is a permanent project reference
+  2. End-to-end workflow — Field survey → Trimble → export → D2D → PoleCAD → AutoCAD → submission; where problems occur and where time is wasted
+  3. Field capture reality — Trimble Access + GNSS, feature-code libraries, raw export format, GPS Z vs declared height distinction
+  4. Feature code meaning — EXpole (existing asset), PRpole/Pol (proposed), context features (Hedge/Gate/Track/Stream/Fence/Tree), anchor/control points; and the Unitas behaviour implication of each
+  5. Replacement logic — EXpole + PRpole proximity interpretation, typical offset distances (0–5m standard replacement, 5–10m repositioned, 10–20m minor diversion, 20m+ new route), why cautious WARN is correct
+  6. Survey captures vs design needs — structured gap analysis showing what CSV contains vs what PoleCAD requires; explains why D2D workload exists
+  7. The D2D problem — what D2D involves, why it is error-prone, how Unitas targets this gap
+  8. What designers actually care about — real acceptance/rejection signals from design experience
+  9. Real-world failure points — ranked list: missing poles, short spans (duplicate vs replacement), missing structure_type, missing stay evidence, unclear connectivity, inconsistent coding
+  10. What makes a survey "design-ready" — minimum requirements vs what is not required
+  11. Implications for Unitas — must/must-not list grounded in sections 1–10
+  12. Future direction — Phase 1 (current): post-survey validation; Phase 2: feedback loop; Phase 3: capture guidance; Phase 4: field integration
+
+- **`CLAUDE.md`**: control layer reading order updated to include
+  `07_REAL_WORLD_SURVEY_WORKFLOW.md` as item 6 (read when making QA logic or
+  output language decisions).
+
+No application code or test changes.
+
+---
+
 ## 2026-04-24 (batch 17 — documentation alignment after audit)
 
 ### Changed
