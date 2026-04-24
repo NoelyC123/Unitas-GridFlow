@@ -8,6 +8,57 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-24 (batch 19 — field meaning and designer clarity layer)
+
+### Changed
+
+- **`app/controller_intake.py`**:
+  - `build_circuit_summary()`: wording updated from "structural records / overhead line route"
+    to "poles / support structures / surveyed route". Added `existing_count` and
+    `proposed_count` to returned dict (scans structural rows for EXpole vs Pol/PRpole codes).
+  - `build_top_design_risks()`: all 4 risk titles and `designer_impact` strings rewritten to
+    field-aligned designer language (angle stay, height, material, short spans).
+  - `build_design_readiness()`: replaced alarming "This file cannot support full design"
+    headline with informative gap description stating what is absent and what is needed.
+
+- **`app/routes/api_intake.py`**:
+  - `_build_feature_collection()`: added `file_type` parameter; `file_type` now included
+    in GeoJSON metadata so the JS can choose the correct ID label per file type.
+  - `_build_replacement_narratives()`: added ambiguity caveat note when the same EX pole
+    ID appears across multiple narratives (multi-PR/same-EX case).
+  - `finalize()`: replacement cluster wording in `what_this_supports` rewritten (1 pair →
+    "Proposed replacement identified near existing pole"; N pairs → "N probable replacement
+    pairs detected — verify intended pairings"). Added `issue_groups` triage metadata dict
+    (span_issues, replacement_clusters, missing_heights, angle_stay counts) to meta.json.
+    `_build_feature_collection` call updated to pass `file_type`.
+
+- **`app/templates/map_viewer.html`**:
+  - Removed misleading "Spans: 0" stat block. Records stat centered as a single display.
+  - Circuit summary section now shows sub-lines: structural/context/anchor breakdown
+    and existing/proposed counts when available.
+  - JS version bumped `?v=9` → `?v=10`.
+
+- **`app/static/js/map-viewer.js`**:
+  - Added `this.fileType` state, set from `meta.file_type` in `renderSummary()`.
+  - Popup ID label is now contextual: "Point no." (controller file) or "Record ID" (structured).
+  - Added `explainAssetType()` method mapping feature codes to plain-English descriptions
+    (EXpole, PRpole, Pol, Angle, Hedge, Tree, Gate, Track, Stream).
+  - Explained type shown in popup below Type line; also shown in record panel items.
+
+- **`app/routes/pdf_reports.py`**:
+  - "Issues" section renamed "Review Signals". Row data removed from main report body.
+  - Added Technical Appendix (new page via `pdf.showPage()`) with full issue detail
+    including raw Row data for technical reference.
+  - Footer updated from "local MVP." to "Unitas GridFlow."
+
+- **`tests/test_controller_intake.py`**:
+  - Updated 3 test assertions to match new wording in `build_circuit_summary()` and
+    `build_top_design_risks()`.
+
+121 tests passing. No QA logic changes. Presentation and interpretation only.
+
+---
+
 ## 2026-04-24 (batch 18 — real-world survey workflow reference)
 
 ### Added
