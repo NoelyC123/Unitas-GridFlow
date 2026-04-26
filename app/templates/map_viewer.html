@@ -354,6 +354,16 @@
                 <i class="bi bi-file-pdf"></i> Download PDF
               </a>
 
+              {% if sequence_summary and sequence_summary.status == 'ok' and sequence_summary.total_sequenced and sequence_summary.total_sequenced > 0 %}
+              <a id="btn-download-d2d" href="/d2d/export/{{ job_id }}" class="btn btn-outline-success">
+                <i class="bi bi-table"></i> Download D2D Export
+              </a>
+              {% else %}
+              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="D2D export unavailable — no sequenced poles found">
+                <i class="bi bi-table"></i> D2D export unavailable
+              </a>
+              {% endif %}
+
               <a id="btn-open-upload" href="/upload" class="btn btn-outline-primary">
                 <i class="bi bi-cloud-upload"></i> Upload another file
               </a>

@@ -38,6 +38,7 @@ def map_view(job_id: str):
     replacement_narratives: list = []
     recommended_actions: list = []
     evidence_gates: list = []
+    sequence_summary: dict = {}
     if meta_path.exists():
         try:
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -48,6 +49,7 @@ def map_view(job_id: str):
             replacement_narratives = meta.get("replacement_narratives") or []
             recommended_actions = meta.get("recommended_actions") or []
             evidence_gates = meta.get("evidence_gates") or []
+            sequence_summary = meta.get("sequence_summary") or {}
         except Exception:
             pass
     return render_template(
@@ -60,6 +62,7 @@ def map_view(job_id: str):
         replacement_narratives=replacement_narratives,
         recommended_actions=recommended_actions,
         evidence_gates=evidence_gates,
+        sequence_summary=sequence_summary,
     )
 
 

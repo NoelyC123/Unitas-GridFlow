@@ -82,4 +82,11 @@ def create_app() -> Flask:
     except Exception as exc:
         app.logger.warning(f"pdf_reports blueprint not loaded: {exc}")
 
+    try:
+        from app.routes.d2d_export import d2d_export_bp
+
+        app.register_blueprint(d2d_export_bp, url_prefix="/d2d")
+    except Exception as exc:
+        app.logger.warning(f"d2d_export blueprint not loaded: {exc}")
+
     return app

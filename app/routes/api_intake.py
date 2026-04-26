@@ -24,6 +24,7 @@ from app.controller_intake import (
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
 from app.qa_engine import run_qa_checks
+from app.route_sequencer import sequence_route
 
 # Compiled once at module level for replacement-pair offset extraction.
 _REPL_OFFSET_RE = re.compile(r"([\d.]+)m offset")
@@ -612,6 +613,27 @@ def finalize(job_short: str):
         top_design_risks = build_top_design_risks(issues_df, completeness)
         replacement_narratives = _build_replacement_narratives(df, issues_df)
 
+        # Route sequencer — produces provisional D2D candidate output.
+        # Wrapped in its own try/except so any sequencer bug does NOT break the
+        # existing upload/map/PDF flow. Errors are logged and surfaced in meta.json.
+        sequence_result: dict = {}
+        try:
+            sequence_result = sequence_route(df)
+        except Exception as _seq_exc:
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "route_sequencer failed for %s: %s", job_id, _seq_exc
+            )
+            sequence_result = {"status": "error", "reason": str(_seq_exc)}
+
+        seq_path = job_dir / "sequenced_route.json"
+        _write_json(seq_path, sequence_result)
+        sequence_summary = sequence_result.get("summary") or {
+            "status": sequence_result.get("status", "error"),
+            "reason": sequence_result.get("reason"),
+        }
+
         # Count replacement pairs and surface in design readiness.
         replacement_cluster_count = 0
         if not issues_df.empty and "Severity" in issues_df.columns and "Issue" in issues_df.columns:
@@ -700,6 +722,7 @@ def finalize(job_short: str):
                 "replacement_narratives": replacement_narratives,
                 "recommended_actions": recommended_actions,
                 "evidence_gates": evidence_gates,
+                "sequence_summary": sequence_summary,
                 "issue_groups": issue_groups,
                 "issue_count": len(map_issues_df),
                 "pole_count": completeness.get(
