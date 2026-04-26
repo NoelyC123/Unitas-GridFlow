@@ -937,3 +937,77 @@ def test_confidence_warning_not_triggered() -> None:
     result = sequence_route(df)
 
     assert result["summary"]["confidence_warning"] is None
+
+
+# ===========================================================================
+# Stage 2B validation bugfixes
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# test_gordon_not_required_points_detached
+# ---------------------------------------------------------------------------
+
+
+def test_gordon_not_required_points_detached() -> None:
+    """Records with 'not required' in location (Gordon points 9/10 pattern) are
+    excluded from the chain and appear in detached_records."""
+    main_route = [_structural_pol(f"P{i}", float(i * 100), 0.0) for i in range(6)]
+    main_route.append(_structural_angle("A1", 600.0, 0.0))
+    main_route += [_structural_pol(f"Q{i}", float((i + 7) * 100), 0.0) for i in range(4)]
+    # Simulate Gordon points 9/10: Angle records with "pole not required" in location,
+    # far from the main route
+    pt10 = _structural_angle("PT10", 5000.0, 0.0, location="pole not required")
+    pt9 = _structural_angle("PT9", 5100.0, 0.0, location="pole not required")
+
+    df = _make_df(main_route + [pt10, pt9])
+    result = sequence_route(df)
+
+    assert result["status"] == "ok"
+
+    chain_ids = [r["point_id"] for r in result["chain"]]
+    assert "PT10" not in chain_ids, "PT10 must be detached, not in chain"
+    assert "PT9" not in chain_ids, "PT9 must be detached, not in chain"
+
+    detached_ids = [r["point_id"] for r in result["detached_records"]]
+    assert "PT10" in detached_ids
+    assert "PT9" in detached_ids
+    assert len(result["detached_records"]) == 2
+    assert result["summary"]["total_detached"] == 2
+
+
+# ---------------------------------------------------------------------------
+# test_balanced_section_selects_candidate_closest_to_target
+# ---------------------------------------------------------------------------
+
+
+def test_balanced_section_selects_candidate_closest_to_target() -> None:
+    """With Angle candidates at seq ~39 and seq ~60 and target_section_size=60,
+    the heuristic selects the candidate closest to the target (seq 60),
+    not the first available candidate past half-target (seq 39)."""
+    records: list[dict] = []
+    for i in range(100):
+        if i == 38:
+            records.append(_structural_angle("EARLY", float(i * 50), 0.0))
+        elif i == 59:
+            records.append(_structural_angle("MIDPOINT", float(i * 50), 0.0))
+        else:
+            records.append(_structural_pol(f"P{i}", float(i * 50), 0.0))
+
+    df = _make_df(records)
+    result = sequence_route(df, config={"target_section_size": 60})
+
+    assert result["status"] == "ok"
+    chain = result["chain"]
+
+    early_rec = next(r for r in chain if r["point_id"] == "EARLY")
+    midpoint_rec = next(r for r in chain if r["point_id"] == "MIDPOINT")
+
+    # MIDPOINT (seq ~60, closest to target 60) must be chosen as the boundary
+    assert midpoint_rec["section_boundary"] is True, (
+        f"MIDPOINT at seq {midpoint_rec['seq']} should be section boundary"
+    )
+    # EARLY (seq ~39, farther from target 60) must NOT be chosen
+    assert early_rec["section_boundary"] is False, (
+        f"EARLY at seq {early_rec['seq']} should not be section boundary when MIDPOINT is closer"
+    )

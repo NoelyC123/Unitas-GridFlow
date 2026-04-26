@@ -325,16 +325,26 @@ def _assign_sections(chain: list[dict], cfg: dict) -> list[dict]:
     candidate_indices = [i for i, r in enumerate(chain) if r["section_split_candidate"]]
 
     # Choose actual split points from candidates using balanced heuristic.
-    # A split at index i means: chain[i] ends Section N and starts Section N+1.
-    # We pick candidates greedily: if a candidate is near the target boundary, use it.
+    # For each expected section boundary (last_split + target), pick the Angle
+    # candidate whose chain index is closest to that target position.
+    # This matches the Gordon evidence: PR1/PR2 split at point 4 (~seq 60), not
+    # at the largest angle or the first candidate past half-target.
     chosen_splits: list[int] = []
     if candidate_indices and n > target:
         last_split = 0
-        for ci in candidate_indices:
-            # Only consider after minimum half-target distance from last split
-            if ci - last_split >= target // 2:
-                chosen_splits.append(ci)
-                last_split = ci
+        while True:
+            target_pos = last_split + target
+            if target_pos >= n:
+                break
+            eligible = [ci for ci in candidate_indices if ci > last_split]
+            if not eligible:
+                break
+            best = min(eligible, key=lambda ci: abs(ci - target_pos))
+            if abs(best - target_pos) <= target // 2:
+                chosen_splits.append(best)
+                last_split = best
+            else:
+                break
 
     # Build section boundary list: list of chain indices that are boundaries
     # Each boundary index is the end of one section and the start of the next.

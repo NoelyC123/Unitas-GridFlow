@@ -563,3 +563,33 @@ PRS485572899536,219497.298,413575.610,118.985,
     assert pd.isna(df.loc["10", "location"]) or df.loc["10", "location"] == ""
     # Normal EXpole record with no remark — location also empty
     assert pd.isna(df.loc["11", "location"]) or df.loc["11", "location"] == ""
+
+
+def test_raw_trailing_not_required_preserved_or_detected(tmp_path) -> None:
+    """Trailing 'not required' annotation after all attribute pairs is captured in location.
+
+    Gordon raw dump rows for points 9 and 10 have a lone 'not required' value
+    after the final attribute pair, separated by an empty column (,,not required).
+    The empty column is stripped, leaving 'not required' as an unpaired last element.
+    The parser must capture this annotation in the location field.
+    """
+    content = (
+        "Job:Gordon Pt1,Version:3.21,Units:Metres\n"
+        "1,365137.124,643603.023,164.191,Angle,"
+        "Angle:STRING,1,Angle:TAG,S,Angle:REMARK,pole 1,"
+        "Angle:LAND USE,PASTURE,Angle:HEIGHT,7.2,,\n"
+        "10,367140.998,645265.13,209.3,Angle,"
+        "Angle:STRING,10,Angle:TAG,S,Angle:REMARK,pole,"
+        "Angle:LAND USE,ARABLE,Angle:HEIGHT,5,,not required\n"
+    )
+    f = tmp_path / "dump.csv"
+    f.write_text(content)
+    df = parse_raw_controller_dump(f).set_index("pole_id")
+
+    # Normal record: location is just the REMARK value
+    assert df.loc["1", "location"] == "pole 1"
+    # Record with trailing annotation: location must contain "not required"
+    location_10 = str(df.loc["10", "location"] or "")
+    assert "not required" in location_10.lower(), (
+        f"Expected 'not required' in location for point 10, got: {location_10!r}"
+    )

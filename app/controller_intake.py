@@ -296,6 +296,16 @@ def parse_raw_controller_dump(path: Path | str) -> pd.DataFrame:
                 elif attr_type == "REMARK" and attr_val:
                     remark = attr_val or None
 
+            # Capture trailing unpaired annotation after all attribute pairs.
+            # The Gordon raw dump stores "not required" as a lone value after the
+            # final attribute pair, separated by an empty column (,,not required).
+            # Empty columns are stripped by the list comprehension above, leaving
+            # "not required" as an orphaned last element with no following value.
+            if idx < len(values):
+                trailing = values[idx].strip()
+                if trailing and ":" not in trailing:
+                    remark = f"{remark} {trailing}".strip() if remark else trailing
+
             # Strip raw Trimble attribute labels that were captured as remarks.
             # "Pol:LAND USE", "EXpole:LAND USE", "Angle:STRING" etc. are controller
             # noise — they start with a known feature code prefix followed by ":".
