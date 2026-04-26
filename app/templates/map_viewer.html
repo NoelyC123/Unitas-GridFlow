@@ -358,9 +358,15 @@
               <a id="btn-download-d2d" href="/d2d/export/{{ job_id }}" class="btn btn-outline-success">
                 <i class="bi bi-table"></i> Download D2D Export
               </a>
+              <a id="btn-download-d2d-working" href="/d2d/interleaved/{{ job_id }}" class="btn btn-outline-success">
+                <i class="bi bi-layout-text-sidebar"></i> D2D Working View
+              </a>
               {% else %}
               <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="D2D export unavailable — no sequenced poles found">
                 <i class="bi bi-table"></i> D2D export unavailable
+              </a>
+              <a id="btn-download-d2d-working-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="D2D working view unavailable — no sequenced poles found">
+                <i class="bi bi-layout-text-sidebar"></i> D2D working view unavailable
               </a>
               {% endif %}
 
