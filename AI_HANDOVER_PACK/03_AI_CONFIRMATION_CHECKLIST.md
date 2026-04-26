@@ -46,6 +46,7 @@ The AI should be able to answer all of these correctly before you let it advise 
 - [ ] Mentions Stage 2A implementation commit `5f99bf0`.
 - [ ] Mentions Stage 2B implementation commit `54417ba`.
 - [ ] Mentions Stage 2B validation bugfix commit `e51d0ee`.
+- [ ] Mentions Stage 2C polish commit `4ca6bc0`.
 - [ ] Mentions provisional D2D candidate CSV export.
 - [ ] Mentions D2D interleaved working view export.
 - [ ] Mentions `sequenced_route.json`.
@@ -56,8 +57,8 @@ The AI should be able to answer all of these correctly before you let it advise 
 - [ ] Focuses on Stage 2.
 - [ ] Talks about clean, sequenced, PoleCAD-ready output.
 - [ ] Talks about replacing/reducing D2D spreadsheet work.
-- [ ] Treats Stage 2A and Stage 2B as implemented.
+- [ ] Treats Stage 2A, Stage 2B and Stage 2C as implemented.
 - [ ] Treats Stage 2B as validated against the current Gordon/NIE file set.
-- [ ] Treats the next phase as Stage 2C polish pass vs Stage 2 completion review.
+- [ ] Treats the next phase as Stage 2 completion review.
 - [ ] Mentions Gordon PR1/PR2 manual split files as validation evidence.
 - [ ] Keeps work small, testable and validation-led.

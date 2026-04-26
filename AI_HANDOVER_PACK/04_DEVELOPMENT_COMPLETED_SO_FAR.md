@@ -48,7 +48,7 @@ Phase 3A improved real-file handling by:
 
 Current focus is Stage 2: D2D elimination.
 
-Stage 2A and Stage 2B have now been implemented and validated against the current real-file set.
+Stage 2A, Stage 2B and Stage 2C have now been implemented and validated against the current real-file set.
 
 ## Stage 2A Implemented
 
@@ -105,12 +105,29 @@ Stage 2B has passed the current real-file validation set:
 
 Stage 2B is accepted as a strong D2D replacement baseline, but Stage 2 is not formally closed yet.
 
+## Stage 2C Implemented
+
+Stage 2C commit: `4ca6bc0`
+
+Stage 2C polished:
+
+- export headers
+- section summaries
+- detached/reference wording
+- sequence-note wording
+- map page download labels
+- export filenames (`_d2d_chain.csv`, `_d2d_working_view.csv`)
+
+Stage 2C validation passed on:
+
+- Gordon
+- `2814_4-474_raw_trimble_export.csv`
+- `28-14 513 (2).csv`
+- `2814_474c_raw_trimble_export.csv`
+
 ## Current Decision Point
 
-The next decision is whether to:
-
-1. do a small Stage 2C polish pass, focused on output clarity and validation reporting, or
-2. move to a Stage 2 completion review.
+The next decision is Stage 2 completion review.
 
 ## Important Boundary
 

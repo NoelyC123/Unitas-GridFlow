@@ -13,9 +13,11 @@ Current confirmed state:
 - Stage 1 is complete.
 - Stage 2A is implemented.
 - Stage 2B is implemented and validated as a strong D2D replacement baseline.
+- Stage 2C is implemented and validated as an export/output polish pass.
 - Stage 2A commit: `5f99bf0`
 - Stage 2B commit: `54417ba`
 - Stage 2B validation bugfix commit: `e51d0ee`
+- Stage 2C commit: `4ca6bc0`
 - Current test count: 211 passing.
 - D2D candidate CSV export has been added.
 - D2D interleaved working view export has been added.
@@ -23,7 +25,7 @@ Current confirmed state:
 - Route sequencing, EXpole matching, span calculation, deviation angle calculation, section-aware output, detached record handling, confidence warnings and design numbering are implemented.
 - Gordon, `4-474`, `513` and `474c` validation exports have passed current review.
 - Stage 2 is not complete yet.
-- Current focus is Stage 2C polish pass vs Stage 2 completion review.
+- Current focus is Stage 2 completion review.
 
 If this file conflicts with newer handover-pack notes, use the newest handover-pack notes and the latest repo state.
 
