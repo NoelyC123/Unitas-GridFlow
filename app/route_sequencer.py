@@ -658,8 +658,9 @@ def sequence_route(df: "pd.DataFrame", config: dict | None = None) -> dict:
     confidence_warning: str | None = None
     if total > 0 and non_high / total > 0.5:
         confidence_warning = (
-            f"WARNING: {non_high}/{total} chain records are medium or low confidence. "
-            "File order may not match survey capture order — designer review required."
+            f"Sequence note: file order and spatial order differ for {non_high} of {total} "
+            "chain records. Route was sequenced but designer review is recommended "
+            "before using this output for design."
         )
 
     summary = {

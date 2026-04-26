@@ -98,6 +98,25 @@ def _load_seq(job_id: str) -> dict | None:
     return seq
 
 
+def _write_section_summary(buf: io.StringIO, sections: list[dict]) -> None:
+    """Write a compact section summary block into the CSV header area."""
+    buf.write("#\n")
+    buf.write(f"# Section summary: {len(sections)} section(s)\n")
+    for sec in sections:
+        sid = sec.get("section_id", "?")
+        start = sec.get("start_seq", "?")
+        end = sec.get("end_seq", "?")
+        count = sec.get("pole_count", "?")
+        boundary = sec.get("boundary_point_id")
+        overlap = sec.get("overlap_with_next_section", False)
+        boundary_note = f" | boundary: point {boundary}" if boundary else ""
+        overlap_note = f" | overlaps section {sid + 1}" if overlap else ""
+        buf.write(
+            f"#   Section {sid}: seq {start}–{end} | {count} poles{boundary_note}{overlap_note}\n"
+        )
+    buf.write("#\n")
+
+
 @d2d_export_bp.get("/export/<job_id>")
 def d2d_export(job_id: str) -> Response:
     seq = _load_seq(job_id)
@@ -110,6 +129,7 @@ def d2d_export(job_id: str) -> Response:
     unmatched_expoles = seq.get("unmatched_expoles") or []
     context_features = seq.get("context_features") or []
     detached_records = seq.get("detached_records") or []
+    sections = seq.get("sections") or []
     summary = seq.get("summary") or {}
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -118,8 +138,15 @@ def d2d_export(job_id: str) -> Response:
     expole_thr = cfg.get("expole_match_threshold_m", "—")
 
     buf = io.StringIO()
-    buf.write("# Unitas GridFlow — Provisional D2D Candidate Export (Clean Chain View)\n")
-    buf.write("# NOT verified PoleCAD import format — for designer review only\n")
+    buf.write("# Unitas GridFlow — Clean Chain Export (provisional)\n")
+    buf.write(
+        "# Proposed poles in route sequence order."
+        " EXpole references and context features listed separately.\n"
+    )
+    buf.write("# For the interleaved file-order view use the D2D Working View export.\n")
+    buf.write(
+        "# NOT verified PoleCAD import format — provisional output for designer review only.\n"
+    )
     buf.write(
         f"# Job: {job_id} | Generated: {timestamp}"
         f" | Thresholds: provisional"
@@ -128,7 +155,11 @@ def d2d_export(job_id: str) -> Response:
     conf_warn = summary.get("confidence_warning")
     if conf_warn:
         buf.write(f"# {conf_warn}\n")
-    buf.write("\n")
+
+    if sections:
+        _write_section_summary(buf, sections)
+    else:
+        buf.write("\n")
 
     writer = csv.writer(buf)
 
@@ -160,7 +191,7 @@ def d2d_export(job_id: str) -> Response:
         )
 
     buf.write("\n")
-    buf.write("# Matched EXpoles (replacement references)\n")
+    buf.write("# Matched EXpoles (replacement references — see Replaces columns in main chain)\n")
     writer.writerow(_EXPOLE_HEADERS)
     for r in matched_expoles:
         writer.writerow(
@@ -177,7 +208,10 @@ def d2d_export(job_id: str) -> Response:
         )
 
     buf.write("\n")
-    buf.write("# Unmatched EXpoles (could not pair within threshold — verify in field notes)\n")
+    buf.write(
+        "# Unmatched EXpoles"
+        " (no proposed pole within matching threshold — verify against field notes)\n"
+    )
     writer.writerow(_EXPOLE_HEADERS)
     for r in unmatched_expoles:
         writer.writerow(
@@ -194,7 +228,7 @@ def d2d_export(job_id: str) -> Response:
         )
 
     buf.write("\n")
-    buf.write("# Context Features (for reference only — not part of structural chain)\n")
+    buf.write("# Context Features (survey observations — not part of the structural pole chain)\n")
     writer.writerow(_CONTEXT_HEADERS)
     for r in context_features:
         writer.writerow(
@@ -210,9 +244,17 @@ def d2d_export(job_id: str) -> Response:
 
     if detached_records:
         buf.write("\n")
+        buf.write("# --- Detached / Reference Records ---\n")
         buf.write(
-            "# Detached / Reference Points"
-            " (excluded from chain — not required or large spatial gap)\n"
+            "# These records are retained for traceability"
+            " but are NOT part of the main design chain.\n"
+        )
+        buf.write(
+            "# They do not influence sequencing, spans, section membership or design numbering.\n"
+        )
+        buf.write(
+            '# Reason codes: "remark: not required" = survey remark excluded them'
+            ' | "large spatial gap from main route" = located far from main route.\n'
         )
         writer.writerow(_DETACHED_HEADERS)
         for r in detached_records:
@@ -227,7 +269,7 @@ def d2d_export(job_id: str) -> Response:
                 ]
             )
 
-    filename = f"{job_id}_d2d_candidate.csv"
+    filename = f"{job_id}_d2d_chain.csv"
     return Response(
         buf.getvalue(),
         status=200,
@@ -244,6 +286,7 @@ def d2d_interleaved(job_id: str) -> Response:
 
     cfg = seq.get("config_used") or {}
     interleaved_view = seq.get("interleaved_view") or []
+    sections = seq.get("sections") or []
     summary = seq.get("summary") or {}
 
     if not interleaved_view:
@@ -257,20 +300,31 @@ def d2d_interleaved(job_id: str) -> Response:
     total_detached = summary.get("total_detached", 0)
 
     buf = io.StringIO()
-    buf.write("# Unitas GridFlow — Provisional D2D Working View (Interleaved)\n")
-    buf.write("# All records in original file order — proposed, existing, context inline\n")
-    buf.write("# NOT verified PoleCAD import format — for designer review only\n")
+    buf.write("# Unitas GridFlow — D2D Working View (provisional)\n")
+    buf.write(
+        "# All records in original file order:"
+        " proposed poles, existing poles, and context features inline.\n"
+    )
+    buf.write("# Section markers and Role column are added — original file order is preserved.\n")
+    buf.write("# This view mirrors the PR1/PR2 manual working file format.\n")
+    buf.write(
+        "# NOT verified PoleCAD import format — provisional output for designer review only.\n"
+    )
     buf.write(
         f"# Job: {job_id} | Generated: {timestamp}"
         f" | Sections: {section_count}"
-        f" | Detached: {total_detached}"
+        f" | Detached records excluded: {total_detached}"
         f" | Thresholds: provisional"
         f" (angle={angle_thr}deg, gap={gap_thr}m, EXpole match={expole_thr}m)\n"
     )
     conf_warn = summary.get("confidence_warning")
     if conf_warn:
         buf.write(f"# {conf_warn}\n")
-    buf.write("\n")
+
+    if sections:
+        _write_section_summary(buf, sections)
+    else:
+        buf.write("\n")
 
     writer = csv.writer(buf)
     writer.writerow(_INTERLEAVED_HEADERS)

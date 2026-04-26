@@ -356,14 +356,14 @@
 
               {% if sequence_summary and sequence_summary.status == 'ok' and sequence_summary.total_sequenced and sequence_summary.total_sequenced > 0 %}
               <a id="btn-download-d2d" href="/d2d/export/{{ job_id }}" class="btn btn-outline-success">
-                <i class="bi bi-table"></i> Download D2D Export
+                <i class="bi bi-table"></i> Download Clean Chain Export
               </a>
               <a id="btn-download-d2d-working" href="/d2d/interleaved/{{ job_id }}" class="btn btn-outline-success">
-                <i class="bi bi-layout-text-sidebar"></i> D2D Working View
+                <i class="bi bi-layout-text-sidebar"></i> Download D2D Working View
               </a>
               {% else %}
-              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="D2D export unavailable — no sequenced poles found">
-                <i class="bi bi-table"></i> D2D export unavailable
+              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Clean chain export unavailable — no sequenced poles found">
+                <i class="bi bi-table"></i> Clean chain export unavailable
               </a>
               <a id="btn-download-d2d-working-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="D2D working view unavailable — no sequenced poles found">
                 <i class="bi bi-layout-text-sidebar"></i> D2D working view unavailable

@@ -915,7 +915,7 @@ def test_confidence_warning_triggered() -> None:
     total = summary["total_sequenced"]
     if non_high / total > 0.5:
         assert summary["confidence_warning"] is not None
-        assert "WARNING" in summary["confidence_warning"]
+        assert "Sequence note" in summary["confidence_warning"]
 
 
 # ---------------------------------------------------------------------------
