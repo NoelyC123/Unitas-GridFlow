@@ -6,19 +6,24 @@ Use this when an AI tool cannot access the repository directly.
 
 ## Current Update Override
 
-This combined file includes copied source documents that may still mention the earlier `175 passing tests` state. The current handover-pack update supersedes those older mentions.
+This combined file includes copied source documents that may still mention earlier `175`, `186`, Stage 2A-only, or pre-validation states. The current handover-pack update supersedes those older mentions.
 
 Current confirmed state:
 
 - Stage 1 is complete.
-- Stage 2A is implemented as a provisional D2D replacement candidate output.
+- Stage 2A is implemented.
+- Stage 2B is implemented and validated as a strong D2D replacement baseline.
 - Stage 2A commit: `5f99bf0`
-- Current test count: 186 passing.
+- Stage 2B commit: `54417ba`
+- Stage 2B validation bugfix commit: `e51d0ee`
+- Current test count: 211 passing.
 - D2D candidate CSV export has been added.
+- D2D interleaved working view export has been added.
 - `sequenced_route.json` is generated per job.
-- Route sequencing, EXpole matching, span calculation, deviation angle calculation and candidate section breaks are implemented.
+- Route sequencing, EXpole matching, span calculation, deviation angle calculation, section-aware output, detached record handling, confidence warnings and design numbering are implemented.
+- Gordon, `4-474`, `513` and `474c` validation exports have passed current review.
 - Stage 2 is not complete yet.
-- Current focus is real-file validation and Stage 2B refinement, especially using Gordon raw vs PR1/PR2 manual split evidence.
+- Current focus is Stage 2C polish pass vs Stage 2 completion review.
 
 If this file conflicts with newer handover-pack notes, use the newest handover-pack notes and the latest repo state.
 

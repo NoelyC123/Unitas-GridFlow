@@ -28,16 +28,20 @@ The immediate product direction is: raw Trimble/controller dump in, structured s
 
 ## Latest Implementation State
 
-Stage 2A has now been implemented as a provisional D2D replacement candidate output.
+Stage 2A and Stage 2B have now been implemented.
 
 Current confirmed state:
 
 - Stage 2A implementation commit: `5f99bf0`
-- Tests: 186 passing
+- Stage 2B implementation commit: `54417ba`
+- Stage 2B validation bugfix commit: `e51d0ee`
+- Tests: 211 passing
 - D2D candidate CSV export added
+- D2D interleaved working view export added
 - `sequenced_route.json` generated per job
-- Route sequencing, EXpole matching, span calculation, deviation angle calculation and candidate section breaks implemented
-- Next phase: real-file validation and Stage 2B refinement, especially section-aware sequencing against Gordon PR1/PR2 manual split evidence
+- Route sequencing, EXpole matching, span calculation, deviation angle calculation, section-aware output, detached record handling, confidence warnings and design numbering implemented
+- Stage 2B passed current real-file validation on Gordon, `4-474`, `513` and `474c`
+- Current decision point: Stage 2C polish pass vs Stage 2 completion review
 
 ## Six-Stage Vision
 

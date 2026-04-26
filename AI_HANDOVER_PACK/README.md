@@ -5,10 +5,13 @@ Use this folder to update Claude Desktop, ChatGPT and other AI tools with the cu
 ## Latest State
 
 - Stage 1: complete
-- Stage 2A: implemented as provisional D2D replacement candidate output
-- Current tests: 186 passing
+- Stage 2A: implemented
+- Stage 2B: implemented and validated as a strong D2D replacement baseline
+- Current tests: 211 passing
 - Stage 2A commit: `5f99bf0`
-- Current focus: real-file validation and Stage 2B refinement
+- Stage 2B commit: `54417ba`
+- Stage 2B validation bugfix commit: `e51d0ee`
+- Current focus: Stage 2C polish pass vs Stage 2 completion review
 
 ## Best files to give an AI
 

@@ -40,20 +40,24 @@ The AI should be able to answer all of these correctly before you let it advise 
 - [ ] Mentions EX/PR replacement pair detection.
 - [ ] Mentions confidence-aware QA and evidence gates.
 - [ ] Mentions interactive map/PDF pre-design briefing.
-- [ ] Mentions 186 passing tests.
+- [ ] Mentions 211 passing tests.
 - [ ] Mentions 4 real NIE/SPEN files validated.
 - [ ] Mentions Phase 3A context classification/span threshold/location cleanup.
 - [ ] Mentions Stage 2A implementation commit `5f99bf0`.
+- [ ] Mentions Stage 2B implementation commit `54417ba`.
+- [ ] Mentions Stage 2B validation bugfix commit `e51d0ee`.
 - [ ] Mentions provisional D2D candidate CSV export.
+- [ ] Mentions D2D interleaved working view export.
 - [ ] Mentions `sequenced_route.json`.
-- [ ] Mentions route sequencing, EXpole matching, span calculation, deviation angles and candidate section breaks.
+- [ ] Mentions route sequencing, EXpole matching, span calculation, deviation angles, section-aware output, detached record handling, confidence warnings and design numbering.
 
 ## Immediate Next Work
 
 - [ ] Focuses on Stage 2.
 - [ ] Talks about clean, sequenced, PoleCAD-ready output.
 - [ ] Talks about replacing/reducing D2D spreadsheet work.
-- [ ] Treats Stage 2A as implemented but not fully validated.
-- [ ] Treats the next phase as real-file validation / Stage 2B refinement.
+- [ ] Treats Stage 2A and Stage 2B as implemented.
+- [ ] Treats Stage 2B as validated against the current Gordon/NIE file set.
+- [ ] Treats the next phase as Stage 2C polish pass vs Stage 2 completion review.
 - [ ] Mentions Gordon PR1/PR2 manual split files as validation evidence.
 - [ ] Keeps work small, testable and validation-led.

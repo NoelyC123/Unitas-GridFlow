@@ -30,8 +30,8 @@ It can process raw Trimble/GNSS controller dump CSVs and produce useful pre-desi
 - Interactive Leaflet map with design-readiness signals.
 - PDF pre-design briefing report.
 - DNO rulepack inference from geography.
-- Validation against four real survey files from NIE and SPEN jobs.
-- Active test suite with 186 passing tests.
+- Validation against real Gordon, NIE and SPEN-style survey files.
+- Active test suite with 211 passing tests.
 - Active CI with pre-commit and pytest.
 
 ## Phase 3A Completed
@@ -48,7 +48,7 @@ Phase 3A improved real-file handling by:
 
 Current focus is Stage 2: D2D elimination.
 
-Stage 2A has now been implemented as a provisional D2D replacement candidate output.
+Stage 2A and Stage 2B have now been implemented and validated against the current real-file set.
 
 ## Stage 2A Implemented
 
@@ -74,20 +74,43 @@ Stage 2A can now produce a provisional designer-readable export containing:
 - Candidate section breaks.
 - Context features separated from the structural chain.
 
-## Current Validation Focus
+## Stage 2B Implemented
 
-Stage 2A implementation is complete, but Stage 2 is not complete.
+Stage 2B commit: `54417ba`
 
-The next phase is real-file validation / Stage 2B refinement:
+Stage 2B validation bugfix commit: `e51d0ee`
 
-- Validate the D2D candidate export against `Gordon Pt1 - Original.csv`.
-- Compare output against the manual split files:
-  - `Gordon Pt1 - POLES 1-12 - PR1.csv`
-  - `Gordon Pt1 - POLES 12-20- PR2.csv`
-- Confirm whether the sequence matches the real route.
-- Confirm whether EXpoles are paired sensibly.
-- Separate `not required` / detached points from the main route chain where appropriate.
-- Add section-aware sequencing if validation confirms the need.
+Stage 2B added:
+
+- detached / `not required` record handling
+- section-aware sequencing
+- Angle records as section candidates
+- `sections` metadata
+- global `design_pole_number`
+- section-local `section_sequence_number`
+- interleaved D2D working view
+- `/d2d/interleaved/<job_id>` endpoint
+- confidence warnings for high-ambiguity files
+- clean-chain export preserved and extended
+
+## Current Validation Result
+
+Stage 2B has passed the current real-file validation set:
+
+- Gordon original: passed.
+- Gordon manual PR1/PR2 comparison: passed.
+- `28-14 4-474.csv`: passed with expected high-ambiguity warning.
+- `28-14 513 (2).csv`: passed clean/simple case.
+- `28-14 474c.csv`: passed.
+
+Stage 2B is accepted as a strong D2D replacement baseline, but Stage 2 is not formally closed yet.
+
+## Current Decision Point
+
+The next decision is whether to:
+
+1. do a small Stage 2C polish pass, focused on output clarity and validation reporting, or
+2. move to a Stage 2 completion review.
 
 ## Important Boundary
 
