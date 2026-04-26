@@ -12,6 +12,8 @@ const CONTEXT_FEATURE_CODES = new Set([
 class MapViewer {
   constructor() {
     this.jobId = document.querySelector('meta[name="job-id"]')?.content;
+    this.mapDataUrl = document.querySelector('meta[name="map-data-url"]')?.content
+      || `/map/data/${this.jobId}`;
     this.mapEl = document.getElementById('map');
 
     this.poleCountEl = document.getElementById('pole-count');
@@ -45,7 +47,7 @@ class MapViewer {
 
   async loadData() {
     try {
-      const res = await fetch(`/map/data/${this.jobId}`, { cache: 'no-store' });
+      const res = await fetch(this.mapDataUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error(`Failed to load map data: ${res.status}`);
 
       const data = await res.json();

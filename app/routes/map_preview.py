@@ -10,6 +10,7 @@ map_preview_bp = Blueprint("map_preview", __name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 JOBS_ROOT = PROJECT_ROOT / "uploads" / "jobs"
+PROJECTS_ROOT = PROJECT_ROOT / "uploads" / "projects"
 
 
 def _empty_feature_collection(job_id: str) -> dict:
@@ -78,3 +79,52 @@ def map_data(job_id: str):
         return jsonify(data)
     except Exception:
         return jsonify(_empty_feature_collection(job_id))
+
+
+def _load_file_meta(file_dir: Path) -> dict:
+    meta_path = file_dir / "meta.json"
+    if not meta_path.exists():
+        return {}
+    try:
+        return json.loads(meta_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+@map_preview_bp.get("/view/project/<project_id>/<file_id>")
+def project_map_view(project_id: str, file_id: str):
+    file_dir = PROJECTS_ROOT / project_id / "files" / file_id
+    meta = _load_file_meta(file_dir)
+    display_id = f"{project_id}/{file_id}"
+    return render_template(
+        "map_viewer.html",
+        job_id=display_id,
+        map_data_url=f"/map/data/project/{project_id}/{file_id}",
+        project_id=project_id,
+        file_id=file_id,
+        completeness=meta.get("completeness") or {},
+        design_readiness=meta.get("design_readiness") or {},
+        circuit_summary=meta.get("circuit_summary") or {},
+        top_design_risks=meta.get("top_design_risks") or [],
+        replacement_narratives=meta.get("replacement_narratives") or [],
+        recommended_actions=meta.get("recommended_actions") or [],
+        evidence_gates=meta.get("evidence_gates") or [],
+        sequence_summary=meta.get("sequence_summary") or {},
+        d2d_url=f"/d2d/export/project/{project_id}/{file_id}",
+        d2d_interleaved_url=f"/d2d/interleaved/project/{project_id}/{file_id}",
+        pdf_url=f"/pdf/qa/project/{project_id}/{file_id}",
+        back_url=f"/project/{project_id}",
+    )
+
+
+@map_preview_bp.get("/data/project/<project_id>/<file_id>")
+def project_map_data(project_id: str, file_id: str):
+    display_id = f"{project_id}/{file_id}"
+    map_path = PROJECTS_ROOT / project_id / "files" / file_id / "map_data.json"
+    if not map_path.exists():
+        return jsonify(_empty_feature_collection(display_id))
+    try:
+        data = json.loads(map_path.read_text(encoding="utf-8"))
+        return jsonify(data)
+    except Exception:
+        return jsonify(_empty_feature_collection(display_id))

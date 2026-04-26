@@ -14,41 +14,38 @@ pdf_reports_bp = Blueprint("pdf_reports", __name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 JOBS_ROOT = PROJECT_ROOT / "uploads" / "jobs"
+PROJECTS_ROOT = PROJECT_ROOT / "uploads" / "projects"
 
 
 def _job_dir(job_id: str) -> Path:
     return JOBS_ROOT / job_id
 
 
-def _meta_path(job_id: str) -> Path:
-    return _job_dir(job_id) / "meta.json"
-
-
-def _issues_path(job_id: str) -> Path:
-    return _job_dir(job_id) / "issues.csv"
-
-
-def _load_meta(job_id: str) -> dict:
-    path = _meta_path(job_id)
-
+def _load_meta_from_dir(job_dir: Path) -> dict:
+    path = job_dir / "meta.json"
     if not path.exists():
         return {}
-
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
 
 
-def _load_issues(job_id: str) -> list[dict]:
-    path = _issues_path(job_id)
-
+def _load_issues_from_dir(job_dir: Path) -> list[dict]:
+    path = job_dir / "issues.csv"
     if not path.exists():
         return []
-
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         return list(reader)
+
+
+def _load_meta(job_id: str) -> dict:
+    return _load_meta_from_dir(_job_dir(job_id))
+
+
+def _load_issues(job_id: str) -> list[dict]:
+    return _load_issues_from_dir(_job_dir(job_id))
 
 
 def _draw_line(
@@ -63,15 +60,13 @@ def _draw_line(
     pdf.drawString(x, y, text)
 
 
-@pdf_reports_bp.get("/qa/<job_id>")
-def qa_pdf(job_id: str):
-    job_path = _job_dir(job_id)
-
-    if not job_path.exists():
+def _generate_qa_pdf(job_dir: Path, display_id: str):
+    if not job_dir.exists():
         abort(404)
 
-    meta = _load_meta(job_id)
-    issues = _load_issues(job_id)
+    meta = _load_meta_from_dir(job_dir)
+    issues = _load_issues_from_dir(job_dir)
+    job_id = display_id  # used for labels only
 
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
@@ -356,5 +351,16 @@ def qa_pdf(job_id: str):
         buffer,
         mimetype="application/pdf",
         as_attachment=False,
-        download_name=f"{job_id}_unitas_gridflow_qa_report.pdf",
+        download_name=f"{display_id}_unitas_gridflow_qa_report.pdf",
     )
+
+
+@pdf_reports_bp.get("/qa/<job_id>")
+def qa_pdf(job_id: str):
+    return _generate_qa_pdf(_job_dir(job_id), job_id)
+
+
+@pdf_reports_bp.get("/qa/project/<project_id>/<file_id>")
+def qa_pdf_project(project_id: str, file_id: str):
+    file_dir = PROJECTS_ROOT / project_id / "files" / file_id
+    return _generate_qa_pdf(file_dir, f"{project_id}_{file_id}")

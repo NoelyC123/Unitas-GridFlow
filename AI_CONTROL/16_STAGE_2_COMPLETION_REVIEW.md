@@ -160,8 +160,10 @@ Stage 2 does not yet provide:
 
 - verified final PoleCAD import format
 - final engineering design automation
+- engineering approval or replacement for designer judgement
 - manual section selection UI
 - multi-file job merge
+- validation on true branched / tee-off route topology
 - photo integration
 - live field intake
 - tablet-based structured capture
@@ -179,6 +181,8 @@ These belong to later decisions/stages.
 3. More real processed examples would strengthen confidence.
 4. Exact PoleCAD/MicroStation import expectations remain unverified.
 5. Different surveyors or DNOs may use different coding conventions.
+6. True branched / tee-off routes are not yet validated against the current nearest-neighbour sequencing approach.
+7. Outputs support designer review and reduce manual interpretation; they do not bypass engineering judgement or formal approval.
 
 These risks do not block closing Stage 2 for the current evidence set, as long as Stage 2 is described honestly.
 

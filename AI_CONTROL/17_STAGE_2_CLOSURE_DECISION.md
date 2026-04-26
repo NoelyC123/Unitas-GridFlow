@@ -99,8 +99,10 @@ Still not done:
 
 - verified final PoleCAD import format
 - final engineering design automation
+- engineering approval or replacement for designer judgement
 - manual section selection UI
 - multi-file job merge
+- validation on true branched / tee-off route topology
 - photo/evidence integration
 - live field intake
 - tablet-based structured capture
@@ -139,7 +141,7 @@ The review should answer:
 
 ## Tool Direction
 
-- Cursor/GPT remains project lead and coordinator.
-- Claude Desktop should review Stage 3 planning before implementation.
+- Cursor/GPT remains project lead and cross-tool coordinator for day-to-day validation, prompts, documentation and process control.
+- Claude Desktop remains the high-level orchestration / stage-gate reviewer and should review Stage 3 planning before implementation.
 - Claude Code should not begin Stage 3 implementation until a scoped task is approved.
 - ChatGPT/Grok/Gemini can be used for research and second opinions only.

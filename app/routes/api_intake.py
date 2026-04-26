@@ -532,19 +532,21 @@ def _build_replacement_narratives(
     return narratives
 
 
-@api_intake_bp.post("/import/<job_short>")
-def finalize(job_short: str):
-    bare_id = job_short[1:] if job_short.startswith("J") else job_short
-    job_id = f"J{bare_id}"
+def process_job(
+    job_dir: Path,
+    job_id: str,
+    explicit_dno: str | None = None,
+) -> dict[str, Any]:
+    """Process a survey CSV in job_dir and return a response-ready dict.
 
-    data = request.get_json(silent=True) or {}
-    explicit_dno = data.get("dno")
-    requested_dno = explicit_dno or "SPEN_11kV"
-
-    job_dir = _job_dir(job_id)
-    meta_path = _meta_path(job_id)
-
+    Writes sequenced_route.json, issues.csv, map_data.json, and updates
+    meta.json in job_dir.  Returns {"ok": True, ...} or {"ok": False, "error": ...}.
+    Callers must not duplicate this logic — both legacy and project finalize routes
+    call this function.
+    """
+    meta_path = job_dir / "meta.json"
     meta = _read_json(meta_path, default={"job_id": job_id})
+    requested_dno = explicit_dno or "SPEN_11kV"
     meta["job_id"] = job_id
     meta["status"] = "processing"
     meta["rulepack_id"] = requested_dno
@@ -737,26 +739,32 @@ def finalize(job_short: str):
         )
         _write_json(meta_path, meta)
 
-        return jsonify(
-            {
-                "ok": True,
-                "job_id": job_id,
-                "file_type": file_type,
-                "auto_normalized": auto_normalized,
-                "rulepack_id": requested_dno,
-                "rulepack_inferred": rulepack_inferred,
-                "issue_count": len(map_issues_df),
-                "completeness": completeness,
-                "design_readiness": design_readiness,
-            }
-        )
+        return {
+            "ok": True,
+            "job_id": job_id,
+            "file_type": file_type,
+            "auto_normalized": auto_normalized,
+            "rulepack_id": requested_dno,
+            "rulepack_inferred": rulepack_inferred,
+            "issue_count": len(map_issues_df),
+            "completeness": completeness,
+            "design_readiness": design_readiness,
+        }
 
     except Exception as exc:
-        meta.update(
-            {
-                "status": "error",
-                "error": str(exc),
-            }
-        )
+        meta.update({"status": "error", "error": str(exc)})
         _write_json(meta_path, meta)
-        return jsonify({"ok": False, "job_id": job_id, "error": str(exc)}), 500
+        return {"ok": False, "job_id": job_id, "error": str(exc)}
+
+
+@api_intake_bp.post("/import/<job_short>")
+def finalize(job_short: str):
+    bare_id = job_short[1:] if job_short.startswith("J") else job_short
+    job_id = f"J{bare_id}"
+    data = request.get_json(silent=True) or {}
+    explicit_dno = data.get("dno")
+
+    result = process_job(_job_dir(job_id), job_id, explicit_dno)
+    if not result["ok"]:
+        return jsonify({"ok": False, "job_id": job_id, "error": result["error"]}), 500
+    return jsonify(result)

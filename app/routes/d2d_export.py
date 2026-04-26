@@ -11,6 +11,7 @@ from flask import Blueprint, Response
 d2d_export_bp = Blueprint("d2d_export", __name__)
 
 _JOBS_ROOT = Path(__file__).resolve().parents[2] / "uploads" / "jobs"
+_PROJECTS_ROOT = Path(__file__).resolve().parents[2] / "uploads" / "projects"
 
 _CHAIN_HEADERS = [
     "Seq",
@@ -98,6 +99,18 @@ def _load_seq(job_id: str) -> dict | None:
     return seq
 
 
+def _load_seq_from_path(seq_path: Path) -> dict | None:
+    if not seq_path.exists():
+        return None
+    try:
+        seq = json.loads(seq_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if seq.get("status") != "ok" or not seq.get("chain"):
+        return None
+    return seq
+
+
 def _write_section_summary(buf: io.StringIO, sections: list[dict]) -> None:
     """Write a compact section summary block into the CSV header area."""
     buf.write("#\n")
@@ -117,12 +130,7 @@ def _write_section_summary(buf: io.StringIO, sections: list[dict]) -> None:
     buf.write("#\n")
 
 
-@d2d_export_bp.get("/export/<job_id>")
-def d2d_export(job_id: str) -> Response:
-    seq = _load_seq(job_id)
-    if seq is None:
-        return _unavailable()
-
+def _render_chain_export(seq: dict, job_id: str) -> Response:
     cfg = seq.get("config_used") or {}
     chain = seq.get("chain") or []
     matched_expoles = seq.get("matched_expoles") or []
@@ -278,12 +286,15 @@ def d2d_export(job_id: str) -> Response:
     )
 
 
-@d2d_export_bp.get("/interleaved/<job_id>")
-def d2d_interleaved(job_id: str) -> Response:
+@d2d_export_bp.get("/export/<job_id>")
+def d2d_export(job_id: str) -> Response:
     seq = _load_seq(job_id)
     if seq is None:
         return _unavailable()
+    return _render_chain_export(seq, job_id)
 
+
+def _render_interleaved_export(seq: dict, job_id: str) -> Response:
     cfg = seq.get("config_used") or {}
     interleaved_view = seq.get("interleaved_view") or []
     sections = seq.get("sections") or []
@@ -355,3 +366,37 @@ def d2d_interleaved(job_id: str) -> Response:
         mimetype="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@d2d_export_bp.get("/interleaved/<job_id>")
+def d2d_interleaved(job_id: str) -> Response:
+    seq = _load_seq(job_id)
+    if seq is None:
+        return _unavailable()
+    return _render_interleaved_export(seq, job_id)
+
+
+# ---------------------------------------------------------------------------
+# Project-file variants — delegate to the same rendering logic
+# ---------------------------------------------------------------------------
+
+
+@d2d_export_bp.get("/export/project/<project_id>/<file_id>")
+def d2d_export_project(project_id: str, file_id: str) -> Response:
+    seq_path = _PROJECTS_ROOT / project_id / "files" / file_id / "sequenced_route.json"
+    seq = _load_seq_from_path(seq_path)
+    if seq is None:
+        return _unavailable()
+    safe_id = f"{project_id}_{file_id}"
+    # Reuse d2d_export logic by temporarily swapping the seq into a local call
+    return _render_chain_export(seq, safe_id)
+
+
+@d2d_export_bp.get("/interleaved/project/<project_id>/<file_id>")
+def d2d_interleaved_project(project_id: str, file_id: str) -> Response:
+    seq_path = _PROJECTS_ROOT / project_id / "files" / file_id / "sequenced_route.json"
+    seq = _load_seq_from_path(seq_path)
+    if seq is None:
+        return _unavailable()
+    safe_id = f"{project_id}_{file_id}"
+    return _render_interleaved_export(seq, safe_id)

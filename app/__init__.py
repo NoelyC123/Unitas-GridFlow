@@ -89,4 +89,18 @@ def create_app() -> Flask:
     except Exception as exc:
         app.logger.warning(f"d2d_export blueprint not loaded: {exc}")
 
+    try:
+        from app.routes.api_projects import api_projects_bp
+
+        app.register_blueprint(api_projects_bp, url_prefix="/api")
+    except Exception as exc:
+        app.logger.warning(f"api_projects blueprint not loaded: {exc}")
+
+    try:
+        from app.routes.projects_page import projects_page_bp
+
+        app.register_blueprint(projects_page_bp)
+    except Exception as exc:
+        app.logger.warning(f"projects_page blueprint not loaded: {exc}")
+
     return app
