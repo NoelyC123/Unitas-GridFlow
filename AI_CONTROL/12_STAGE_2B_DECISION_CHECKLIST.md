@@ -259,8 +259,8 @@ Minimum validation set:
 - Gordon raw file
 - Gordon manual PR1 file
 - Gordon manual PR2 file
-- `28-14 474c.csv`
-- `28-14 4-474.csv`
+- `2814_474c_raw_trimble_export.csv`
+- `2814_4-474_raw_trimble_export.csv`
 - `28-14 513 (2).csv`
 
 Success means:

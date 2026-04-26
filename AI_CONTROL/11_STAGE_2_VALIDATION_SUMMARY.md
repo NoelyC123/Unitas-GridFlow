@@ -45,8 +45,8 @@ The current phase is validation and Stage 2B refinement.
 
 ### NIE / Irish Grid Evidence
 
-- `validation_data/2814_474/raw/28-14 474c.csv`
-- `validation_data/2814_474/raw/28-14 4-474.csv`
+- `validation_data/2814_474/raw/2814_474c_raw_trimble_export.csv`
+- `validation_data/2814_474/raw/2814_4-474_raw_trimble_export.csv`
 - `validation_data/2814_513/raw/28-14 513 (2).csv`
 
 ---
@@ -136,7 +136,7 @@ They show:
 
 The Stage 2A sequencer was run read-only against the three NIE/Irish Grid validation files.
 
-### `28-14 474c.csv`
+### `2814_474c_raw_trimble_export.csv`
 
 Result:
 
@@ -158,7 +158,7 @@ There are many Angle records and several very short spans. The high number of me
 
 Stage 2B should handle this by adding section-aware logic rather than trying to make nearest-neighbour smarter in isolation.
 
-### `28-14 4-474.csv`
+### `2814_4-474_raw_trimble_export.csv`
 
 Result:
 

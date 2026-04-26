@@ -99,9 +99,9 @@ Stage 2B has passed the current real-file validation set:
 
 - Gordon original: passed.
 - Gordon manual PR1/PR2 comparison: passed.
-- `28-14 4-474.csv`: passed with expected high-ambiguity warning.
+- `2814_4-474_raw_trimble_export.csv`: passed with expected high-ambiguity warning.
 - `28-14 513 (2).csv`: passed clean/simple case.
-- `28-14 474c.csv`: passed.
+- `2814_474c_raw_trimble_export.csv`: passed.
 
 Stage 2B is accepted as a strong D2D replacement baseline, but Stage 2 is not formally closed yet.
 

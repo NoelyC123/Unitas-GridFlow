@@ -1425,8 +1425,8 @@ We are entering Stage 2 of the product vision.
 
 Files to test:
 - 28-14 513 (NIE, small job, 11 points)
-- 28-14 4-474 (NIE, dense survey, 83 points)
-- 28-14 474c (NIE, separate section same area, 91 points)
+- 2814_4-474_raw_trimble_export.csv (NIE, dense survey, 83 points)
+- 2814_474c_raw_trimble_export.csv (NIE, separate section same area, 91 points)
 - Gordon Pt1 Original (SPEN, large job, 157 points)
 
 What to check:

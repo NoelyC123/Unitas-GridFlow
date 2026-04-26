@@ -51,11 +51,11 @@ Stage 2B added:
 
 ### NIE / Irish Grid
 
-- `validation_data/2814_474/raw/28-14 4-474.csv`
+- `validation_data/2814_474/raw/2814_4-474_raw_trimble_export.csv`
 - downloaded exports: `J63835_d2d_candidate.csv`, `J63835_d2d_working_view.csv`
 - `validation_data/2814_513/raw/28-14 513 (2).csv`
 - downloaded exports: `J85546_d2d_candidate.csv`, `J85546_d2d_working_view.csv`
-- `validation_data/2814_474/raw/28-14 474c.csv`
+- `validation_data/2814_474/raw/2814_474c_raw_trimble_export.csv`
 - downloaded exports: `474c_d2d_candidate.csv.csv`, `474c_d2d_working_view.csv`
 
 ---
