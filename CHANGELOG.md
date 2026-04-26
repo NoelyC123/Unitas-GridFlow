@@ -8,6 +8,62 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-26 — Project vision defined; Phase 3A complete; control layer restructured
+
+### Added
+
+- **Full 6-stage product vision** documented in `AI_CONTROL/00_PROJECT_CANONICAL.md`:
+  Stage 1 (QA gate), Stage 2 (D2D elimination), Stage 3 (live intake), Stage 4 (structured
+  field capture), Stage 5 (designer workspace), Stage 6 (DNO submission layer).
+
+- **`AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md`** — domain standard reference
+  for OHL survey data fields, feature codes, and operational context.
+
+- **`AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md`** — full project origin document:
+  real-world workflow observations, field-to-design chain, D2D stage analysis, core pain
+  points. Primary source for all product decisions.
+
+- **`OHL_SURVEY_OPERATIONAL_STANDARD.md`** — complete OHL survey operational standard
+  document.
+
+- **Phase 3A: real-file noise fixes** (committed `9030274`):
+  - BTxing, LVxing, Road, Ignore classified as context feature codes in both
+    `app/qa_engine.py` and `app/controller_intake.py` — eliminates false height
+    and span QA positives for crossing/environmental observations
+  - Span minimum threshold reduced 10m → 5m in all 4 DNO rulepacks — matches
+    real survey density on dense NIE/SPEN jobs
+  - Location field contamination cleaned in `parse_raw_controller_dump()` —
+    Trimble compound codes like `Pol:LAND USE` stripped from remark/location field
+  - 6 focused tests added covering all three changes
+  - 175 tests passing (up from 169)
+
+### Changed
+
+- **Claude Desktop** is now project orchestrator (previously ChatGPT). Claude Desktop
+  defines what gets built, reviews results, and manages all tools. ChatGPT is available
+  for second opinions only.
+
+- **`CLAUDE.md`** rewritten: 6-stage vision, current stage (Stage 2), tool roles
+  clarified, stale batch numbering removed, superseded control files flagged.
+
+- **`WORKFLOW_SYSTEM.md`** rewritten: Claude Desktop as orchestrator, 6-stage table,
+  Stage 2 context, simplified tool role section.
+
+- **`README.md`** rewritten: full vision framing, 175 tests, 4 real files validated,
+  competitive gap statement, Stage 2 as current milestone.
+
+### Competitive analysis
+
+No competing product exists for the survey-to-design handoff gap in UK OHL work.
+Existing tools sit upstream (field capture: Trimble, Leica) or downstream (design/CAD:
+PoleCAD, MicroStation, AutoCAD). The D2D bridge layer is entirely unserved.
+
+### Tests
+
+- 175 passing
+
+---
+
 ## 2026-04-24 (batch 20D — scoped design evidence gates)
 
 ### Added

@@ -1,233 +1,117 @@
 # Unitas GridFlow
 
-**Pre-CAD QA, validation, and workflow support for UK electricity network survey-to-design handoffs.**
+**Survey-to-design workflow intelligence and automation for UK electricity distribution overhead line work.**
 
 ---
 
-## Overview
+## What this is
 
-Unitas GridFlow is a survey-to-design workflow intelligence tool for UK electricity network projects.
+Unitas GridFlow is a pre-CAD QA gatekeeper and workflow automation tool that sits between field survey output and office-based design work.
 
-Its role is to:
+It exists because the project owner has done both the survey job on site and the D2D/PoleCAD design job in the office, and knows from direct experience that the entire survey-to-design handoff can be made dramatically better.
 
-- ingest survey data (CSV, raw controller exports, Trimble dumps)
-- interpret record roles — structural, context, anchor, existing/proposed
-- normalise input into a consistent internal schema
-- apply rule-based QA validation
-- identify design risks and gaps in the survey handoff
-- generate structured issues with design-context explanations
-- render mapped outputs with design-readiness signals
-- produce a PDF pre-design briefing report
-- retain job outputs locally for review
-
-Short version:
-
-**A survey-to-design workflow intelligence tool for UK electricity network projects**
+**No competing product exists in this space.** All existing tools sit upstream (field capture) or downstream (design/CAD). The survey-to-design handoff gap is unserved.
 
 ---
 
-## Why this project exists
+## The problem
 
-Unitas GridFlow exists because repeated real-world friction was observed in the handoff between field survey and office design.
+The current survey-to-design workflow in UK overhead line work is fundamentally outdated:
 
-The main problem is not usually the engineering calculation itself.
-
-The main problem is often that incoming survey information is:
-
-- inconsistent
-- incomplete
-- awkward to interpret
-- mixed in quality
-- discovered to be defective too late in the process
-
-In practice, designers are often forced to perform hidden QA before they can begin actual design work — wasting time and increasing the risk of poor assumptions entering the design process.
-
-The project is intended to act as a structured gate between survey and design by:
-
-- validating incoming data early
-- interpreting what record types are present (structural, context, anchor, existing/proposed)
-- catching missing or inconsistent information
-- applying practical workflow / DNO-style checks
-- surfacing design risks before office time is wasted downstream
-- producing a clear design-readiness signal for PoleCAD/CAD/design teams
-
-It is useful across the survey, planning, and design workflow — not only for surveyors. Its value is in improving the trustworthiness of the digital handoff that downstream engineering decisions depend on.
-
-**This tool does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is a pre-design intelligence layer, not a substitute for any of these.**
+- Surveyors capture precise GNSS coordinates digitally, but record critical engineering information (stay specs, clearances, materials, obstructions, crossing details) in handwritten notebooks
+- Survey data is handed over on a physical USB drive at the end of the week
+- A designer manually cleans and reformats the raw controller export in a D2D spreadsheet before it can be used in PoleCAD
+- CAD is used as an error detector rather than a clean production stage
+- Quality depends on individuals compensating for weak systems
 
 ---
 
-## Current MVP Status
+## The vision (6 stages)
 
-The project currently has a working local MVP.
+| Stage | Name | Status |
+|-------|------|--------|
+| 1 | Post-survey QA gate | ✅ Complete |
+| 2 | D2D elimination | ← Current |
+| 3 | Live intake platform | Planned |
+| 4 | Structured field capture | Planned |
+| 5 | Designer workspace | Planned |
+| 6 | DNO submission layer | Planned |
 
-### Working flow
+**Stage 1** is complete: the tool parses raw controller dumps, validates their contents, and gives the designer a clear pre-design briefing before they open PoleCAD.
 
-```
-upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
-```
+**Stage 2** (current): the tool produces structured, sequenced, PoleCAD-ready output directly from the raw controller dump, eliminating the manual D2D spreadsheet step.
 
-### Confirmed working components
+---
 
-- upload page
-- upload / presign flow
-- CSV save to job folder
-- intake / finalise route
-- QA processing
-- `issues.csv` generation
-- `map_data.json` generation
-- PDF QA report route
-- jobs listing page
-- representative input schema with header normalisation
-- pytest coverage
-- GitHub Actions CI (`pre-commit` + `pytest`)
+## What the tool does right now
+
+- Parses raw Trimble GNSS controller dump CSVs
+- Detects coordinate reference systems (Irish Grid TM65, ITM, OSGB27700) and converts to WGS84
+- Classifies records by role: structural, context (Hedge, Fence, BTxing, LVxing, Road, etc.), anchor
+- Detects EX/PR replacement pairs and produces design narratives
+- Applies confidence-aware QA checks with PASS/WARN/FAIL severity tiers
+- Generates 7 scoped design evidence gates (Position, Structure Identity, Structural Spec, Stay Evidence, Clearance Design, Conductor Scope, Overall Handoff Status)
+- Renders an interactive Leaflet map with design-readiness signals
+- Produces a PDF pre-design briefing report
+- Infers the correct DNO rulepack from geography (SPEN, SSEN, NIE, ENWL)
+
+**Validated on 4 real survey files from real NIE and SPEN jobs.**
 
 ---
 
 ## Current status
 
-The project has moved beyond setup and baseline scaffolding.
+- **Stage 1: complete**
+- **Stage 2: in progress**
+- **175 passing tests**
+- **4 real files validated**
+- Active CI (GitHub Actions: pre-commit + pytest)
 
-### Completed so far
+### What was just shipped (Phase 3A)
 
-- working local MVP
-- 4 live regional rulepacks
-- 10 QA check types
-- Phase 1 complete: QA rule improvements
-- Phase 2A complete: input/header normalisation improvements
-- Validation batch 2 complete: raw GNSS controller dump intake + completeness reporting
-- Validation batch 3 complete: coord_consistency fix for non-OSGB grids + QA noise suppression for controller files
-- Validation batch 4 complete: NIE_11kV rulepack auto-detection from Irish Grid CRS + completeness surfacing in map view and PDF
-- Validation batch 5 complete: design readiness verdict + survey coverage categories + enhanced map popups
-- Validation batch 6 complete: issue-text popup explanation + interactive pass/fail filter + Records label + design-readiness wording + overlap detection
-- Validation batch 7 complete: feature-aware QA (Hedge skipped in span checks) + record inspection panel + "not captured" height in popups
-- Validation batch 8 complete: strict structural_only scoping for height rules + issue deduplication (no duplicate height FAILs per record)
-- Validation batch 9 complete: record-role classification (structural/context/anchor), anchor chain-reset in span checks, Gate/Track/Stream as context, role breakdown in map UI and PDF
-- Validation batch 10 complete: record count consistency, span threshold decimal precision, coverage label fix (any data → Partial), expanded what_this_supports
-- Validation batch 11 complete: EX/PR replacement cluster detection — EXpole + nearby structural emits WARN instead of false span-too-short FAIL; relationship metadata in map popup and design readiness
-- Batch 12 complete: angle/stay evidence logic — angle structures with no proximate stay evidence emit a cautious WARN; surfaced in popup, record panel, PDF, and design readiness
-- Batch 13 complete: confidence-aware QA refinements — short span tiers (very short/unusual/borderline, all WARN); EXpole height-below-min downgrades to WARN; design readiness strong summary when material absent
-- Batch 14 complete: EX/PR narrative linking — asset_intent labels (Existing asset / Proposed support) in GeoJSON and map UI; warn_count/warn_texts now correctly serialised to GeoJSON (Batch 12 gap fixed); improved replacement-pair popup/panel wording
-- Batch 15 complete: designer summary layer — circuit summary, top design risks (grouped), replacement narratives; map side panel and PDF report now present a pre-design briefing rather than a raw QA dump
-- 121 passing tests
-- active control layer for project truth and direction
-
-### Current main unresolved issue
-
-The biggest remaining uncertainty is now:
-
-**real-world validation**
-
-The project still needs proof that the current tool provides meaningful value on real survey files for real users.
+- Crossing codes (BTxing, LVxing, Road, Ignore) classified as context, not structural — eliminates false QA positives for height and span checks
+- Span minimum threshold reduced from 10m to 5m — matches real survey density on dense jobs
+- Location field contamination cleaned (Trimble compound codes like `Pol:LAND USE` stripped)
+- 6 targeted tests added covering all three changes
 
 ---
 
-## Current development focus
+## Why this will succeed
 
-Primary priority:
-
-**Validation-led next phase**
-
-This means the next important step is to:
-
-- test the current tool against one or more real survey files from real jobs
-- identify what works
-- identify what breaks
-- identify what real users actually care about
-- refine the next development phase from that evidence
-
-This is now more important than abstract feature expansion.
-
----
-
-## Current limitations
-
-- real-world validation still missing
-- rules are meaningful for an MVP but not yet deeply differentiated or truly DNO-grade
-- issue modelling is still lightweight
-- browser E2E coverage not yet implemented
-- output model is still MVP-level, not production-grade
-
----
-
-## Best current framing
-
-At this stage, the strongest realistic framing is:
-
-- internal workflow tool and consultancy leverage asset
-- survey-to-design workflow intelligence layer for UK electricity network projects
-- trusted pre-CAD gate that interprets, validates, and explains survey handoffs
-
-Less realistic framing right now:
-
-- broad SaaS platform
-- major standalone utility software business
-- fully mature DNO compliance product
-- replacement for Trimble, PoleCAD, AutoCAD, or engineering designers
+- Real domain expertise: the project owner has done both the survey and design sides of the workflow
+- Real validation: tested against actual NIE and SPEN survey files, not synthetic data
+- Clear gap: no product exists for this workflow segment
+- Defined commercial trajectory: internal tool → contractor tool → survey-team tool → DNO layer
 
 ---
 
 ## Project structure
 
-The repository is intentionally split into three layers:
-
-### 1. ACTIVE PROJECT (used for development)
-
-- `AI_CONTROL/` → control layer (project truth + direction)
-- `app/` → Flask application
-- `tests/` → pytest suite
-- `sample_data/` → example inputs
-- `README.md`
-- `CHANGELOG.md`
-- `CLAUDE.md`
-- `WORKFLOW_SYSTEM.md` → how the project operates across all tools
-- `PROJECT_DEEP_CONTEXT.md`
-- root config files
-
-### 2. ARCHIVE (reference only — do not use for development)
-
-- `_archive/`
-
-Contains:
-
-- old control layers
-- AI synthesis outputs
-- legacy documentation
-- quarantined code
-- upload bundles
-
-These are historical only.
-
-### 3. LOCAL / TOOL FILES (not project truth)
-
-- `.env`
-- `.vscode/`
-- `.claude/`
-- `.venv312/`
-- caches / coverage
+```
+AI_CONTROL/         → control layer (project truth + direction)
+app/                → Flask application
+tests/              → pytest suite (175 passing)
+sample_data/        → example inputs
+README.md
+CHANGELOG.md
+CLAUDE.md           → Claude Code working instructions
+WORKFLOW_SYSTEM.md  → how the project operates across all tools
+_archive/           → historical only — do not use for development
+```
 
 ---
 
-## Control layer (important)
+## Control layer
 
 Project direction is controlled by:
 
-- `AI_CONTROL/00_PROJECT_CANONICAL.md`
-- `AI_CONTROL/01_CURRENT_STATE.md`
-- `AI_CONTROL/02_CURRENT_TASK.md`
-- `AI_CONTROL/03_WORKING_RULES.md`
-- `AI_CONTROL/04_SESSION_HANDOFF.md`
-- `AI_CONTROL/05_PROJECT_REFERENCE.md`
-- `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
-
-These define:
-
-- what the project is
-- current state
-- current task
-- development rules
-- session continuity
-- strategic conclusions
+- `AI_CONTROL/00_PROJECT_CANONICAL.md` — full product vision and 6-stage roadmap
+- `AI_CONTROL/01_CURRENT_STATE.md` — what is true right now
+- `AI_CONTROL/02_CURRENT_TASK.md` — what to build next
+- `AI_CONTROL/03_WORKING_RULES.md` — development discipline
+- `AI_CONTROL/04_SESSION_HANDOFF.md` — session continuity
+- `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard reference
+- `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — project origin and real workflow notes
 
 ---
 
@@ -279,23 +163,13 @@ pre-commit run --all-files
 
 ---
 
-## Development principles
-
-- Stay strictly narrow in scope
-- Work one task at a time
-- Prefer small, targeted changes
-- Avoid unnecessary rewrites
-- Do not introduce features outside current scope
-- Do not assume more features are the right next step without validation evidence
-
----
-
 ## Key files
 
-- `app/dno_rules.py` — QA rulepacks
-- `app/qa_engine.py` — QA engine
-- `app/routes/api_intake.py` — CSV intake and normalisation
-- `app/routes/api_upload.py` — upload handling
+- `app/controller_intake.py` — raw controller dump parsing, CRS detection, record-role classification
+- `app/qa_engine.py` — QA check engine
+- `app/issue_model.py` — structured issue model, evidence gates, designer summary
+- `app/dno_rules.py` — DNO rulepacks
+- `app/routes/api_intake.py` — intake pipeline
 - `app/routes/map_preview.py` — map logic
 - `app/routes/pdf_reports.py` — PDF generation
 - `tests/` — must remain green
@@ -304,16 +178,9 @@ pre-commit run --all-files
 
 ## After any code change
 
-Always run:
-
 ```
 pytest -v
 pre-commit run --all-files
-```
-
-Then:
-
-```
 git add .
 git commit -m "clear message"
 git push
@@ -323,8 +190,8 @@ git push
 
 ## Final note
 
-This project is intentionally narrow.
+This is not a general platform.
 
-It is not a general platform.
+It is a specialist pre-CAD workflow tool for the survey-to-design gap in UK electricity network overhead line work, built by someone who has worked both sides of that gap.
 
-It is a specialist pre-CAD QA layer for survey-to-design workflows, and the next meaningful step is proving that it provides real-world value on real survey files.
+The next meaningful milestone is Stage 2: a raw controller dump goes in, and a PoleCAD-ready structured output comes out — no spreadsheet required.

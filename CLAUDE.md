@@ -1,21 +1,26 @@
 # CLAUDE.md
 
-# Unitas-GridFlow — Claude Working File
+# Unitas-GridFlow — Claude Code Working File
 
 ## Project identity
 
-You are working on **Unitas-GridFlow**, a survey-to-design workflow intelligence tool for UK electricity network projects.
+You are working on **Unitas-GridFlow**, a survey-to-design workflow intelligence and automation tool for UK electricity distribution overhead line work.
+
+It is a **pre-CAD QA gatekeeper and workflow automation layer** that sits between field survey output and office-based design work.
 
 The system currently:
 
-- ingests survey data (CSV, raw controller exports, Trimble dumps)
-- interprets record roles (structural, context, anchor, existing/proposed)
-- normalises input into a working schema
-- applies rule-based QA validation
-- identifies design risks and gaps in the survey handoff
-- generates structured issues with design-context explanations
-- visualises outputs on a Leaflet map with design-readiness signals
-- produces PDF pre-design briefing reports
+- parses raw Trimble GNSS controller dump CSVs
+- detects coordinate reference systems (Irish Grid TM65, ITM, OSGB27700)
+- converts coordinates for map display
+- classifies records by role (structural, context, anchor)
+- detects EX/PR replacement pairs and produces design narratives
+- applies confidence-aware QA checks (PASS/WARN/FAIL severity tiers)
+- generates 7 scoped design evidence gates
+- renders an interactive Leaflet map with design-readiness signals
+- produces a PDF pre-design briefing report
+- infers the correct DNO rulepack from geography
+- validated on 4 real survey files from real NIE and SPEN jobs
 
 Short identity:
 
@@ -23,11 +28,31 @@ Short identity:
 
 ---
 
+## The full vision (6 stages)
+
+### Stage 1 — Post-survey QA gate ✅ COMPLETE
+Raw controller dump → parse → report completeness and design risks → designer knows what they have before opening PoleCAD.
+
+### Stage 2 — D2D elimination ← CURRENT
+Tool takes raw controller dump and produces structured, sequenced, PoleCAD-ready output directly. No spreadsheet bridge. Automatic pole sequencing, section splitting, coordinate formatting. The manual D2D step disappears.
+
+### Stage 3 — Live intake platform
+Surveyor syncs controller data daily (or continuously). Tool immediately validates and produces completeness reports. Designer sees the job building in real-time. Feedback loop closes while surveyor is still on site.
+
+### Stage 4 — Structured field capture
+Surveyor uses a tablet alongside Trimble. Structured digital entry for pole type, stay type, clearances, crossings, photos geotagged to point records. 80% of what currently goes on paper moves into structured digital capture.
+
+### Stage 5 — Designer workspace
+Complete job presented to designer: route on map, every pole with full attributes, replacement pairs identified, stay flags, clearance issues, photos linked. Designer reviews and exports directly to PoleCAD.
+
+### Stage 6 — DNO submission layer
+Submission-ready packs: route maps, clearance schedules, compliance reports, photo evidence, QA audit trails formatted to DNO requirements.
+
+---
+
 ## Core principle
 
 This project is **validation-led, not feature-led**.
-
-Its purpose is to act as the trusted gate between survey and design — turning raw, inconsistent, incomplete survey data into something a designer can confidently assess and use.
 
 Every step must answer:
 
@@ -39,18 +64,28 @@ Every step must answer:
 
 This project is not software-first.
 
-It comes from direct real-world experience of:
+It comes from direct real-world experience of both the survey job on site and the D2D/PoleCAD design job in the office. The project owner knows from direct experience that the entire process can be made dramatically better.
 
-- survey → design handoff failures
-- messy data intake
-- designers doing hidden QA instead of design
-- downstream office time being wasted on input repair instead of actual design
+**This tool does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is a pre-design intelligence layer and workflow automation tool, not a substitute for any of these.**
 
-The project is not just for surveyors.
+---
 
-It is useful across the survey, planning, and design workflow — surveyors handing over better-evidenced data, designers receiving a clearer picture of the handoff, QA leads checking data quality before design release.
+## Tool roles (STRICT)
 
-**This tool does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is not yet a full DNO compliance engine. It is a pre-design intelligence layer — the trusted gate between survey and design.**
+### Claude Desktop — Project Orchestrator
+- defines what gets built, why, and in what order
+- reviews validation results
+- manages all tools
+- prevents scope drift
+- holds full project context
+
+### Claude Code (VS Code) — Primary Builder (YOU)
+- reads repo, writes code, runs tests, commits, pushes
+- executes tasks as defined by the orchestrator
+- makes minimal, targeted changes
+- keeps tests passing
+
+### ChatGPT — Available for second opinions and commercial thinking only
 
 ---
 
@@ -73,7 +108,6 @@ It is useful across the survey, planning, and design workflow — surveyors hand
 - `README.md`
 - `CHANGELOG.md`
 - `CLAUDE.md`
-- `PROJECT_DEEP_CONTEXT.md`
 - `WORKFLOW_SYSTEM.md`
 
 ### ARCHIVE (DO NOT USE)
@@ -94,20 +128,16 @@ It is useful across the survey, planning, and design workflow — surveyors hand
 
 Read in this order when needed:
 
-1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
-2. `AI_CONTROL/02_CURRENT_TASK.md`
-3. `AI_CONTROL/01_CURRENT_STATE.md` (only if needed)
-4. `AI_CONTROL/04_SESSION_HANDOFF.md` (only if needed)
-5. `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` (only if strategic direction is relevant)
-6. `AI_CONTROL/07_REAL_WORLD_SURVEY_WORKFLOW.md` (core domain reference — read when making QA logic or output language decisions)
+1. `AI_CONTROL/00_PROJECT_CANONICAL.md` — what the project is and the full 6-stage vision
+2. `AI_CONTROL/02_CURRENT_TASK.md` — what to do next
+3. `AI_CONTROL/01_CURRENT_STATE.md` — what is true right now
+4. `AI_CONTROL/04_SESSION_HANDOFF.md` — continuity between sessions
+5. `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — domain context; read when making QA logic or output language decisions
+6. `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — survey domain standard reference
 
-Use:
+Do not read `_archive/` unless explicitly asked.
 
-- canonical = what the project is
-- current task = what to do next
-- current state = what is true right now
-- strategic review = why the next phase is validation-led
-- real-world workflow reference = how the actual field→design workflow behaves
+Do not rely on `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md` or `AI_CONTROL/07_REAL_WORLD_SURVEY_WORKFLOW.md` — superseded by 08 and 09.
 
 ---
 
@@ -122,10 +152,7 @@ At the start of work:
 2. Then optionally:
    - `AI_CONTROL/01_CURRENT_STATE.md`
    - `AI_CONTROL/04_SESSION_HANDOFF.md`
-   - `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
    - `CHANGELOG.md`
-   - `README.md`
-   - `WORKFLOW_SYSTEM.md`
 
 Do not read `_archive/` unless explicitly asked.
 
@@ -133,98 +160,23 @@ Do not read `_archive/` unless explicitly asked.
 
 ## Current state
 
-- MVP works end-to-end
-- Tests must remain green (121 passing)
-- CI is active
-- Phase 1 is complete
-- Phase 2A is complete
-- Phase 2B is complete
-- Validation batches 2–15 complete (raw intake → completeness → design readiness → record roles → EX/PR detection → angle/stay evidence → designer summary layer)
-- Batch 16 complete (project vision documentation aligned)
-- Validation-led refinement is active
-
----
-
-## Current strategic position (STRICT)
-
-The project should continue, but the next phase must be validation-led.
-
-The main unresolved question is:
-
-> **Does the current tool provide meaningful value on real survey files for real users?**
-
-That means the current focus is no longer broad rule expansion by default.
-
-The focus is now:
-
-- test the current tool against real survey files
-- identify what works
-- identify what breaks
-- identify what users actually care about
-- use that evidence to define the next development step
-
-Do not assume more features are the right next step without validation evidence.
-
----
-
-## Validation-phase position
-
-The first real-job validation pack showed that:
-
-- real survey inputs may arrive as raw controller exports rather than clean structured CSVs
-- NIE jobs may require Irish Grid handling
-- value comes from interpreting what the digital survey file contains for design purposes
-
-The project has now implemented through Batches 2–15:
-
-- raw controller dump intake support
-- Irish Grid handling (TM65/ITM detection and WGS84 conversion)
-- completeness/capture summary generation
-- record-role classification (structural, context, anchor)
-- design readiness verdict with per-category survey coverage
-- EX/PR replacement-pair detection and narrative linking
-- angle/stay evidence logic (proximity scan, cautious WARN)
-- confidence-aware QA severity tiers (WARN vs FAIL calibration)
-- asset_intent labels (Existing asset / Proposed support) in GeoJSON and UI
-- designer summary layer: circuit summary, top design risks, replacement narratives
-- PDF and map outputs now present a pre-design briefing, not a raw QA dump
-
-The current phase is about validating whether this designer-facing output is genuinely useful on real files.
+- Stage 1 complete
+- Stage 2 (D2D elimination) is the current work
+- 175 tests passing
+- CI active
+- 4 real survey files validated
+- Phase 3A complete: crossing codes as context, span threshold 5m, location cleanup
 
 ---
 
 ## Working style
 
-- stay strictly narrow in scope
+- stay strictly narrow in scope — work on the current stage only
 - make small, targeted changes
 - do not redesign architecture
-- do not expand scope
 - always read before editing
 - prioritise real-world usefulness over theoretical completeness
 - prioritise validation evidence over abstract feature expansion
-- when a real validation analysis file exists, use it as current evidence for next-step decisions
-
----
-
-## Tooling / workflow role
-
-Use the current workflow model in `WORKFLOW_SYSTEM.md`.
-
-In practice:
-
-- GitHub-connected repository = current code source of truth
-- Claude Code / VS Code = live implementation, tests, commit, push
-- Claude Desktop / project context = stable context, control layer, workflow, and validation evidence
-- ChatGPT = project orchestration, review, prioritisation, and next-step planning
-- Codex = optional secondary coding/review agent for bounded tasks
-
-Do not assume that uploaded project snapshots are always fresher than the connected repo.
-
-Prefer:
-
-- control files for direction
-- repo truth for implementation
-- real validation evidence for product decisions
 
 ---
 
@@ -232,28 +184,29 @@ Prefer:
 
 After any approved code change:
 
-- run `pytest -v`
-- run `pre-commit run --all-files`
-- commit clearly
-- push to `master`
+1. `pytest -v` — all tests must pass
+2. `pre-commit run --all-files`
+3. commit clearly
+4. push to `master`
 
 ---
 
-## Output rule
+## Source of truth hierarchy
 
-When editing or improving files:
-
-- provide the full final version of every changed file
-- provide exact terminal commands separately
-- avoid partial patches unless explicitly asked
+1. Real survey files (highest)
+2. `AI_CONTROL/` files
+3. Repo code and tests
+4. Documentation
+5. AI outputs (lowest)
 
 ---
 
 ## Key files
 
 - `app/controller_intake.py`
-- `app/routes/api_intake.py`
 - `app/qa_engine.py`
+- `app/issue_model.py`
+- `app/routes/api_intake.py`
 - `app/dno_rules.py`
 - `tests/`
 
@@ -264,14 +217,17 @@ Strategic / control files:
 - `AI_CONTROL/02_CURRENT_TASK.md`
 - `AI_CONTROL/03_WORKING_RULES.md`
 - `AI_CONTROL/04_SESSION_HANDOFF.md`
-- `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
+- `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md`
+- `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md`
 
 ---
 
 ## Final rule
 
-Operate strictly within the active project.
+Operate strictly within the active stage.
 
 Do not rely on archive or assumptions.
 
 Do not replace real-world validation with abstract feature work.
+
+Do not jump ahead to later stages without the orchestrator defining the next task.

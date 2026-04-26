@@ -1,125 +1,59 @@
 # Session Handoff
 
-## Session summary
+## Date: April 2026
 
-This session completed two things:
+## What happened this session
 
-1. **Validation batch 3** — fixed coord_consistency false positives for non-OSGB
-   grid-derived files and suppressed structurally meaningless QA noise for raw
-   controller dump inputs.
+### Project vision fully defined
 
-2. **Docs alignment batch** — aligned core project documents (00_PROJECT_CANONICAL.md,
-   README.md, CLAUDE.md, CHANGELOG.md) with WORKFLOW_SYSTEM.md and the current
-   validation-led project position.
+The complete 6-stage product vision was articulated and agreed:
 
----
+1. Post-survey QA gate (mostly built)
+2. D2D elimination (next)
+3. Live intake platform
+4. Structured field capture (tablet/GIS)
+5. Designer workspace
+6. DNO submission layer
 
-## What was completed this session
+### Phase 3A completed
 
-### Validation batch 3 — coord_consistency fix + QA noise suppression
+Claude Code implemented real-file noise fixes:
+- Crossing codes (BTxing, LVxing, Road, Ignore) classified as context
+- Span threshold reduced from 10m to 5m
+- Location field contamination cleaned
+- 6 new tests added
+- 175 tests passing, pushed to master (commit 9030274)
 
-- `coord_consistency` CRS guard added to `app/qa_engine.py`. When `_grid_crs` is
-  set and is not `EPSG:27700`, the check is skipped. Without this, every real NIE
-  job (TM65 coordinates) produced a false positive on every pole — the check was
-  converting lat/lon to OSGB27700 and comparing against TM65 easting/northing values
-  which are in a different coordinate space.
+### Control layer restructured
 
-- `filter_rules_for_controller()` added to `app/dno_rules.py`. Removes checks that
-  produce noise rather than signal for controller dump files: `required`/`allowed_values`
-  for `material` (absent from format), `allowed_values` for `structure_type` (feature
-  codes Angle/Pol/Hedge are valid surveyor codes, not schema values), and
-  `dependent_allowed_values` (structure_type → material mapping meaningless without
-  material). Span distance, unique_pair, coordinate bounds, regex, and required pole_id
-  are preserved.
+Project orchestration moved to Claude Desktop. Control files updated to reflect:
+- Full 6-stage vision
+- Current phase (entering Stage 2)
+- Tool roles clarified
+- Domain reference documents saved (OHL operational standard, project origin notes)
 
-- Filter applied in `app/routes/api_intake.py` when `file_type == "controller"`.
-  Structured CSV path unchanged.
+### New reference documents added
 
-- 3 new focused tests added. 70 total tests passing (up from 67).
+- `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard summary
+- `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — full project origin and field workflow notes
+- `OHL_SURVEY_OPERATIONAL_STANDARD.md` — complete OHL survey operational standard
 
-### Docs alignment batch
+### Competitive analysis completed
 
-- `WORKFLOW_SYSTEM.md` added to repo by user — defines the operating model across all
-  AI tools (ChatGPT orchestrator, Claude Code builder, Claude Desktop verifier).
-
-- `AI_CONTROL/00_PROJECT_CANONICAL.md` updated:
-  - core principle statement added (trusted gate, reliability/clarity/design-readiness)
-  - `WORKFLOW_SYSTEM.md` added to active project structure and navigation
-  - `app/controller_intake.py` added to key source files
-  - phase status updated to include validation batches 2 and 3
-
-- `README.md` updated:
-  - test count corrected (38 → 70)
-  - completed steps updated to include batches 2 and 3
-  - stale limitation removed ("intake centered on structured CSV only")
-  - `WORKFLOW_SYSTEM.md` added to project structure
-
-- `AI_CONTROL/04_SESSION_HANDOFF.md` (this file) rewritten to current state.
-
-- `CLAUDE.md` updated with WORKFLOW_SYSTEM.md reference.
-
-- `CHANGELOG.md` updated with docs alignment entry.
+No competing product exists for the survey-to-design handoff gap. All existing tools sit upstream (field capture) or downstream (design/CAD).
 
 ---
 
-## What is now true
+## Current state
 
-### Project state
-
-- Working local MVP exists
-- Phase 1 (QA rule improvements) complete
-- Phase 2A (input/header normalisation) complete
-- Validation batch 2 (raw controller intake + completeness) complete
-- Validation batch 3 (coord_consistency fix + QA noise suppression) complete
-- 70 tests passing, pre-commit clean, CI active
-- Raw GNSS controller dump files can be parsed end-to-end
-- NIE real jobs no longer generate false positives from coord_consistency
-- Controller dump QA output contains only meaningful signal
-
-### Strategic state
-
-- WORKFLOW_SYSTEM.md now defines the operating model for all tools
-- Core principle: trusted gate between survey and design
-- Project remains validation-led, not feature-led
-- Next meaningful question: is the completeness output useful to a real designer?
+- 175 tests passing
+- Phase 3A fixes pushed
+- 4 real files need re-testing after Phase 3A
+- Ready to enter Stage 2 (D2D elimination)
 
 ---
 
-## Current phase
+## Next steps
 
-**Working MVP + Phase 1 complete + Phase 2A complete + Validation batches 2 and 3 complete + current: Phase 2C — validation-led proof-of-value work**
-
----
-
-## Next session should
-
-1. Read `02_CURRENT_TASK.md`
-2. Obtain user feedback on whether the completeness summary output is useful
-3. If more real files are available, run them through the system and record:
-   - whether intake handles them correctly
-   - whether completeness output is the right level of detail
-   - what a designer would actually need to act on the report
-4. Consider Phase 3: surfacing completeness summary in the map view UI
-5. Use real evidence to define the next precise development step
-
----
-
-## What should not happen next
-
-Do NOT:
-
-- broaden the product into a larger platform
-- add more rulepacks without validation evidence
-- focus on commercial packaging before proof-of-value exists
-- treat more feature work as the default next step
-
----
-
-## What must remain true
-
-- Scope stays narrow (pre-CAD QA only)
-- Control layer remains the single source of truth
-- `_archive/` is never used for active decisions
-- `pytest -v` must be green after every code change
-- Real-world validation evidence takes priority over abstract expansion
-- WORKFLOW_SYSTEM.md defines tool roles — Claude Code is the execution engine only
+1. Run all 4 validation files through the tool, verify Phase 3A output quality
+2. Begin Stage 2 design: route sequencing, pole numbering, section splitting, PoleCAD-ready output
