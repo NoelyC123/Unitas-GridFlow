@@ -8,6 +8,68 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-26 — Stage 2 D2D elimination baseline validated
+
+### Added
+
+- **Stage 2A: provisional D2D candidate export** (commit `5f99bf0`)
+  - route sequencing
+  - EXpole matching
+  - span-to-next calculation
+  - deviation angle calculation
+  - clean D2D candidate CSV export
+  - `sequenced_route.json` per job
+
+- **Stage 2B: section-aware D2D working view** (commit `54417ba`)
+  - detached / `not required` record handling
+  - section-aware sequencing
+  - Angle records as section candidates
+  - `sections` metadata
+  - global provisional `design_pole_number`
+  - section-local `section_sequence_number`
+  - interleaved D2D working view
+  - `/d2d/interleaved/<job_id>` endpoint
+  - confidence / sequence-note warnings
+
+- **Stage 2C: export polish** (commit `4ca6bc0`)
+  - clearer clean-chain and working-view headers
+  - section summary comments
+  - detached/reference wording
+  - sequence-note wording
+  - clearer map download labels
+  - export filenames:
+    - `<job_id>_d2d_chain.csv`
+    - `<job_id>_d2d_working_view.csv`
+
+- **Stage 2 completion-review document**:
+  - `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md`
+
+### Fixed
+
+- **Stage 2B real-file validation bugfix** (commit `e51d0ee`)
+  - parser now preserves trailing orphan annotations such as `not required`
+  - Gordon points `9` and `10` detach correctly
+  - Gordon section boundary is selected at point `4` / seq 60, matching PR1/PR2 evidence
+
+### Validation
+
+- Gordon original + manual PR1/PR2 split evidence: passed
+- `2814_4-474_raw_trimble_export.csv`: passed with expected sequence note
+- `28-14 513 (2).csv`: passed
+- `2814_474c_raw_trimble_export.csv`: passed
+
+### Tests
+
+- 211 passing
+
+### Current decision
+
+- Stage 2 is ready for completion review.
+- Recommended decision: mark Stage 2 complete as a validated provisional D2D replacement baseline.
+- Final PoleCAD import format remains out of scope until verified with additional evidence.
+
+---
+
 ## 2026-04-26 — Project vision defined; Phase 3A complete; control layer restructured
 
 ### Added

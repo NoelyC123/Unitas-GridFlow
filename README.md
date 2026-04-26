@@ -31,7 +31,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 | Stage | Name | Status |
 |-------|------|--------|
 | 1 | Post-survey QA gate | ✅ Complete |
-| 2 | D2D elimination | ← Current |
+| 2 | D2D elimination | ✅ Completion review |
 | 3 | Live intake platform | Planned |
 | 4 | Structured field capture | Planned |
 | 5 | Designer workspace | Planned |
@@ -39,7 +39,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 
 **Stage 1** is complete: the tool parses raw controller dumps, validates their contents, and gives the designer a clear pre-design briefing before they open PoleCAD.
 
-**Stage 2** (current): the tool produces structured, sequenced, PoleCAD-ready output directly from the raw controller dump, eliminating the manual D2D spreadsheet step.
+**Stage 2** (completion review): the tool now produces structured, sequenced, designer-readable D2D replacement outputs directly from raw controller dumps. It includes both a clean route-chain export and an interleaved D2D working view. The output is provisional and not a verified final PoleCAD import format.
 
 ---
 
@@ -54,6 +54,11 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - Renders an interactive Leaflet map with design-readiness signals
 - Produces a PDF pre-design briefing report
 - Infers the correct DNO rulepack from geography (SPEN, SSEN, NIE, ENWL)
+- Produces a clean D2D route-chain export (`<job_id>_d2d_chain.csv`)
+- Produces an interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
+- Performs route sequencing, EXpole matching, span calculation and deviation-angle calculation
+- Handles detached / `not required` records
+- Adds section summaries, global provisional design pole numbering and sequence-confidence notes
 
 **Validated on 4 real survey files from real NIE and SPEN jobs.**
 
@@ -62,12 +67,25 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 ## Current status
 
 - **Stage 1: complete**
-- **Stage 2: in progress**
-- **175 passing tests**
-- **4 real files validated**
+- **Stage 2: completion review**
+- **211 passing tests**
+- **Gordon + NIE real files validated**
 - Active CI (GitHub Actions: pre-commit + pytest)
 
-### What was just shipped (Phase 3A)
+### What was just shipped
+
+Stage 2A / 2B / 2C delivered a validated provisional D2D replacement baseline:
+
+- Clean chain export for route analysis
+- Interleaved D2D working view for designer review
+- Detached / not-required record handling
+- EXpole matching and replacement references
+- Section-aware output with section summaries
+- Global provisional design pole numbering
+- Sequence notes for high-ambiguity files
+- Export polish and clearer UI labels
+
+### Earlier Phase 3A fixes
 
 - Crossing codes (BTxing, LVxing, Road, Ignore) classified as context, not structural — eliminates false QA positives for height and span checks
 - Span minimum threshold reduced from 10m to 5m — matches real survey density on dense jobs
@@ -90,7 +108,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 ```
 AI_CONTROL/         → control layer (project truth + direction)
 app/                → Flask application
-tests/              → pytest suite (175 passing)
+tests/              → pytest suite (211 passing)
 sample_data/        → example inputs
 README.md
 CHANGELOG.md

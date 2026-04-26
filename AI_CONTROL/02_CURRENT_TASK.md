@@ -2,42 +2,48 @@
 
 ## Phase
 
-**Stage 2 — D2D Elimination**
+**Stage 2 — Completion Review**
 
-We are entering Stage 2 of the product vision.
+Stage 2A, Stage 2B and Stage 2C are implemented and validated against the current real-file evidence set.
+
+The next task is to decide whether Stage 2 can be formally marked complete for now.
 
 ---
 
 ## Immediate next step
 
-**Run all 4 real validation files through the tool after Phase 3A fixes and verify output quality.**
+**Run the Stage 2 completion review.**
 
-Files to test:
-- 28-14 513 (NIE, small job, 11 points)
-- 2814_4-474_raw_trimble_export.csv (NIE, dense survey, 83 points)
-- 2814_474c_raw_trimble_export.csv (NIE, separate section same area, 91 points)
-- Gordon Pt1 Original (SPEN, large job, 157 points)
+Primary review document:
 
-What to check:
-- Span noise reduced (474 should drop from 42 to much fewer)
-- BTxing/LVxing classified as context (not structural)
-- Location field clean (no "Pol:LAND USE" contamination)
-- Overall output quality — would this save a designer time?
+- `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md`
+
+Question to answer:
+
+> Is Stage 2 complete as a validated provisional D2D replacement baseline for the current evidence set?
 
 ---
 
-## After validation confirms Phase 3A
+## Current Stage 2 capability
 
-Begin Stage 2 work: **D2D elimination.**
+The tool can now produce structured D2D replacement outputs directly from raw controller dumps.
 
-The goal is to make the tool produce PoleCAD-ready output directly from a raw controller dump, eliminating the manual D2D spreadsheet step.
+Current outputs:
 
-This means:
-- Automatic pole sequencing (spatial route order, not file order)
-- Correct pole numbering
-- Section splitting at sensible points (the Gordon PR1/PR2 split done automatically)
-- Coordinate output in the format PoleCAD expects
-- EXpole records matched to their route position, not left at the end of the file
+- clean route-chain export: `<job_id>_d2d_chain.csv`
+- interleaved working view: `<job_id>_d2d_working_view.csv`
+- `sequenced_route.json`
+
+Current capabilities:
+
+- route sequencing
+- EXpole matching
+- span and angle calculations
+- section-aware output
+- detached/not-required record handling
+- global provisional design pole numbering
+- section-local sequence numbering
+- confidence/sequence notes for ambiguous files
 
 ---
 
@@ -48,19 +54,28 @@ This means:
 - Do not build commercial packaging
 - Do not expand rulepacks without real-file evidence
 - Do not redesign architecture
+- Do not begin Stage 3 until Stage 2 closure is explicitly approved
 
 ---
 
-## Files likely involved for Stage 2
+## Relevant files
 
-- `app/controller_intake.py` — route sequencing logic
-- `app/qa_engine.py` — span calculations on spatial sequence
-- `app/routes/api_intake.py` — output formatting
-- New export module for PoleCAD-ready output
-- Tests
+- `AI_CONTROL/13_STAGE_2B_VALIDATION_ACCEPTANCE.md`
+- `AI_CONTROL/14_STAGE_2C_POLISH_PLAN.md`
+- `AI_CONTROL/15_STAGE_2C_VALIDATION_ACCEPTANCE.md`
+- `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md`
+- `app/route_sequencer.py`
+- `app/routes/d2d_export.py`
+- `tests/test_route_sequencer.py`
 
 ---
 
 ## Success criteria for Stage 2
 
-A raw controller dump goes in. A structured, sequenced, section-split output comes out that a designer could feed into PoleCAD without manually creating a D2D spreadsheet first.
+Stage 2 can be marked complete if the domain owner accepts:
+
+- raw controller dumps produce structured D2D replacement outputs
+- clean route-chain and interleaved working views are both useful
+- current real-file validation has passed
+- remaining limitations are clearly documented
+- final PoleCAD import format remains out of scope until verified with additional evidence

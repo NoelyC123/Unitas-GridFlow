@@ -24,11 +24,11 @@ This project exists because the project owner has done both the survey job on si
 
 ## The full vision (6 stages)
 
-### Stage 1 — Post-survey QA gate (CURRENT — mostly built)
+### Stage 1 — Post-survey QA gate (COMPLETE)
 Raw controller dump arrives → tool parses it → reports what's there and what's missing → designer knows what they're working with before opening PoleCAD.
 
-### Stage 2 — D2D elimination (NEXT)
-Tool takes raw controller dump and produces structured, sequenced, PoleCAD-ready output directly. No spreadsheet bridge. Automatic pole sequencing, section splitting, coordinate formatting. The manual D2D step disappears.
+### Stage 2 — D2D elimination (COMPLETION REVIEW)
+Tool takes raw controller dump and produces structured, sequenced, designer-readable D2D replacement outputs directly. It now provides a clean route-chain export and an interleaved D2D working view. Final PoleCAD import format remains out of scope until verified with additional evidence.
 
 ### Stage 3 — Live intake platform
 Instead of processing files after the fact, the tool becomes what the surveyor sends data to in real-time. Surveyor syncs controller data at end of each day (or continuously). Tool immediately validates, runs QA, produces completeness report. Designer sees job building up in real-time. Feedback loop closes while surveyor is still on site or nearby.
@@ -66,17 +66,21 @@ The tool currently:
 - Renders interactive Leaflet map
 - Generates PDF pre-design briefing
 - Infers correct DNO rulepack from geography
-- 175 passing tests, active CI
+- Produces clean D2D route-chain export (`<job_id>_d2d_chain.csv`)
+- Produces interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
+- Handles detached / not-required records
+- Produces section-aware output and global provisional design pole numbering
+- 211 passing tests, active CI
 
-Validated on 4 real survey files from real NIE and SPEN jobs.
+Validated on Gordon and NIE real survey files, including raw Gordon data and manual PR1/PR2 split evidence.
 
 ---
 
 ## Current phase
 
-**Stage 1 complete → entering Stage 2 (D2D elimination)**
+**Stage 2 completion review**
 
-The immediate priority is making the tool produce PoleCAD-ready output from raw controller dumps, eliminating the manual D2D spreadsheet step.
+The immediate priority is deciding whether Stage 2 can be marked complete for the current evidence set as a validated provisional D2D replacement baseline.
 
 ---
 
@@ -110,6 +114,7 @@ Every step must answer: **Does this improve the reliability, clarity, and design
 
 - `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — why this project exists, the real workflow observed
 - `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard for survey data
+- `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md` — Stage 2 completion decision document
 - `OHL_SURVEY_OPERATIONAL_STANDARD.md` — full operational standard document
 - `VALIDATION_ANALYSIS_JOB_2814_513.md` — first real-file validation findings
 
