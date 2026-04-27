@@ -10,6 +10,20 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
 
+### Validated
+
+- Temporary unauthenticated Cloudflare Tunnel connectivity:
+  - `cloudflared` installed locally.
+  - Local GridFlow app confirmed reachable on `127.0.0.1:5001`.
+  - Temporary `trycloudflare.com` tunnel opened.
+  - Phone / external-device test passed for home page, `/projects/`, and `/upload`.
+  - No real or sensitive survey CSVs were uploaded.
+
+### Still pending
+
+- Full Stage 3A2 acceptance is not complete because Cloudflare Access is not active.
+- Next proper step is to add a Cloudflare domain/zone, create a named tunnel, and configure Cloudflare Access before testing real survey-data upload/dashboard/export/review workflows.
+
 ### Added
 
 - **`AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`** — Stage 3A2 planning brief:

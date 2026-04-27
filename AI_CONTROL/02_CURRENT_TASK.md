@@ -2,13 +2,21 @@
 
 ## Phase
 
-**Stage 3A2 planned — run controlled remote access trial**
+**Stage 3A2 in progress — add controlled Cloudflare Access after temporary connectivity pass**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-The next task is a controlled Cloudflare Tunnel + Cloudflare Access trial against the existing local app.
+Temporary tunnel connectivity has been validated from a phone/external device. The next task is to add a Cloudflare domain/zone, create a named Cloudflare Tunnel, and protect it with Cloudflare Access before using real survey data.
+
+Temporary validation completed:
+
+- Home page loaded through a temporary `trycloudflare.com` tunnel.
+- `/projects/` loaded remotely.
+- `/upload` loaded remotely.
+- No real or sensitive survey CSVs were uploaded.
+- This does not count as full Stage 3A2 acceptance because Cloudflare Access was not active.
 
 ---
 
@@ -24,7 +32,7 @@ The next task is a controlled Cloudflare Tunnel + Cloudflare Access trial agains
 
 ## Next task
 
-Proceed to **Stage 3A2 remote access trial**.
+Proceed to **Stage 3A2 controlled remote access trial**.
 
 Use:
 
@@ -34,7 +42,7 @@ Use:
 
 The trial should prove:
 
-- app reachable from a phone or external trusted device
+- app reachable from a phone or external trusted device (temporary tunnel connectivity passed)
 - Cloudflare Access prompts for authentication before real survey data is used
 - upload into an existing project works remotely
 - project dashboard updates remotely

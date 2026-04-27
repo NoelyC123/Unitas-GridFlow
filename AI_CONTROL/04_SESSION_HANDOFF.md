@@ -4,6 +4,41 @@
 
 ## What happened this session
 
+### Stage 3A2: Temporary tunnel connectivity — validated, not accepted
+
+Cursor/GPT installed `cloudflared`, confirmed the local GridFlow app was reachable on `127.0.0.1:5001`, and started a temporary unauthenticated Cloudflare Tunnel using:
+
+```bash
+cloudflared tunnel --url http://localhost:5001
+```
+
+Temporary URL used:
+
+- `https://basically-movements-morgan-surname.trycloudflare.com`
+
+Phone / external-device validation passed:
+
+1. Home page loaded.
+2. `/projects/` loaded.
+3. `/upload` loaded.
+
+Important boundary:
+
+- No real or sensitive survey CSVs were uploaded.
+- This is **temporary unauthenticated connectivity validation only**.
+- This is **not full Stage 3A2 acceptance** because Cloudflare Access is not active.
+- Full Stage 3A2 acceptance still requires a Cloudflare domain/zone, named tunnel, and Cloudflare Access gate before any real survey-data workflow validation.
+
+Next proper step:
+
+1. Add a Cloudflare domain/zone.
+2. Create a named `gridflow` Cloudflare Tunnel.
+3. Add a DNS route such as `gridflow.<domain>`.
+4. Configure Cloudflare Access with approved email / one-time PIN.
+5. Then validate authenticated remote upload, project dashboard update, Map/PDF/D2D links, and Review.
+
+---
+
 ### Stage 3A2: Remote Access Trial — planned
 
 Cursor/GPT converted the Claude Desktop deployment analysis and ChatGPT review into a committed Stage 3A2 plan.
@@ -111,7 +146,9 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 ## Current state
 
 - Stage 3A1 local daily intake implemented and validated
-- Stage 3A2 remote access trial planned
+- Stage 3A2 remote access trial in progress
+- Temporary unauthenticated tunnel page reachability validated from phone/external device
+- Cloudflare Access gated validation still pending
 - Stage 1 complete
 - Stage 2A, 2B, 2C implemented and closed
 - Stage 3C implemented and validated — commit `b0b5331`
@@ -135,6 +172,7 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Run the Stage 3A2 Cloudflare Tunnel + Access trial.
-2. Validate upload, project dashboard, Map/PDF/D2D exports, and Review from a phone or external trusted device.
+1. Add a Cloudflare domain/zone for the account.
+2. Create a named Cloudflare Tunnel and protect it with Cloudflare Access.
+3. Validate authenticated upload, project dashboard, Map/PDF/D2D exports, and Review from a phone or external trusted device.
 3. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.

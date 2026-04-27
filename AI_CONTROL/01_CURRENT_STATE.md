@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3A2 planned — remote access trial next**
+**Stage 3A2 in progress — temporary connectivity validated; Access trial next**
 
 Stage 1 is complete.
 
@@ -14,7 +14,7 @@ Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated.
 
-Stage 3A2 (Remote Access Trial) is planned. The next step is a controlled Cloudflare Tunnel + Cloudflare Access trial against the existing local app. Tailscale is the private fallback. Render/Railway/full hosted deployment is deferred.
+Stage 3A2 (Remote Access Trial) is in progress. A temporary unauthenticated `trycloudflare.com` tunnel proved basic remote page reachability from a phone/external device. Full Stage 3A2 acceptance still requires a named Cloudflare Tunnel with Cloudflare Access protecting the app before any real survey data is used. Tailscale is the private fallback. Render/Railway/full hosted deployment is deferred.
 
 ---
 
@@ -61,6 +61,7 @@ Stage 3A2 (Remote Access Trial) is planned. The next step is a controlled Cloudf
 - **Stage 3A1: derived intake status on project overview**
 - **Stage 3A1: project dashboard shows intake context alongside existing outputs**
 - **Stage 3A2: remote-access trial plan documented**
+- **Stage 3A2: temporary unauthenticated tunnel connectivity validated for home, projects, and upload pages**
 
 ## Counts
 
@@ -69,6 +70,12 @@ Stage 3A2 (Remote Access Trial) is planned. The next step is a controlled Cloudf
 - **Real files validated:** Gordon, 4-474, 513, 474c
 
 ## What was just shipped
+
+- Stage 3A2: temporary tunnel connectivity validation
+  - A `trycloudflare.com` temporary tunnel loaded successfully from a phone/external device.
+  - Home page, `/projects/`, and `/upload` all loaded remotely.
+  - No real or sensitive survey CSVs were uploaded.
+  - This is not full Stage 3A2 acceptance because Cloudflare Access is not active.
 
 - Stage 3A2: remote access trial plan
   - `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md` — Cloudflare Tunnel + Access first, Tailscale fallback, hosted deployment deferred
@@ -79,7 +86,7 @@ Stage 3A2 (Remote Access Trial) is planned. The next step is a controlled Cloudf
 1. No cross-file chain merging or combined exports within a project.
 2. No combined project-level map overlay.
 3. No section boundary editing (Stage 3B+ scope).
-4. Cloudflare Tunnel trial not yet manually validated from an external device.
+4. Temporary unauthenticated Cloudflare Tunnel page reachability validated; named tunnel + Cloudflare Access validation still pending.
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
 6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
 7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
@@ -91,4 +98,4 @@ Stage 3A2 (Remote Access Trial) is planned. The next step is a controlled Cloudf
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3A2 planned — next validation is controlled remote access to the existing daily-intake workflow
+- Stage 3A2 in progress — next validation is controlled access-gated remote intake through a named Cloudflare Tunnel
