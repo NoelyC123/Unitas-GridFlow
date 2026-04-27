@@ -190,8 +190,14 @@ def _copy_screenshots(args: argparse.Namespace, pack_root: Path, manifest: list[
     if args.screenshots_dir:
         source_dir = Path(args.screenshots_dir).expanduser()
         if source_dir.exists():
-            for suffix in ("*.png", "*.jpg", "*.jpeg", "*.heic", "*.webp"):
-                screenshot_paths.extend(sorted(source_dir.glob(suffix)))
+            image_suffixes = {".png", ".jpg", ".jpeg", ".heic", ".webp"}
+            screenshot_paths.extend(
+                sorted(
+                    path
+                    for path in source_dir.iterdir()
+                    if path.is_file() and path.suffix.lower() in image_suffixes
+                )
+            )
         else:
             manifest.append(f"- missing screenshots directory: `{source_dir}`")
 
