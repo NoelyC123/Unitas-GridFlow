@@ -540,6 +540,28 @@ def test_classify_record_roles_road_and_ignore_are_context() -> None:
     assert result.loc[result["pole_id"] == "3", "_record_role"].iloc[0] == "structural"
 
 
+def test_classify_record_roles_pline_and_voltage_crossings_are_context() -> None:
+    """Bellsprings evidence: Pline/voltage crossings are route context, not poles."""
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "structure_type": "Pline"},
+            {"pole_id": "2", "structure_type": "110xing"},
+            {"pole_id": "3", "structure_type": "33xing"},
+            {"pole_id": "4", "structure_type": "11xing"},
+            {"pole_id": "5", "structure_type": "HVxing"},
+            {"pole_id": "6", "structure_type": "Pol"},
+        ]
+    )
+    result = classify_record_roles(df)
+
+    context_roles = result.loc[
+        result["structure_type"].isin({"Pline", "110xing", "33xing", "11xing", "HVxing"}),
+        "_record_role",
+    ].tolist()
+    assert context_roles == ["context", "context", "context", "context", "context"]
+    assert result.loc[result["pole_id"] == "6", "_record_role"].iloc[0] == "structural"
+
+
 def test_parse_raw_controller_dump_cleans_location_remark_contamination(
     tmp_path,
 ) -> None:

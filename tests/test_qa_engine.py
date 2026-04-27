@@ -707,6 +707,54 @@ def test_gate_track_stream_no_height_range_fail() -> None:
     )
 
 
+def test_pline_and_voltage_crossings_do_not_trigger_structural_height_fail() -> None:
+    """Bellsprings context codes must not participate in structural-only QA."""
+    df = pd.DataFrame(
+        [
+            {"structure_type": "Pline", "height": 1.0},
+            {"structure_type": "110xing", "height": 2.0},
+            {"structure_type": "33xing", "height": 3.0},
+            {"structure_type": "11xing", "height": 4.0},
+            {"structure_type": "HVxing", "height": 5.0},
+            {"structure_type": "Pol", "height": 6.0},
+        ]
+    )
+    rules = [{"check": "range", "field": "height", "min": 7, "max": 25, "structural_only": True}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1, f"Expected one issue (Pol only), got: {issues['Issue'].tolist()}"
+    assert issues.iloc[0]["Row"].get("structure_type") == "Pol"
+
+
+def test_span_distance_skips_pline_and_voltage_crossing_context_codes() -> None:
+    """Context crossings between structures must not create false short-span FAILs."""
+    df = pd.DataFrame(
+        [
+            {"pole_id": "1", "lat": 54.5200, "lon": -3.0000, "structure_type": "Pol"},
+            {"pole_id": "PL", "lat": 54.52001, "lon": -3.0000, "structure_type": "Pline"},
+            {"pole_id": "110", "lat": 54.52002, "lon": -3.0000, "structure_type": "110xing"},
+            {"pole_id": "33", "lat": 54.52003, "lon": -3.0000, "structure_type": "33xing"},
+            {"pole_id": "11", "lat": 54.52004, "lon": -3.0000, "structure_type": "11xing"},
+            {"pole_id": "HV", "lat": 54.52005, "lon": -3.0000, "structure_type": "HVxing"},
+            {"pole_id": "2", "lat": 54.5207, "lon": -3.0000, "structure_type": "Pol"},
+        ]
+    )
+    rules = [
+        {
+            "check": "span_distance",
+            "lat_field": "lat",
+            "lon_field": "lon",
+            "min_m": 10,
+            "max_m": 500,
+        }
+    ]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0, f"Unexpected span issues: {issues['Issue'].tolist()}"
+
+
 def test_replacement_cluster_detection() -> None:
     """EXpole + structural Pol within min distance must emit WARN, not FAIL.
 
