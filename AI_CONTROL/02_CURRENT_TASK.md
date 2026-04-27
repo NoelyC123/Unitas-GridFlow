@@ -69,13 +69,15 @@ Stage 3 proved:
 - Map/PDF/D2D/Review links work remotely
 - real Gordon survey data can be uploaded, reviewed, exported, and packaged as validation evidence
 - mobile project intake is usable enough to stop internal polish and begin operational use
+- Stage 2/3 handoff outputs are transitional replacements for the manual D2D workaround, not the future product model.
 
 Next operational use:
 
 - Use GridFlow on the next real job as the actual survey-to-design handoff workflow.
 - Upload the real controller CSV at end of day or when the file is ready.
 - Review the project dashboard, map, design-readiness findings, EXpole pairings, PDF, Clean Chain, and D2D Working View.
-- Try to use the D2D Working View instead of rebuilding the manual D2D spreadsheet from scratch.
+- Try to use GridFlow's structured handoff outputs instead of rebuilding the manual D2D spreadsheet from scratch.
+- Record whether the designer can skip D2D entirely, and if not, what PoleCAD/design-ready input is still missing.
 - Record friction, missing evidence, export gaps, designer questions, and any need to return to field notes/photos.
 - For Bellsprings, do not change EXpole/design-numbering logic yet. The real pole schedule shows some final design poles at EXpole coordinates, but that requires a separate reviewed-design interpretation step before implementation.
 - Keep Stage 4 structured field capture/tablet/photo/Trimble-GIS integration as future roadmap, not current implementation.
@@ -92,6 +94,7 @@ Next operational use:
 - Do not begin Stage 5 or 6 work
 - Do not add new QA rules or sequencing algorithms
 - Do not implement photo upload, tablet capture, or live Trimble sync in Stage 3A2
+- Do not redesign outputs around the legacy D2D spreadsheet as if it is the destination. Use real D2D spreadsheets only to identify current manual decisions, missing data, and PoleCAD/design-handoff requirements.
 
 ---
 

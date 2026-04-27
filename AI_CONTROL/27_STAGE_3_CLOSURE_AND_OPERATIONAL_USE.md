@@ -52,9 +52,11 @@ Use GridFlow on the next real survey-to-design job as the actual handoff workflo
 
 The key question is:
 
-> Does GridFlow reduce real D2D/design handoff effort on an actual job?
+> Can GridFlow make the old manual D2D spreadsheet step unnecessary, or at least sharply reduce it, on an actual job?
 
 This is stronger evidence than more internal validation.
+
+Important framing: D2D is the legacy workaround, not the target product model. The current Clean Chain and D2D Working View outputs are transitional designer handoff outputs. The real aim is trusted design-ready handoff from survey input, eventually as close to PoleCAD-direct import as verified evidence allows.
 
 ---
 
@@ -78,8 +80,9 @@ For the next real job:
    - PDF report
    - Clean Chain CSV
    - D2D Working View CSV
-9. Try to use the D2D Working View instead of rebuilding the manual D2D spreadsheet from scratch.
-10. Record what still required field notes, notebook pages, photos, designer memory, or manual spreadsheet work.
+9. Try to use the structured handoff outputs instead of rebuilding the manual D2D spreadsheet from scratch.
+10. Record whether D2D was skipped, reduced, or still required.
+11. If D2D was still required, record exactly what missing field, convention, trust gap, or PoleCAD requirement forced it.
 
 ---
 
@@ -90,8 +93,9 @@ Record:
 - Did upload work reliably?
 - Did the map and route sequence match the real route?
 - Were EXpole pairings correct enough?
-- Did the D2D Working View save time?
-- What columns or information were missing for real D2D/PoleCAD preparation?
+- Did the structured handoff outputs save time?
+- Could the designer skip the old D2D spreadsheet entirely?
+- What columns, information, trust checks, or format requirements were missing for real PoleCAD/design-ready preparation?
 - What did the designer still need from notebooks, photos, WhatsApp, or memory?
 - What would have helped the surveyor capture better data while still on site?
 - What failed, confused, or slowed the workflow?

@@ -18,7 +18,9 @@ Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was va
 
 Stage 3 mobile validation is complete. The real Gordon file was uploaded through the protected remote workflow as `P007/F001`, reviewed, exported, captured in a validation evidence pack, and used to drive a final map wording clarity polish.
 
-The project is now in an **operational use phase**: use GridFlow on a real survey-to-design job, measure whether the D2D Working View and review flow reduce manual work, and let real friction define the next build.
+The project is now in an **operational use phase**: use GridFlow on a real survey-to-design job, measure whether the designer can skip or sharply reduce the old manual D2D spreadsheet step, and let real friction define the next build.
+
+Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the future product model. Current Clean Chain / D2D Working View CSVs are transitional design-handoff outputs. The real destination is a trusted design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
 
 ---
 
@@ -36,8 +38,8 @@ The project is now in an **operational use phase**: use GridFlow on a real surve
 - DNO rulepack inference from geography
 - Column/header normalisation for structured CSVs
 - Context feature classification (Hedge, Fence, Wall, Gate, Track, Road, Tree, Stream, Pline, 110xing, 33xing, 11xing, BTxing, HVxing, LVxing, Ignore)
-- Stage 2 clean route-chain export (`<job_id>_d2d_chain.csv`)
-- Stage 2 interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
+- Stage 2 clean route-chain export (`<job_id>_d2d_chain.csv`) as a transitional design-handoff output
+- Stage 2 interleaved D2D working view (`<job_id>_d2d_working_view.csv`) as a transitional replacement for manual D2D spreadsheet rebuilding
 - Route sequencing from raw controller exports
 - EXpole matching to proposed poles
 - Span-to-next and deviation-angle calculations
@@ -126,6 +128,7 @@ The project is now in an **operational use phase**: use GridFlow on a real surve
 7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
 8. Reviewed state affects D2D CSV exports only — PDF update deferred.
 9. Stage 4 structured field capture/tablet/photo workflows remain future roadmap and require operational evidence before design.
+10. The old D2D spreadsheet should be used as evidence of current manual decisions and conventions, not as the target product shape. The strategic target is design-ready handoff/PoleCAD-ready evidence once actual import requirements are known.
 
 ## Strategic position
 

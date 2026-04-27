@@ -10,6 +10,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
 
+### Strategic Framing
+
+- Clarified that the manual D2D spreadsheet is the legacy workaround GridFlow is designed to eliminate, not the long-term product model.
+- Reframed Stage 2 as survey-to-design direct handoff / D2D elimination.
+- Clarified that current Clean Chain and D2D Working View CSVs are transitional design-handoff outputs for designer review and operational validation.
+- Added the strategic target: trusted design-ready handoff from survey input, eventually as close to PoleCAD-direct import as verified evidence allows.
+- Documented that real D2D spreadsheets are useful as evidence of current manual decisions and missing requirements, but should not define the future product shape by themselves.
+
 ### Bellsprings Operational Validation
 
 - Organised work-colleague evidence locally under `/Users/noelcollins/Desktop/UGF Documentation April 2026/REAL_VALIDATION_EVIDENCE/`.

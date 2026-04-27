@@ -27,8 +27,8 @@ This project exists because the project owner has done both the survey job on si
 ### Stage 1 — Post-survey QA gate (COMPLETE)
 Raw controller dump arrives → tool parses it → reports what's there and what's missing → designer knows what they're working with before opening PoleCAD.
 
-### Stage 2 — D2D elimination (COMPLETE)
-Tool takes raw controller dump and produces structured, sequenced, designer-readable D2D replacement outputs directly. It now provides a clean route-chain export and an interleaved D2D working view. Final PoleCAD import format remains out of scope until verified with additional evidence.
+### Stage 2 — Survey-to-design direct handoff / D2D elimination (COMPLETE)
+Tool takes raw controller dump and produces structured, sequenced, designer-readable handoff outputs directly. The old manual D2D spreadsheet is treated as the workaround being eliminated, not the long-term product model. GridFlow currently provides transitional clean-chain and designer working-view CSVs so designers can review the route and reduce/rebuild less manual D2D work. Final PoleCAD import format remains a strategic evidence target and must not be built until the actual import requirements are verified.
 
 ### Stage 3 — Live intake platform (COMPLETE)
 Instead of processing files after the fact, the tool becomes what the surveyor sends data to in real-time. Surveyor syncs controller data at end of each day (or continuously). Tool immediately validates, runs QA, produces completeness report. Designer sees job building up in real-time. Feedback loop closes while surveyor is still on site or nearby.
@@ -47,7 +47,7 @@ Tool generates submission-ready packs: route maps, clearance schedules, complian
 ## Commercial trajectory
 
 - **Stages 1-2:** Internal tool / consultancy asset. Saves time on every job.
-- **Stage 3:** Sellable to other OHL contractors doing D2D work.
+- **Stage 3:** Sellable to other OHL contractors doing survey-to-design handoff and manual D2D replacement work.
 - **Stage 4:** Sellable to survey teams directly. Changes how fieldwork is done.
 - **Stages 5-6:** Potentially valuable to DNOs themselves.
 
@@ -66,8 +66,8 @@ The tool currently:
 - Renders interactive Leaflet map
 - Generates PDF pre-design briefing
 - Infers correct DNO rulepack from geography
-- Produces clean D2D route-chain export (`<job_id>_d2d_chain.csv`)
-- Produces interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
+- Produces a clean route-chain export (`<job_id>_d2d_chain.csv`) as a transitional design handoff output
+- Produces an interleaved designer working view (`<job_id>_d2d_working_view.csv`) as a transitional replacement for manual D2D spreadsheet rebuilding
 - Handles detached / not-required records
 - Produces section-aware output and global provisional design pole numbering
 - Supports named projects, project file intake metadata, designer review, reviewed/provisional exports, and controlled remote mobile access

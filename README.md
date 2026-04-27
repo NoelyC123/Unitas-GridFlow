@@ -10,6 +10,8 @@ Unitas GridFlow is a pre-CAD QA gatekeeper and workflow automation tool that sit
 
 It exists because the project owner has done both the survey job on site and the D2D/PoleCAD design job in the office, and knows from direct experience that the entire survey-to-design handoff can be made dramatically better.
 
+Strategic framing: the manual D2D spreadsheet is the legacy workaround GridFlow is designed to make unnecessary. Current CSV exports are transitional structured handoff outputs for designer review; the long-term destination is trusted design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
+
 **No competing product exists in this space.** All existing tools sit upstream (field capture) or downstream (design/CAD). The survey-to-design handoff gap is unserved.
 
 ---
@@ -31,21 +33,21 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 | Stage | Name | Status |
 |-------|------|--------|
 | 1 | Post-survey QA gate | ✅ Complete |
-| 2 | D2D elimination | ✅ Complete |
+| 2 | Survey-to-design direct handoff / D2D elimination | ✅ Complete |
 | 3C | Project management (multi-file) | ✅ Complete |
 | 3B | Designer review & export readiness | ✅ Complete |
-| 3A | Live intake platform | Planned |
-| 4 | Structured field capture | Planned |
-| 5 | Designer workspace | Planned |
-| 6 | DNO submission layer | Planned |
+| 3A | Live intake platform | ✅ Complete |
+| 4 | Structured field capture | Future |
+| 5 | Designer workspace | Future |
+| 6 | DNO submission layer | Future |
 
 **Stage 1** is complete: the tool parses raw controller dumps, validates their contents, and gives the designer a clear pre-design briefing before they open PoleCAD.
 
-**Stage 2** is complete: the tool produces structured, sequenced, designer-readable D2D replacement outputs directly from raw controller dumps. Clean route-chain export and interleaved D2D working view included. Output is provisional and not a verified final PoleCAD import format.
+**Stage 2** is complete: the tool produces structured, sequenced, designer-readable handoff outputs directly from raw controller dumps. Clean route-chain export and interleaved working view included. These are transitional D2D-replacement outputs, not a claim that D2D spreadsheets are the future product model. Output is provisional and not a verified final PoleCAD import format.
 
 **Stage 3C** is complete: named projects group related survey files. Multiple CSVs can be uploaded to a single project. Each file still runs through the same Stage 1/2 pipeline independently. Map, PDF, D2D chain and working view are all accessible per file from the project overview page. Legacy J##### jobs remain fully accessible.
 
-**Stage 3B** is complete: designers can now review and sign off on auto-generated EXpole pairings before using D2D exports. A per-file review page shows all EXpole-to-proposed-pole pairings with dropdown reassignment controls. Reviewed exports carry a "Designer Reviewed" header; unreviewed exports remain "provisional". Review can be reset to auto-generated at any time. The original `sequenced_route.json` is never modified.
+**Stage 3B** is complete: designers can now review and sign off on auto-generated EXpole pairings before using structured handoff exports. A per-file review page shows all EXpole-to-proposed-pole pairings with dropdown reassignment controls. Reviewed exports carry a "Designer Reviewed" header; unreviewed exports remain "provisional". Review can be reset to auto-generated at any time. The original `sequenced_route.json` is never modified.
 
 ---
 
@@ -60,17 +62,17 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - Renders an interactive Leaflet map with design-readiness signals
 - Produces a PDF pre-design briefing report
 - Infers the correct DNO rulepack from geography (SPEN, SSEN, NIE, ENWL)
-- Produces a clean D2D route-chain export (`<job_id>_d2d_chain.csv`)
-- Produces an interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
+- Produces a clean route-chain export (`<job_id>_d2d_chain.csv`) as a transitional design handoff output
+- Produces an interleaved designer working view (`<job_id>_d2d_working_view.csv`) as a transitional replacement for manual D2D spreadsheet rebuilding
 - Performs route sequencing, EXpole matching, span calculation and deviation-angle calculation
 - Handles detached / `not required` records
 - Adds section summaries, global provisional design pole numbering and sequence-confidence notes
 - Groups related survey files into named projects (Stage 3C)
 - Per-project map, PDF, D2D chain and working view all accessible independently per file
 - Designer review page with EXpole pairing reassignment and sign-off (Stage 3B)
-- D2D exports reflect reviewed pairing decisions with reviewed/provisional header
+- Structured handoff exports reflect reviewed pairing decisions with reviewed/provisional header
 
-**Validated on 4 real survey files from real NIE and SPEN jobs.**
+**Validated on real NIE, Gordon/SPEN, and Bellsprings/SPEN survey evidence, including a complete Bellsprings raw-survey-to-pole-schedule comparison.**
 
 ---
 
@@ -80,8 +82,8 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - **Stage 2: complete**
 - **Stage 3C: complete** (commit `b0b5331`)
 - **Stage 3B: complete** (commits `a9b3ee2`, `7daa5a9`)
-- **273 passing tests**
-- **Gordon + NIE real files validated**
+- **287 passing tests**
+- **Gordon + NIE + Bellsprings/SPEN real files validated**
 - Active CI (GitHub Actions: pre-commit + pytest)
 
 ### What was just shipped
@@ -107,12 +109,12 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - All legacy J##### routes unchanged — full backward compatibility
 - 22 unit tests + 9 integration tests
 
-### Earlier: Stage 2 — D2D elimination
+### Earlier: Stage 2 — Survey-to-design direct handoff / D2D elimination
 
-Stage 2A / 2B / 2C delivered a validated provisional D2D replacement baseline:
+Stage 2A / 2B / 2C delivered a validated provisional design handoff baseline:
 
 - Clean chain export for route analysis
-- Interleaved D2D working view for designer review
+- Interleaved designer working view for review
 - Detached / not-required record handling
 - EXpole matching and replacement references
 - Section-aware output with section summaries

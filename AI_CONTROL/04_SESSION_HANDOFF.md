@@ -4,6 +4,27 @@
 
 ## What happened this session
 
+### Strategic handoff framing correction — D2D is the workaround, not the product
+
+Claude Desktop challenged the wording around D2D and the project direction was clarified.
+
+Decision:
+
+- Manual D2D spreadsheets are the legacy workaround caused by a missing direct bridge between survey output and design tools.
+- GridFlow should not be framed as "automating D2D" as the final product model.
+- GridFlow should be framed as making the D2D step unnecessary by producing trusted, structured, design-ready handoff outputs from survey evidence.
+- The current Clean Chain and D2D Working View CSVs remain valid transitional outputs, because they reduce current manual work and help designers review the route.
+- Real D2D spreadsheets are still useful evidence, but only to understand existing manual decisions, missing fields, ordering conventions, EXpole/proposed handling, and PoleCAD/design-handoff requirements.
+- The strategic target is design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
+
+Boundary:
+
+- Do not build a PoleCAD-specific exporter until the actual import format and trust requirements are verified.
+- Do not redesign around one company's or one designer's D2D spreadsheet.
+- Do not treat D2D as the destination. Treat it as the old process GridFlow is replacing.
+
+---
+
 ### Bellsprings EWM285 operational validation — completed
 
 Work-colleague evidence was received, inspected, organised locally, and used for the first real operational validation after Stage 3 closure.
@@ -167,7 +188,7 @@ Validation conclusion:
 - The core remote workflow passed.
 - The project dashboard made sense after upload.
 - Gordon EXpole pairings were acceptable for this validation run but must remain designer-reviewable.
-- D2D Chain and Working View are good enough to reduce manual D2D spreadsheet preparation, while remaining reviewed/provisional handoff outputs rather than final PoleCAD import format.
+- D2D Chain and Working View are good enough transitional handoff outputs to reduce manual spreadsheet preparation, while remaining reviewed/provisional outputs rather than final PoleCAD import format.
 - Biggest friction is mobile usability: tables and review controls are cramped on phone, and homepage/navigation wording still reflects early QA-tool language.
 
 Recommended next task:

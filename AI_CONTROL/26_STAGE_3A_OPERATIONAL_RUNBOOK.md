@@ -185,7 +185,7 @@ Prepare:
    - D2D Chain
    - D2D Working View
    - PDF
-10. Compare the D2D output against the manual D2D process.
+10. Compare the structured handoff output against the old manual D2D process.
 
 ### Success criteria
 
@@ -195,7 +195,7 @@ The field trial is successful if:
 - The designer can see the project immediately.
 - The processed output is understandable without opening the raw CSV first.
 - The review page is usable for intended pairing checks.
-- The D2D exports are close enough to reduce or replace manual D2D spreadsheet preparation.
+- The structured handoff exports are close enough to reduce or replace manual D2D spreadsheet preparation.
 - Any gaps are specific enough to define the next narrow improvement.
 
 ### Post-trial notes
@@ -206,7 +206,7 @@ Record:
 - What failed:
 - What was confusing:
 - What saved time:
-- What still required manual D2D work:
+- What still required manual D2D work, and why:
 - Whether reviewed exports were useful:
 - Whether the next improvement should be:
   - operational/documentation only
@@ -303,9 +303,9 @@ The main dashboard friction is responsive layout. On phone, the survey files tab
 
 Yes for this Gordon validation. The review showed 24 matched EXpoles and 0 unmatched EXpoles. This is a strong validation signal, but the pairing output must remain designer-reviewable.
 
-### Were D2D exports good enough to reduce manual D2D spreadsheet work?
+### Were structured handoff exports good enough to reduce manual D2D spreadsheet work?
 
-Yes. The D2D Chain and D2D Working View are good enough to reduce manual D2D preparation by supporting route sequencing, EX/PR interpretation, section review, issue triage, reviewed/provisional status, and export preparation.
+Yes. The D2D Chain and D2D Working View are good enough transitional handoff outputs to reduce manual D2D preparation by supporting route sequencing, EX/PR interpretation, section review, issue triage, reviewed/provisional status, and export preparation.
 
 They remain reviewed/provisional handoff outputs, not a verified final PoleCAD import format.
 
