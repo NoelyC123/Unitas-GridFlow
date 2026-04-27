@@ -2,65 +2,65 @@
 
 ## Phase
 
-**Stage 3C closure → Stage 3B planning**
+**Stage 3B complete — next decision pending**
 
-Stage 3C (Project Management / multi-file job support) is implemented and manually validated. It is now closed.
+Stage 3B (Designer Review & Export Readiness) is implemented and validated. It is now closed.
 
-The next task is for the project orchestrator (Claude Desktop) to define the Stage 3B brief before any code work begins.
-
----
-
-## Stage 3C is closed
-
-- Implementation: commit `b0b5331`
-- Validation: passed across Gordon, 474 + 474c (multi-file), 513, and legacy J##### jobs
-- Validation acceptance: `AI_CONTROL/20_STAGE_3C_VALIDATION_ACCEPTANCE.md`
-- Tests: 244 passing, pre-commit clean
+The next direction has not yet been decided by the project orchestrator.
 
 ---
 
-## What Stage 3B is (planned, not started)
+## Stage 3B is closed
 
-**Stage 3B — Designer Review & Export Readiness**
-
-Stage 3B will allow a designer to review and adjust the auto-generated processing outputs before exporting:
-
-- EXpole pairing reassignment (confirm or override auto-detected pairs)
-- Section boundary selection (confirm or move auto-detected splits)
-
-Stage 3B must not begin until the project orchestrator defines the exact scope and success criteria. The scope above is indicative only.
+- Design brief: `AI_CONTROL/21_STAGE_3B_DESIGN_BRIEF.md`
+- Implementation: commits `a9b3ee2`, `7daa5a9`
+- Validation acceptance: `AI_CONTROL/22_STAGE_3B_VALIDATION_ACCEPTANCE.md`
+- Tests: 273 passing, pre-commit clean
 
 ---
 
-## What not to do before Stage 3B is defined
+## Open next-direction choice
 
-- Do not begin any designer review or editing UI
-- Do not add combined project-level maps or exports
-- Do not begin cloud deployment (Stage 3A)
-- Do not add new QA rules or sequencing algorithms
+The project orchestrator must choose between:
+
+**Option A — Stage 3B polish**
+
+Address known caveats within the Stage 3B scope:
+- Section boundary editing (confirm or move auto-detected splits)
+- PDF report updated to show reviewed pairing state
+- Configurable reviewer role label
+- Review page accessible from project overview action buttons
+- Validation warnings for stale override references after reprocess
+
+**Option B — Stage 3A planning**
+
+Stage 3A is the live intake platform:
+- Surveyor syncs controller data daily or continuously
+- Tool immediately validates and produces completeness reports
+- Designer sees the job building in real-time
+- Feedback loop closes while the surveyor is still on site
+
+Neither option should begin without the orchestrator defining the scope.
+
+---
+
+## What not to do before the next stage is defined
+
+- Do not begin section boundary editing
+- Do not begin cloud deployment or authentication
 - Do not redesign architecture
 - Do not begin Stage 4, 5, or 6 work
-
----
-
-## Handoff criteria: Stage 3C → Stage 3B
-
-All criteria are now met:
-
-1. Named projects work ✅
-2. Multi-file projects work ✅
-3. Project overview is usable ✅
-4. All existing outputs accessible from project page ✅
-5. Real multi-file project validated (474 + 474c) ✅
+- Do not add new QA rules or sequencing algorithms
 
 ---
 
 ## Relevant files
 
-- `AI_CONTROL/20_STAGE_3C_VALIDATION_ACCEPTANCE.md`
-- `AI_CONTROL/19_STAGE_3_EXECUTION_PLAN.md` (Stage 3B scope notes in section B)
-- `app/project_manager.py`
-- `app/routes/api_projects.py`
-- `app/routes/projects_page.py`
-- `tests/test_project_manager.py`
-- `tests/test_project_integration.py`
+- `AI_CONTROL/21_STAGE_3B_DESIGN_BRIEF.md`
+- `AI_CONTROL/22_STAGE_3B_VALIDATION_ACCEPTANCE.md`
+- `app/review_manager.py`
+- `app/routes/api_review.py`
+- `app/routes/review_page.py`
+- `app/templates/review.html`
+- `tests/test_review_manager.py`
+- `tests/test_review_integration.py`

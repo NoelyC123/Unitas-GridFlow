@@ -33,7 +33,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 | 1 | Post-survey QA gate | ✅ Complete |
 | 2 | D2D elimination | ✅ Complete |
 | 3C | Project management (multi-file) | ✅ Complete |
-| 3B | Designer review & export readiness | Planning |
+| 3B | Designer review & export readiness | ✅ Complete |
 | 3A | Live intake platform | Planned |
 | 4 | Structured field capture | Planned |
 | 5 | Designer workspace | Planned |
@@ -44,6 +44,8 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 **Stage 2** is complete: the tool produces structured, sequenced, designer-readable D2D replacement outputs directly from raw controller dumps. Clean route-chain export and interleaved D2D working view included. Output is provisional and not a verified final PoleCAD import format.
 
 **Stage 3C** is complete: named projects group related survey files. Multiple CSVs can be uploaded to a single project. Each file still runs through the same Stage 1/2 pipeline independently. Map, PDF, D2D chain and working view are all accessible per file from the project overview page. Legacy J##### jobs remain fully accessible.
+
+**Stage 3B** is complete: designers can now review and sign off on auto-generated EXpole pairings before using D2D exports. A per-file review page shows all EXpole-to-proposed-pole pairings with dropdown reassignment controls. Reviewed exports carry a "Designer Reviewed" header; unreviewed exports remain "provisional". Review can be reset to auto-generated at any time. The original `sequenced_route.json` is never modified.
 
 ---
 
@@ -65,6 +67,8 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - Adds section summaries, global provisional design pole numbering and sequence-confidence notes
 - Groups related survey files into named projects (Stage 3C)
 - Per-project map, PDF, D2D chain and working view all accessible independently per file
+- Designer review page with EXpole pairing reassignment and sign-off (Stage 3B)
+- D2D exports reflect reviewed pairing decisions with reviewed/provisional header
 
 **Validated on 4 real survey files from real NIE and SPEN jobs.**
 
@@ -75,13 +79,24 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - **Stage 1: complete**
 - **Stage 2: complete**
 - **Stage 3C: complete** (commit `b0b5331`)
-- **244 passing tests**
+- **Stage 3B: complete** (commits `a9b3ee2`, `7daa5a9`)
+- **273 passing tests**
 - **Gordon + NIE real files validated**
 - Active CI (GitHub Actions: pre-commit + pytest)
 
 ### What was just shipped
 
-**Stage 3C — Project Management** (commit `b0b5331`):
+**Stage 3B — Designer Review & Export Readiness** (commits `a9b3ee2`, `7daa5a9`):
+
+- `review.json` overlay storage per project file — original sequenced_route.json never modified
+- Per-file review page (`/review/project/<pid>/<fid>`) with EXpole pairing table and dropdown reassignment
+- Designer reviewed/not-reviewed flag with review notes
+- D2D Chain and D2D Working View exports apply reviewed pairing overrides
+- Reviewed exports: "Designer Reviewed — <timestamp>" header; unreviewed: "provisional"
+- Reset to auto-generated — single delete, no pipeline re-run
+- 20 unit tests + 9 integration tests
+
+### Earlier: Stage 3C — Project Management (commit `b0b5331`):
 
 - Named project container (P001, P002, …) above the existing flat-job model
 - Multiple survey files per project (F001, F002, …)
@@ -92,7 +107,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - All legacy J##### routes unchanged — full backward compatibility
 - 22 unit tests + 9 integration tests
 
-### Earlier: Stage 2 D2D elimination
+### Earlier: Stage 2 — D2D elimination
 
 Stage 2A / 2B / 2C delivered a validated provisional D2D replacement baseline:
 

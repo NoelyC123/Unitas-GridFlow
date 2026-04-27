@@ -8,6 +8,85 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-27 — Stage 3B: Designer Review & Export Readiness
+
+### Added
+
+- **`app/review_manager.py`** — review data layer (commits `a9b3ee2`, `7daa5a9`):
+  - `load_review`, `save_review`, `delete_review` — per-file `review.json` CRUD
+  - `build_review` — constructs review dict with version counter and reviewed_at timestamp
+  - `calc_distance` — Euclidean distance in grid space (easting/northing)
+  - `enrich_overrides_with_distances` — fills distance fields from sequenced_route.json
+  - `apply_pairing_overrides` — deep copies seq, applies overrides to matched/unmatched
+    expole lists, chain replaces fields, and interleaved_view rows. Never mutates original.
+
+- **`app/routes/api_review.py`** — review REST API:
+  - `GET /api/project/<project_id>/file/<file_id>/review` — returns current review state
+  - `POST /api/project/<project_id>/file/<file_id>/review` — save review with enriched distances
+  - `DELETE /api/project/<project_id>/file/<file_id>/review` — reset to auto-generated
+
+- **`app/routes/review_page.py`** — review page route:
+  - `GET /review/project/<project_id>/<file_id>` — renders `review.html`
+
+- **`app/templates/review.html`** — Bootstrap 5 review page:
+  - EXpole pairings table with dropdown reassignment per row (matched + unmatched EXpoles shown)
+  - Designer sign-off: reviewed/not-reviewed radio, review notes textarea
+  - Save Review and Reset to Auto-Generated buttons via vanilla JS fetch()
+  - Toast notifications on save/reset
+  - Breadcrumb navigation back to project
+
+- **`tests/test_review_manager.py`** — 20 unit tests covering:
+  - load/save/delete roundtrip, version increment, reviewed_at timestamp, notes stripped,
+    distance calculation, override enrichment, apply_pairing_overrides (no-op cases, reassign,
+    mark unmatched, chain replaces update, interleaved_view update, original seq not mutated)
+
+- **`tests/test_review_integration.py`** — 9 integration tests covering all specified scenarios:
+  1. Creating review.json via POST
+  2. Saving a pairing override (with server-enriched distances)
+  3. Marking EXpole unmatched — appears in unmatched export section
+  4. Reviewed export header — "Designer Reviewed" present
+  5. Provisional export header before review — "provisional" present
+  6. Reviewed D2D export uses override — chain row shows reassigned replacement
+  7. sequenced_route.json unchanged after override
+  8. Reset review (DELETE) removes review.json, export reverts to provisional
+  9. Existing exports work without review.json (backward compat)
+
+### Changed
+
+- **`app/routes/d2d_export.py`** — project chain and interleaved export routes now:
+  - Load `review.json` via `load_review`
+  - Apply `apply_pairing_overrides` to a deep copy of the seq
+  - Build `reviewed_label` from review status/timestamp
+  - Pass `reviewed_label` to `_render_chain_export` / `_render_interleaved_export`
+  - `_render_chain_export` and `_render_interleaved_export` now accept `reviewed_label: str | None`
+
+- **`app/routes/api_intake.py`** — `process_job` calls `delete_review(job_dir)` at start.
+  Reprocessing a file invalidates any existing review.
+
+- **`app/__init__.py`** — registered `api_review_bp` at `/api` and `review_page_bp`.
+
+### Backward compatibility
+
+- All legacy and project-level D2D routes unchanged in URL shape
+- Files without `review.json` are unaffected — `apply_pairing_overrides` is a no-op
+- `sequenced_route.json` is never written by the review layer
+- Legacy J##### export routes unchanged
+
+### Tests
+
+- **273 passing** (up from 244)
+
+### Known caveats (by design)
+
+- EXpole pairing review only — section boundary editing deferred to Stage 3B+ scope
+- No route sequence editing, no pole attribute editing, no map-based editing
+- No cross-file review — each file reviewed independently
+- Reviewed state affects D2D CSV exports only; PDF update deferred
+- `reviewed_by` hardcoded to "Designer" — configurable later
+- No multi-user conflict resolution — last-write-wins (single-user local use)
+
+---
+
 ## 2026-04-27 — Stage 3C: Project Management (multi-file job support)
 
 ### Added

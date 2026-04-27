@@ -12,14 +12,14 @@ Current confirmed state:
 
 - Stage 1 is complete.
 - Stage 2A, 2B, 2C implemented and validated. Stage 2 is formally closed.
-- Stage 3C (Project Management / multi-file job support) is implemented and validated.
-- Stage 3C commit: `b0b5331`
-- Current test count: 244 passing.
+- Stage 3C (Project Management / multi-file job support) is implemented and validated. Commit: `b0b5331`
+- Stage 3B (Designer Review & Export Readiness) is implemented and validated. Commits: `a9b3ee2`, `7daa5a9`
+- Current test count: 273 passing.
 - Named project container (P001/F001 model) is in place.
-- Multi-file projects work. Project overview page works. Project map/PDF/D2D routes work.
+- Designer review overlay (review.json) is in place. EXpole pairing reassignment, sign-off flag, reset to auto-generated all work.
+- D2D exports apply reviewed pairings and show reviewed/provisional header.
 - All legacy J##### routes unchanged — full backward compatibility.
-- Current focus: Stage 3C closure documentation. Stage 3B planning is next.
-- Do not begin Stage 3B code work until the project orchestrator defines the Stage 3B brief.
+- Current focus: Stage 3B is closed. Next direction (Stage 3B polish vs Stage 3A) not yet decided.
 
 If this file conflicts with newer handover-pack notes, use the newest handover-pack notes and the latest repo state.
 
