@@ -8,6 +8,33 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
+
+### Added
+
+- **`AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`** — Stage 3A2 planning brief:
+  - recommends Cloudflare Tunnel + Cloudflare Access as the first controlled remote-access trial
+  - keeps Tailscale as the private trusted-device fallback
+  - defers Render/Railway/full hosted deployment
+  - documents UK DNO survey-data sensitivity and access-control constraints
+  - keeps photo upload, tablet capture, and live Trimble/controller sync in the roadmap but deferred from Stage 3A2
+
+- **`README.md`** — local remote-access trial instructions:
+  - run Flask locally
+  - expose with `cloudflared`
+  - require Cloudflare Access before real survey data
+  - validate upload, dashboard, Map/PDF/D2D exports, and Review remotely
+
+### Boundaries
+
+- No application code changes.
+- No app user accounts or role-based access control.
+- No cloud storage/database migration.
+- No hosted deployment.
+- No photo upload, tablet capture, or live Trimble sync implementation.
+
+---
+
 ## 2026-04-27 — Stage 3A1: Local Daily Intake MVP
 
 ### Added

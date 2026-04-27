@@ -4,6 +4,31 @@
 
 ## What happened this session
 
+### Stage 3A2: Remote Access Trial — planned
+
+Cursor/GPT converted the Claude Desktop deployment analysis and ChatGPT review into a committed Stage 3A2 plan.
+
+Key decision:
+
+- Use **Cloudflare Tunnel + Cloudflare Access** as the first controlled remote-access trial.
+- Use **Tailscale** as the private trusted-device fallback.
+- Defer **Render/Railway/full hosted deployment** until the remote workflow proves useful and data handling requirements are clearer.
+- Do not build app user accounts, cloud storage migration, photo upload, tablet capture, or live Trimble sync in Stage 3A2.
+
+Files added or changed:
+
+| File | Change |
+|------|--------|
+| `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md` | Stage 3A2 remote-access plan |
+| `README.md` | Local remote-access trial commands and validation checklist |
+| `AI_CONTROL/01_CURRENT_STATE.md` | Current state updated for Stage 3A2 plan |
+| `AI_CONTROL/02_CURRENT_TASK.md` | Next task set to remote-access trial |
+| `CHANGELOG.md` | Planning/documentation entry |
+
+The next practical validation is to run the existing Flask app locally, expose it through Cloudflare Tunnel + Access, and test upload/dashboard/export/review from a phone or external trusted device.
+
+---
+
 ### Stage 3A1: Local Daily Intake MVP — implemented and validated
 
 Cursor/GPT implemented the approved Stage 3A1 local daily intake scope from `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md`.
@@ -86,6 +111,7 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 ## Current state
 
 - Stage 3A1 local daily intake implemented and validated
+- Stage 3A2 remote access trial planned
 - Stage 1 complete
 - Stage 2A, 2B, 2C implemented and closed
 - Stage 3C implemented and validated — commit `b0b5331`
@@ -109,6 +135,6 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Plan Stage 3A2 cloud/remote access.
-2. Do not begin deployment/authentication until the Stage 3A2 plan is approved.
-3. Do not begin Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.
+1. Run the Stage 3A2 Cloudflare Tunnel + Access trial.
+2. Validate upload, project dashboard, Map/PDF/D2D exports, and Review from a phone or external trusted device.
+3. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.

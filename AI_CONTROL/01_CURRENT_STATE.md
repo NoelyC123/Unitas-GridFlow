@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3A1 complete — local daily intake MVP**
+**Stage 3A2 planned — remote access trial next**
 
 Stage 1 is complete.
 
@@ -12,7 +12,9 @@ Stage 3C (Project Management / multi-file job support) is implemented and manual
 
 Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 
-Stage 3A1 (Local Daily Intake MVP) is implemented and validated. Cloud/remote access is deferred to Stage 3A2 planning.
+Stage 3A1 (Local Daily Intake MVP) is implemented and validated.
+
+Stage 3A2 (Remote Access Trial) is planned. The next step is a controlled Cloudflare Tunnel + Cloudflare Access trial against the existing local app. Tailscale is the private fallback. Render/Railway/full hosted deployment is deferred.
 
 ---
 
@@ -58,6 +60,7 @@ Stage 3A1 (Local Daily Intake MVP) is implemented and validated. Cloud/remote ac
 - **Stage 3A1: office feedback note per project file**
 - **Stage 3A1: derived intake status on project overview**
 - **Stage 3A1: project dashboard shows intake context alongside existing outputs**
+- **Stage 3A2: remote-access trial plan documented**
 
 ## Counts
 
@@ -67,20 +70,16 @@ Stage 3A1 (Local Daily Intake MVP) is implemented and validated. Cloud/remote ac
 
 ## What was just shipped
 
-- Stage 3A1: local daily intake layer
-  - `app/project_manager.py` — intake metadata and derived intake status
-  - `app/routes/api_projects.py` — intake metadata capture and office feedback API
-  - `app/templates/upload.html` / `app/static/js/upload-manager.js` — survey-day upload fields
-  - `app/templates/project.html` — intake dashboard row with office feedback
-  - `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md` — approved scope
-  - `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md` — validation evidence
+- Stage 3A2: remote access trial plan
+  - `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md` — Cloudflare Tunnel + Access first, Tailscale fallback, hosted deployment deferred
+  - `README.md` — local remote access trial commands and validation checklist
 
 ## Known remaining issues
 
 1. No cross-file chain merging or combined exports within a project.
 2. No combined project-level map overlay.
 3. No section boundary editing (Stage 3B+ scope).
-4. No cloud deployment or remote authentication yet (Stage 3A2 scope).
+4. Cloudflare Tunnel trial not yet manually validated from an external device.
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
 6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
 7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
@@ -92,4 +91,4 @@ Stage 3A1 (Local Daily Intake MVP) is implemented and validated. Cloud/remote ac
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3A1 complete — projects can now act as local daily-intake dashboards before cloud access
+- Stage 3A2 planned — next validation is controlled remote access to the existing daily-intake workflow

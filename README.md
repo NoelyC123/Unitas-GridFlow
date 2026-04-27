@@ -191,6 +191,61 @@ pytest -v
 pre-commit run --all-files
 ```
 
+### Stage 3A2 Remote Access Trial
+
+Stage 3A2 tests whether the existing daily-intake workflow works remotely before building a hosted cloud platform.
+
+Recommended route:
+
+- Run GridFlow on the local office Mac.
+- Expose it with Cloudflare Tunnel.
+- Protect it with Cloudflare Access using approved email / one-time PIN.
+- Validate from a phone or external trusted device.
+
+Quick connectivity test:
+
+```
+brew install cloudflared
+cd /Users/noelcollins/Unitas-GridFlow
+source .venv312/bin/activate
+python run.py
+cloudflared tunnel --url http://localhost:5001
+```
+
+Use the temporary `trycloudflare.com` URL only for connectivity testing. Do not upload real or sensitive survey data through an unauthenticated temporary URL.
+
+Controlled trial:
+
+```
+cloudflared tunnel login
+cloudflared tunnel create gridflow
+cloudflared tunnel route dns gridflow gridflow.yourdomain.com
+cloudflared tunnel run gridflow
+```
+
+Then configure Cloudflare Access in the Cloudflare dashboard:
+
+- Zero Trust → Access → Applications
+- Add an application for `gridflow.yourdomain.com`
+- Require one-time PIN or approved email access
+- Test from a phone or external trusted device
+
+Validation checklist:
+
+- Cloudflare Access prompts before app access.
+- Remote device can open the projects page.
+- Remote upload into an existing project works.
+- Intake status appears on the project dashboard.
+- Map, PDF, D2D Chain, D2D Working, and Review links work remotely.
+
+Deferred from Stage 3A2 but retained in the roadmap:
+
+- photo upload linked to survey files / pole records
+- tablet-based structured field capture
+- live or semi-live Trimble/controller sync
+- Render/Railway/full hosted deployment
+- app user accounts or role-based access control
+
 ---
 
 ## Tech stack
