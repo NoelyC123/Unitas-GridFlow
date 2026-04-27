@@ -4,9 +4,9 @@
 
 ## What happened this session
 
-### Stage 3A2: Cloudflare Access-gated remote trial — validated
+### Stage 3A2: Cloudflare Access-gated remote trial — complete
 
-The primary Stage 3A2 route was validated using a named Cloudflare Tunnel and Cloudflare Access.
+The primary Stage 3A2 route was validated using a named Cloudflare Tunnel and Cloudflare Access. Stage 3A2 is closed as a controlled remote-access validation success.
 
 Operational setup completed:
 
@@ -54,7 +54,7 @@ Boundary:
 
 Recommended next decision:
 
-- Stage 3A2 can be treated as validated for the controlled remote-access trial objective.
+- Stage 3A2 is validated for the controlled remote-access trial objective.
 - A later stage/decision is needed before always-on hosted deployment, backups, app-level accounts, or wider user rollout.
 
 ---
@@ -201,7 +201,7 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 ## Current state
 
 - Stage 3A1 local daily intake implemented and validated
-- Stage 3A2 Cloudflare Tunnel + Access trial validated
+- Stage 3A2 Cloudflare Tunnel + Access trial complete
 - Temporary unauthenticated tunnel page reachability validated from phone/external device
 - Access-gated remote upload/dashboard/export/review smoke test passed with non-sensitive data
 - Stage 1 complete
@@ -227,6 +227,7 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Decide whether to close Stage 3A2 as validated for controlled remote access.
+1. Ask the orchestrator to choose the next narrow validation-led stage.
 2. Keep using the named tunnel only for controlled trials while the Mac is online.
-3. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.
+3. Likely next candidates: operational runbook, first real controlled field-trial checklist, or a narrowly scoped Stage 3B follow-on if remote-use friction proves it is needed.
+4. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.

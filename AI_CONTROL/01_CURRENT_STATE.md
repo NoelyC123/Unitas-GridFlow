@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3A2 access-gated remote trial validated**
+**Stage 3A2 complete — controlled remote access validated**
 
 Stage 1 is complete.
 
@@ -14,7 +14,7 @@ Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated.
 
-Stage 3A2 (Remote Access Trial) has validated the primary Cloudflare route: a named Cloudflare Tunnel for `gridflow.unitasconnect.com` protected by Cloudflare Access email one-time PIN. A phone on mobile data authenticated through Access, loaded the app, uploaded non-sensitive `sample_data/mock_survey.csv`, updated the project dashboard, and opened Map/PDF/D2D/Review outputs. Tailscale remains the private fallback. Render/Railway/full hosted deployment is deferred.
+Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was validated with a named Cloudflare Tunnel for `gridflow.unitasconnect.com` protected by Cloudflare Access email one-time PIN. A phone on mobile data authenticated through Access, loaded the app, uploaded non-sensitive `sample_data/mock_survey.csv`, updated the project dashboard, and opened Map/PDF/D2D/Review outputs. Tailscale remains the private fallback. Render/Railway/full hosted deployment is deferred.
 
 ---
 
@@ -64,6 +64,7 @@ Stage 3A2 (Remote Access Trial) has validated the primary Cloudflare route: a na
 - **Stage 3A2: temporary unauthenticated tunnel connectivity validated for home, projects, and upload pages**
 - **Stage 3A2: named Cloudflare Tunnel + Access validated from iPhone/mobile data**
 - **Stage 3A2: protected remote upload/dashboard/Map/PDF/D2D/Review smoke test passed with non-sensitive mock CSV**
+- **Stage 3A2: closed as a controlled remote-access validation success**
 
 ## Counts
 
@@ -72,6 +73,11 @@ Stage 3A2 (Remote Access Trial) has validated the primary Cloudflare route: a na
 - **Real files validated:** Gordon, 4-474, 513, 474c
 
 ## What was just shipped
+
+- Stage 3A2 closure
+  - Controlled remote access validated with Cloudflare Tunnel + Cloudflare Access.
+  - No app accounts, hosted deployment, cloud storage migration, photo upload, tablet capture, or live Trimble sync were introduced.
+  - Next step is an orchestrator decision on the next stage/scope.
 
 - Stage 3A2: Cloudflare Access-gated remote validation
   - Named tunnel `gridflow` created for `gridflow.unitasconnect.com`.
@@ -108,4 +114,4 @@ Stage 3A2 (Remote Access Trial) has validated the primary Cloudflare route: a na
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3A2 primary route validated — next decision is whether the controlled tunnel is sufficient for the near-term trial or whether always-on hosting should be planned later
+- Stage 3A2 complete — next decision is what Stage 3 follow-on should be, without jumping into hosted deployment or Stage 4 features

@@ -12,6 +12,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Validated
 
+- Stage 3A2 closed as a controlled remote-access validation success.
+
 - Cloudflare Tunnel + Access controlled remote trial:
   - named tunnel `gridflow` created for `gridflow.unitasconnect.com`
   - local GridFlow app served through the tunnel from `http://localhost:5001`
@@ -31,7 +33,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Still pending
 
-- Formal Stage 3A2 closure decision.
+- Next-stage orchestration decision.
 - Any always-on hosted deployment, backup process, app-level accounts, or wider rollout remains deferred to a later stage/decision.
 
 ### Added

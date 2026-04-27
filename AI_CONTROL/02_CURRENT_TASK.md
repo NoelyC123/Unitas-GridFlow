@@ -2,13 +2,13 @@
 
 ## Phase
 
-**Stage 3A2 access-gated remote trial validated — record and decide closure**
+**Stage 3A2 complete — decide next validated stage**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. The next task is to record the validation result and decide whether Stage 3A2 can be closed as a controlled remote-access trial, or whether more trial evidence is needed before closure.
+The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The next task is an orchestrator decision on the next narrow validation-led stage.
 
 Validation completed:
 
@@ -37,7 +37,7 @@ Validation completed:
 
 ## Next task
 
-Proceed to **Stage 3A2 validation recording / closure decision**.
+Proceed to **next-stage planning / orchestration review**.
 
 Use:
 
@@ -45,13 +45,20 @@ Use:
 - Fallback route: Tailscale trusted-device access
 - Deferred: Render/Railway/full hosted deployment
 
-The trial proved:
+Stage 3A2 proved:
 
 - app reachable from a phone or external trusted device
 - Cloudflare Access prompts for authentication before app access
 - upload into a project works remotely with non-sensitive test data
 - project dashboard updates remotely
 - Map/PDF/D2D/Review links work remotely
+
+Recommended next-step candidates for orchestrator review:
+
+- Stage 3A operational runbook: document how to start/stop/recover the local app + named tunnel safely.
+- Stage 3A field-trial checklist: define how to run the first real controlled surveyor/designer trial without adding new product features.
+- Stage 3B follow-on: improve review workflow only if real remote-trial friction shows the need.
+- Defer always-on hosting, app accounts, cloud storage, photo upload, tablet capture, and live Trimble sync until explicitly approved.
 
 ---
 
