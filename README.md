@@ -246,6 +246,34 @@ Deferred from Stage 3A2 but retained in the roadmap:
 - Render/Railway/full hosted deployment
 - app user accounts or role-based access control
 
+### Validation Evidence Packs
+
+Create a shareable evidence pack for a project/file run:
+
+```
+python scripts/create_validation_pack.py --project-id P007 --file-id F001 --zip
+```
+
+Or use the compact run identifier:
+
+```
+python scripts/create_validation_pack.py --run P007/F001 --zip
+```
+
+Legacy jobs are also supported:
+
+```
+python scripts/create_validation_pack.py --job-id J16535 --zip
+```
+
+The pack is written to the Desktop by default and includes the raw input, `meta.json`, `issues.csv`, `map_data.json`, `sequenced_route.json`, review decisions when present, generated PDF, D2D Chain CSV, D2D Working View CSV, validation notes, and an AI review prompt.
+
+Add screenshots when useful:
+
+```
+python scripts/create_validation_pack.py --run P007/F001 --screenshots-dir ~/Downloads/gridflow-screenshots --zip
+```
+
 ---
 
 ## Tech stack
