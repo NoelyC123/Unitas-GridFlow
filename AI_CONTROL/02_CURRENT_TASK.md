@@ -2,13 +2,13 @@
 
 ## Phase
 
-**Stage 3A2 complete — decide next validated stage**
+**Stage 3A complete — prepare first controlled field trial**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The next task is an orchestrator decision on the next narrow validation-led stage.
+The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. Claude Desktop approved closure and recommended the next narrow validation-led step: prepare and run the first controlled field-trial checklist, supported by an operational runbook.
 
 Validation completed:
 
@@ -37,7 +37,7 @@ Validation completed:
 
 ## Next task
 
-Proceed to **next-stage planning / orchestration review**.
+Proceed to **first controlled field-trial preparation**.
 
 Use:
 
@@ -53,11 +53,12 @@ Stage 3A2 proved:
 - project dashboard updates remotely
 - Map/PDF/D2D/Review links work remotely
 
-Recommended next-step candidates for orchestrator review:
+Next step:
 
-- Stage 3A operational runbook: document how to start/stop/recover the local app + named tunnel safely.
-- Stage 3A field-trial checklist: define how to run the first real controlled surveyor/designer trial without adding new product features.
-- Stage 3B follow-on: improve review workflow only if real remote-trial friction shows the need.
+- Use `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md` to run the local app and named tunnel safely.
+- Use its field-trial checklist to test a real or approved replay surveyor/designer workflow.
+- Record what worked, what failed, and whether D2D output reduced manual spreadsheet work.
+- Do not build Stage 3B follow-on features until field-trial friction proves the need.
 - Defer always-on hosting, app accounts, cloud storage, photo upload, tablet capture, and live Trimble sync until explicitly approved.
 
 ---
@@ -80,6 +81,7 @@ Recommended next-step candidates for orchestrator review:
 - `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md`
 - `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md`
 - `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`
+- `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md`
 - `README.md`
 - `app/project_manager.py`
 - `app/routes/api_projects.py`

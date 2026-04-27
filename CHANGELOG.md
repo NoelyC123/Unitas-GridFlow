@@ -38,6 +38,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **`AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md`** — operational runbook and first controlled field-trial checklist:
+  - start/stop commands for local Flask app and named Cloudflare Tunnel
+  - Access-gated remote test steps
+  - Mac/WiFi DNS cache recovery note for `DNS_PROBE_FINISHED_NXDOMAIN`
+  - first controlled surveyor/designer field-trial checklist
+  - post-trial evidence prompts and scope boundaries
+
 - **`AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`** — Stage 3A2 planning brief:
   - recommends Cloudflare Tunnel + Cloudflare Access as the first controlled remote-access trial
   - keeps Tailscale as the private trusted-device fallback

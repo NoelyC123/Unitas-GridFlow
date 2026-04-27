@@ -227,9 +227,9 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Ask the orchestrator to choose the next narrow validation-led stage.
-2. Keep using the named tunnel only for controlled trials while the Mac is online.
-3. Likely next candidates: operational runbook, first real controlled field-trial checklist, or a narrowly scoped Stage 3B follow-on if remote-use friction proves it is needed.
+1. Use `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md` to run the local app and named tunnel safely.
+2. Prepare the first controlled field trial using the checklist in that document.
+3. Keep using the named tunnel only for controlled trials while the Mac is online.
 4. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.
 
 ---
