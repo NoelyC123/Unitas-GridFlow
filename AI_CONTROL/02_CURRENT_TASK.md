@@ -2,13 +2,13 @@
 
 ## Phase
 
-**Stage 3 mobile intake polish implemented — validate on phone**
+**Stage 3 closed — operational use phase**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The first controlled field trial has now been run with the real Gordon file through the protected remote workflow. Claude Desktop approved a narrow Stage 3 mobile usability follow-on, and the scoped homepage/navigation/project-file-card polish has been implemented.
+The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The first controlled field trial has now been run with the real Gordon file through the protected remote workflow. Claude Desktop approved a narrow Stage 3 mobile usability follow-on, and the scoped homepage/navigation/project-file-card polish has been implemented and validated with an iPhone evidence pack. A final map wording clarity polish was also completed.
 
 Validation completed:
 
@@ -30,6 +30,9 @@ Validation completed:
 - Homepage wording updated from Stage 1 QA/compliance framing to survey-to-design project intake and D2D handoff framing.
 - Navigation updated so Projects and New Upload are primary, with Legacy Jobs secondary.
 - Project detail page now renders mobile file cards with status, intake context, key counts, office feedback, and Map/Review/PDF/D2D actions.
+- Validation evidence pack generated for `P007/F001` with raw input, app outputs, review JSON, PDF/D2D exports, 14 iPhone screenshots, validation notes, and AI review prompt.
+- Map wording now distinguishes mapped records from total survey records.
+- Replacement wording now distinguishes QA replacement signals from reviewed EXpole assignments.
 
 ---
 
@@ -45,7 +48,7 @@ Validation completed:
 
 ## Next task
 
-Proceed to **phone validation of Stage 3 mobile intake polish**.
+Proceed to **operational use on a real survey-to-design job**.
 
 Use:
 
@@ -53,22 +56,24 @@ Use:
 - Fallback route: Tailscale trusted-device access
 - Deferred: Render/Railway/full hosted deployment
 
-Stage 3A2 proved:
+Stage 3 proved:
 
 - app reachable from a phone or external trusted device
 - Cloudflare Access prompts for authentication before app access
 - upload into a project works remotely with non-sensitive test data
 - project dashboard updates remotely
 - Map/PDF/D2D/Review links work remotely
+- real Gordon survey data can be uploaded, reviewed, exported, and packaged as validation evidence
+- mobile project intake is usable enough to stop internal polish and begin operational use
 
-Next validation:
+Next operational use:
 
-- Open `https://gridflow.unitasconnect.com` from iPhone/mobile data once the local app reloads the updated templates.
-- Confirm homepage wording and primary links now reflect Projects / New Upload / Legacy Jobs.
-- Open project `P007` and confirm the survey file appears as a mobile card instead of a cramped table.
-- Confirm Map / Review / PDF / D2D Chain / D2D Working actions are visible and tappable from the mobile card.
-- Do not begin hosted deployment, app accounts, cloud storage, photo upload, tablet capture, or live Trimble sync.
-- Defer always-on hosting, app accounts, cloud storage, photo upload, tablet capture, and live Trimble sync until explicitly approved.
+- Use GridFlow on the next real job as the actual survey-to-design handoff workflow.
+- Upload the real controller CSV at end of day or when the file is ready.
+- Review the project dashboard, map, design-readiness findings, EXpole pairings, PDF, Clean Chain, and D2D Working View.
+- Try to use the D2D Working View instead of rebuilding the manual D2D spreadsheet from scratch.
+- Record friction, missing evidence, export gaps, designer questions, and any need to return to field notes/photos.
+- Keep Stage 4 structured field capture/tablet/photo/Trimble-GIS integration as future roadmap, not current implementation.
 
 ---
 
@@ -78,7 +83,7 @@ Next validation:
 - Do not begin Render/Railway/full hosted deployment
 - Do not build app user accounts or role-based auth
 - Do not redesign architecture
-- Do not begin Stage 4 tablet capture
+- Do not begin Stage 4 tablet capture, photo upload, or structured field forms before operational use evidence
 - Do not begin Stage 5 or 6 work
 - Do not add new QA rules or sequencing algorithms
 - Do not implement photo upload, tablet capture, or live Trimble sync in Stage 3A2
@@ -91,6 +96,7 @@ Next validation:
 - `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md`
 - `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`
 - `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md`
+- `AI_CONTROL/27_STAGE_3_CLOSURE_AND_OPERATIONAL_USE.md`
 - `README.md`
 - `app/project_manager.py`
 - `app/routes/api_projects.py`

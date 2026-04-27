@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3A2 complete — controlled remote access validated**
+**Stage 3 complete — enter operational use**
 
 Stage 1 is complete.
 
@@ -15,6 +15,10 @@ Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated.
 
 Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was validated with a named Cloudflare Tunnel for `gridflow.unitasconnect.com` protected by Cloudflare Access email one-time PIN. A phone on mobile data authenticated through Access, loaded the app, uploaded non-sensitive `sample_data/mock_survey.csv`, updated the project dashboard, and opened Map/PDF/D2D/Review outputs. Tailscale remains the private fallback. Render/Railway/full hosted deployment is deferred.
+
+Stage 3 mobile validation is complete. The real Gordon file was uploaded through the protected remote workflow as `P007/F001`, reviewed, exported, captured in a validation evidence pack, and used to drive a final map wording clarity polish.
+
+The project is now in an **operational use phase**: use GridFlow on a real survey-to-design job, measure whether the D2D Working View and review flow reduce manual work, and let real friction define the next build.
 
 ---
 
@@ -65,19 +69,24 @@ Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was va
 - **Stage 3A2: named Cloudflare Tunnel + Access validated from iPhone/mobile data**
 - **Stage 3A2: protected remote upload/dashboard/Map/PDF/D2D/Review smoke test passed with non-sensitive mock CSV**
 - **Stage 3A2: closed as a controlled remote-access validation success**
+- **Stage 3 mobile polish: homepage/navigation/project-file cards validated with Gordon iPhone screenshots**
+- **Stage 3 validation evidence pack utility: packages raw input, app outputs, review JSON, screenshots, notes, and AI review prompt**
+- **Stage 3 map clarity polish: distinguishes mapped records from total survey records and QA replacement signals from reviewed EXpole assignments**
 
 ## Counts
 
-- **Tests passing:** 281
+- **Tests passing:** 284
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c
 
 ## What was just shipped
 
-- Stage 3A2 closure
+- Stage 3 closure
+  - Stage 3C, Stage 3B, Stage 3A1, Stage 3A2, mobile intake polish, validation evidence packs, and map clarity polish are complete for the current evidence set.
   - Controlled remote access validated with Cloudflare Tunnel + Cloudflare Access.
+  - Real Gordon field-trial evidence pack generated with raw input, generated outputs, review JSON, PDF/D2D exports, notes, prompt, and iPhone screenshots.
   - No app accounts, hosted deployment, cloud storage migration, photo upload, tablet capture, or live Trimble sync were introduced.
-  - Next step is an orchestrator decision on the next stage/scope.
+  - Next step is operational use on a real job.
 
 - Stage 3A2: Cloudflare Access-gated remote validation
   - Named tunnel `gridflow` created for `gridflow.unitasconnect.com`.
@@ -101,12 +110,13 @@ Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was va
 
 1. No cross-file chain merging or combined exports within a project.
 2. No combined project-level map overlay.
-3. No section boundary editing (Stage 3B+ scope).
+3. No section boundary editing.
 4. Stage 3A2 uses the local Mac as the origin, so remote access depends on the Mac and `cloudflared` tunnel staying online.
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
 6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
 7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
 8. Reviewed state affects D2D CSV exports only — PDF update deferred.
+9. Stage 4 structured field capture/tablet/photo workflows remain future roadmap and require operational evidence before design.
 
 ## Strategic position
 
@@ -114,4 +124,5 @@ Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was va
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3A2 complete — next decision is what Stage 3 follow-on should be, without jumping into hosted deployment or Stage 4 features
+- Stage 3 complete — next work should come from real operational use rather than internal validation polish
+- Stage 4 remains the future structured field-capture layer around Trimble/GNSS/controller/GIS data, not a replacement for Trimble positioning

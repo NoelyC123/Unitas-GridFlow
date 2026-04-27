@@ -10,6 +10,43 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
 
+### Stage 3 Closure
+
+- Stage 3 is closed for the current evidence set.
+- Added `AI_CONTROL/27_STAGE_3_CLOSURE_AND_OPERATIONAL_USE.md`:
+  - records Stage 3C, Stage 3B, Stage 3A1, Stage 3A2, mobile intake polish, validation evidence packs, and map clarity polish as complete
+  - preserves Stage 4 structured field capture/tablet/photo/Trimble-GIS integration as future roadmap
+  - defines the next phase as real operational use on an actual survey-to-design job
+  - adds an operational-use checklist and evidence prompts
+- Current direction:
+  - stop internal Stage 3 polish
+  - use GridFlow on a real job
+  - let real operational friction define the next build
+
+### Added
+
+- `scripts/create_validation_pack.py`:
+  - creates Desktop validation evidence packs for project/file runs such as `P007/F001` and legacy jobs such as `J16535`
+  - copies raw input, `project.json`, `meta.json`, `issues.csv`, `map_data.json`, `sequenced_route.json`, review decisions, screenshots, notes, and AI review prompt
+  - generates PDF, Clean Chain, and D2D Working View outputs through existing app routes without changing app logic
+  - supports zipped packs and uppercase iPhone `.HEIC` screenshots
+- README validation-pack usage instructions.
+
+### Changed
+
+- Map viewer validation wording:
+  - top count now says mapped records and can show total survey records separately
+  - replacement narratives are labelled as probable replacement signals / QA prompts, not final reviewed EXpole assignments
+  - record panel title now says all mapped records
+
+### Validated
+
+- Final Gordon evidence pack generated:
+  - `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_131851_Gordon_Field_Trial_With_Screenshots.zip`
+  - includes raw Gordon input, generated app outputs, review JSON, PDF/D2D exports, notes, prompt, and 14 iPhone screenshots
+- Full suite after map clarity polish: **284 passed**.
+- `pre-commit run --all-files` passed.
+
 ### Changed
 
 - Stage 3 mobile intake polish:

@@ -27,14 +27,14 @@ This project exists because the project owner has done both the survey job on si
 ### Stage 1 — Post-survey QA gate (COMPLETE)
 Raw controller dump arrives → tool parses it → reports what's there and what's missing → designer knows what they're working with before opening PoleCAD.
 
-### Stage 2 — D2D elimination (COMPLETION REVIEW)
+### Stage 2 — D2D elimination (COMPLETE)
 Tool takes raw controller dump and produces structured, sequenced, designer-readable D2D replacement outputs directly. It now provides a clean route-chain export and an interleaved D2D working view. Final PoleCAD import format remains out of scope until verified with additional evidence.
 
-### Stage 3 — Live intake platform
+### Stage 3 — Live intake platform (COMPLETE)
 Instead of processing files after the fact, the tool becomes what the surveyor sends data to in real-time. Surveyor syncs controller data at end of each day (or continuously). Tool immediately validates, runs QA, produces completeness report. Designer sees job building up in real-time. Feedback loop closes while surveyor is still on site or nearby.
 
-### Stage 4 — Structured field capture
-Surveyor uses a tablet/iPad alongside Trimble with GIS integration. Instead of writing in a notebook, they enter structured data: pole type, stay type/quantity/dimensions, clearance measurements, crossing details, photos geotagged to point records. 80% of what currently goes on paper moves into structured digital capture.
+### Stage 4 — Structured field capture (FUTURE)
+Surveyor uses a tablet/iPad alongside Trimble/GNSS and GIS data. Trimble remains the coordinate/source-of-position authority; Unitas GridFlow becomes the structured engineering capture layer around those records. Instead of writing design-critical evidence only in a notebook, the surveyor enters structured data such as pole type, stay type/quantity/dimensions, clearance measurements, crossing details, access/private-land notes, and photos linked to point records. 80% of what currently goes on paper moves into structured digital capture.
 
 ### Stage 5 — Designer workspace
 Tool presents the complete job to the designer: route on map, every pole with full attributes, replacement pairs identified, stay requirements flagged, clearance issues highlighted, photos linked. Designer reviews, approves/amends, exports directly to PoleCAD. The "open the CSV and figure out what it means" step is gone.
@@ -70,17 +70,19 @@ The tool currently:
 - Produces interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
 - Handles detached / not-required records
 - Produces section-aware output and global provisional design pole numbering
-- 211 passing tests, active CI
+- Supports named projects, project file intake metadata, designer review, reviewed/provisional exports, and controlled remote mobile access
+- Provides a repeatable validation evidence-pack utility for raw input, generated outputs, review state, screenshots, notes, and AI review prompts
+- 284 passing tests, active CI
 
-Validated on Gordon and NIE real survey files, including raw Gordon data and manual PR1/PR2 split evidence.
+Validated on Gordon and NIE real survey files, including raw Gordon data, manual PR1/PR2 split evidence, and a protected iPhone/mobile Gordon field-trial run.
 
 ---
 
 ## Current phase
 
-**Stage 2 completion review**
+**Operational use after Stage 3 closure**
 
-The immediate priority is deciding whether Stage 2 can be marked complete for the current evidence set as a validated provisional D2D replacement baseline.
+Stages 1, 2 and 3 are complete for the current evidence set. The immediate priority is using GridFlow on a real operational job and letting real survey-to-design friction define the next build. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
 
 ---
 

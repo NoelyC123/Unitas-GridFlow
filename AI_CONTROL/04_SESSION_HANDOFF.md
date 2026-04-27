@@ -4,6 +4,42 @@
 
 ## What happened this session
 
+### Stage 3 closure — operational use phase begins
+
+Stage 3 is now closed for the current evidence set.
+
+Reason:
+
+- Stage 3C, Stage 3B, Stage 3A1, and Stage 3A2 are implemented and validated.
+- The Gordon real-file field trial proved protected remote/mobile intake, project dashboard review, map, PDF, D2D Chain, D2D Working View, and Designer Review.
+- Mobile intake polish was implemented and validated with iPhone screenshots.
+- A validation evidence-pack utility was added and used to create a final Gordon evidence pack with raw input, app outputs, review JSON, PDF/D2D exports, notes, prompt, and 14 iPhone screenshots.
+- A final map wording clarity polish now distinguishes mapped records from total survey records, and QA replacement signals from reviewed EXpole assignments.
+
+Decision:
+
+- Stop internal Stage 3 polish.
+- Use GridFlow on a real operational survey-to-design job.
+- Let real friction define the next build.
+
+Future roadmap preserved:
+
+- Trimble/GNSS remains the coordinate/source-of-position authority.
+- Unitas GridFlow remains the structured UK OHL survey-to-design workflow, validation, evidence, field-capture, and handoff layer around Trimble/controller/GIS data.
+- Stage 4 tablet/iPad structured field capture, photo evidence, richer surveyor capture, and Trimble/GIS integration remain valid future roadmap.
+- Do not implement Stage 4 until operational use evidence identifies the first field-capture requirement worth building.
+
+New control document:
+
+- `AI_CONTROL/27_STAGE_3_CLOSURE_AND_OPERATIONAL_USE.md`
+
+Latest validation:
+
+- `pytest -v` after map clarity polish — 284 passed.
+- `pre-commit run --all-files` — passed.
+
+---
+
 ### Stage 3 mobile intake polish — implemented
 
 Claude Desktop approved a narrow Stage 3 mobile usability follow-on after the Gordon field trial. Cursor/GPT implemented only the approved scope.

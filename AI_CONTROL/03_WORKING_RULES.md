@@ -61,11 +61,13 @@ Real-world evidence takes priority over abstract feature expansion. Do not build
 The project has 6 stages. Work on the current stage only. Do not jump ahead.
 
 1. Post-survey QA gate ✅
-2. D2D elimination ← CURRENT
-3. Live intake platform
-4. Structured field capture
+2. D2D elimination ✅
+3. Live intake platform ✅
+4. Structured field capture ← FUTURE
 5. Designer workspace
 6. DNO submission layer
+
+Current operating mode: use the completed Stage 3 tool on real survey-to-design work. Do not begin Stage 4 implementation until operational evidence identifies the first field-capture requirement worth building.
 
 ---
 
