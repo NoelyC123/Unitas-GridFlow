@@ -4,6 +4,65 @@
 
 ## What happened this session
 
+### Bellsprings EWM285 operational validation — completed
+
+Work-colleague evidence was received, inspected, organised locally, and used for the first real operational validation after Stage 3 closure.
+
+Local-only evidence location:
+
+- `/Users/noelcollins/Desktop/UGF Documentation April 2026/REAL_VALIDATION_EVIDENCE/`
+
+What the files are:
+
+- `01_Bellsprings_EWM285_Design_Package/01_Raw_Survey/Bellsprings_Woodside_Park_11kV_Rebuild_Trimble_Controller_Export.csv` — raw Trimble/controller-style survey export for `Woodside Park 11kV Rebuild`.
+- `01_Bellsprings_EWM285_Design_Package/02_Design_Outputs/` — real downstream design deliverables for the same job:
+  - pole schedule
+  - route map
+  - profile
+  - technical information sheet
+- `01_Bellsprings_EWM285_Design_Package/03_Original_Zip/Sample.zip` — original received Bellsprings archive, retained unchanged.
+- `02_EW_Scopes_Workplans/01_Site_Plans_and_Workplans/` — scope/workplan/site-plan DOCX documents, not raw survey files. They show real work-package instructions such as transformer replacement, tee-off pole replacement, inter-pole replacement, H-pole replacement, HV terminal pole replacement, and switching points.
+- `02_EW_Scopes_Workplans/02_Original_Zip/Scopes_of_Work.zip` — original received scopes archive, retained unchanged.
+
+How Bellsprings was used:
+
+- Processed in GridFlow as project `P008/F001`.
+- Rulepack: `SPEN_11kV`.
+- Initial evidence pack: `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_143117_Bellsprings_EWM285_Operational_Validation.zip`.
+- Initial comparison document: `04_Notes/bellsprings_initial_comparison.md` inside that pack.
+
+Initial findings:
+
+- GridFlow successfully ingested and processed the Bellsprings CSV.
+- The pole schedule coordinates matched raw survey points closely enough to prove this is a strong before/after validation sample.
+- `Pline` and `110xing` were incorrectly entering the structural/proposed chain.
+- Real pole schedule numbering and final design-pole interpretation do not match GridFlow provisional numbering directly.
+- Some final design poles use coordinates corresponding to `EXpole` records; this is a future reviewed-design interpretation gap, not an immediate parser bug.
+
+Code fix shipped:
+
+- `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` are now context records in both intake classification and QA structural filters.
+- Focused tests were added for role classification, structural-only QA, and span checks.
+- Full validation: `pytest -v` — 287 passed.
+- `pre-commit run --all-files` — passed.
+- Commit: `eb88bac Classify Bellsprings crossing codes as context`.
+
+After-fix validation:
+
+- Bellsprings reprocessed successfully.
+- Issue count changed from 24 to 18.
+- Structural/context counts changed from 46/10 to 40/16.
+- Replacement signals changed from 9 to 3.
+- After-fix evidence pack: `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_144746_Bellsprings_EWM285_After_Context_Code_Fix.zip`.
+
+Important boundary:
+
+- Raw colleague files, PDFs, DOCX files, generated `uploads/`, and validation packs remain local-only and are not committed to Git.
+- Do not implement EXpole-as-final-design-pole handling, design-number alignment, photo capture, tablet capture, or Stage 4 workflows from this evidence alone.
+- The next useful step is another operational comparison/review, not a broad feature build.
+
+---
+
 ### Stage 3 closure — operational use phase begins
 
 Stage 3 is now closed for the current evidence set.

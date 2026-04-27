@@ -72,9 +72,10 @@ The tool currently:
 - Produces section-aware output and global provisional design pole numbering
 - Supports named projects, project file intake metadata, designer review, reviewed/provisional exports, and controlled remote mobile access
 - Provides a repeatable validation evidence-pack utility for raw input, generated outputs, review state, screenshots, notes, and AI review prompts
-- 284 passing tests, active CI
+- Classifies real-world route context / crossing records such as `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` as context rather than structural poles
+- 287 passing tests, active CI
 
-Validated on Gordon and NIE real survey files, including raw Gordon data, manual PR1/PR2 split evidence, and a protected iPhone/mobile Gordon field-trial run.
+Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw Gordon data, manual PR1/PR2 split evidence, a protected iPhone/mobile Gordon field-trial run, and a Bellsprings before/after package with real pole schedule, route map, profile, and technical information sheet.
 
 ---
 

@@ -35,7 +35,7 @@ The project is now in an **operational use phase**: use GridFlow on a real surve
 - PDF pre-design briefing report
 - DNO rulepack inference from geography
 - Column/header normalisation for structured CSVs
-- Context feature classification (Hedge, Fence, Wall, Gate, Track, Road, Tree, Stream, BTxing, LVxing, Ignore)
+- Context feature classification (Hedge, Fence, Wall, Gate, Track, Road, Tree, Stream, Pline, 110xing, 33xing, 11xing, BTxing, HVxing, LVxing, Ignore)
 - Stage 2 clean route-chain export (`<job_id>_d2d_chain.csv`)
 - Stage 2 interleaved D2D working view (`<job_id>_d2d_working_view.csv`)
 - Route sequencing from raw controller exports
@@ -75,11 +75,20 @@ The project is now in an **operational use phase**: use GridFlow on a real surve
 
 ## Counts
 
-- **Tests passing:** 284
+- **Tests passing:** 287
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
-- **Real files validated:** Gordon, 4-474, 513, 474c
+- **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
 
 ## What was just shipped
+
+- Bellsprings EWM285 operational validation and fix
+  - Work-colleague evidence was organised locally as a real validation package: raw Bellsprings Trimble/controller CSV, pole schedule, route map, profile, TIS, and separate scope/workplan/site-plan documents.
+  - Bellsprings was processed as project `P008/F001` against `SPEN_11kV`.
+  - Initial comparison showed `Pline` and `110xing` were being treated as proposed/structural records even though they are route/crossing context.
+  - Narrow operational fix shipped: `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` are context records in both intake classification and structural-only QA.
+  - Before/after result: issue count dropped from 24 to 18; structural/context counts changed from 46/10 to 40/16.
+  - New after-fix validation pack: `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_144746_Bellsprings_EWM285_After_Context_Code_Fix.zip`.
+  - Real design-numbering and EXpole-as-final-design-pole interpretation remain documented as future evidence gaps, not code changes.
 
 - Stage 3 closure
   - Stage 3C, Stage 3B, Stage 3A1, Stage 3A2, mobile intake polish, validation evidence packs, and map clarity polish are complete for the current evidence set.

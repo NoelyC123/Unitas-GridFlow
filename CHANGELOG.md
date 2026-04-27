@@ -10,6 +10,38 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
 
+### Bellsprings Operational Validation
+
+- Organised work-colleague evidence locally under `/Users/noelcollins/Desktop/UGF Documentation April 2026/REAL_VALIDATION_EVIDENCE/`.
+- Confirmed the Bellsprings package contains a raw Trimble/controller CSV plus real design outputs for the same SPEN 11kV rebuild:
+  - pole schedule
+  - route map
+  - profile
+  - technical information sheet
+- Confirmed the separate Scopes/Workplans package contains site-plan/workplan DOCX context, not raw survey exports.
+- Processed Bellsprings as project `P008/F001` with `SPEN_11kV`.
+- Created an initial validation pack and comparison note:
+  - `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_143117_Bellsprings_EWM285_Operational_Validation.zip`
+  - `04_Notes/bellsprings_initial_comparison.md` inside the pack
+- Shipped a narrow operational fix:
+  - `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` are context records, not structural poles
+  - intake role classification and QA structural filters now stay aligned
+  - focused regression tests cover classification, height QA, and span QA
+- After reprocessing Bellsprings:
+  - issue count dropped from 24 to 18
+  - structural/context counts changed from 46/10 to 40/16
+  - replacement signals changed from 9 to 3
+- Created after-fix validation pack:
+  - `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_144746_Bellsprings_EWM285_After_Context_Code_Fix.zip`
+- Validation:
+  - full suite: **287 passed**
+  - `pre-commit run --all-files` passed
+
+### Boundaries
+
+- Raw colleague evidence, PDFs, DOCX files, generated `uploads/`, and validation packs remain local-only and untracked.
+- No EXpole/design-numbering logic was changed. Bellsprings shows this may become a reviewed-design interpretation problem, but it needs a separate decision before implementation.
+
 ### Stage 3 Closure
 
 - Stage 3 is closed for the current evidence set.

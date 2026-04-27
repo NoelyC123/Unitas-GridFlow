@@ -33,6 +33,10 @@ Validation completed:
 - Validation evidence pack generated for `P007/F001` with raw input, app outputs, review JSON, PDF/D2D exports, 14 iPhone screenshots, validation notes, and AI review prompt.
 - Map wording now distinguishes mapped records from total survey records.
 - Replacement wording now distinguishes QA replacement signals from reviewed EXpole assignments.
+- Bellsprings EWM285 work-colleague evidence package was organised locally and used for the first operational validation pass after Stage 3 closure.
+- Bellsprings processed as project `P008/F001`; initial validation exposed `Pline` and `110xing` as context/crossing records that were incorrectly entering the structural chain.
+- Narrow context-code fix shipped for `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing`; after rerun, issues dropped from 24 to 18 and structural/context counts moved from 46/10 to 40/16.
+- After-fix evidence pack generated: `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_144746_Bellsprings_EWM285_After_Context_Code_Fix.zip`.
 
 ---
 
@@ -73,6 +77,7 @@ Next operational use:
 - Review the project dashboard, map, design-readiness findings, EXpole pairings, PDF, Clean Chain, and D2D Working View.
 - Try to use the D2D Working View instead of rebuilding the manual D2D spreadsheet from scratch.
 - Record friction, missing evidence, export gaps, designer questions, and any need to return to field notes/photos.
+- For Bellsprings, do not change EXpole/design-numbering logic yet. The real pole schedule shows some final design poles at EXpole coordinates, but that requires a separate reviewed-design interpretation step before implementation.
 - Keep Stage 4 structured field capture/tablet/photo/Trimble-GIS integration as future roadmap, not current implementation.
 
 ---
