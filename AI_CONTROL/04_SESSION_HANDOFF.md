@@ -231,3 +231,58 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 2. Keep using the named tunnel only for controlled trials while the Mac is online.
 3. Likely next candidates: operational runbook, first real controlled field-trial checklist, or a narrowly scoped Stage 3B follow-on if remote-use friction proves it is needed.
 4. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.
+
+---
+
+## Tool usage instructions for next chat
+
+Use Cursor/GPT as the default working agent for routine repo work:
+
+- documentation updates
+- validation notes
+- small scoped implementation
+- test/check runs
+- commits for agreed, narrow changes
+- operational guidance such as starting the app or tunnel
+
+Use Claude Desktop selectively as the project orchestrator:
+
+- stage closure decisions
+- next-stage scope decisions
+- ambiguous product direction
+- commercial/strategic tradeoffs
+- deciding whether to move from controlled tunnel trial to broader field trial, hosted deployment, or later-stage work
+
+Do not use Claude Desktop for routine admin, small doc edits, or obvious mechanical updates.
+
+Use Claude Code only when the task is code-heavy, risky, or benefits from autonomous repo-wide implementation:
+
+- multi-file feature implementation
+- complex refactors
+- substantial test additions
+- debugging failures that require broad code inspection
+- infrastructure/code changes beyond simple operational setup
+
+Do not use Claude Code for routine docs, small validation records, or simple command guidance.
+
+Use ChatGPT as a second-opinion / analysis tool when useful:
+
+- reviewing strategic options
+- challenging assumptions
+- commercial framing
+- comparing deployment/access approaches
+- drafting questions for orchestrator review
+
+Do not treat ChatGPT output as project truth unless it is reviewed and folded into the active control layer.
+
+Source-of-truth order remains:
+
+1. Real validation evidence
+2. `AI_CONTROL/` active control files
+3. Repo code and tests
+4. Documentation
+5. AI outputs
+
+Current hard boundary:
+
+- Do not build app accounts, hosted deployment, cloud storage migration, photo upload, tablet capture, live Trimble sync, Stage 4, Stage 5, or Stage 6 work unless explicitly approved as a new stage/task.
