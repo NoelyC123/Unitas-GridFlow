@@ -518,6 +518,8 @@ def test_map_view_passes_completeness_to_template(tmp_path, monkeypatch) -> None
     assert response.status_code == 200
     html = response.data.decode("utf-8")
     assert "Survey Completeness" in html
+    assert "Mapped Records" in html
+    assert "3 total survey records" in html
     assert "EPSG:29900" in html
     assert "Angle" in html
 
@@ -587,6 +589,9 @@ def test_map_view_includes_design_readiness_verdict(tmp_path, monkeypatch) -> No
             "design_readiness": {
                 "verdict": "PARTIALLY READY",
                 "reasons": ["height data incomplete (18.2% coverage)"],
+                "what_this_supports": [
+                    "11 probable replacement pairs detected — verify intended pairings"
+                ],
                 "coverage": {
                     "Position & Identity": "Strong",
                     "Structural Data": "Missing",
@@ -612,10 +617,45 @@ def test_map_view_includes_design_readiness_verdict(tmp_path, monkeypatch) -> No
     assert "PARTIALLY READY" in html
     assert "Survey Coverage" in html
     assert "Position &amp; Identity" in html
+    assert "Replacement counts here are QA signals/clusters" in html
+
+
+def test_map_view_clarifies_replacement_narratives_are_not_reviewed_assignments(
+    tmp_path, monkeypatch
+) -> None:
+    """Map replacement narratives must be framed as QA prompts, not reviewed pairings."""
+    from app.routes import map_preview
+
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J70003"
+    job_dir.mkdir(parents=True)
+
+    _write_json(
+        job_dir / "meta.json",
+        {
+            "job_id": "J70003",
+            "status": "complete",
+            "replacement_narratives": [
+                "EXpole 29 is likely being replaced by nearby proposed support 30."
+            ],
+        },
+    )
+
+    monkeypatch.setattr(map_preview, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/map/view/J70003")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Probable Replacement Signals" in html
+    assert "Map narratives are evidence prompts" in html
 
 
 def test_map_view_shows_records_label_not_poles(tmp_path, monkeypatch) -> None:
-    """Map view must use 'Records' label, not 'Poles'."""
+    """Map view must use mapped-record wording, not 'Poles'."""
     from app.routes import map_preview
 
     jobs_root = tmp_path / "jobs"
@@ -633,7 +673,7 @@ def test_map_view_shows_records_label_not_poles(tmp_path, monkeypatch) -> None:
 
     assert response.status_code == 200
     html = response.data.decode("utf-8")
-    assert "Records" in html
+    assert "Mapped Records" in html
     assert "Poles" not in html
 
 

@@ -318,8 +318,13 @@
             <div style="text-align:center; margin-bottom:14px;">
               <div id="all-records-btn" style="cursor:pointer; display:inline-block; padding:4px; border-radius:8px; transition:background 0.15s;" title="Click to list all records">
                 <div id="pole-count" class="stat-value">0</div>
-                <div class="stat-label">Records</div>
+                <div class="stat-label">Mapped Records</div>
               </div>
+              {% if completeness and completeness.total_records %}
+              <div style="font-size:0.78rem; color:#6b7280; margin-top:4px;">
+                {{ completeness.total_records }} total survey records
+              </div>
+              {% endif %}
             </div>
 
             <div id="role-breakdown" style="display:none; font-size:0.8rem; color:#6b7280; text-align:center; margin-bottom:10px;"></div>
@@ -428,6 +433,9 @@
                   <li>{{ item }}</li>
                   {% endfor %}
                 </ul>
+                <div style="font-size:0.74rem; color:#6b7280; margin-top:6px; line-height:1.35;">
+                  Replacement counts here are QA signals/clusters. Confirmed EXpole assignments are shown in Designer Review and reviewed D2D exports.
+                </div>
               </div>
               {% endif %}
             </div>
@@ -529,7 +537,8 @@
 
             {% if replacement_narratives %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
-              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Replacement Pairs</div>
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Probable Replacement Signals</div>
+              <div style="font-size: 0.76rem; color: #6b7280; margin-bottom: 6px; line-height: 1.35;">Map narratives are evidence prompts, not the final reviewed EXpole assignment list.</div>
               {% for narrative in replacement_narratives[:5] %}
               <div style="font-size: 0.82rem; color: #374151; margin-bottom: 4px; padding-left: 4px; border-left: 2px solid #d39e00;">{{ narrative }}</div>
               {% endfor %}
@@ -545,6 +554,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=10"></script>
+  <script src="/static/js/map-viewer.js?v=11"></script>
 </body>
 </html>

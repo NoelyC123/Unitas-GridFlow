@@ -244,7 +244,7 @@ class MapViewer {
         document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('filter-active'));
         if (this.filterNoteEl) this.filterNoteEl.textContent = '';
       }
-      this._showRecordPanel(this.featureData, `All Records (${this.featureData.length})`);
+      this._showRecordPanel(this.featureData, `All Mapped Records (${this.featureData.length})`);
     });
   }
 
