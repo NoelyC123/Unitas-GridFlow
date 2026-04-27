@@ -2,21 +2,26 @@
 
 ## Phase
 
-**Stage 3A2 in progress — add controlled Cloudflare Access after temporary connectivity pass**
+**Stage 3A2 access-gated remote trial validated — record and decide closure**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-Temporary tunnel connectivity has been validated from a phone/external device. The next task is to add a Cloudflare domain/zone, create a named Cloudflare Tunnel, and protect it with Cloudflare Access before using real survey data.
+The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. The next task is to record the validation result and decide whether Stage 3A2 can be closed as a controlled remote-access trial, or whether more trial evidence is needed before closure.
 
-Temporary validation completed:
+Validation completed:
 
 - Home page loaded through a temporary `trycloudflare.com` tunnel.
 - `/projects/` loaded remotely.
 - `/upload` loaded remotely.
 - No real or sensitive survey CSVs were uploaded.
-- This does not count as full Stage 3A2 acceptance because Cloudflare Access was not active.
+- Named tunnel `gridflow` created for `gridflow.unitasconnect.com`.
+- Cloudflare Access email one-time PIN prompt appeared before app access.
+- iPhone on mobile data authenticated successfully through Access.
+- Non-sensitive `mock_survey.csv` uploaded remotely into project `P006` / `iPhone Test`.
+- Project dashboard updated remotely.
+- Map, PDF, D2D Chain, D2D Working, and Review routes responded successfully for `P006/F001`.
 
 ---
 
@@ -32,7 +37,7 @@ Temporary validation completed:
 
 ## Next task
 
-Proceed to **Stage 3A2 controlled remote access trial**.
+Proceed to **Stage 3A2 validation recording / closure decision**.
 
 Use:
 
@@ -40,11 +45,11 @@ Use:
 - Fallback route: Tailscale trusted-device access
 - Deferred: Render/Railway/full hosted deployment
 
-The trial should prove:
+The trial proved:
 
-- app reachable from a phone or external trusted device (temporary tunnel connectivity passed)
-- Cloudflare Access prompts for authentication before real survey data is used
-- upload into an existing project works remotely
+- app reachable from a phone or external trusted device
+- Cloudflare Access prompts for authentication before app access
+- upload into a project works remotely with non-sensitive test data
 - project dashboard updates remotely
 - Map/PDF/D2D/Review links work remotely
 

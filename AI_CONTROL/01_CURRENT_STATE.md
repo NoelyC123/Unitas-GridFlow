@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3A2 in progress — temporary connectivity validated; Access trial next**
+**Stage 3A2 access-gated remote trial validated**
 
 Stage 1 is complete.
 
@@ -14,7 +14,7 @@ Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated.
 
-Stage 3A2 (Remote Access Trial) is in progress. A temporary unauthenticated `trycloudflare.com` tunnel proved basic remote page reachability from a phone/external device. Full Stage 3A2 acceptance still requires a named Cloudflare Tunnel with Cloudflare Access protecting the app before any real survey data is used. Tailscale is the private fallback. Render/Railway/full hosted deployment is deferred.
+Stage 3A2 (Remote Access Trial) has validated the primary Cloudflare route: a named Cloudflare Tunnel for `gridflow.unitasconnect.com` protected by Cloudflare Access email one-time PIN. A phone on mobile data authenticated through Access, loaded the app, uploaded non-sensitive `sample_data/mock_survey.csv`, updated the project dashboard, and opened Map/PDF/D2D/Review outputs. Tailscale remains the private fallback. Render/Railway/full hosted deployment is deferred.
 
 ---
 
@@ -62,6 +62,8 @@ Stage 3A2 (Remote Access Trial) is in progress. A temporary unauthenticated `try
 - **Stage 3A1: project dashboard shows intake context alongside existing outputs**
 - **Stage 3A2: remote-access trial plan documented**
 - **Stage 3A2: temporary unauthenticated tunnel connectivity validated for home, projects, and upload pages**
+- **Stage 3A2: named Cloudflare Tunnel + Access validated from iPhone/mobile data**
+- **Stage 3A2: protected remote upload/dashboard/Map/PDF/D2D/Review smoke test passed with non-sensitive mock CSV**
 
 ## Counts
 
@@ -70,6 +72,14 @@ Stage 3A2 (Remote Access Trial) is in progress. A temporary unauthenticated `try
 - **Real files validated:** Gordon, 4-474, 513, 474c
 
 ## What was just shipped
+
+- Stage 3A2: Cloudflare Access-gated remote validation
+  - Named tunnel `gridflow` created for `gridflow.unitasconnect.com`.
+  - Cloudflare Access email one-time PIN prompt validated from iPhone/mobile data.
+  - After authentication, GridFlow loaded remotely.
+  - Non-sensitive `mock_survey.csv` uploaded from iPhone as project `P006` / `iPhone Test`.
+  - Project dashboard updated: 1 file, 5 poles, 10 issues.
+  - Map, PDF, D2D Chain, D2D Working, and Review routes all returned successfully for `P006/F001`.
 
 - Stage 3A2: temporary tunnel connectivity validation
   - A `trycloudflare.com` temporary tunnel loaded successfully from a phone/external device.
@@ -86,7 +96,7 @@ Stage 3A2 (Remote Access Trial) is in progress. A temporary unauthenticated `try
 1. No cross-file chain merging or combined exports within a project.
 2. No combined project-level map overlay.
 3. No section boundary editing (Stage 3B+ scope).
-4. Temporary unauthenticated Cloudflare Tunnel page reachability validated; named tunnel + Cloudflare Access validation still pending.
+4. Stage 3A2 uses the local Mac as the origin, so remote access depends on the Mac and `cloudflared` tunnel staying online.
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
 6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
 7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
@@ -98,4 +108,4 @@ Stage 3A2 (Remote Access Trial) is in progress. A temporary unauthenticated `try
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3A2 in progress — next validation is controlled access-gated remote intake through a named Cloudflare Tunnel
+- Stage 3A2 primary route validated — next decision is whether the controlled tunnel is sufficient for the near-term trial or whether always-on hosting should be planned later

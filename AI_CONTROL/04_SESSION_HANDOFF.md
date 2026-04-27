@@ -4,6 +4,61 @@
 
 ## What happened this session
 
+### Stage 3A2: Cloudflare Access-gated remote trial — validated
+
+The primary Stage 3A2 route was validated using a named Cloudflare Tunnel and Cloudflare Access.
+
+Operational setup completed:
+
+- Cloudflare zone: `unitasconnect.com`
+- Tunnel name: `gridflow`
+- Tunnel hostname: `gridflow.unitasconnect.com`
+- Tunnel origin: local GridFlow app on `http://localhost:5001`
+- Cloudflare Access application: `gridflow`
+- Access policy: email allow policy for Noel
+- Authentication method: Cloudflare Access email / one-time PIN
+
+Validation evidence:
+
+1. iPhone on mobile data opened `https://gridflow.unitasconnect.com`.
+2. Cloudflare Access login screen appeared before GridFlow loaded.
+3. Email one-time PIN was received and accepted.
+4. GridFlow loaded after authentication.
+5. `/projects/` loaded remotely.
+6. `/upload` loaded remotely.
+7. Non-sensitive `sample_data/mock_survey.csv` was uploaded from iPhone.
+8. Project dashboard updated with project `P006` / `iPhone Test`.
+9. Local stored project metadata confirms:
+   - file `F001`
+   - filename `mock_survey.csv`
+   - status `complete`
+   - uploaded by `Noel`
+   - surveyor note `Testing`
+   - 5 poles
+   - 10 issues
+   - review status `reviewed`
+10. Output routes for `P006/F001` returned successfully:
+    - project dashboard
+    - Map
+    - PDF
+    - D2D Chain
+    - D2D Working
+    - Review
+
+Boundary:
+
+- No real or sensitive survey CSVs were uploaded during the Access-gated test.
+- No app accounts, app-level auth, hosted deployment, cloud storage migration, photo upload, tablet capture, or live Trimble sync were built.
+- Data at rest remains on the local Mac; Cloudflare provides the protected HTTPS tunnel.
+- Remote availability depends on the Mac and `cloudflared tunnel run gridflow` staying online.
+
+Recommended next decision:
+
+- Stage 3A2 can be treated as validated for the controlled remote-access trial objective.
+- A later stage/decision is needed before always-on hosted deployment, backups, app-level accounts, or wider user rollout.
+
+---
+
 ### Stage 3A2: Temporary tunnel connectivity — validated, not accepted
 
 Cursor/GPT installed `cloudflared`, confirmed the local GridFlow app was reachable on `127.0.0.1:5001`, and started a temporary unauthenticated Cloudflare Tunnel using:
@@ -146,9 +201,9 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 ## Current state
 
 - Stage 3A1 local daily intake implemented and validated
-- Stage 3A2 remote access trial in progress
+- Stage 3A2 Cloudflare Tunnel + Access trial validated
 - Temporary unauthenticated tunnel page reachability validated from phone/external device
-- Cloudflare Access gated validation still pending
+- Access-gated remote upload/dashboard/export/review smoke test passed with non-sensitive data
 - Stage 1 complete
 - Stage 2A, 2B, 2C implemented and closed
 - Stage 3C implemented and validated — commit `b0b5331`
@@ -172,7 +227,6 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Add a Cloudflare domain/zone for the account.
-2. Create a named Cloudflare Tunnel and protect it with Cloudflare Access.
-3. Validate authenticated upload, project dashboard, Map/PDF/D2D exports, and Review from a phone or external trusted device.
+1. Decide whether to close Stage 3A2 as validated for controlled remote access.
+2. Keep using the named tunnel only for controlled trials while the Mac is online.
 3. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.
