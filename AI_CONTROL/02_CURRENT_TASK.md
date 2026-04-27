@@ -2,13 +2,13 @@
 
 ## Phase
 
-**Stage 3A field trial complete — decide mobile usability follow-on**
+**Stage 3 mobile intake polish implemented — validate on phone**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The first controlled field trial has now been run with the real Gordon file through the protected remote workflow.
+The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The first controlled field trial has now been run with the real Gordon file through the protected remote workflow. Claude Desktop approved a narrow Stage 3 mobile usability follow-on, and the scoped homepage/navigation/project-file-card polish has been implemented.
 
 Validation completed:
 
@@ -27,6 +27,9 @@ Validation completed:
 - Gordon review marked reviewed with 24 matched EXpoles and 0 unmatched EXpoles.
 - Gordon Map/PDF/D2D Chain/D2D Working/Review routes all worked.
 - Field-trial finding: core workflow passed; biggest friction is mobile table/review layout and outdated homepage wording.
+- Homepage wording updated from Stage 1 QA/compliance framing to survey-to-design project intake and D2D handoff framing.
+- Navigation updated so Projects and New Upload are primary, with Legacy Jobs secondary.
+- Project detail page now renders mobile file cards with status, intake context, key counts, office feedback, and Map/Review/PDF/D2D actions.
 
 ---
 
@@ -42,7 +45,7 @@ Validation completed:
 
 ## Next task
 
-Proceed to **next-stage decision: Stage 3 mobile usability follow-on or more field evidence**.
+Proceed to **phone validation of Stage 3 mobile intake polish**.
 
 Use:
 
@@ -58,11 +61,12 @@ Stage 3A2 proved:
 - project dashboard updates remotely
 - Map/PDF/D2D/Review links work remotely
 
-Next decision:
+Next validation:
 
-- Review the Gordon field-trial result in `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md`.
-- Decide whether to approve a narrow Stage 3 mobile usability follow-on.
-- Candidate follow-on: mobile-friendly project file cards, clearer mobile action buttons, compact review/export summary, and updated homepage wording.
+- Open `https://gridflow.unitasconnect.com` from iPhone/mobile data once the local app reloads the updated templates.
+- Confirm homepage wording and primary links now reflect Projects / New Upload / Legacy Jobs.
+- Open project `P007` and confirm the survey file appears as a mobile card instead of a cramped table.
+- Confirm Map / Review / PDF / D2D Chain / D2D Working actions are visible and tappable from the mobile card.
 - Do not begin hosted deployment, app accounts, cloud storage, photo upload, tablet capture, or live Trimble sync.
 - Defer always-on hosting, app accounts, cloud storage, photo upload, tablet capture, and live Trimble sync until explicitly approved.
 

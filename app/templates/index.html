@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unitas GridFlow — Pre-CAD QA</title>
+    <title>Unitas GridFlow — Survey-to-Design Intelligence</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -16,8 +16,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/upload">Upload</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/jobs">Jobs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/projects/">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/upload">New Upload</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/jobs">Legacy Jobs</a></li>
                     <li class="nav-item"><a class="nav-link" href="/health/full">Health</a></li>
                 </ul>
             </div>
@@ -27,16 +28,17 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <h1 class="mb-4">Unitas GridFlow — Pre-CAD QA Tool</h1>
-                <p class="lead">Upload survey data, check DNO compliance, and produce cleaner handoffs to CAD.</p>
+                <h1 class="mb-4">Unitas GridFlow — Survey-to-Design Intelligence</h1>
+                <p class="lead">Upload raw survey data, group it by project, review design readiness, and export cleaner D2D handoff outputs.</p>
 
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">Quick Start</h5>
                         <ul>
-                            <li><a href="/upload">Upload survey CSV</a> — start a new QA job</li>
-                            <li><a href="/jobs">View jobs</a> — browse completed and failed runs</li>
-                            <li><a href="/health/full">Health check</a> — verify system status</li>
+                            <li><a href="/projects/">View Projects</a> — open project dashboards, intake status, and exports</li>
+                            <li><a href="/upload">Upload New Survey File</a> — add a CSV to a new or existing project</li>
+                            <li><a href="/jobs">Legacy Jobs</a> — browse older flat job runs</li>
+                            <li><a href="/health/full">Health Check</a> — verify system status</li>
                         </ul>
                     </div>
                 </div>
@@ -44,9 +46,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">About</h5>
-                        <p>Unitas GridFlow validates surveyed pole data against DNO-oriented QA checks before it reaches CAD design.</p>
-                        <p><strong>Current capabilities:</strong> CSV upload, schema normalization, QA issue detection, map review, PDF reporting, and job browsing.</p>
-                        <p><small class="text-muted">Current build: working local MVP with active CI, linting, and initial pytest coverage.</small></p>
+                        <p>Unitas GridFlow is a survey-to-design handoff layer for overhead line work. It turns raw controller exports into project-based review evidence before design work starts.</p>
+                        <p><strong>Current capabilities:</strong> project intake, multi-file survey grouping, QA and design-readiness checks, route sequencing, EXpole pairing review, map/PDF review, and D2D handoff exports.</p>
+                        <p><small class="text-muted">Current build: Stage 3 controlled remote intake validated with Cloudflare Access and real Gordon survey data.</small></p>
                     </div>
                 </div>
             </div>

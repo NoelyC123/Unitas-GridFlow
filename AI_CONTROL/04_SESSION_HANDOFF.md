@@ -4,6 +4,40 @@
 
 ## What happened this session
 
+### Stage 3 mobile intake polish — implemented
+
+Claude Desktop approved a narrow Stage 3 mobile usability follow-on after the Gordon field trial. Cursor/GPT implemented only the approved scope.
+
+Implemented:
+
+- Homepage wording updated from early "Pre-CAD QA Tool" / DNO compliance framing to survey-to-design project intake, review, and D2D handoff framing.
+- Homepage quick-start links now prioritise Projects and New Upload, with Legacy Jobs and Health as secondary links.
+- Upload and legacy jobs page navigation now keeps Projects visible and labels upload as New Upload.
+- Map viewer legacy "Jobs" back-link changed to Projects for non-project map views.
+- Project detail page now keeps the desktop table but adds a mobile-only survey file card layout below 768px.
+- Mobile cards show filename, file ID, processing status, intake status, rulepack, record/issue/P/W/F counts, survey day, uploaded-by, surveyor note, office feedback, and Map/Review/PDF/D2D actions.
+
+Not changed:
+
+- No backend logic.
+- No processing pipeline.
+- No D2D export logic.
+- No map sidebar restructure.
+- No designer review page redesign.
+- No hosted deployment, app accounts, cloud storage, photo upload, tablet capture, or live Trimble sync.
+
+Validation run:
+
+- `pytest -v` — 283 passed.
+- `pre-commit run --all-files` — passed.
+
+Next validation:
+
+- Reload the local app/templates and check `https://gridflow.unitasconnect.com` from iPhone/mobile data.
+- Confirm `P007` uses the mobile card layout and the action buttons are easy to tap.
+
+---
+
 ### First controlled field trial — Gordon real file
 
 The first controlled field trial was run through the protected remote workflow.

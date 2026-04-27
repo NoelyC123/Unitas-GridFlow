@@ -349,6 +349,21 @@ def test_project_map_route_returns_200(client_and_root):
     assert b"map" in response.data.lower()
 
 
+def test_project_detail_includes_mobile_file_card_layout(client_and_root):
+    client, projects_root = client_and_root
+
+    _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+
+    response = client.get("/project/P001")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "files-mobile-list" in html
+    assert "mobile-file-card" in html
+    assert "mobile-action-grid" in html
+    assert "D2D Working" in html
+
+
 # ---------------------------------------------------------------------------
 # test_project_pdf_route_returns_200
 # ---------------------------------------------------------------------------

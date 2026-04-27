@@ -10,6 +10,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
 
+### Changed
+
+- Stage 3 mobile intake polish:
+  - homepage wording updated to survey-to-design project intake and D2D handoff framing
+  - homepage quick start now prioritises Projects and New Upload
+  - navigation labels updated so Projects and New Upload are primary and Legacy Jobs is secondary
+  - project detail page now has a mobile-only survey file card layout for narrow screens
+  - mobile file cards show status, intake context, rulepack, counts, office feedback, and Map/Review/PDF/D2D actions
+  - non-project map view back-link now points to Projects instead of legacy Jobs
+
 ### Validated
 
 - First controlled field trial with real Gordon file:

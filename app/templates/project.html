@@ -37,9 +37,22 @@
     .pwf-counts { font-size: 0.82rem; color: #374151; line-height: 1.5; }
     .actions-cell { white-space: nowrap; }
     .actions-cell .btn { margin-right: 4px; margin-bottom: 4px; }
+    .mobile-file-list { display: none; }
+    .mobile-file-card { border-bottom: 1px solid #e5e7eb; padding: 16px; }
+    .mobile-file-card:last-child { border-bottom: 0; }
+    .mobile-file-meta { color: #6b7280; font-size: 0.84rem; line-height: 1.45; }
+    .mobile-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .mobile-action-grid .btn { width: 100%; }
     .empty-state { padding: 36px 20px; text-align: center; color: #6b7280; }
     .error-box { display: none; margin-bottom: 16px; }
     @media (max-width: 900px) { .desktop-only { display: none; } }
+    @media (max-width: 767.98px) {
+      .files-table-wrap { display: none; }
+      .mobile-file-list { display: block; }
+      .summary-bar { gap: 16px; justify-content: space-between; }
+      .summary-item { min-width: 72px; }
+      .feedback-box { min-width: 0; width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -92,7 +105,7 @@
         <span id="file-count-label" class="text-muted small"></span>
       </div>
       <div class="card-body p-0">
-        <div class="table-responsive">
+        <div class="table-responsive files-table-wrap">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -109,6 +122,9 @@
               <tr><td colspan="7" class="empty-state">Loading files…</td></tr>
             </tbody>
           </table>
+        </div>
+        <div id="files-mobile-list" class="mobile-file-list">
+          <div class="empty-state">Loading files…</div>
         </div>
       </div>
     </div>
@@ -167,21 +183,49 @@
       return `<div class="actions-cell">${reviewBtn}${mapBtn}${pdfBtn}${chainBtn}${workingBtn}</div>`;
     }
 
+    function buildMobileFileActions(pid, fid, status, seqSummary) {
+      const s = String(status || "").toLowerCase();
+      if (s !== "complete") {
+        return `<span class="text-muted small">Processing…</span>`;
+      }
+
+      const hasSeq = seqSummary && seqSummary.status === "ok" && seqSummary.total_sequenced > 0;
+      const reviewBtn = `<a href="/review/project/${pid}/${fid}" class="btn btn-sm btn-outline-dark">
+        <i class="bi bi-check2-square"></i> Review</a>`;
+      const mapBtn = `<a href="/map/view/project/${pid}/${fid}" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-map"></i> Map</a>`;
+      const pdfBtn = `<a href="/pdf/qa/project/${pid}/${fid}" class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-file-pdf"></i> PDF</a>`;
+      const chainBtn = hasSeq
+        ? `<a href="/d2d/export/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-table"></i> D2D Chain</a>`
+        : "";
+      const workingBtn = hasSeq
+        ? `<a href="/d2d/interleaved/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-layout-text-sidebar"></i> D2D Working</a>`
+        : "";
+      return `<div class="mobile-action-grid">${mapBtn}${reviewBtn}${pdfBtn}${chainBtn}${workingBtn}</div>`;
+    }
+
     function renderFiles(files) {
       const tbody = document.getElementById("files-tbody");
+      const mobileList = document.getElementById("files-mobile-list");
       const countLabel = document.getElementById("file-count-label");
 
       if (!Array.isArray(files) || files.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
           No files yet. <a href="/upload?project_id=${escapeHtml(PROJECT_ID)}">Add a survey file</a> to get started.
         </td></tr>`;
+        if (mobileList) mobileList.innerHTML = `<div class="empty-state">
+          No files yet. <a href="/upload?project_id=${escapeHtml(PROJECT_ID)}">Add a survey file</a> to get started.
+        </div>`;
         if (countLabel) countLabel.textContent = "0 files";
         return;
       }
 
       if (countLabel) countLabel.textContent = `${files.length} file${files.length !== 1 ? "s" : ""}`;
 
-      tbody.innerHTML = files.map(f => {
+      const rows = files.map(f => {
         const fid = escapeHtml(f.file_id || "");
         const fname = escapeHtml(f.filename || f.file_id || "");
         const status = String(f.status || "unknown");
@@ -224,6 +268,53 @@
           </tr>
         `;
       }).join("");
+
+      const cards = files.map(f => {
+        const fid = escapeHtml(f.file_id || "");
+        const fname = escapeHtml(f.filename || f.file_id || "");
+        const status = String(f.status || "unknown");
+        const rulepack = escapeHtml(f.rulepack_id || "—");
+        const intake = f.intake || {};
+        const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
+        const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
+        const uploadedBy = escapeHtml(intake.uploaded_by || "");
+        const surveyorNote = escapeHtml(intake.surveyor_note || "");
+        const officeFeedback = escapeHtml(intake.office_feedback || "");
+        const poles = f.pole_count ?? "—";
+        const issues = f.issue_count ?? 0;
+        const pass = f.pass_count ?? 0;
+        const warn = f.warn_count ?? 0;
+        const fail = f.fail_count ?? 0;
+
+        return `
+          <div class="mobile-file-card">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div>
+                <div class="file-name">${fname}</div>
+                <div class="file-id-label">${fid}</div>
+              </div>
+              <span class="status-pill ${statusClass(status)}">${escapeHtml(status)}</span>
+            </div>
+            <div class="mb-2">
+              <span class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</span>
+              <span class="rulepack-badge ms-1">${rulepack}</span>
+            </div>
+            <div class="mobile-file-meta">
+              <div><strong>${poles}</strong> records · <strong>${issues}</strong> issues · P/W/F ${pass}/${warn}/${fail}</div>
+              <div><strong>${surveyDay}</strong>${uploadedBy ? ` · ${uploadedBy}` : ""}</div>
+              ${surveyorNote ? `<div>${surveyorNote}</div>` : ""}
+            </div>
+            ${buildMobileFileActions(escapeHtml(PROJECT_ID), fid, status, f.sequence_summary)}
+            <div class="input-group input-group-sm mt-3 feedback-box">
+              <textarea class="form-control" id="feedback-mobile-${fid}" rows="2" placeholder="Office feedback for surveyor">${officeFeedback}</textarea>
+              <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}', 'feedback-mobile-${fid}')">Save</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      tbody.innerHTML = rows;
+      if (mobileList) mobileList.innerHTML = cards;
     }
 
     function renderSummary(summary) {
@@ -266,8 +357,8 @@
       }
     }
 
-    async function saveIntakeFeedback(fid) {
-      const field = document.getElementById(`feedback-${fid}`);
+    async function saveIntakeFeedback(fid, fieldId) {
+      const field = document.getElementById(fieldId || `feedback-${fid}`);
       if (!field) return;
       try {
         const res = await fetch(`/api/project/${PROJECT_ID}/file/${fid}/intake`, {

@@ -27,6 +27,22 @@ def test_health_full_returns_expected_payload() -> None:
     assert data["version"] == "dev"
 
 
+def test_homepage_uses_stage_3_project_intake_framing() -> None:
+    app = create_app()
+    client = app.test_client()
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Survey-to-Design Intelligence" in html
+    assert "View Projects" in html
+    assert "Upload New Survey File" in html
+    assert "Legacy Jobs" in html
+    assert "Pre-CAD QA Tool" not in html
+    assert "DNO compliance" not in html
+
+
 def test_api_jobs_list_returns_saved_job_metadata(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     job_dir = jobs_root / "J10001"
