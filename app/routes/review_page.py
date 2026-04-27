@@ -31,6 +31,7 @@ def review_file(project_id: str, file_id: str):
     unmatched_expoles = seq.get("unmatched_expoles") or []
     sections = seq.get("sections") or []
     summary = seq.get("summary") or {}
+    chain_count = summary.get("total_poles") or len(chain)
 
     # Proposed poles available for reassignment
     proposed_poles = [
@@ -62,6 +63,7 @@ def review_file(project_id: str, file_id: str):
         proposed_poles=proposed_poles,
         sections=sections,
         summary=summary,
+        chain_count=chain_count,
         review=review,
         override_by_expole=override_by_expole,
     )

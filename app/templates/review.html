@@ -94,7 +94,7 @@
       </div>
     {% endif %}
     <span style="font-size:0.87rem;color:#374151;">
-      Chain: {{ summary.get("total_poles","?") }} proposed poles &nbsp;|&nbsp;
+      Chain: {{ chain_count }} proposed poles &nbsp;|&nbsp;
       Matched EXpoles: {{ summary.get("total_matched_expoles", matched_expoles|length) }} &nbsp;|&nbsp;
       Unmatched EXpoles: {{ summary.get("total_unmatched_expoles", unmatched_expoles|length) }}
     </span>
@@ -105,8 +105,9 @@
   <div class="section-card">
     <div class="section-title">EXpole Pairings</div>
     <p style="font-size:0.87rem;color:#6b7280;margin-bottom:14px;">
-      Review each existing pole pairing below. Use the dropdown to reassign or mark as unmatched.
-      Changes are saved when you click <strong>Save Review</strong> below.
+      Review each existing pole pairing below. The auto match is the tool's suggested replacement pole.
+      Use the reviewed assignment dropdown to confirm, reassign, or mark as unmatched.
+      Changes are saved when you click <strong>Save Review</strong>.
     </p>
 
     {% set all_expoles = matched_expoles + unmatched_expoles %}
@@ -118,15 +119,16 @@
             <th>EXpole ID</th>
             <th>Code</th>
             <th>Remark</th>
-            <th>Current match</th>
-            <th>Dist (m)</th>
-            <th>Assign to proposed pole</th>
+            <th>Auto match</th>
+            <th>Auto dist (m)</th>
+            <th>Reviewed assignment</th>
           </tr>
         </thead>
         <tbody>
           {% for ex in all_expoles %}
           {% set ov = override_by_expole.get(ex.get("point_id")|string) %}
           {% set current_match = ex.get("matched_to_proposed_id") %}
+          {% set reviewed_match = ov.get("reviewed_matched_to") if ov else current_match %}
           <tr>
             <td><strong>{{ ex.get("point_id") }}</strong></td>
             <td><code style="font-size:0.82rem;">{{ ex.get("feature_code","") }}</code></td>
@@ -147,12 +149,12 @@
                       style="min-width:220px;font-size:0.83rem;"
                       data-expole-id="{{ ex.get('point_id') }}"
                       data-original-match="{{ current_match or '' }}">
-                <option value=""{% if not current_match %} selected{% endif %}>— Unmatched / no replacement —</option>
+                <option value=""{% if not reviewed_match %} selected{% endif %}>— Unmatched / no replacement —</option>
                 {% if current_match %}
-                  {# Current match shown first #}
+                  {# Auto match shown first #}
                   {% for p in proposed_poles %}
                   {% if p.get("point_id")|string == current_match|string %}
-                  <option value="{{ p.get('point_id') }}" selected>
+                  <option value="{{ p.get('point_id') }}"{% if reviewed_match|string == p.get("point_id")|string %} selected{% endif %}>
                     {{ p.get("point_id") }} {{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %}{% if p.get("remark") %} — {{ p.get("remark") }}{% endif %}
                   </option>
                   {% endif %}
@@ -160,7 +162,7 @@
                 {% endif %}
                 {% for p in proposed_poles %}
                 {% if p.get("point_id")|string != current_match|string %}
-                <option value="{{ p.get('point_id') }}"{% if ov and ov.get("reviewed_matched_to")|string == p.get("point_id")|string %} selected{% endif %}>
+                <option value="{{ p.get('point_id') }}"{% if reviewed_match|string == p.get("point_id")|string %} selected{% endif %}>
                   {{ p.get("point_id") }} {{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %}{% if p.get("remark") %} — {{ p.get("remark") }}{% endif %}
                 </option>
                 {% endif %}
