@@ -24,6 +24,7 @@ from app.controller_intake import (
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
 from app.qa_engine import run_qa_checks
+from app.review_manager import delete_review
 from app.route_sequencer import sequence_route
 
 # Compiled once at module level for replacement-pair offset extraction.
@@ -544,6 +545,7 @@ def process_job(
     Callers must not duplicate this logic — both legacy and project finalize routes
     call this function.
     """
+    delete_review(job_dir)
     meta_path = job_dir / "meta.json"
     meta = _read_json(meta_path, default={"job_id": job_id})
     requested_dno = explicit_dno or "SPEN_11kV"

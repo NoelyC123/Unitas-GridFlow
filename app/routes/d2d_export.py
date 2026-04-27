@@ -8,6 +8,8 @@ from pathlib import Path
 
 from flask import Blueprint, Response
 
+from app.review_manager import apply_pairing_overrides, load_review
+
 d2d_export_bp = Blueprint("d2d_export", __name__)
 
 _JOBS_ROOT = Path(__file__).resolve().parents[2] / "uploads" / "jobs"
@@ -130,7 +132,7 @@ def _write_section_summary(buf: io.StringIO, sections: list[dict]) -> None:
     buf.write("#\n")
 
 
-def _render_chain_export(seq: dict, job_id: str) -> Response:
+def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = None) -> Response:
     cfg = seq.get("config_used") or {}
     chain = seq.get("chain") or []
     matched_expoles = seq.get("matched_expoles") or []
@@ -144,17 +146,21 @@ def _render_chain_export(seq: dict, job_id: str) -> Response:
     angle_thr = cfg.get("angle_split_threshold_deg", "—")
     gap_thr = cfg.get("gap_split_threshold_m", "—")
     expole_thr = cfg.get("expole_match_threshold_m", "—")
+    status_label = reviewed_label or "provisional"
 
     buf = io.StringIO()
-    buf.write("# Unitas GridFlow — Clean Chain Export (provisional)\n")
+    buf.write(f"# Unitas GridFlow — Clean Chain Export ({status_label})\n")
     buf.write(
         "# Proposed poles in route sequence order."
         " EXpole references and context features listed separately.\n"
     )
     buf.write("# For the interleaved file-order view use the D2D Working View export.\n")
-    buf.write(
-        "# NOT verified PoleCAD import format — provisional output for designer review only.\n"
-    )
+    if reviewed_label:
+        buf.write(f"# {reviewed_label}.\n")
+    else:
+        buf.write(
+            "# NOT verified PoleCAD import format — provisional output for designer review only.\n"
+        )
     buf.write(
         f"# Job: {job_id} | Generated: {timestamp}"
         f" | Thresholds: provisional"
@@ -294,7 +300,9 @@ def d2d_export(job_id: str) -> Response:
     return _render_chain_export(seq, job_id)
 
 
-def _render_interleaved_export(seq: dict, job_id: str) -> Response:
+def _render_interleaved_export(
+    seq: dict, job_id: str, reviewed_label: str | None = None
+) -> Response:
     cfg = seq.get("config_used") or {}
     interleaved_view = seq.get("interleaved_view") or []
     sections = seq.get("sections") or []
@@ -309,18 +317,22 @@ def _render_interleaved_export(seq: dict, job_id: str) -> Response:
     expole_thr = cfg.get("expole_match_threshold_m", "—")
     section_count = summary.get("section_count", "—")
     total_detached = summary.get("total_detached", 0)
+    status_label = reviewed_label or "provisional"
 
     buf = io.StringIO()
-    buf.write("# Unitas GridFlow — D2D Working View (provisional)\n")
+    buf.write(f"# Unitas GridFlow — D2D Working View ({status_label})\n")
     buf.write(
         "# All records in original file order:"
         " proposed poles, existing poles, and context features inline.\n"
     )
     buf.write("# Section markers and Role column are added — original file order is preserved.\n")
     buf.write("# This view mirrors the PR1/PR2 manual working file format.\n")
-    buf.write(
-        "# NOT verified PoleCAD import format — provisional output for designer review only.\n"
-    )
+    if reviewed_label:
+        buf.write(f"# {reviewed_label}.\n")
+    else:
+        buf.write(
+            "# NOT verified PoleCAD import format — provisional output for designer review only.\n"
+        )
     buf.write(
         f"# Job: {job_id} | Generated: {timestamp}"
         f" | Sections: {section_count}"
@@ -383,20 +395,33 @@ def d2d_interleaved(job_id: str) -> Response:
 
 @d2d_export_bp.get("/export/project/<project_id>/<file_id>")
 def d2d_export_project(project_id: str, file_id: str) -> Response:
-    seq_path = _PROJECTS_ROOT / project_id / "files" / file_id / "sequenced_route.json"
-    seq = _load_seq_from_path(seq_path)
+    file_dir = _PROJECTS_ROOT / project_id / "files" / file_id
+    seq = _load_seq_from_path(file_dir / "sequenced_route.json")
     if seq is None:
         return _unavailable()
+    review = load_review(file_dir)
+    seq = apply_pairing_overrides(seq, review)
+    reviewed_label = (
+        f"Designer Reviewed — {review['reviewed_at']}"
+        if review and review.get("review_status") == "reviewed"
+        else None
+    )
     safe_id = f"{project_id}_{file_id}"
-    # Reuse d2d_export logic by temporarily swapping the seq into a local call
-    return _render_chain_export(seq, safe_id)
+    return _render_chain_export(seq, safe_id, reviewed_label=reviewed_label)
 
 
 @d2d_export_bp.get("/interleaved/project/<project_id>/<file_id>")
 def d2d_interleaved_project(project_id: str, file_id: str) -> Response:
-    seq_path = _PROJECTS_ROOT / project_id / "files" / file_id / "sequenced_route.json"
-    seq = _load_seq_from_path(seq_path)
+    file_dir = _PROJECTS_ROOT / project_id / "files" / file_id
+    seq = _load_seq_from_path(file_dir / "sequenced_route.json")
     if seq is None:
         return _unavailable()
+    review = load_review(file_dir)
+    seq = apply_pairing_overrides(seq, review)
+    reviewed_label = (
+        f"Designer Reviewed — {review['reviewed_at']}"
+        if review and review.get("review_status") == "reviewed"
+        else None
+    )
     safe_id = f"{project_id}_{file_id}"
-    return _render_interleaved_export(seq, safe_id)
+    return _render_interleaved_export(seq, safe_id, reviewed_label=reviewed_label)

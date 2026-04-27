@@ -133,6 +133,8 @@
       }
 
       const hasSeq = seqSummary && seqSummary.status === "ok" && seqSummary.total_sequenced > 0;
+      const reviewBtn = `<a href="/review/project/${pid}/${fid}" class="btn btn-sm btn-outline-dark">
+        <i class="bi bi-check2-square"></i> Review</a>`;
       const mapBtn = `<a href="/map/view/project/${pid}/${fid}" class="btn btn-sm btn-outline-primary">
         <i class="bi bi-map"></i> Map</a>`;
       const pdfBtn = `<a href="/pdf/qa/project/${pid}/${fid}" class="btn btn-sm btn-outline-danger">
@@ -145,7 +147,7 @@
         ? `<a href="/d2d/interleaved/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
             <i class="bi bi-layout-text-sidebar"></i> D2D Working</a>`
         : "";
-      return `<div class="actions-cell">${mapBtn}${pdfBtn}${chainBtn}${workingBtn}</div>`;
+      return `<div class="actions-cell">${reviewBtn}${mapBtn}${pdfBtn}${chainBtn}${workingBtn}</div>`;
     }
 
     function renderFiles(files) {

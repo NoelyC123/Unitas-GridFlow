@@ -103,4 +103,18 @@ def create_app() -> Flask:
     except Exception as exc:
         app.logger.warning(f"projects_page blueprint not loaded: {exc}")
 
+    try:
+        from app.routes.api_review import api_review_bp
+
+        app.register_blueprint(api_review_bp, url_prefix="/api")
+    except Exception as exc:
+        app.logger.warning(f"api_review blueprint not loaded: {exc}")
+
+    try:
+        from app.routes.review_page import review_page_bp
+
+        app.register_blueprint(review_page_bp)
+    except Exception as exc:
+        app.logger.warning(f"review_page blueprint not loaded: {exc}")
+
     return app
