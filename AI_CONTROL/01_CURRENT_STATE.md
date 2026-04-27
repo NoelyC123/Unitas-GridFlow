@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3B complete — next decision pending**
+**Stage 3A1 complete — local daily intake MVP**
 
 Stage 1 is complete.
 
@@ -11,6 +11,8 @@ Stage 2A, Stage 2B and Stage 2C are implemented and validated. Stage 2 is formal
 Stage 3C (Project Management / multi-file job support) is implemented and manually validated.
 
 Stage 3B (Designer Review & Export Readiness) is implemented and validated.
+
+Stage 3A1 (Local Daily Intake MVP) is implemented and validated. Cloud/remote access is deferred to Stage 3A2 planning.
 
 ---
 
@@ -51,32 +53,34 @@ Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 - **Stage 3B: D2D Chain and D2D Working exports apply reviewed pairing overrides**
 - **Stage 3B: reviewed/provisional export headers**
 - **Stage 3B: reset to auto-generated deletes review.json; original seq unchanged**
+- **Stage 3A1: survey day / visit label per project file**
+- **Stage 3A1: uploaded-by and surveyor note intake metadata**
+- **Stage 3A1: office feedback note per project file**
+- **Stage 3A1: derived intake status on project overview**
+- **Stage 3A1: project dashboard shows intake context alongside existing outputs**
 
 ## Counts
 
-- **Tests passing:** 273
+- **Tests passing:** 281
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c
 
 ## What was just shipped
 
-- Stage 3B: designer review overlay
-  - `app/review_manager.py` — data layer
-  - `app/routes/api_review.py` — review API (GET/POST/DELETE)
-  - `app/routes/review_page.py` — review page route
-  - `app/templates/review.html` — Bootstrap 5 review UI
-  - `app/routes/d2d_export.py` — project exports apply review overlay
-  - `app/routes/api_intake.py` — reprocessing clears stale review
-  - `app/__init__.py` — blueprint registration
-  - 20 unit tests + 9 integration tests
-  - commits `a9b3ee2`, `7daa5a9`
+- Stage 3A1: local daily intake layer
+  - `app/project_manager.py` — intake metadata and derived intake status
+  - `app/routes/api_projects.py` — intake metadata capture and office feedback API
+  - `app/templates/upload.html` / `app/static/js/upload-manager.js` — survey-day upload fields
+  - `app/templates/project.html` — intake dashboard row with office feedback
+  - `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md` — approved scope
+  - `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md` — validation evidence
 
 ## Known remaining issues
 
 1. No cross-file chain merging or combined exports within a project.
 2. No combined project-level map overlay.
 3. No section boundary editing (Stage 3B+ scope).
-4. No live sync or cloud deployment (Stage 3A scope).
+4. No cloud deployment or remote authentication yet (Stage 3A2 scope).
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
 6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
 7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
@@ -88,4 +92,4 @@ Stage 3B (Designer Review & Export Readiness) is implemented and validated.
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3B complete — designers can now review and sign off EXpole pairings before export
+- Stage 3A1 complete — projects can now act as local daily-intake dashboards before cloud access

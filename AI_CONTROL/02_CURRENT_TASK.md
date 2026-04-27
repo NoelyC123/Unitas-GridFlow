@@ -2,65 +2,57 @@
 
 ## Phase
 
-**Stage 3B complete — next decision pending**
+**Stage 3A1 complete — next step is Stage 3A2 cloud/remote access planning**
 
-Stage 3B (Designer Review & Export Readiness) is implemented and validated. It is now closed.
+Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is now closed.
 
-The next direction has not yet been decided by the project orchestrator.
-
----
-
-## Stage 3B is closed
-
-- Design brief: `AI_CONTROL/21_STAGE_3B_DESIGN_BRIEF.md`
-- Implementation: commits `a9b3ee2`, `7daa5a9`
-- Validation acceptance: `AI_CONTROL/22_STAGE_3B_VALIDATION_ACCEPTANCE.md`
-- Tests: 273 passing, pre-commit clean
+The next direction is Stage 3A2 planning: define the smallest safe cloud/remote access path without beginning deployment work prematurely.
 
 ---
 
-## Open next-direction choice
+## Stage 3A1 is closed
 
-The project orchestrator must choose between:
+- Design brief: `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md`
+- Validation acceptance: `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md`
+- Focused tests: `tests/test_project_manager.py tests/test_project_integration.py` — 41 passing
+- Real-file validation: Gordon single-day intake and Strabane 474/474c multi-file intake passed
 
-**Option A — Stage 3B polish**
+---
 
-Address known caveats within the Stage 3B scope:
-- Section boundary editing (confirm or move auto-detected splits)
-- PDF report updated to show reviewed pairing state
-- Configurable reviewer role label
-- Review page accessible from project overview action buttons
-- Validation warnings for stale override references after reprocess
+## Next-direction choice
 
-**Option B — Stage 3A planning**
+Proceed to **Stage 3A2 cloud/remote access planning**.
 
-Stage 3A is the live intake platform:
-- Surveyor syncs controller data daily or continuously
-- Tool immediately validates and produces completeness reports
-- Designer sees the job building in real-time
-- Feedback loop closes while the surveyor is still on site
+The plan should cover:
 
-Neither option should begin without the orchestrator defining the scope.
+- simple managed hosting options
+- shared-password/basic access control
+- upload storage and backup
+- mobile upload constraints
+- UK/EU data sensitivity and hosting preference
+- what remains local-only until product value is proven
 
 ---
 
 ## What not to do before the next stage is defined
 
 - Do not begin section boundary editing
-- Do not begin cloud deployment or authentication
+- Do not begin cloud deployment or authentication before Stage 3A2 plan approval
 - Do not redesign architecture
-- Do not begin Stage 4, 5, or 6 work
+- Do not begin Stage 4 tablet capture
+- Do not begin Stage 5 or 6 work
 - Do not add new QA rules or sequencing algorithms
 
 ---
 
 ## Relevant files
 
-- `AI_CONTROL/21_STAGE_3B_DESIGN_BRIEF.md`
-- `AI_CONTROL/22_STAGE_3B_VALIDATION_ACCEPTANCE.md`
-- `app/review_manager.py`
-- `app/routes/api_review.py`
-- `app/routes/review_page.py`
-- `app/templates/review.html`
-- `tests/test_review_manager.py`
-- `tests/test_review_integration.py`
+- `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md`
+- `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md`
+- `app/project_manager.py`
+- `app/routes/api_projects.py`
+- `app/templates/project.html`
+- `app/templates/upload.html`
+- `app/static/js/upload-manager.js`
+- `tests/test_project_manager.py`
+- `tests/test_project_integration.py`

@@ -4,6 +4,33 @@
 
 ## What happened this session
 
+### Stage 3A1: Local Daily Intake MVP — implemented and validated
+
+Cursor/GPT implemented the approved Stage 3A1 local daily intake scope from `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md`.
+
+Files added or changed:
+
+| File | Change |
+|------|--------|
+| `AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md` | New — Stage 3A1 local intake scope and Stage 3A2 cloud boundary |
+| `AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md` | New — validation evidence |
+| `app/project_manager.py` | Added intake metadata, office feedback update, and review-aware intake status |
+| `app/routes/api_projects.py` | Added intake capture during project presign and office feedback API |
+| `app/templates/upload.html` | Added survey day / uploaded-by / surveyor note fields |
+| `app/static/js/upload-manager.js` | Sends intake metadata with project uploads |
+| `app/templates/project.html` | Shows intake status, survey notes, and office feedback per file |
+| `tests/test_project_manager.py` | Added intake metadata and status tests |
+| `tests/test_project_integration.py` | Added intake API integration tests |
+
+Focused validation:
+
+- `tests/test_project_manager.py tests/test_project_integration.py` — 41 passing
+- Real-file temporary-root validation passed for Gordon and Strabane 474/474c intake flows
+
+Stage 3A1 remains local-only by design. Cloud/remote access is now a Stage 3A2 planning task, not an active implementation task.
+
+---
+
 ### Stage 3B: Designer Review & Export Readiness — implemented and validated
 
 Claude Code implemented the Stage 3B MVP across two commits in one work session, following the approved brief at `AI_CONTROL/21_STAGE_3B_DESIGN_BRIEF.md`.
@@ -58,7 +85,7 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Current state
 
-- 273 tests passing
+- Stage 3A1 local daily intake implemented and validated
 - Stage 1 complete
 - Stage 2A, 2B, 2C implemented and closed
 - Stage 3C implemented and validated — commit `b0b5331`
@@ -82,6 +109,6 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Project orchestrator (Claude Desktop) decides: Stage 3B polish or Stage 3A planning.
-2. Do not begin any new code work until the next direction is defined.
-3. Do not begin Stage 3A (live intake/cloud) until a scope brief is approved.
+1. Plan Stage 3A2 cloud/remote access.
+2. Do not begin deployment/authentication until the Stage 3A2 plan is approved.
+3. Do not begin Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.

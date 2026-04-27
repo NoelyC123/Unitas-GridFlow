@@ -10,6 +10,9 @@ class UploadManager {
     this.projectNameInput = document.getElementById('project-name');
     this.projectIdInput = document.getElementById('project-id');
     this.projectDescInput = document.getElementById('project-description');
+    this.surveyDayInput = document.getElementById('survey-day-label');
+    this.uploadedByInput = document.getElementById('uploaded-by');
+    this.surveyorNoteInput = document.getElementById('surveyor-note');
     this.btn = document.getElementById('btn-upload');
     this.out = document.getElementById('result');
     this.jobSpan = document.getElementById('res-job');
@@ -28,6 +31,10 @@ class UploadManager {
       const group = document.getElementById('project-name-group');
       if (group) {
         group.style.display = 'none';
+      }
+      const heading = document.getElementById('upload-heading');
+      if (heading) {
+        heading.textContent = 'Add Survey Day / File';
       }
     }
 
@@ -71,9 +78,17 @@ class UploadManager {
     const projectName = this.projectNameInput?.value?.trim() || f.name.replace(/\.[^.]+$/, '');
     const description = this.projectDescInput?.value?.trim() || '';
     const dno = this.dno?.value || '';
+    const surveyDayLabel = this.surveyDayInput?.value?.trim() || '';
+    const uploadedBy = this.uploadedByInput?.value?.trim() || '';
+    const surveyorNote = this.surveyorNoteInput?.value?.trim() || '';
 
     // 1) Project presign — creates or extends project, assigns file slot
-    const presignBody = { filename: f.name };
+    const presignBody = {
+      filename: f.name,
+      survey_day_label: surveyDayLabel,
+      uploaded_by: uploadedBy,
+      surveyor_note: surveyorNote
+    };
     if (projectId) {
       presignBody.project_id = projectId;
     } else {

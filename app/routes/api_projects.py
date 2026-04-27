@@ -13,6 +13,7 @@ from app.project_manager import (
     load_project,
     refresh_project_summary,
     suggest_project_name,
+    update_file_intake_feedback,
 )
 from app.routes.api_intake import process_job
 
@@ -25,6 +26,14 @@ _PROJECTS_ROOT = _PROJECT_ROOT / "uploads" / "projects"
 def _ensure_projects_root() -> Path:
     _PROJECTS_ROOT.mkdir(parents=True, exist_ok=True)
     return _PROJECTS_ROOT
+
+
+def _intake_from_payload(data: dict) -> dict:
+    return {
+        "survey_day_label": str(data.get("survey_day_label", "")).strip(),
+        "uploaded_by": str(data.get("uploaded_by", "")).strip(),
+        "surveyor_note": str(data.get("surveyor_note", "")).strip(),
+    }
 
 
 @api_projects_bp.get("/projects/")
@@ -74,7 +83,12 @@ def project_presign():
         project = create_project(projects_root, name, description)
         project_id = project["project_id"]
 
-    file_id, file_dir = add_file_slot(projects_root, project_id, filename)
+    file_id, file_dir = add_file_slot(
+        projects_root,
+        project_id,
+        filename,
+        intake=_intake_from_payload(data),
+    )
     upload_url = f"/api/upload/project/{project_id}/{file_id}/{filename}"
 
     return jsonify(
@@ -174,3 +188,18 @@ def project_file_status(project_id: str, file_id: str):
         return jsonify(meta)
     except Exception:
         return jsonify({"project_id": project_id, "file_id": file_id, "status": "error"}), 500
+
+
+@api_projects_bp.post("/project/<project_id>/file/<file_id>/intake")
+def update_project_file_intake(project_id: str, file_id: str):
+    data = request.get_json(silent=True) or {}
+    office_feedback = str(data.get("office_feedback", ""))
+    intake = update_file_intake_feedback(
+        _PROJECTS_ROOT,
+        project_id,
+        file_id,
+        office_feedback,
+    )
+    if intake is None:
+        return jsonify({"ok": False, "error": "File slot not found"}), 404
+    return jsonify({"ok": True, "intake": intake})

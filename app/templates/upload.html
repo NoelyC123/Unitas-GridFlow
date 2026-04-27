@@ -30,7 +30,7 @@
 
     <div class="card shadow-sm">
       <div class="card-body p-4">
-        <h2 class="h5 mb-3">Upload Survey</h2>
+        <h2 class="h5 mb-3" id="upload-heading">Upload Survey</h2>
 
         <div class="mb-3" id="project-name-group">
           <label for="project-name" class="form-label">Project name <span class="text-danger">*</span></label>
@@ -42,6 +42,22 @@
         <div class="mb-3">
           <label for="project-description" class="form-label">Description <span class="text-muted small">(optional)</span></label>
           <input class="form-control" type="text" id="project-description" placeholder="e.g. 11kV refurbishment, SPEN area" />
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="survey-day-label" class="form-label">Survey day / visit label</label>
+            <input class="form-control" type="text" id="survey-day-label" placeholder="e.g. Day 1, Return visit, 474c follow-up" />
+          </div>
+          <div class="col-md-6">
+            <label for="uploaded-by" class="form-label">Uploaded by</label>
+            <input class="form-control" type="text" id="uploaded-by" placeholder="e.g. Surveyor, office admin" />
+          </div>
+          <div class="col-12">
+            <label for="surveyor-note" class="form-label">Surveyor note <span class="text-muted small">(optional)</span></label>
+            <textarea class="form-control" id="surveyor-note" rows="2" placeholder="e.g. Day 2 upload after return visit. Check pole 67 replacement pairing."></textarea>
+            <div class="form-text">Use this for quick handover context while the survey is still active.</div>
+          </div>
         </div>
 
         <div class="mb-3">

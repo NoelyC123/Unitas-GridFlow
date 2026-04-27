@@ -121,6 +121,27 @@ def test_project_presign_creates_project_and_returns_urls(client_and_root):
     assert project["name"] == "Gordon Pt1"
 
 
+def test_project_presign_stores_intake_metadata(client_and_root):
+    client, projects_root = client_and_root
+
+    response = client.post(
+        "/api/project/presign",
+        json={
+            "filename": "Gordon_Pt1_Original.csv",
+            "project_name": "Gordon Pt1",
+            "survey_day_label": "Day 1",
+            "uploaded_by": "Surveyor",
+            "surveyor_note": "Uploaded from van at end of day.",
+        },
+    )
+
+    assert response.status_code == 200
+    meta = json.loads((projects_root / "P001" / "files" / "F001" / "meta.json").read_text())
+    assert meta["intake"]["survey_day_label"] == "Day 1"
+    assert meta["intake"]["uploaded_by"] == "Surveyor"
+    assert meta["intake"]["surveyor_note"] == "Uploaded from van at end of day."
+
+
 # ---------------------------------------------------------------------------
 # test_project_file_upload_endpoint_stores_file
 # ---------------------------------------------------------------------------
@@ -249,6 +270,30 @@ def test_get_api_projects_returns_all_projects(client_and_root):
     assert len(data["projects"]) == 2
     names = {p["name"] for p in data["projects"]}
     assert names == {"Alpha", "Beta"}
+
+
+def test_update_project_file_intake_feedback(client_and_root):
+    client, projects_root = client_and_root
+
+    _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+
+    response = client.post(
+        "/api/project/P001/file/F001/intake",
+        json={"office_feedback": "Please confirm EXpole pairing before export."},
+    )
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["ok"] is True
+    assert data["intake"]["office_feedback"] == "Please confirm EXpole pairing before export."
+
+    meta = json.loads((projects_root / "P001" / "files" / "F001" / "meta.json").read_text())
+    assert meta["intake"]["office_feedback"] == "Please confirm EXpole pairing before export."
+
+    project = json.loads((projects_root / "P001" / "project.json").read_text())
+    assert project["files"][0]["intake"]["office_feedback"] == (
+        "Please confirm EXpole pairing before export."
+    )
 
 
 # ---------------------------------------------------------------------------

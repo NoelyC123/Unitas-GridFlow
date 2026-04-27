@@ -8,6 +8,40 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-27 — Stage 3A1: Local Daily Intake MVP
+
+### Added
+
+- **`AI_CONTROL/23_STAGE_3A_DESIGN_BRIEF.md`** — defines Stage 3A1 local daily intake and defers cloud/remote access to Stage 3A2 planning.
+- **`AI_CONTROL/24_STAGE_3A_VALIDATION_ACCEPTANCE.md`** — records focused tests and real-file validation using Gordon and Strabane 474/474c.
+- **`app/project_manager.py`**:
+  - `build_intake_metadata()` — normalises survey day, uploaded-by, surveyor note, and office feedback fields.
+  - `derive_intake_status()` — derives office-facing intake status from processing and review state.
+  - `update_file_intake_feedback()` — saves office feedback to a project file's `meta.json` and refreshes project summary.
+- **`app/routes/api_projects.py`**:
+  - Project presign now accepts `survey_day_label`, `uploaded_by`, and `surveyor_note`.
+  - `POST /api/project/<project_id>/file/<file_id>/intake` saves office feedback.
+- **Upload UI**:
+  - `app/templates/upload.html` adds survey day / visit label, uploaded-by, and surveyor note fields.
+  - `app/static/js/upload-manager.js` sends those fields during project upload.
+- **Project dashboard UI**:
+  - `app/templates/project.html` shows intake status, survey-day context, surveyor note, and office feedback per file.
+
+### Validation
+
+- Focused project/intake tests: **41 passing**.
+- Real-file temporary-root validation:
+  - Gordon Pt1 created as a single-day intake project.
+  - Strabane 474 and 474c created as a two-file intake project with `Day 1` and `Return visit` labels.
+  - Office feedback saved and survived project reload.
+
+### Boundaries
+
+- No cloud deployment, authentication, direct Trimble sync, tablet forms, photos, combined cross-file routing, or PoleCAD-specific export changes in Stage 3A1.
+- Next step is Stage 3A2 cloud/remote access planning.
+
+---
+
 ## 2026-04-27 — Stage 3B: Designer Review & Export Readiness
 
 ### Added

@@ -28,6 +28,11 @@
     .status-complete { background: #e8f7ee; color: #1d7f49; }
     .status-error { background: #fdeaea; color: #c83737; }
     .status-processing, .status-pending, .status-uploaded, .status-awaiting_upload { background: #eef2ff; color: #4f46e5; }
+    .intake-pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 0.76rem; font-weight: 700; background: #eef2ff; color: #4f46e5; margin-bottom: 4px; }
+    .intake-reviewed { background: #e8f7ee; color: #1d7f49; }
+    .intake-needs_review, .intake-needs_attention { background: #fff7ed; color: #c2410c; }
+    .intake-copy { font-size: 0.78rem; color: #6b7280; line-height: 1.35; max-width: 240px; }
+    .feedback-box { min-width: 220px; font-size: 0.82rem; }
     .rulepack-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #4fc3e8; color: #fff; font-size: 0.78rem; font-weight: 700; }
     .pwf-counts { font-size: 0.82rem; color: #374151; line-height: 1.5; }
     .actions-cell { white-space: nowrap; }
@@ -92,6 +97,7 @@
             <thead class="table-light">
               <tr>
                 <th>File</th>
+                <th>Intake</th>
                 <th>Status</th>
                 <th>Rulepack</th>
                 <th>Poles</th>
@@ -100,7 +106,7 @@
               </tr>
             </thead>
             <tbody id="files-tbody">
-              <tr><td colspan="6" class="empty-state">Loading files…</td></tr>
+              <tr><td colspan="7" class="empty-state">Loading files…</td></tr>
             </tbody>
           </table>
         </div>
@@ -108,7 +114,7 @@
     </div>
 
     <div class="small text-muted">
-      Each file is processed independently. Map, PDF and D2D exports are available per file.
+      Each file is processed independently. Intake notes show daily upload context and office feedback while the survey is still active.
     </div>
   </div>
 
@@ -124,6 +130,17 @@
       if (s === "complete") return "status-complete";
       if (s === "error" || s === "failed") return "status-error";
       return "status-processing";
+    }
+
+    function intakeLabel(status) {
+      return String(status || "pending").replaceAll("_", " ");
+    }
+
+    function intakeClass(status) {
+      const s = String(status || "pending").toLowerCase();
+      if (s === "reviewed") return "intake-reviewed";
+      if (s === "needs_review" || s === "needs_attention") return `intake-${s}`;
+      return "";
     }
 
     function buildFileActions(pid, fid, status, seqSummary) {
@@ -155,7 +172,7 @@
       const countLabel = document.getElementById("file-count-label");
 
       if (!Array.isArray(files) || files.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
           No files yet. <a href="/upload?project_id=${escapeHtml(PROJECT_ID)}">Add a survey file</a> to get started.
         </td></tr>`;
         if (countLabel) countLabel.textContent = "0 files";
@@ -169,6 +186,12 @@
         const fname = escapeHtml(f.filename || f.file_id || "");
         const status = String(f.status || "unknown");
         const rulepack = escapeHtml(f.rulepack_id || "—");
+        const intake = f.intake || {};
+        const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
+        const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
+        const uploadedBy = escapeHtml(intake.uploaded_by || "");
+        const surveyorNote = escapeHtml(intake.surveyor_note || "");
+        const officeFeedback = escapeHtml(intake.office_feedback || "");
         const poles = f.pole_count ?? "—";
         const pass = f.pass_count ?? 0;
         const warn = f.warn_count ?? 0;
@@ -179,6 +202,15 @@
             <td>
               <div class="file-name">${fname}</div>
               <div class="file-id-label">${fid}</div>
+            </td>
+            <td>
+              <div class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</div>
+              <div class="intake-copy"><strong>${surveyDay}</strong>${uploadedBy ? ` · ${uploadedBy}` : ""}</div>
+              ${surveyorNote ? `<div class="intake-copy mt-1">${surveyorNote}</div>` : ""}
+              <div class="input-group input-group-sm mt-2 feedback-box">
+                <textarea class="form-control" id="feedback-${fid}" rows="2" placeholder="Office feedback for surveyor">${officeFeedback}</textarea>
+                <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}')">Save</button>
+              </div>
             </td>
             <td><span class="status-pill ${statusClass(status)}">${escapeHtml(status)}</span></td>
             <td><span class="rulepack-badge">${rulepack}</span></td>
@@ -230,7 +262,28 @@
         console.error(err);
         if (errorBox) { errorBox.textContent = err.message || String(err); errorBox.style.display = "block"; }
         const tbody = document.getElementById("files-tbody");
-        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Could not load project.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Could not load project.</td></tr>`;
+      }
+    }
+
+    async function saveIntakeFeedback(fid) {
+      const field = document.getElementById(`feedback-${fid}`);
+      if (!field) return;
+      try {
+        const res = await fetch(`/api/project/${PROJECT_ID}/file/${fid}/intake`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ office_feedback: field.value })
+        });
+        if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+        await loadProject();
+      } catch (err) {
+        console.error(err);
+        const errorBox = document.getElementById("error-box");
+        if (errorBox) {
+          errorBox.textContent = err.message || String(err);
+          errorBox.style.display = "block";
+        }
       }
     }
 

@@ -6,13 +6,16 @@ import json
 
 from app.project_manager import (
     add_file_slot,
+    build_intake_metadata,
     create_project,
+    derive_intake_status,
     list_projects,
     load_project,
     next_file_id,
     next_project_id,
     refresh_project_summary,
     suggest_project_name,
+    update_file_intake_feedback,
 )
 
 # ---------------------------------------------------------------------------
@@ -173,6 +176,27 @@ def test_add_file_slot_creates_dir_and_meta(tmp_path):
     assert meta["file_id"] == "F001"
     assert meta["filename"] == "survey.csv"
     assert meta["status"] == "awaiting_upload"
+    assert meta["intake"]["survey_day_label"] == ""
+
+
+def test_add_file_slot_stores_intake_metadata(tmp_path):
+    root = tmp_path / "projects"
+    root.mkdir()
+    create_project(root, "Test")
+    _, file_dir = add_file_slot(
+        root,
+        "P001",
+        "survey.csv",
+        intake={
+            "survey_day_label": "Day 2",
+            "uploaded_by": "Surveyor",
+            "surveyor_note": "Return visit after access issue.",
+        },
+    )
+    meta = json.loads((file_dir / "meta.json").read_text())
+    assert meta["intake"]["survey_day_label"] == "Day 2"
+    assert meta["intake"]["uploaded_by"] == "Surveyor"
+    assert meta["intake"]["surveyor_note"] == "Return visit after access issue."
 
 
 def test_add_file_slot_sequential(tmp_path):
@@ -225,6 +249,88 @@ def test_refresh_project_summary_aggregates_files(tmp_path):
     assert project["summary"]["total_issues"] == 4
     assert set(project["summary"]["rulepacks_used"]) == {"SPEN_11kV", "NIE_11kV"}
     assert len(project["files"]) == 2
+
+
+def test_refresh_project_summary_includes_intake_and_review_status(tmp_path):
+    root = tmp_path / "projects"
+    root.mkdir()
+    create_project(root, "Summary Test")
+    _, file_dir = add_file_slot(
+        root,
+        "P001",
+        "a.csv",
+        intake={"survey_day_label": "Day 1", "uploaded_by": "Surveyor"},
+    )
+    meta = json.loads((file_dir / "meta.json").read_text())
+    meta.update({"status": "complete", "pole_count": 10, "issue_count": 2})
+    (file_dir / "meta.json").write_text(json.dumps(meta))
+
+    refresh_project_summary(root, "P001")
+
+    project = load_project(root, "P001")
+    entry = project["files"][0]
+    assert entry["intake_status"] == "needs_review"
+    assert entry["review_status"] == "not_reviewed"
+    assert entry["intake"]["survey_day_label"] == "Day 1"
+
+
+def test_refresh_project_summary_marks_reviewed_intake(tmp_path):
+    root = tmp_path / "projects"
+    root.mkdir()
+    create_project(root, "Summary Test")
+    _, file_dir = add_file_slot(root, "P001", "a.csv")
+    meta = json.loads((file_dir / "meta.json").read_text())
+    meta.update({"status": "complete", "pole_count": 10, "issue_count": 2})
+    (file_dir / "meta.json").write_text(json.dumps(meta))
+    (file_dir / "review.json").write_text(json.dumps({"review_status": "reviewed"}))
+
+    refresh_project_summary(root, "P001")
+
+    project = load_project(root, "P001")
+    entry = project["files"][0]
+    assert entry["intake_status"] == "reviewed"
+    assert entry["review_status"] == "reviewed"
+
+
+def test_update_file_intake_feedback(tmp_path):
+    root = tmp_path / "projects"
+    root.mkdir()
+    create_project(root, "Summary Test")
+    _, file_dir = add_file_slot(
+        root,
+        "P001",
+        "a.csv",
+        intake={"survey_day_label": "Day 1", "uploaded_by": "Surveyor"},
+    )
+
+    intake = update_file_intake_feedback(root, "P001", "F001", "Check EXpole 67.")
+
+    assert intake["office_feedback"] == "Check EXpole 67."
+    meta = json.loads((file_dir / "meta.json").read_text())
+    assert meta["intake"]["survey_day_label"] == "Day 1"
+    project = load_project(root, "P001")
+    assert project["files"][0]["intake"]["office_feedback"] == "Check EXpole 67."
+
+
+def test_build_intake_metadata_strips_values():
+    intake = build_intake_metadata(
+        survey_day_label=" Day 1 ",
+        uploaded_by=" Surveyor ",
+        surveyor_note=" Note ",
+        office_feedback=" Feedback ",
+    )
+    assert intake == {
+        "survey_day_label": "Day 1",
+        "uploaded_by": "Surveyor",
+        "surveyor_note": "Note",
+        "office_feedback": "Feedback",
+    }
+
+
+def test_derive_intake_status():
+    assert derive_intake_status("complete", "not_reviewed") == "needs_review"
+    assert derive_intake_status("complete", "reviewed") == "reviewed"
+    assert derive_intake_status("error") == "needs_attention"
 
 
 def test_refresh_project_summary_missing_project(tmp_path):

@@ -56,6 +56,35 @@ def create_project(projects_root: Path, name: str, description: str = "") -> dic
     return project
 
 
+def build_intake_metadata(
+    survey_day_label: str = "",
+    uploaded_by: str = "",
+    surveyor_note: str = "",
+    office_feedback: str = "",
+) -> dict:
+    """Build the small Stage 3A intake block stored in file meta.json."""
+    return {
+        "survey_day_label": survey_day_label.strip(),
+        "uploaded_by": uploaded_by.strip(),
+        "surveyor_note": surveyor_note.strip(),
+        "office_feedback": office_feedback.strip(),
+    }
+
+
+def derive_intake_status(file_status: str, review_status: str = "not_reviewed") -> str:
+    """Return the office-facing intake status for a project file."""
+    status = (file_status or "").lower()
+    if review_status == "reviewed":
+        return "reviewed"
+    if status == "complete":
+        return "needs_review"
+    if status in {"error", "failed"}:
+        return "needs_attention"
+    if status in {"processing", "uploaded", "awaiting_upload", "pending"}:
+        return status
+    return "pending"
+
+
 def load_project(projects_root: Path, project_id: str) -> dict | None:
     path = projects_root / project_id / "project.json"
     if not path.exists():
@@ -83,7 +112,12 @@ def list_projects(projects_root: Path) -> list[dict]:
     return result
 
 
-def add_file_slot(projects_root: Path, project_id: str, filename: str) -> tuple[str, Path]:
+def add_file_slot(
+    projects_root: Path,
+    project_id: str,
+    filename: str,
+    intake: dict | None = None,
+) -> tuple[str, Path]:
     """Reserve the next file slot in a project. Returns (file_id, file_dir)."""
     project_dir = projects_root / project_id
     file_id = next_file_id(project_dir)
@@ -95,11 +129,40 @@ def add_file_slot(projects_root: Path, project_id: str, filename: str) -> tuple[
         "filename": filename,
         "status": "awaiting_upload",
         "uploaded": _now_iso(),
+        "intake": build_intake_metadata(**(intake or {})),
     }
     (file_dir / "meta.json").write_text(
         json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     return file_id, file_dir
+
+
+def update_file_intake_feedback(
+    projects_root: Path,
+    project_id: str,
+    file_id: str,
+    office_feedback: str,
+) -> dict | None:
+    """Update the office feedback note for one project file."""
+    file_dir = projects_root / project_id / "files" / file_id
+    meta_path = file_dir / "meta.json"
+    if not meta_path.exists():
+        return None
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+    existing = meta.get("intake") or {}
+    meta["intake"] = build_intake_metadata(
+        survey_day_label=str(existing.get("survey_day_label", "")),
+        uploaded_by=str(existing.get("uploaded_by", "")),
+        surveyor_note=str(existing.get("surveyor_note", "")),
+        office_feedback=office_feedback,
+    )
+    meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+    refresh_project_summary(projects_root, project_id)
+    return meta["intake"]
 
 
 def refresh_project_summary(projects_root: Path, project_id: str) -> None:
@@ -138,13 +201,31 @@ def refresh_project_summary(projects_root: Path, project_id: str) -> None:
             total_issues += issue_count
             if meta.get("rulepack_id"):
                 rulepacks.add(meta["rulepack_id"])
+            review_status = "not_reviewed"
+            review_path = file_dir / "review.json"
+            if review_path.exists():
+                try:
+                    review = json.loads(review_path.read_text(encoding="utf-8"))
+                    review_status = review.get("review_status", "not_reviewed")
+                except Exception:
+                    review_status = "not_reviewed"
+            intake = meta.get("intake") or {}
+            file_status = meta.get("status", "unknown")
 
             file_entries.append(
                 {
                     "file_id": meta.get("file_id", file_dir.name),
                     "filename": meta.get("filename", ""),
                     "uploaded": meta.get("uploaded", ""),
-                    "status": meta.get("status", "unknown"),
+                    "status": file_status,
+                    "intake_status": derive_intake_status(file_status, review_status),
+                    "review_status": review_status,
+                    "intake": build_intake_metadata(
+                        survey_day_label=str(intake.get("survey_day_label", "")),
+                        uploaded_by=str(intake.get("uploaded_by", "")),
+                        surveyor_note=str(intake.get("surveyor_note", "")),
+                        office_feedback=str(intake.get("office_feedback", "")),
+                    ),
                     "rulepack_id": meta.get("rulepack_id", ""),
                     "pole_count": pole_count,
                     "issue_count": issue_count,
