@@ -8,6 +8,92 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-27 — Stage 3C: Project Management (multi-file job support)
+
+### Added
+
+- **`app/project_manager.py`** — project data layer (commit `b0b5331`):
+  - Sequential project IDs (P001, P002, …) and file IDs (F001, F002, …)
+  - `create_project`, `load_project`, `list_projects`, `add_file_slot`, `refresh_project_summary`
+  - `suggest_project_name()` — derives clean project name from raw CSV filename; strips
+    Trimble-style ` - Descriptor` suffix; takes first 2 underscore parts for 3+ part
+    names; preserves hyphens in job numbers (e.g. `28-14`, `4-474`)
+
+- **`app/routes/api_projects.py`** — project API:
+  - `GET /api/projects/` — list all projects
+  - `GET /api/projects/<project_id>` — single project
+  - `POST /api/project/presign` — create or extend project, return upload/finalize URLs
+  - `PUT /api/upload/project/<project_id>/<file_id>/<filename>` — receive CSV body
+  - `POST /api/project/<project_id>/file/<file_id>/import` — run pipeline, always
+    refresh `project.json` (success or failure, so failed files appear in overview)
+  - `GET /api/project/<project_id>/file/<file_id>/status` — poll file status
+
+- **`app/routes/projects_page.py`** — page routes:
+  - `GET /projects/` — projects list (client-side rendered)
+  - `GET /project/<project_id>` — project detail (client-side rendered)
+
+- **Project-aware routes** added to `map_preview`, `d2d_export`, `pdf_reports`:
+  - `/map/view/project/<project_id>/<file_id>`, `/map/data/project/<...>`
+  - `/pdf/qa/project/<project_id>/<file_id>`
+  - `/d2d/export/project/<project_id>/<file_id>`, `/d2d/interleaved/project/<...>`
+
+- **`app/templates/projects.html`**, **`project.html`** — client-side rendered pages
+  showing project list and per-project file table with Map / PDF / D2D action links.
+
+- **`app/templates/upload.html`** — Project Name and Description fields added;
+  auto-suggests project name from filename via JS.
+
+- **`app/static/js/upload-manager.js`** — project-aware upload flow; supports
+  `?project_id=` URL parameter to add a file to an existing project.
+
+- **`app/templates/map_viewer.html`** + **`app/static/js/map-viewer.js`** —
+  `map-data-url` meta tag pattern so the server specifies the data URL and JS reads it,
+  decoupling the viewer from J##### vs project path conventions.
+
+- **`tests/test_project_manager.py`** — 22 unit tests for the data layer.
+- **`tests/test_project_integration.py`** — 9 integration tests covering presign,
+  upload, finalize success, finalize failure visibility in project overview, project
+  listing, legacy jobs backward-compat, and project map/PDF/D2D routes.
+
+### Changed
+
+- `app/routes/api_intake.py` — `process_job(job_dir, job_id, explicit_dno)` extracted
+  as a shared function called by both the legacy finalize route and the project finalize
+  route. No change to existing legacy behaviour.
+
+- `app/__init__.py` — registered `api_projects_bp` and `projects_page_bp`.
+
+### Backward compatibility
+
+All existing routes unchanged:
+
+- `/map/view/<job_id>`, `/pdf/qa/<job_id>`, `/d2d/export/<job_id>`, `/d2d/interleaved/<job_id>`
+- `/api/jobs/`, `/api/jobs/<job_id>/status`
+- `/api/import/<job_short>`
+- `uploads/jobs/` tree untouched
+
+### Validation
+
+- Gordon Pt1 Original: passed — project created, map/PDF/D2D accessible
+- 474 + 474c: passed — multi-file project, both files accessible independently
+- 513: passed — small file project correct
+- Legacy J##### jobs: passed — backward compat confirmed
+- D2D chain export inspected: clean header, 43 sequenced poles, EXpoles, context
+  features, and detached/reference sections all present
+
+### Tests
+
+- **244 passing** (up from 211)
+
+### Known caveats (by design)
+
+- No cross-file chain merging or combined exports within a project
+- No combined project-level map overlay
+- No designer editing (Stage 3B scope)
+- Sequential P### IDs not concurrent-safe (acceptable for single-user local use)
+
+---
+
 ## 2026-04-26 — Stage 2 D2D elimination baseline validated
 
 ### Added

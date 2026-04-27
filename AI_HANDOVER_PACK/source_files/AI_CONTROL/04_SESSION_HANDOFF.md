@@ -1,122 +1,86 @@
 # Session Handoff
 
-## Date: April 2026
+## Date: 2026-04-27
 
 ## What happened this session
 
-### Project vision fully defined
+### Stage 3C: Project Management (multi-file job support) — implemented and validated
 
-The complete 6-stage product vision was articulated and agreed:
+Claude Code implemented the full Stage 3C project container system in two work sessions:
 
-1. Post-survey QA gate
-2. D2D elimination
-3. Live intake platform
-4. Structured field capture (tablet/GIS)
-5. Designer workspace
-6. DNO submission layer
+**Implementation session:**
 
-### Phase 3A completed
+- `app/project_manager.py` — data layer (project/file CRUD, suggest_project_name, refresh_project_summary)
+- `app/routes/api_projects.py` — project API (presign, upload, finalize, status, list, get)
+- `app/routes/projects_page.py` — page routes (/projects/, /project/<id>)
+- Project-aware routes added to map_preview, d2d_export, pdf_reports
+- `app/templates/projects.html`, `project.html` — client-side rendered pages
+- `app/templates/upload.html` + `app/static/js/upload-manager.js` — project-aware upload flow
+- `app/templates/map_viewer.html` + `app/static/js/map-viewer.js` — `map-data-url` meta tag pattern
+- `app/__init__.py` — registered all new blueprints
+- `tests/test_project_manager.py` — 22 unit tests
+- `tests/test_project_integration.py` — 9 integration tests
 
-Claude Code implemented real-file noise fixes:
-- Crossing codes (BTxing, LVxing, Road, Ignore) classified as context
-- Span threshold reduced from 10m to 5m
-- Location field contamination cleaned
-- 6 new tests added
-- 175 tests passing, pushed to master (commit 9030274)
+**Review fixes session:**
 
-### Stage 2A completed
+- `suggest_project_name()` corrected: strips ` - Descriptor` suffix, takes first 2 underscore parts for 3+ part names, preserves hyphens in job numbers
+- `api_projects.py` finalize: `refresh_project_summary` now always called (not only on success), so failed files appear in project overview
+- Integration tests written and passing for all 9 scenarios
 
-Claude Code implemented the provisional D2D candidate export:
-- route sequencing
-- EXpole matching
-- span-to-next calculation
-- deviation angle calculation
-- D2D clean chain candidate CSV
-- `sequenced_route.json`
-- 186 tests passing
-- commit `5f99bf0`
+**Commit:** `b0b5331`
 
-### Stage 2B completed
+**Test count:** 244 passing
 
-Claude Code implemented section-aware D2D output:
-- detached / `not required` record handling
-- section-aware sequencing
-- Angle records as section candidates
-- `sections` metadata
-- global `design_pole_number`
-- section-local `section_sequence_number`
-- interleaved D2D working view
-- `/d2d/interleaved/<job_id>` endpoint
-- confidence warnings
-- commit `54417ba`
+**Pre-commit:** clean
 
-Validation bugfix:
-- trailing orphan annotation such as `not required` preserved by parser
-- Gordon points `9` and `10` detached correctly
-- section boundary selected at point `4` / seq 60
-- 211 tests passing
-- commit `e51d0ee`
+---
 
-### Stage 2C completed
+### Manual validation passed
 
-Claude Code implemented export polish:
-- clearer clean-chain and working-view headers
-- section summary comments
-- clearer detached/reference wording
-- friendlier sequence note wording
-- clearer map download button labels
-- export filenames changed to `_d2d_chain.csv` and `_d2d_working_view.csv`
-- 211 tests passing
-- commit `4ca6bc0`
+Validation performed on the existing real-file set:
 
-### Stage 2 validation accepted
+| File | Project | Result |
+|------|---------|--------|
+| Gordon Pt1 Original | Gordon Pt1 | Passed — map, PDF, D2D chain all accessible |
+| 28-14 4-474 | Strabane 474 | Passed |
+| 28-14 474c | Strabane 474 (added) | Passed — multi-file project, both files accessible |
+| 28-14 513 | Strabane 513 | Passed — small file |
+| Legacy J##### jobs | n/a | Passed — backward compat confirmed |
 
-Validated files:
-- Gordon raw + manual PR1/PR2
-- `2814_4-474_raw_trimble_export.csv`
-- `28-14 513 (2).csv`
-- `2814_474c_raw_trimble_export.csv`
-
-Validation result:
-- Gordon passed with detached points 9/10 and boundary at point 4
-- 4-474 passed with expected sequence note
-- 513 passed clean/simple case
-- 474c passed
-
-### Control layer restructured
-
-Project orchestration moved to Claude Desktop. Control files updated to reflect:
-- Full 6-stage vision
-- Then-current phase (entering Stage 2 at the time of restructure)
-- Tool roles clarified
-- Domain reference documents saved (OHL operational standard, project origin notes)
-
-### New reference documents added
-
-- `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard summary
-- `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — full project origin and field workflow notes
-- `OHL_SURVEY_OPERATIONAL_STANDARD.md` — complete OHL survey operational standard
-
-### Competitive analysis completed
-
-No competing product exists for the survey-to-design handoff gap. All existing tools sit upstream (field capture) or downstream (design/CAD).
+D2D chain export inspected (`P004_F003_d2d_chain.csv`):
+- clean chain header present
+- 43 sequenced poles
+- matched EXpoles section present
+- context features section present
+- detached/reference records section present
+- no filename swap issues
 
 ---
 
 ## Current state
 
-- 211 tests passing
+- 244 tests passing
 - Stage 1 complete
-- Stage 2A, Stage 2B and Stage 2C implemented
-- Stage 2 real-file validation accepted
+- Stage 2A, 2B, 2C implemented and closed
+- Stage 3C implemented and validated — commit `b0b5331`
 - Branch is up to date with `origin/master`
-- Only generated zip files remain untracked locally (`AI_HANDOVER_PACK.zip`, `validation_data.zip`)
+- Untracked: `AI_HANDOVER_PACK.zip`, `validation_data.zip` (do not commit)
+
+---
+
+## Known caveats (by design — not bugs)
+
+- No cross-file chain merging: each file in a project is processed independently
+- No combined project-level map overlay
+- No designer editing of pairings or section boundaries (Stage 3B scope)
+- No live sync or cloud deployment (Stage 3A scope)
+- Sequential P### IDs are not concurrent-safe (acceptable for single-user local use)
+- Legacy J##### jobs not auto-migrated into projects
 
 ---
 
 ## Next steps
 
-1. Run Stage 2 completion review.
-2. Decide whether Stage 2 can be closed for the current evidence set.
-3. If Stage 2 is closed, update source-of-truth docs and handover pack.
-4. Do not begin Stage 3 planning until Stage 2 closure is explicitly approved.
+1. Project orchestrator (Claude Desktop) defines Stage 3B brief and scope.
+2. Do not begin any Stage 3B code work until the brief is approved.
+3. Do not begin Stage 3A (live intake/cloud) until Stage 3B is complete.

@@ -2,19 +2,19 @@
 
 ## Project phase
 
-**Stage 2 completion review**
+**Stage 3C complete — Stage 3B planning**
 
 Stage 1 is complete.
 
-Stage 2A, Stage 2B and Stage 2C are implemented and validated against the current Gordon/NIE real-file set.
+Stage 2A, Stage 2B and Stage 2C are implemented and validated. Stage 2 is formally closed.
 
-Stage 2 is not formally closed until the completion review decision is made.
+Stage 3C (Project Management / multi-file job support) is implemented and manually validated.
 
 ---
 
 ## What works
 
-- Raw Trimble controller dump intake (tested on 4 real files)
+- Raw Trimble GNSS controller dump intake (tested on 4 real files)
 - CRS detection: Irish Grid TM65, ITM, OSGB27700
 - Coordinate conversion to WGS84 for map display
 - Record-role classification (structural, context, anchor)
@@ -36,27 +36,40 @@ Stage 2 is not formally closed until the completion review decision is made.
 - Global provisional design pole numbering
 - Section-local sequence numbering
 - Confidence / sequence-note warning for high-ambiguity files
+- **Stage 3C: named project container above flat-job model**
+- **Stage 3C: multi-file projects (P001/F001, P001/F002...)**
+- **Stage 3C: project.json with aggregate summary across files**
+- **Stage 3C: project-aware upload, map, PDF, D2D routes**
+- **Stage 3C: project overview and projects list pages**
+- **Stage 3C: backward-compatible — all legacy J##### routes unchanged**
 
 ## Counts
 
-- **Tests passing:** 211
+- **Tests passing:** 244
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c
 
 ## What was just shipped
 
-- Stage 2A: provisional D2D candidate export / clean chain view
-- Stage 2B: section-aware sequencing, interleaved D2D working view, detached record handling, global design numbering
-- Stage 2B validation bugfix: trailing `not required` annotation preserved and Gordon points 9/10 detached correctly
-- Stage 2C: export polish, clearer headers, section summaries, detached wording, sequence-note wording, UI labels and filenames
+- Stage 3C: project container system
+  - `app/project_manager.py` — data layer
+  - `app/routes/api_projects.py` — project API
+  - `app/routes/projects_page.py` — project page routes
+  - project-aware routes in map_preview, d2d_export, pdf_reports
+  - `app/templates/projects.html`, `project.html`
+  - updated upload.html + upload-manager.js for project-aware upload
+  - 22 unit tests + 9 integration tests
+  - commit `b0b5331`
 
 ## Known remaining issues
 
-1. Stage 2 output is still provisional and not a verified PoleCAD import schema.
-2. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
-3. No manual section-selection UI yet.
-4. No multi-file job merge yet (`4-474` and `474c` remain separate validation files).
-5. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
+1. No cross-file chain merging or combined exports within a project.
+2. No combined project-level map overlay.
+3. No designer editing of pairings or section boundaries (Stage 3B scope).
+4. No live sync or cloud deployment (Stage 3A scope).
+5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
+6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
+7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
 
 ## Strategic position
 
@@ -64,4 +77,4 @@ Stage 2 is not formally closed until the completion review decision is made.
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Next decision is whether Stage 2 is complete enough for now or whether a small further polish pass is needed before Stage 3 planning
+- Stage 3C complete — foundation for Stage 3B (designer review) is now in place

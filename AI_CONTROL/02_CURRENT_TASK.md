@@ -2,80 +2,65 @@
 
 ## Phase
 
-**Stage 2 — Completion Review**
+**Stage 3C closure → Stage 3B planning**
 
-Stage 2A, Stage 2B and Stage 2C are implemented and validated against the current real-file evidence set.
+Stage 3C (Project Management / multi-file job support) is implemented and manually validated. It is now closed.
 
-The next task is to decide whether Stage 2 can be formally marked complete for now.
-
----
-
-## Immediate next step
-
-**Run the Stage 2 completion review.**
-
-Primary review document:
-
-- `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md`
-
-Question to answer:
-
-> Is Stage 2 complete as a validated provisional D2D replacement baseline for the current evidence set?
+The next task is for the project orchestrator (Claude Desktop) to define the Stage 3B brief before any code work begins.
 
 ---
 
-## Current Stage 2 capability
+## Stage 3C is closed
 
-The tool can now produce structured D2D replacement outputs directly from raw controller dumps.
-
-Current outputs:
-
-- clean route-chain export: `<job_id>_d2d_chain.csv`
-- interleaved working view: `<job_id>_d2d_working_view.csv`
-- `sequenced_route.json`
-
-Current capabilities:
-
-- route sequencing
-- EXpole matching
-- span and angle calculations
-- section-aware output
-- detached/not-required record handling
-- global provisional design pole numbering
-- section-local sequence numbering
-- confidence/sequence notes for ambiguous files
+- Implementation: commit `b0b5331`
+- Validation: passed across Gordon, 474 + 474c (multi-file), 513, and legacy J##### jobs
+- Validation acceptance: `AI_CONTROL/20_STAGE_3C_VALIDATION_ACCEPTANCE.md`
+- Tests: 244 passing, pre-commit clean
 
 ---
 
-## What not to do
+## What Stage 3B is (planned, not started)
 
-- Do not add features without validation evidence
-- Do not build tablet/field capture (Stage 4) yet
-- Do not build commercial packaging
-- Do not expand rulepacks without real-file evidence
+**Stage 3B — Designer Review & Export Readiness**
+
+Stage 3B will allow a designer to review and adjust the auto-generated processing outputs before exporting:
+
+- EXpole pairing reassignment (confirm or override auto-detected pairs)
+- Section boundary selection (confirm or move auto-detected splits)
+
+Stage 3B must not begin until the project orchestrator defines the exact scope and success criteria. The scope above is indicative only.
+
+---
+
+## What not to do before Stage 3B is defined
+
+- Do not begin any designer review or editing UI
+- Do not add combined project-level maps or exports
+- Do not begin cloud deployment (Stage 3A)
+- Do not add new QA rules or sequencing algorithms
 - Do not redesign architecture
-- Do not begin Stage 3 until Stage 2 closure is explicitly approved
+- Do not begin Stage 4, 5, or 6 work
+
+---
+
+## Handoff criteria: Stage 3C → Stage 3B
+
+All criteria are now met:
+
+1. Named projects work ✅
+2. Multi-file projects work ✅
+3. Project overview is usable ✅
+4. All existing outputs accessible from project page ✅
+5. Real multi-file project validated (474 + 474c) ✅
 
 ---
 
 ## Relevant files
 
-- `AI_CONTROL/13_STAGE_2B_VALIDATION_ACCEPTANCE.md`
-- `AI_CONTROL/14_STAGE_2C_POLISH_PLAN.md`
-- `AI_CONTROL/15_STAGE_2C_VALIDATION_ACCEPTANCE.md`
-- `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md`
-- `app/route_sequencer.py`
-- `app/routes/d2d_export.py`
-- `tests/test_route_sequencer.py`
-
----
-
-## Success criteria for Stage 2
-
-Stage 2 can be marked complete if the domain owner accepts:
-
-- raw controller dumps produce structured D2D replacement outputs
-- clean route-chain and interleaved working views are both useful
-- current real-file validation has passed
-- remaining limitations are clearly documented
-- final PoleCAD import format remains out of scope until verified with additional evidence
+- `AI_CONTROL/20_STAGE_3C_VALIDATION_ACCEPTANCE.md`
+- `AI_CONTROL/19_STAGE_3_EXECUTION_PLAN.md` (Stage 3B scope notes in section B)
+- `app/project_manager.py`
+- `app/routes/api_projects.py`
+- `app/routes/projects_page.py`
+- `tests/test_project_manager.py`
+- `tests/test_project_integration.py`

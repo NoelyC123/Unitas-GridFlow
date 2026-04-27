@@ -125,10 +125,38 @@ Stage 2C validation passed on:
 - `28-14 513 (2).csv`
 - `2814_474c_raw_trimble_export.csv`
 
-## Current Decision Point
+## Stage 2 Closed
 
-The next decision is Stage 2 completion review.
+Stage 2 completion review was completed and Stage 2 was formally closed. It is accepted as a validated provisional D2D replacement baseline. Final PoleCAD import format remains out of scope until verified with additional evidence.
+
+## Stage 3C Implemented and Validated
+
+Stage 3C commit: `b0b5331`
+
+Stage 3C added a named project container above the existing flat-job model:
+
+- Sequential project IDs: P001, P002, …
+- Sequential file IDs within each project: F001, F002, …
+- `project.json` aggregates file summaries (total poles, issues, rulepacks)
+- Project-aware upload flow with auto-suggested project name from filename
+- Project overview page and projects list page
+- Map, PDF, D2D chain and working view all routed per project file
+- All legacy J##### routes unchanged — full backward compatibility
+- 22 unit tests + 9 integration tests
+- 244 tests passing, pre-commit clean
+
+Stage 3C manual validation passed:
+- Gordon Pt1: project created, map/PDF/D2D all accessible
+- 474 + 474c: multi-file project, both files accessible independently
+- 513: small file project
+- Legacy J##### jobs: backward compat confirmed
+
+## Current Development Focus
+
+Stage 3C is closed. The next task is Stage 3B planning.
+
+Stage 3B (Designer Review & Export Readiness) will allow a designer to review and adjust auto-generated processing outputs (EXpole pairings, section boundaries) before exporting. Stage 3B must not begin until the project orchestrator defines the exact scope.
 
 ## Important Boundary
 
-Do not jump ahead to the tablet app, live sync, designer workspace or DNO submission layer until Stage 2 is properly validated.
+Do not begin Stage 3B code work until the orchestrator defines the Stage 3B brief. Do not begin Stage 3A (live intake) or later stages without explicit approval.
