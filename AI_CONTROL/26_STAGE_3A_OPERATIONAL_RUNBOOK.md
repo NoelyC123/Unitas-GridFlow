@@ -234,3 +234,103 @@ Specifically do not build:
 - Stage 4, Stage 5, or Stage 6 features
 
 Field-trial findings should define the next task. They should not trigger feature work automatically.
+
+---
+
+## 9. First Controlled Field-Trial Result — Gordon Real File
+
+## Date
+
+2026-04-27
+
+## Trial Setup
+
+- Protected URL: `https://gridflow.unitasconnect.com`
+- Access method: Cloudflare Access email one-time PIN
+- Upload device: iPhone on mobile data
+- Local origin: Mac running Flask app on `http://127.0.0.1:5001`
+- Tunnel: named Cloudflare Tunnel `gridflow`
+- Survey file: `Gordon_Pt1_-_Original.csv`
+- Project: `P007` / `Test with actual survey data`
+- File ID: `F001`
+- Uploaded by: `Noel`
+- Survey note: `Testing real survey CSV file`
+
+## Processing Result
+
+- Status: `complete`
+- Intake status: `reviewed`
+- Review status: `reviewed`
+- Rulepack: `SPEN_11kV`
+- Records / poles: `157`
+- Issues: `39`
+- PASS / WARN / FAIL: `126 / 25 / 4`
+- Sequenced proposed supports: `102`
+- Matched EXpoles: `24`
+- Unmatched EXpoles: `0`
+- Sections: `2`
+
+## Routes Validated
+
+The following routes returned successfully for `P007/F001`:
+
+- Project dashboard
+- Map viewer
+- PDF report
+- D2D Chain export
+- D2D Working View export
+- Designer Review page
+
+## Designer Review Result
+
+- Gordon EXpole pairings were acceptable for this validation run without manual reassignment.
+- Review was marked as reviewed.
+- Pairing output should remain designer-reviewable and should not be treated as automatic final truth.
+
+## Field-Trial Answers
+
+### Did the remote phone upload feel usable?
+
+Yes. The remote phone upload/access trial was successful and usable for a first controlled validation. The app could be reached on mobile data, authenticated through Cloudflare Access, used to upload into a project, and used to view dashboard, map, review, and D2D outputs.
+
+### Did the project dashboard make sense after upload?
+
+Yes. The dashboard showed the project code, file count, pole/record count, issue count, rulepack, uploaded file, intake status, survey note, uploaded-by label, and office feedback area. This validates the daily-intake concept.
+
+The main dashboard friction is responsive layout. On phone, the survey files table is too wide and the right-hand status/action area can be partly off-screen.
+
+### Were EXpole pairings acceptable without changes?
+
+Yes for this Gordon validation. The review showed 24 matched EXpoles and 0 unmatched EXpoles. This is a strong validation signal, but the pairing output must remain designer-reviewable.
+
+### Were D2D exports good enough to reduce manual D2D spreadsheet work?
+
+Yes. The D2D Chain and D2D Working View are good enough to reduce manual D2D preparation by supporting route sequencing, EX/PR interpretation, section review, issue triage, reviewed/provisional status, and export preparation.
+
+They remain reviewed/provisional handoff outputs, not a verified final PoleCAD import format.
+
+### Biggest friction or missing piece
+
+The biggest friction is mobile usability, not the core workflow.
+
+Observed mobile friction:
+
+- project dashboard table is cramped
+- status/action columns are partly off-screen
+- designer review pairing table is hard to inspect on phone
+- long map sidebar/report sections require heavy scrolling
+- homepage wording still reflects early "Pre-CAD QA Tool" / "DNO compliance" framing
+- navigation still feels partly legacy: Upload / Jobs / Health rather than Projects / Intake / Review / Exports
+
+## Recommended Next Improvement
+
+Do not jump to hosted deployment or later-stage features.
+
+The next narrow improvement should be responsive/mobile polish for the existing Stage 3 workflow:
+
+- mobile-friendly project file cards instead of wide tables
+- clearer action buttons for Map / Review / PDF / D2D exports
+- compact mobile review/export summary
+- updated homepage wording to reflect project intake and D2D handoff, not only early QA/compliance language
+
+This should be treated as a Stage 3 usability follow-on only if approved as the next task.

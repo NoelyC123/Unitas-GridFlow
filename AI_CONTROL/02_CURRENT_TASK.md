@@ -2,13 +2,13 @@
 
 ## Phase
 
-**Stage 3A complete — prepare first controlled field trial**
+**Stage 3A field trial complete — decide mobile usability follow-on**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
 Stage 3A2 planning is documented in `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`.
 
-The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. Claude Desktop approved closure and recommended the next narrow validation-led step: prepare and run the first controlled field-trial checklist, supported by an operational runbook.
+The Cloudflare Tunnel + Access route has been validated from a phone on mobile data. Stage 3A2 is closed as a controlled remote-access trial. The first controlled field trial has now been run with the real Gordon file through the protected remote workflow.
 
 Validation completed:
 
@@ -22,6 +22,11 @@ Validation completed:
 - Non-sensitive `mock_survey.csv` uploaded remotely into project `P006` / `iPhone Test`.
 - Project dashboard updated remotely.
 - Map, PDF, D2D Chain, D2D Working, and Review routes responded successfully for `P006/F001`.
+- Real Gordon file uploaded remotely as project `P007` / `F001`.
+- Gordon processed successfully: 157 records, 39 issues, 126 PASS, 25 WARN, 4 FAIL.
+- Gordon review marked reviewed with 24 matched EXpoles and 0 unmatched EXpoles.
+- Gordon Map/PDF/D2D Chain/D2D Working/Review routes all worked.
+- Field-trial finding: core workflow passed; biggest friction is mobile table/review layout and outdated homepage wording.
 
 ---
 
@@ -37,7 +42,7 @@ Validation completed:
 
 ## Next task
 
-Proceed to **first controlled field-trial preparation**.
+Proceed to **next-stage decision: Stage 3 mobile usability follow-on or more field evidence**.
 
 Use:
 
@@ -53,12 +58,12 @@ Stage 3A2 proved:
 - project dashboard updates remotely
 - Map/PDF/D2D/Review links work remotely
 
-Next step:
+Next decision:
 
-- Use `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md` to run the local app and named tunnel safely.
-- Use its field-trial checklist to test a real or approved replay surveyor/designer workflow.
-- Record what worked, what failed, and whether D2D output reduced manual spreadsheet work.
-- Do not build Stage 3B follow-on features until field-trial friction proves the need.
+- Review the Gordon field-trial result in `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md`.
+- Decide whether to approve a narrow Stage 3 mobile usability follow-on.
+- Candidate follow-on: mobile-friendly project file cards, clearer mobile action buttons, compact review/export summary, and updated homepage wording.
+- Do not begin hosted deployment, app accounts, cloud storage, photo upload, tablet capture, or live Trimble sync.
 - Defer always-on hosting, app accounts, cloud storage, photo upload, tablet capture, and live Trimble sync until explicitly approved.
 
 ---

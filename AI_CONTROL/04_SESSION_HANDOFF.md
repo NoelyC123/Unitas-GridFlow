@@ -4,6 +4,55 @@
 
 ## What happened this session
 
+### First controlled field trial — Gordon real file
+
+The first controlled field trial was run through the protected remote workflow.
+
+Setup:
+
+- Protected URL: `https://gridflow.unitasconnect.com`
+- Upload device: iPhone on mobile data
+- Survey file: `Gordon_Pt1_-_Original.csv`
+- Project: `P007` / `Test with actual survey data`
+- File: `F001`
+
+Result:
+
+- Remote upload worked.
+- Project dashboard updated.
+- Gordon processed successfully:
+  - 157 records
+  - 39 issues
+  - 126 PASS
+  - 25 WARN
+  - 4 FAIL
+  - 102 sequenced proposed supports
+  - 24 matched EXpoles
+  - 0 unmatched EXpoles
+  - 2 sections
+- Designer review was marked reviewed without pairing reassignment.
+- Map, PDF, D2D Chain, D2D Working View, and Review routes all worked.
+
+Validation conclusion:
+
+- The core remote workflow passed.
+- The project dashboard made sense after upload.
+- Gordon EXpole pairings were acceptable for this validation run but must remain designer-reviewable.
+- D2D Chain and Working View are good enough to reduce manual D2D spreadsheet preparation, while remaining reviewed/provisional handoff outputs rather than final PoleCAD import format.
+- Biggest friction is mobile usability: tables and review controls are cramped on phone, and homepage/navigation wording still reflects early QA-tool language.
+
+Recommended next task:
+
+- Decide whether to approve a narrow Stage 3 mobile usability follow-on:
+  - mobile-friendly project file cards
+  - clearer Map / Review / PDF / D2D action buttons
+  - compact mobile review/export summary
+  - updated homepage wording around project intake and D2D handoff
+
+Do not jump to hosted deployment, app accounts, cloud storage, photo upload, tablet capture, live Trimble sync, or later-stage features.
+
+---
+
 ### Stage 3A2: Cloudflare Access-gated remote trial — complete
 
 The primary Stage 3A2 route was validated using a named Cloudflare Tunnel and Cloudflare Access. Stage 3A2 is closed as a controlled remote-access validation success.
@@ -202,6 +251,7 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 - Stage 3A1 local daily intake implemented and validated
 - Stage 3A2 Cloudflare Tunnel + Access trial complete
+- First controlled Gordon field trial complete
 - Temporary unauthenticated tunnel page reachability validated from phone/external device
 - Access-gated remote upload/dashboard/export/review smoke test passed with non-sensitive data
 - Stage 1 complete
@@ -227,9 +277,9 @@ Stage 3C (Project Management / multi-file job support) was implemented and valid
 
 ## Next steps
 
-1. Use `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md` to run the local app and named tunnel safely.
-2. Prepare the first controlled field trial using the checklist in that document.
-3. Keep using the named tunnel only for controlled trials while the Mac is online.
+1. Decide whether to approve a narrow Stage 3 mobile usability follow-on based on the Gordon field-trial friction.
+2. Keep using the named tunnel only for controlled trials while the Mac is online.
+3. Keep the field-trial result in `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md` as the evidence base.
 4. Do not begin Render/Railway/full hosted deployment, app accounts, Stage 4 tablet capture, Stage 5 designer workspace expansion, or Stage 6 submission packs yet.
 
 ---

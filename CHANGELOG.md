@@ -12,6 +12,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Validated
 
+- First controlled field trial with real Gordon file:
+  - uploaded `Gordon_Pt1_-_Original.csv` remotely through `gridflow.unitasconnect.com`
+  - created project `P007` / `Test with actual survey data`
+  - processed 157 records with 39 issues: 126 PASS, 25 WARN, 4 FAIL
+  - generated 102 sequenced proposed supports, 24 matched EXpoles, 0 unmatched EXpoles, and 2 sections
+  - designer review marked reviewed without pairing reassignment
+  - Map, PDF, D2D Chain, D2D Working View, and Review routes worked
+  - validation conclusion: core remote workflow passed; biggest friction is mobile usability and outdated homepage/navigation wording
+
 - Stage 3A2 closed as a controlled remote-access validation success.
 
 - Cloudflare Tunnel + Access controlled remote trial:
@@ -44,6 +53,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   - Mac/WiFi DNS cache recovery note for `DNS_PROBE_FINISHED_NXDOMAIN`
   - first controlled surveyor/designer field-trial checklist
   - post-trial evidence prompts and scope boundaries
+  - first Gordon real-file field-trial result and recommended mobile usability follow-on
 
 - **`AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`** — Stage 3A2 planning brief:
   - recommends Cloudflare Tunnel + Cloudflare Access as the first controlled remote-access trial
