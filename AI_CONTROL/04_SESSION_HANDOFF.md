@@ -4,76 +4,77 @@
 
 ## What happened this session
 
-### Stage 3C: Project Management (multi-file job support) — implemented and validated
+### Stage 3B: Designer Review & Export Readiness — implemented and validated
 
-Claude Code implemented the full Stage 3C project container system in two work sessions:
+Claude Code implemented the Stage 3B MVP across two commits in one work session, following the approved brief at `AI_CONTROL/21_STAGE_3B_DESIGN_BRIEF.md`.
 
-**Implementation session:**
+**Commit `a9b3ee2`:** Add Stage 3B design brief
 
-- `app/project_manager.py` — data layer (project/file CRUD, suggest_project_name, refresh_project_summary)
-- `app/routes/api_projects.py` — project API (presign, upload, finalize, status, list, get)
-- `app/routes/projects_page.py` — page routes (/projects/, /project/<id>)
-- Project-aware routes added to map_preview, d2d_export, pdf_reports
-- `app/templates/projects.html`, `project.html` — client-side rendered pages
-- `app/templates/upload.html` + `app/static/js/upload-manager.js` — project-aware upload flow
-- `app/templates/map_viewer.html` + `app/static/js/map-viewer.js` — `map-data-url` meta tag pattern
-- `app/__init__.py` — registered all new blueprints
-- `tests/test_project_manager.py` — 22 unit tests
-- `tests/test_project_integration.py` — 9 integration tests
+**Commit `7daa5a9`:** Add Stage 3B designer review overlay
 
-**Review fixes session:**
+Files added or changed:
 
-- `suggest_project_name()` corrected: strips ` - Descriptor` suffix, takes first 2 underscore parts for 3+ part names, preserves hyphens in job numbers
-- `api_projects.py` finalize: `refresh_project_summary` now always called (not only on success), so failed files appear in project overview
-- Integration tests written and passing for all 9 scenarios
+| File | Change |
+|------|--------|
+| `app/review_manager.py` | New — review data layer |
+| `app/routes/api_review.py` | New — review REST API |
+| `app/routes/review_page.py` | New — review page route |
+| `app/templates/review.html` | New — Bootstrap 5 review UI |
+| `app/routes/d2d_export.py` | Modified — project exports apply review overlay |
+| `app/routes/api_intake.py` | Modified — reprocessing clears stale review |
+| `app/__init__.py` | Modified — blueprint registration |
+| `tests/test_review_manager.py` | New — 20 unit tests |
+| `tests/test_review_integration.py` | New — 9 integration tests |
 
-**Commit:** `b0b5331`
-
-**Test count:** 244 passing
+**Test count:** 273 passing (up from 244)
 
 **Pre-commit:** clean
 
 ---
 
-### Manual validation passed
+### What Stage 3B delivers
 
-Validation performed on the existing real-file set:
+A designer can now:
 
-| File | Project | Result |
-|------|---------|--------|
-| Gordon Pt1 Original | Gordon Pt1 | Passed — map, PDF, D2D chain all accessible |
-| 28-14 4-474 | Strabane 474 | Passed |
-| 28-14 474c | Strabane 474 (added) | Passed — multi-file project, both files accessible |
-| 28-14 513 | Strabane 513 | Passed — small file |
-| Legacy J##### jobs | n/a | Passed — backward compat confirmed |
+1. Navigate to `/review/project/<project_id>/<file_id>` to see the review page for a processed file.
+2. View all auto-detected EXpole pairings in a table.
+3. Reassign any EXpole to a different proposed pole using a dropdown, or mark it as unmatched.
+4. Enter review notes and mark the file as "Reviewed".
+5. Download D2D Chain or D2D Working View exports — reviewed exports show "Designer Reviewed — <timestamp>" in the header; unreviewed exports remain "provisional".
+6. Reset the review at any time — deletes `review.json`, exports revert to auto-generated state.
 
-D2D chain export inspected (`P004_F003_d2d_chain.csv`):
-- clean chain header present
-- 43 sequenced poles
-- matched EXpoles section present
-- context features section present
-- detached/reference records section present
-- no filename swap issues
+The original `sequenced_route.json` is never modified. The review overlay is applied at export time on a deep copy.
+
+---
+
+### Previous session (Stage 3C — recorded for continuity)
+
+Stage 3C (Project Management / multi-file job support) was implemented and validated in the prior session.
+
+- Commit: `b0b5331`
+- Test count at close of 3C: 244
 
 ---
 
 ## Current state
 
-- 244 tests passing
+- 273 tests passing
 - Stage 1 complete
 - Stage 2A, 2B, 2C implemented and closed
 - Stage 3C implemented and validated — commit `b0b5331`
+- Stage 3B implemented and validated — commits `a9b3ee2`, `7daa5a9`
 - Branch is up to date with `origin/master`
-- Untracked: `AI_HANDOVER_PACK.zip`, `validation_data.zip` (do not commit)
 
 ---
 
 ## Known caveats (by design — not bugs)
 
-- No cross-file chain merging: each file in a project is processed independently
-- No combined project-level map overlay
-- No designer editing of pairings or section boundaries (Stage 3B scope)
-- No live sync or cloud deployment (Stage 3A scope)
+- EXpole pairing review only — section boundary editing deferred
+- No route sequence editing, no pole attribute editing, no map-based editing
+- No cross-file review — each file is reviewed independently
+- Reviewed state affects D2D CSV exports only; PDF update deferred
+- `reviewed_by` hardcoded to "Designer" — configurable later
+- No multi-user conflict resolution — last-write-wins (single-user local use)
 - Sequential P### IDs are not concurrent-safe (acceptable for single-user local use)
 - Legacy J##### jobs not auto-migrated into projects
 
@@ -81,6 +82,6 @@ D2D chain export inspected (`P004_F003_d2d_chain.csv`):
 
 ## Next steps
 
-1. Project orchestrator (Claude Desktop) defines Stage 3B brief and scope.
-2. Do not begin any Stage 3B code work until the brief is approved.
-3. Do not begin Stage 3A (live intake/cloud) until Stage 3B is complete.
+1. Project orchestrator (Claude Desktop) decides: Stage 3B polish or Stage 3A planning.
+2. Do not begin any new code work until the next direction is defined.
+3. Do not begin Stage 3A (live intake/cloud) until a scope brief is approved.

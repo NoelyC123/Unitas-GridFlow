@@ -15,16 +15,17 @@
 
 ### Claude Desktop (Project Orchestrator)
 - Defines what gets built, why, and in what order
-- Reviews validation results
-- Manages all tools
+- Reviews validation results for major stage gates or ambiguous decisions
 - Prevents scope drift
 - Holds full project context
+- Use selectively; not required for every small documentation or closure step
 
 ### Claude Code (VS Code — Primary Builder)
 - Reads repo, writes code, runs tests, commits, pushes
 - Executes tasks as defined by the orchestrator
 - Makes minimal, targeted changes
 - Keeps tests passing
+- Use mainly for code, tests, and complex repo-wide changes; avoid spending Claude Code usage on routine admin-only docs
 
 ### ChatGPT
 - Available for second opinions, commercial thinking, review
@@ -39,6 +40,13 @@ After code changes:
 1. `pytest -v` — all tests must pass
 2. `pre-commit run --all-files`
 3. `git add . && git commit -m "clear message" && git push`
+
+Documentation-only changes should be lightweight:
+
+- Major stage closure: update only the minimum control docs needed.
+- Small polish/bugfix: changelog only if useful.
+- Do not create closure/review/planning documents for every small task.
+- Prefer Cursor/GPT for routine admin updates to preserve Claude usage.
 
 ---
 

@@ -43,15 +43,14 @@ Work on the **current stage only**. The orchestrator defines when a stage is com
 
 ---
 
-### Claude Desktop — Project Orchestrator
+### Claude Desktop — Project Orchestrator (use selectively)
 
 - defines WHAT gets built, WHY, and in WHAT ORDER
-- reviews validation results
-- manages all tools
+- reviews validation results for major stage gates or ambiguous decisions
 - prevents scope creep and stage drift
 - holds full project context between sessions
 
-This is the **control layer above all tools**.
+This is the **control layer for major decisions**, not a required step for every small update.
 
 ---
 
@@ -67,7 +66,7 @@ Responsibilities:
 - keep tests passing
 - make minimal, targeted changes
 
-This is the **execution engine**.
+This is the **execution engine for code and complex repo-wide edits**. Do not spend Claude Code usage on routine documentation/admin if Cursor can make the small update safely.
 
 ---
 
@@ -103,17 +102,17 @@ If anything conflicts: real data wins, control layer overrides assumptions.
 **Step 1 — Real Input (Human)**
 Provide real survey file or real-world issue.
 
-**Step 2 — Task Definition (Claude Desktop)**
-Claude Desktop defines the exact problem, narrow solution, and constraints. Updates `AI_CONTROL/02_CURRENT_TASK.md`.
+**Step 2 — Task Definition**
+Use Claude Desktop only for major or ambiguous stage decisions. For small, obvious follow-up work, Cursor/GPT can define the narrow task directly from the current control docs.
 
 **Step 3 — Implementation (Claude Code)**
 Claude Code implements, runs tests, commits, pushes.
 
-**Step 4 — Verification (Claude Desktop)**
-Claude Desktop reviews the result, checks alignment with intent, identifies gaps.
+**Step 4 — Verification**
+Use automated tests, real-file validation, and Cursor/GPT review by default. Use Claude Desktop only when a stage-gate decision or high-impact trade-off needs orchestration review.
 
-**Step 5 — Decision (Claude Desktop)**
-Claude Desktop decides: next step, refine, stop, or advance to next stage.
+**Step 5 — Decision**
+For major stage transitions, the orchestrator decides: next step, refine, stop, or advance. For small fixes and docs, keep the process lightweight.
 
 ---
 
@@ -150,6 +149,13 @@ After any code change:
 1. `pytest -v` — all tests must pass
 2. `pre-commit run --all-files`
 3. `git add . && git commit -m "clear message" && git push`
+
+For documentation-only changes, keep the process proportionate:
+
+- Major stage closure: update the minimum current-state/task/handoff/changelog docs needed.
+- Small feature, polish, or bugfix: update `CHANGELOG.md` only if useful.
+- Do not create a separate closure/review/planning artifact for every small task.
+- Do not use Claude Desktop or Claude Code for routine admin if Cursor can safely complete it.
 
 ---
 

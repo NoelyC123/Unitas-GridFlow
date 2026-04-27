@@ -72,18 +72,19 @@ It comes from direct real-world experience of both the survey job on site and th
 
 ## Tool roles (STRICT)
 
-### Claude Desktop — Project Orchestrator
-- defines what gets built, why, and in what order
-- reviews validation results
-- manages all tools
+### Claude Desktop — Project Orchestrator (use selectively)
+- defines what gets built, why, and in what order for major stage decisions
+- reviews validation results when the decision is high-impact or ambiguous
 - prevents scope drift
-- holds full project context
+- should not be used for every routine documentation update or small closure step
 
 ### Claude Code (VS Code) — Primary Builder (YOU)
 - reads repo, writes code, runs tests, commits, pushes
 - executes tasks as defined by the orchestrator
 - makes minimal, targeted changes
 - keeps tests passing
+- should be used mainly for code changes, complex repo-wide edits, and high-risk implementation work
+- should not be used for routine admin-only updates when Cursor can safely make the small documentation change
 
 ### ChatGPT — Available for second opinions and commercial thinking only
 
@@ -188,6 +189,13 @@ After any approved code change:
 2. `pre-commit run --all-files`
 3. commit clearly
 4. push to `master`
+
+Documentation-only changes should be proportionate:
+
+- Major stage closure: update only the minimum control docs needed to keep the project state clear.
+- Small polish/bugfix: update `CHANGELOG.md` only if useful.
+- Do not create a new closure/review/planning document for every small task.
+- Avoid spending Claude Desktop or Claude Code usage on routine admin if Cursor can safely do it.
 
 ---
 
