@@ -151,12 +151,31 @@ Stage 3C manual validation passed:
 - 513: small file project
 - Legacy J##### jobs: backward compat confirmed
 
+## Stage 3B Implemented and Validated
+
+Stage 3B commits: `a9b3ee2`, `7daa5a9`
+
+Stage 3B added designer review and sign-off on auto-generated EXpole pairings:
+
+- `review.json` overlay per project file — original sequenced_route.json never modified
+- `app/review_manager.py` — data layer (load/save/delete/build/enrich/apply)
+- `app/routes/api_review.py` — GET/POST/DELETE `/api/project/<pid>/file/<fid>/review`
+- `app/routes/review_page.py` + `app/templates/review.html` — Bootstrap 5 review page
+- D2D Chain and D2D Working View exports apply reviewed pairing overrides
+- "Designer Reviewed — <timestamp>" header when reviewed; "provisional" when not
+- Reset to auto-generated: single delete of review.json
+- Reprocessing clears stale review at start of process_job
+- 20 unit tests + 9 integration tests
+- 273 tests passing, pre-commit clean
+
+Stage 3B validation passed (all 9 specified integration scenarios).
+
 ## Current Development Focus
 
-Stage 3C is closed. The next task is Stage 3B planning.
+Stage 3B is closed. The next direction has not yet been decided by the project orchestrator.
 
-Stage 3B (Designer Review & Export Readiness) will allow a designer to review and adjust auto-generated processing outputs (EXpole pairings, section boundaries) before exporting. Stage 3B must not begin until the project orchestrator defines the exact scope.
+Options: Stage 3B polish (section boundary editing, PDF update) vs Stage 3A planning (live intake platform).
 
 ## Important Boundary
 
-Do not begin Stage 3B code work until the orchestrator defines the Stage 3B brief. Do not begin Stage 3A (live intake) or later stages without explicit approval.
+Do not begin Stage 3A (live intake) or any later stage without explicit orchestrator approval. Do not begin section boundary editing without a new scope brief.
