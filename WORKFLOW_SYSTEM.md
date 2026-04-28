@@ -23,8 +23,8 @@ Every step must answer:
 | Stage | Name | Status |
 |-------|------|--------|
 | 1 | Post-survey QA gate | ✅ Complete |
-| 2 | D2D elimination | ← CURRENT |
-| 3 | Live intake platform | Planned |
+| 2 | Design-ready handoff / Design Chain | ✅ Complete |
+| 3 | Live intake platform | ✅ Complete |
 | 4 | Structured field capture | Planned |
 | 5 | Designer workspace | Planned |
 | 6 | DNO submission layer | Planned |
@@ -161,15 +161,15 @@ For documentation-only changes, keep the process proportionate:
 
 ## 9. Current Stage Context
 
-**Stage 2 — D2D Elimination**
+**Current remediation — Design Chain handoff polish**
 
-Goal: tool takes raw controller dump → produces structured, sequenced, PoleCAD-ready output. The manual D2D spreadsheet step is eliminated.
+Goal: improve the completed Stage 3 handoff surfaces after practitioner review. The immediate focus is terminology, Design Chain / Raw Working Audit framing, EX/PR proximity QA wording, basic map span rendering, and PDF issue/action presentation.
 
 What this means:
 - automatic pole sequencing (spatial route order, not file order)
 - correct pole numbering
 - section splitting at sensible points
-- coordinate output in PoleCAD-compatible format
+- coordinate output for design handoff review
 - EXpole records matched to their route position
 
 See `AI_CONTROL/02_CURRENT_TASK.md` for the immediate next step.

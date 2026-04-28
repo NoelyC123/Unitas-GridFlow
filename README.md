@@ -43,9 +43,9 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 
 **Stage 1** is complete: the tool parses raw controller dumps, validates their contents, and gives the designer a clear pre-design briefing before they open PoleCAD.
 
-**Stage 2** is complete: the tool produces structured, sequenced, designer-readable handoff outputs directly from raw controller dumps. Clean route-chain export and interleaved working view included. These are transitional D2D-replacement outputs, not a claim that D2D spreadsheets are the future product model. The 2026-04-28 practitioner review reframes the clean route-chain output as the future Design Chain / Design Handoff Export, with the D2D working view kept secondary as a raw working audit. Output is provisional and not a verified final PoleCAD import format.
+**Stage 2** is complete: the tool produces structured, sequenced, designer-readable handoff outputs directly from raw controller dumps. Design Chain export and Raw Working Audit included. These are transitional replacements for the old manual D2D workaround, not a claim that D2D spreadsheets are the future product model. Output is provisional and not a verified final PoleCAD import format.
 
-**Stage 3C** is complete: named projects group related survey files. Multiple CSVs can be uploaded to a single project. Each file still runs through the same Stage 1/2 pipeline independently. Map, PDF, D2D chain and working view are all accessible per file from the project overview page. Legacy J##### jobs remain fully accessible.
+**Stage 3C** is complete: named projects group related survey files. Multiple CSVs can be uploaded to a single project. Each file still runs through the same Stage 1/2 pipeline independently. Map, PDF, Design Chain, and Raw Working Audit are all accessible per file from the project overview page. Legacy J##### jobs remain fully accessible.
 
 **Stage 3B** is complete: designers can now review and sign off on auto-generated EXpole pairings before using structured handoff exports. A per-file review page shows all EXpole-to-proposed-pole pairings with dropdown reassignment controls. Reviewed exports carry a "Designer Reviewed" header; unreviewed exports remain "provisional". Review can be reset to auto-generated at any time. The original `sequenced_route.json` is never modified.
 
@@ -62,13 +62,13 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - Renders an interactive Leaflet map with design-readiness signals
 - Produces a PDF pre-design briefing report
 - Infers the correct DNO rulepack from geography (SPEN, SSEN, NIE, ENWL)
-- Produces a clean route-chain export (`<job_id>_d2d_chain.csv`) as a transitional design handoff output
-- Produces an interleaved designer working view (`<job_id>_d2d_working_view.csv`) as a transitional replacement for manual D2D spreadsheet rebuilding
+- Produces a Design Chain export (`<job_id>_design_chain.csv`) as the primary transitional design handoff output
+- Produces a Raw Working Audit export (`<job_id>_raw_working_audit.csv`) as a secondary traceability view for old manual spreadsheet context
 - Performs route sequencing, EXpole matching, span calculation and deviation-angle calculation
 - Handles detached / `not required` records
 - Adds section summaries, global provisional design pole numbering and sequence-confidence notes
 - Groups related survey files into named projects (Stage 3C)
-- Per-project map, PDF, D2D chain and working view all accessible independently per file
+- Per-project map, PDF, Design Chain, and Raw Working Audit all accessible independently per file
 - Designer review page with EXpole pairing reassignment and sign-off (Stage 3B)
 - Structured handoff exports reflect reviewed pairing decisions with reviewed/provisional header
 
@@ -93,7 +93,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - `review.json` overlay storage per project file — original sequenced_route.json never modified
 - Per-file review page (`/review/project/<pid>/<fid>`) with EXpole pairing table and dropdown reassignment
 - Designer reviewed/not-reviewed flag with review notes
-- D2D Chain and D2D Working View exports apply reviewed pairing overrides
+- Design Chain and Raw Working Audit exports apply reviewed proximity QA overrides
 - Reviewed exports: "Designer Reviewed — <timestamp>" header; unreviewed: "provisional"
 - Reset to auto-generated — single delete, no pipeline re-run
 - 20 unit tests + 9 integration tests
@@ -105,11 +105,11 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 - `project.json` aggregates file summaries (total poles, issues, rulepacks)
 - Project-aware upload flow with auto-suggested project name from filename
 - Project overview page and projects list page (client-side rendered)
-- Map, PDF, D2D chain and working view all routed per project file
+- Map, PDF, Design Chain, and Raw Working Audit all routed per project file
 - All legacy J##### routes unchanged — full backward compatibility
 - 22 unit tests + 9 integration tests
 
-### Earlier: Stage 2 — Survey-to-design direct handoff / D2D elimination
+### Earlier: Stage 2 — Design-ready handoff / Design Chain
 
 Stage 2A / 2B / 2C delivered a validated provisional design handoff baseline:
 
@@ -240,7 +240,7 @@ Validation checklist:
 - Remote device can open the projects page.
 - Remote upload into an existing project works.
 - Intake status appears on the project dashboard.
-- Map, PDF, D2D Chain, D2D Working, and Review links work remotely.
+- Map, PDF, Design Chain, Raw Working Audit, and Review links work remotely.
 
 Deferred from Stage 3A2 but retained in the roadmap:
 
@@ -270,7 +270,7 @@ Legacy jobs are also supported:
 python scripts/create_validation_pack.py --job-id J16535 --zip
 ```
 
-The pack is written to the Desktop by default and includes the raw input, `meta.json`, `issues.csv`, `map_data.json`, `sequenced_route.json`, review decisions when present, generated PDF, D2D Chain CSV, D2D Working View CSV, validation notes, and an AI review prompt.
+The pack is written to the Desktop by default and includes the raw input, `meta.json`, `issues.csv`, `map_data.json`, `sequenced_route.json`, review decisions when present, generated PDF, Design Chain CSV, Raw Working Audit CSV, validation notes, and an AI review prompt.
 
 Add screenshots when useful:
 

@@ -617,7 +617,7 @@ def process_job(
         top_design_risks = build_top_design_risks(issues_df, completeness)
         replacement_narratives = _build_replacement_narratives(df, issues_df)
 
-        # Route sequencer — produces provisional D2D candidate output.
+        # Route sequencer — produces provisional design-chain output.
         # Wrapped in its own try/except so any sequencer bug does NOT break the
         # existing upload/map/PDF flow. Errors are logged and surfaced in meta.json.
         sequence_result: dict = {}

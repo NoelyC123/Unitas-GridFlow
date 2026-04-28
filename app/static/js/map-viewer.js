@@ -358,8 +358,8 @@ class MapViewer {
   }
 
   statusBadge(status) {
-    if (status === 'FAIL') return '<span style="color:#d94141;font-weight:700;">FAIL</span>';
-    if (status === 'WARN') return '<span style="color:#d39e00;font-weight:700;">WARN</span>';
+    if (status === 'FAIL') return '<span style="color:#d94141;font-weight:700;">Design Blocker</span>';
+    if (status === 'WARN') return '<span style="color:#d39e00;font-weight:700;">Review Required</span>';
     return '<span style="color:#2e8b57;font-weight:700;">PASS</span>';
   }
 

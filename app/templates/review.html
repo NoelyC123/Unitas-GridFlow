@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Unitas GridFlow — Review</title>
+  <title>Unitas GridFlow — Design Handoff Review</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
@@ -32,10 +32,10 @@
     <div class="breadcrumb-line">
       <a href="/projects/">Projects</a> /
       <a href="/project/{{ project_id }}">{{ project_id }}</a> /
-      Review
+      Design Handoff Review
     </div>
     <h1>
-      Designer Review —
+      Design Handoff Review —
       {% if meta.get("original_filename") %}
         {{ meta["original_filename"] }}
       {% elif meta.get("filename") %}
@@ -70,7 +70,7 @@
   <div class="section-card">
     <div class="section-title">Sections ({{ sections|length }})</div>
     <table class="table table-sm mb-0">
-      <thead><tr><th>Section</th><th>Seq range</th><th>Poles</th><th>Boundary point</th></tr></thead>
+      <thead><tr><th>Section</th><th>Design pole range</th><th>Poles</th><th>Section boundary</th></tr></thead>
       <tbody>
         {% for sec in sections %}
         <tr>
@@ -95,18 +95,18 @@
     {% endif %}
     <span style="font-size:0.87rem;color:#374151;">
       Chain: {{ chain_count }} proposed poles &nbsp;|&nbsp;
-      Matched EXpoles: {{ summary.get("total_matched_expoles", matched_expoles|length) }} &nbsp;|&nbsp;
-      Unmatched EXpoles: {{ summary.get("total_unmatched_expoles", unmatched_expoles|length) }}
+      Existing/proposed proximity signals: {{ summary.get("total_matched_expoles", matched_expoles|length) }} &nbsp;|&nbsp;
+      Unmatched existing poles: {{ summary.get("total_unmatched_expoles", unmatched_expoles|length) }}
     </span>
   </div>
   {% endif %}
 
-  {# ── EXpole Pairings ── #}
+  {# ── Existing / Proposed Pole Proximity QA ── #}
   <div class="section-card">
-    <div class="section-title">EXpole Pairings</div>
+    <div class="section-title">Existing / Proposed Pole Proximity QA</div>
     <p style="font-size:0.87rem;color:#6b7280;margin-bottom:14px;">
-      Review each existing pole pairing below. The auto match is the tool's suggested replacement pole.
-      Use the reviewed assignment dropdown to confirm, reassign, or mark as unmatched.
+      Review each nearby existing/proposed pole relationship below. The nearby proposed pole is a proximity signal, not a final engineering decision.
+      Use the reviewed link dropdown to confirm, correct, or mark as unmatched.
       Changes are saved when you click <strong>Save Review</strong>.
     </p>
 
@@ -116,12 +116,12 @@
       <table class="table table-hover align-middle mb-0" id="pairings-table">
         <thead>
           <tr>
-            <th>EXpole ID</th>
+            <th>Existing pole ID</th>
             <th>Code</th>
             <th>Remark</th>
-            <th>Auto match</th>
-            <th>Auto dist (m)</th>
-            <th>Reviewed assignment</th>
+            <th>Nearby proposed pole</th>
+            <th>Distance (m)</th>
+            <th>QA status / reviewed link</th>
           </tr>
         </thead>
         <tbody>
@@ -151,7 +151,7 @@
                       data-original-match="{{ current_match or '' }}">
                 <option value=""{% if not reviewed_match %} selected{% endif %}>— Unmatched / no replacement —</option>
                 {% if current_match %}
-                  {# Auto match shown first #}
+                  {# Nearby proposed pole shown first #}
                   {% for p in proposed_poles %}
                   {% if p.get("point_id")|string == current_match|string %}
                   <option value="{{ p.get('point_id') }}"{% if reviewed_match|string == p.get("point_id")|string %} selected{% endif %}>
@@ -175,20 +175,20 @@
       </table>
     </div>
     {% else %}
-      <p class="text-muted" style="font-size:0.9rem;">No EXpoles in this file.</p>
+      <p class="text-muted" style="font-size:0.9rem;">No existing pole proximity records in this file.</p>
     {% endif %}
   </div>
 
   {# ── Sign-off ── #}
   <div class="section-card">
-    <div class="section-title">Designer Sign-off</div>
+    <div class="section-title">Design Handoff Sign-off</div>
     <div class="mb-3">
       <label class="form-label fw-semibold" style="font-size:0.9rem;">Review status</label>
       <div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="review_status" id="status-reviewed" value="reviewed"
             {% if review and review.get("review_status") == "reviewed" %}checked{% endif %}>
-          <label class="form-check-label" for="status-reviewed">Reviewed — I have checked the pairings and this output is correct</label>
+          <label class="form-check-label" for="status-reviewed">Reviewed — I have checked the proximity QA and this provisional design-chain output is ready to use</label>
         </div>
         <div class="form-check form-check-inline mt-1">
           <input class="form-check-input" type="radio" name="review_status" id="status-not-reviewed" value="not_reviewed"
@@ -199,7 +199,7 @@
     </div>
     <div class="mb-3">
       <label for="review-notes" class="form-label fw-semibold" style="font-size:0.9rem;">Review notes</label>
-      <textarea class="form-control" id="review-notes" rows="3" placeholder="e.g. Checked pairings against field notebook page 3, all correct. EXpole 67 reassigned.">{{ (review or {}).get("review_notes","") }}</textarea>
+      <textarea class="form-control" id="review-notes" rows="3" placeholder="e.g. Checked proximity QA against field notebook page 3. Existing pole 67 reviewed against proposed pole record.">{{ (review or {}).get("review_notes","") }}</textarea>
     </div>
 
     <div class="d-flex gap-2 flex-wrap">
@@ -207,7 +207,7 @@
         <i class="bi bi-floppy"></i> Save Review
       </button>
       <button class="btn btn-outline-secondary" id="reset-btn" type="button">
-        <i class="bi bi-arrow-counterclockwise"></i> Reset to Auto-Generated
+        <i class="bi bi-arrow-counterclockwise"></i> Reset to Tool-Generated
       </button>
       <a href="/project/{{ project_id }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> Back to Project

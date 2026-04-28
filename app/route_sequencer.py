@@ -497,7 +497,7 @@ def _build_interleaved_view(
     context_features: list[dict],
     detached_records: list[dict],
 ) -> list[dict]:
-    """Build the interleaved D2D working view.
+    """Build the raw working audit view.
 
     All records (proposed, EXpole, context) appear in ORIGINAL FILE ORDER within
     each section. Each record gets: Role, Section_ID, Design_Pole_No,
@@ -589,7 +589,7 @@ def sequence_route(df: "pd.DataFrame", config: dict | None = None) -> dict:
     - Section membership assignment with overlapping boundaries
     - Global design pole numbering (does not restart per section)
     - Section sequence numbering (restarts per section)
-    - Interleaved D2D working view (file order preserved)
+    - Raw working audit view (file order preserved)
     - Confidence warning if >50% of chain records are medium/low confidence
     """
     cfg = {**DEFAULT_CONFIG, **(config or {})}

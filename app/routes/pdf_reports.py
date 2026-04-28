@@ -166,7 +166,9 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
             title = str(risk.get("title", ""))
             count = risk.get("count", 0)
             impact = str(risk.get("designer_impact", ""))
-            sev_prefix = "[FAIL] " if risk.get("severity") == "FAIL" else "[WARN] "
+            sev_prefix = (
+                "[Design Blocker] " if risk.get("severity") == "FAIL" else "[Review Required] "
+            )
             _draw_line(
                 pdf, f"{sev_prefix}{title} ({count})", left, y, font="Helvetica-Bold", size=10
             )
@@ -257,7 +259,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
 
         y -= 4 * mm
 
-    _draw_line(pdf, "Review Signals", left, y, font="Helvetica-Bold", size=12)
+    _draw_line(pdf, "Design Review Items", left, y, font="Helvetica-Bold", size=12)
     y -= 8 * mm
 
     if not issues:
@@ -269,7 +271,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
         for idx, issue in enumerate(issues[:max_rows], start=1):
             issue_text = str(issue.get("Issue", "Unknown issue")).strip()
             sev = str(issue.get("Severity", "")).strip().upper()
-            sev_prefix = "[WARN] " if sev == "WARN" else ""
+            sev_prefix = "[Review Required] " if sev == "WARN" else ""
 
             _draw_line(pdf, f"{idx}. {sev_prefix}{issue_text}", left, y)
             y -= line_gap
@@ -290,7 +292,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
         if len(issues) > max_rows:
             _draw_line(
                 pdf,
-                f"... {len(issues) - max_rows} more signal(s) not shown.",
+                f"... {len(issues) - max_rows} more design review item(s) not shown.",
                 left,
                 y,
             )
@@ -320,7 +322,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
             issue_text = str(issue.get("Issue", "Unknown issue")).strip()
             row_text = str(issue.get("Row", "")).strip()
             sev = str(issue.get("Severity", "")).strip().upper()
-            sev_prefix = "[WARN] " if sev == "WARN" else ""
+            sev_prefix = "[Review Required] " if sev == "WARN" else ""
 
             _draw_line(pdf, f"{idx}. {sev_prefix}{issue_text}", left, y)
             y -= line_gap

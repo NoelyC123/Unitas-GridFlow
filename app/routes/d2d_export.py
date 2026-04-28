@@ -84,7 +84,7 @@ _INTERLEAVED_HEADERS = [
 ]
 
 
-def _unavailable(reason: str = "D2D export is not available for this job.") -> Response:
+def _unavailable(reason: str = "Design chain export is not available for this job.") -> Response:
     return Response(reason, status=404, mimetype="text/plain")
 
 
@@ -149,12 +149,12 @@ def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = No
     status_label = reviewed_label or "provisional"
 
     buf = io.StringIO()
-    buf.write(f"# Unitas GridFlow — Clean Chain Export ({status_label})\n")
+    buf.write(f"# Unitas GridFlow — Design Chain Export ({status_label})\n")
     buf.write(
         "# Proposed poles in route sequence order."
         " EXpole references and context features listed separately.\n"
     )
-    buf.write("# For the interleaved file-order view use the D2D Working View export.\n")
+    buf.write("# For the original file-order audit use the Raw Working Audit export.\n")
     if reviewed_label:
         buf.write(f"# {reviewed_label}.\n")
     else:
@@ -283,7 +283,7 @@ def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = No
                 ]
             )
 
-    filename = f"{job_id}_d2d_chain.csv"
+    filename = f"{job_id}_design_chain.csv"
     return Response(
         buf.getvalue(),
         status=200,
@@ -320,13 +320,13 @@ def _render_interleaved_export(
     status_label = reviewed_label or "provisional"
 
     buf = io.StringIO()
-    buf.write(f"# Unitas GridFlow — D2D Working View ({status_label})\n")
+    buf.write(f"# Unitas GridFlow — Raw Working Audit ({status_label})\n")
     buf.write(
         "# All records in original file order:"
         " proposed poles, existing poles, and context features inline.\n"
     )
     buf.write("# Section markers and Role column are added — original file order is preserved.\n")
-    buf.write("# This view mirrors the PR1/PR2 manual working file format.\n")
+    buf.write("# This secondary audit view preserves the old manual working-file context.\n")
     if reviewed_label:
         buf.write(f"# {reviewed_label}.\n")
     else:
@@ -371,7 +371,7 @@ def _render_interleaved_export(
             ]
         )
 
-    filename = f"{job_id}_d2d_working_view.csv"
+    filename = f"{job_id}_raw_working_audit.csv"
     return Response(
         buf.getvalue(),
         status=200,

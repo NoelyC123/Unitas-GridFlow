@@ -334,13 +334,13 @@
                 <div id="pass-count" class="status-value status-pass">0</div>
                 <div class="status-label">PASS</div>
               </div>
-              <div class="status-filter-btn" data-filter="WARN" title="Click to show only WARN records">
+              <div class="status-filter-btn" data-filter="WARN" title="Click to show records requiring review">
                 <div id="warn-count" class="status-value status-warn">0</div>
-                <div class="status-label">WARN</div>
+                <div class="status-label">Review Required</div>
               </div>
-              <div class="status-filter-btn" data-filter="FAIL" title="Click to show only FAIL records">
+              <div class="status-filter-btn" data-filter="FAIL" title="Click to show design blockers">
                 <div id="fail-count" class="status-value status-fail">0</div>
-                <div class="status-label">FAIL</div>
+                <div class="status-label">Design Blocker</div>
               </div>
             </div>
             <div id="filter-note" style="font-size:0.82rem;color:#6b7280;text-align:center;margin-top:6px;min-height:1.2em;"></div>
@@ -361,7 +361,7 @@
             </div>
 
             <div class="meta-row">
-              <span>Issue count</span>
+              <span>Open QA items</span>
               <strong id="issue-count">0</strong>
             </div>
 
@@ -372,17 +372,17 @@
 
               {% if sequence_summary and sequence_summary.status == 'ok' and sequence_summary.total_sequenced and sequence_summary.total_sequenced > 0 %}
               <a id="btn-download-d2d" href="{{ d2d_url | default('/d2d/export/' ~ job_id) }}" class="btn btn-outline-success">
-                <i class="bi bi-table"></i> Download Clean Chain Export
+                <i class="bi bi-table"></i> Download Design Chain Export
               </a>
               <a id="btn-download-d2d-working" href="{{ d2d_interleaved_url | default('/d2d/interleaved/' ~ job_id) }}" class="btn btn-outline-success">
-                <i class="bi bi-layout-text-sidebar"></i> Download D2D Working View
+                <i class="bi bi-layout-text-sidebar"></i> Download Raw Working Audit
               </a>
               {% else %}
-              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Clean chain export unavailable — no sequenced poles found">
-                <i class="bi bi-table"></i> Clean chain export unavailable
+              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Design chain export unavailable — no sequenced poles found">
+                <i class="bi bi-table"></i> Design chain export unavailable
               </a>
-              <a id="btn-download-d2d-working-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="D2D working view unavailable — no sequenced poles found">
-                <i class="bi bi-layout-text-sidebar"></i> D2D working view unavailable
+              <a id="btn-download-d2d-working-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Raw working audit unavailable — no sequenced poles found">
+                <i class="bi bi-layout-text-sidebar"></i> Raw working audit unavailable
               </a>
               {% endif %}
 
@@ -434,7 +434,7 @@
                   {% endfor %}
                 </ul>
                 <div style="font-size:0.74rem; color:#6b7280; margin-top:6px; line-height:1.35;">
-                  Replacement counts here are QA signals/clusters. Confirmed EXpole assignments are shown in Designer Review and reviewed D2D exports.
+                  Replacement counts here are QA signals/clusters. Confirmed EXpole assignments are shown in Designer Review and reviewed design-chain exports.
                 </div>
               </div>
               {% endif %}

@@ -2,7 +2,7 @@
 """Create a shareable validation evidence pack for a GridFlow run.
 
 The script is intentionally read-only against app outputs. It copies existing
-artifacts and uses Flask's test client to render PDF/D2D exports into the pack.
+artifacts and uses Flask's test client to render PDF/design-chain exports into the pack.
 """
 
 from __future__ import annotations
@@ -100,8 +100,10 @@ def _context_from_args(args: argparse.Namespace) -> RunContext:
             project_dir=project_dir,
             output_routes={
                 "qa_report.pdf": f"/pdf/qa/project/{args.project_id}/{args.file_id}",
-                "clean_chain_export.csv": (f"/d2d/export/project/{args.project_id}/{args.file_id}"),
-                "d2d_working_view.csv": (
+                "design_chain_export.csv": (
+                    f"/d2d/export/project/{args.project_id}/{args.file_id}"
+                ),
+                "raw_working_audit.csv": (
                     f"/d2d/interleaved/project/{args.project_id}/{args.file_id}"
                 ),
             },
@@ -118,8 +120,8 @@ def _context_from_args(args: argparse.Namespace) -> RunContext:
             input_dir=source_dir,
             output_routes={
                 "qa_report.pdf": f"/pdf/qa/{args.job_id}",
-                "clean_chain_export.csv": f"/d2d/export/{args.job_id}",
-                "d2d_working_view.csv": f"/d2d/interleaved/{args.job_id}",
+                "design_chain_export.csv": f"/d2d/export/{args.job_id}",
+                "raw_working_audit.csv": f"/d2d/interleaved/{args.job_id}",
             },
         )
 
@@ -237,7 +239,7 @@ def _write_notes(context: RunContext, pack_root: Path) -> None:
 1. Did the remote phone upload feel usable?
 2. Did the project dashboard make sense after upload?
 3. Were the EXpole pairings acceptable without changes?
-4. Were the D2D Chain and Working View good enough to reduce manual D2D spreadsheet work?
+4. Were the Design Chain Export and Raw Working Audit good enough to reduce manual spreadsheet work?
 5. What was the biggest friction or missing piece?
 6. Did anything look misleading?
 7. Did any download/export fail?
@@ -249,7 +251,7 @@ def _write_notes(context: RunContext, pack_root: Path) -> None:
 - What failed:
 - What was confusing:
 - What saved time:
-- What still required manual D2D work:
+- What still required manual design-chain preparation:
 - Whether reviewed exports were useful:
 - Recommended next task:
 """,
@@ -267,7 +269,7 @@ def _write_review_prompt(context: RunContext, pack_root: Path) -> None:
 Run under review: {context.display_id}
 
 Unitas GridFlow is a survey-to-design handoff tool for UK overhead-line
-electricity survey files. It supports post-survey QA, provisional D2D exports,
+electricity survey files. It supports post-survey QA, provisional design-chain exports,
 named projects, designer review, local daily intake, and controlled remote
 access through Cloudflare Tunnel + Access.
 
@@ -279,8 +281,8 @@ Please inspect the included evidence:
 - 02_App_Outputs/sequenced_route.json, if present
 - 02_App_Outputs/review_decisions.json, if present
 - 02_App_Outputs/qa_report.pdf
-- 02_App_Outputs/clean_chain_export.csv
-- 02_App_Outputs/d2d_working_view.csv
+- 02_App_Outputs/design_chain_export.csv
+- 02_App_Outputs/raw_working_audit.csv
 - 03_Screenshots/
 - 04_Notes/validation_notes.md
 
@@ -288,7 +290,8 @@ Review questions:
 1. Does the app output match the raw input evidence?
 2. Is the project/dashboard state internally consistent?
 3. Are the QA/design-readiness findings understandable and useful?
-4. Are EXpole pairings and D2D exports plausible enough to reduce manual D2D work?
+4. Are existing/proposed proximity QA and design-chain exports plausible enough
+   to reduce manual spreadsheet work?
 5. What is the strongest validation signal?
 6. What is the biggest risk or friction?
 7. What should the next narrow improvement be?

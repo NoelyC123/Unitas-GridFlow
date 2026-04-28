@@ -33,8 +33,8 @@ Short identity:
 ### Stage 1 — Post-survey QA gate ✅ COMPLETE
 Raw controller dump → parse → report completeness and design risks → designer knows what they have before opening PoleCAD.
 
-### Stage 2 — D2D elimination ← CURRENT
-Tool takes raw controller dump and produces structured, sequenced, PoleCAD-ready output directly. No spreadsheet bridge. Automatic pole sequencing, section splitting, coordinate formatting. The manual D2D step disappears.
+### Stage 2 — Design-ready handoff / Design Chain ✅ COMPLETE
+Tool takes raw controller dump and produces structured, sequenced, designer-readable handoff outputs directly. The old manual D2D spreadsheet is the workaround being eliminated, not the product model. Current outputs are a Design Chain export and secondary Raw Working Audit; final PoleCAD import format remains out of scope until verified.
 
 ### Stage 3 — Live intake platform
 Surveyor syncs controller data daily (or continuously). Tool immediately validates and produces completeness reports. Designer sees the job building in real-time. Feedback loop closes while surveyor is still on site.
@@ -162,11 +162,11 @@ Do not read `_archive/` unless explicitly asked.
 ## Current state
 
 - Stage 1 complete
-- Stage 2 (D2D elimination) is the current work
-- 175 tests passing
+- Stage 3 is complete; current work is practitioner-review remediation
+- 287 tests passing
 - CI active
 - 4 real survey files validated
-- Phase 3A complete: crossing codes as context, span threshold 5m, location cleanup
+- Practitioner review remediation is focused on terminology, Design Chain framing, EX/PR proximity QA, map span rendering, and PDF issue presentation
 
 ---
 

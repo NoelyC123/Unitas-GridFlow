@@ -1,7 +1,7 @@
 """Integration tests for the project container system (Stage 3C).
 
 Tests cover the full HTTP surface: presign, upload, finalize, status,
-listing, and the map/PDF/D2D project routes.  All filesystem I/O is
+listing, and the map/PDF/design-chain project routes.  All filesystem I/O is
 redirected to tmp_path via monkeypatch so the real uploads/ directory
 is never touched.
 """
@@ -361,7 +361,7 @@ def test_project_detail_includes_mobile_file_card_layout(client_and_root):
     assert "files-mobile-list" in html
     assert "mobile-file-card" in html
     assert "mobile-action-grid" in html
-    assert "D2D Working" in html
+    assert "Raw Audit" in html
 
 
 # ---------------------------------------------------------------------------

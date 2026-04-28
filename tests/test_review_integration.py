@@ -207,8 +207,10 @@ def test_export_header_reviewed(client_and_root):
     resp = client.get("/d2d/export/project/P001/F001")
     assert resp.status_code == 200
     csv_text = resp.data.decode()
+    assert "Design Chain Export" in csv_text.splitlines()[0]
     assert "Designer Reviewed" in csv_text
     assert "provisional" not in csv_text.lower().split("\n")[0]
+    assert "P001_F001_design_chain.csv" in resp.headers["Content-Disposition"]
 
 
 # ── 5. Provisional export header before review ───────────────────────────────
@@ -220,11 +222,13 @@ def test_export_header_provisional(client_and_root):
     resp = client.get("/d2d/export/project/P001/F001")
     assert resp.status_code == 200
     csv_text = resp.data.decode()
+    assert "Design Chain Export" in csv_text.splitlines()[0]
     assert "provisional" in csv_text.lower()
     assert "Designer Reviewed" not in csv_text
+    assert "P001_F001_design_chain.csv" in resp.headers["Content-Disposition"]
 
 
-# ── 6. Reviewed D2D export uses override ─────────────────────────────────────
+# ── 6. Reviewed Design Chain export uses override ────────────────────────────
 
 
 def test_export_uses_override(client_and_root):
@@ -298,6 +302,9 @@ def test_exports_work_without_review(client_and_root):
     resp_chain = client.get("/d2d/export/project/P001/F001")
     assert resp_chain.status_code == 200
     assert b"Point_ID" in resp_chain.data
+    assert b"Design Chain Export" in resp_chain.data
     resp_interleaved = client.get("/d2d/interleaved/project/P001/F001")
     assert resp_interleaved.status_code == 200
     assert b"Point_ID" in resp_interleaved.data
+    assert b"Raw Working Audit" in resp_interleaved.data
+    assert "P001_F001_raw_working_audit.csv" in resp_interleaved.headers["Content-Disposition"]

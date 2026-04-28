@@ -165,7 +165,7 @@ def _deduplicate_issues(issues: list[dict]) -> list[dict]:
 
 
 def _is_missing_value(series: pd.Series) -> pd.Series:
-    if series.dtype == "object":
+    if series.dtype == "object" or pd.api.types.is_string_dtype(series):
         return series.isnull() | (series.astype(str).str.strip() == "")
     return series.isnull()
 

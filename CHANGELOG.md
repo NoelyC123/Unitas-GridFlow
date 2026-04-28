@@ -8,6 +8,26 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Design Chain Terminology Pass
+
+### Changed
+
+- Replaced forward-facing D2D/Clean Chain wording with Design Chain / Raw Working Audit wording across the homepage, upload page, project actions, map actions, review page, PDF text, export headers, validation pack prompts, README, and working guidance.
+- Reframed the review page from EXpole Pairings to Existing / Proposed Pole Proximity QA while preserving the existing reviewed override mechanics.
+- Renamed generated CSV download filenames from `*_d2d_chain.csv` / `*_d2d_working_view.csv` to `*_design_chain.csv` / `*_raw_working_audit.csv`.
+- Updated map and PDF severity labels from internal WARN/FAIL wording toward Review Required / Design Blocker wording where user-facing.
+
+### Fixed
+
+- Made QA blank-string detection compatible with pandas string dtype so blank and whitespace-only values are still treated as missing.
+
+### Validated
+
+- `pytest -v` — 287 passed.
+- `pre-commit run --all-files` — passed.
+
+---
+
 ## 2026-04-28 — Practitioner Review Summary
 
 ### Added
