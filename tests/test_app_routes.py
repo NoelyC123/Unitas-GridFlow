@@ -172,6 +172,18 @@ def test_design_review_item_includes_record_coordinates_status_and_action() -> N
     assert "Confirm material" in item["action"]
 
 
+def test_design_review_item_infers_status_when_severity_missing() -> None:
+    item = pdf_reports._build_design_review_item(
+        {
+            "Issue": "height out of range (7-25)",
+            "Row": "{'pole_id': 'P-1004', 'lat': 54.521, 'lon': -3.014}",
+        }
+    )
+
+    assert item["status"] == "Design Blocker"
+    assert item["coordinates"] == "54.52100, -3.01400"
+
+
 def test_pdf_route_returns_404_for_missing_job(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     jobs_root.mkdir(parents=True)

@@ -105,11 +105,22 @@ def _issue_coordinates(row: dict) -> str:
     return "not captured"
 
 
-def _issue_status_label(severity: str) -> str:
+def _issue_status_label(severity: str, issue_text: str = "") -> str:
     sev = severity.strip().upper()
     if sev == "FAIL":
         return "Design Blocker"
     if sev == "WARN":
+        return "Review Required"
+    lower = issue_text.lower()
+    if "out of range" in lower or "coordinate mismatch" in lower or "duplicate" in lower:
+        return "Design Blocker"
+    if (
+        "missing required field" in lower
+        or "height likely estimated" in lower
+        or "span" in lower
+        or "replacement pair" in lower
+        or "angle structure with no stay" in lower
+    ):
         return "Review Required"
     return "Review Item"
 
@@ -171,7 +182,7 @@ def _build_design_review_item(issue: dict) -> dict:
     return {
         "record_ref": _issue_record_ref(row),
         "coordinates": _issue_coordinates(row),
-        "status": _issue_status_label(str(issue.get("Severity", ""))),
+        "status": _issue_status_label(str(issue.get("Severity", "")), issue_text),
         "issue": issue_text,
         "consequence": consequence,
         "action": action,
