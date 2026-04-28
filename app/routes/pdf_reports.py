@@ -12,6 +12,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
+from app.review_manager import load_review
+
 pdf_reports_bp = Blueprint("pdf_reports", __name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -60,6 +62,64 @@ def _draw_line(
 ) -> None:
     pdf.setFont(font, size)
     pdf.drawString(x, y, text)
+
+
+def _build_review_context(review: dict | None) -> dict:
+    if not review:
+        return {
+            "status": "Not Reviewed",
+            "detail": "Designer review has not been completed for this project file.",
+            "notes": "",
+            "override_count": 0,
+        }
+
+    is_reviewed = review.get("review_status") == "reviewed"
+    reviewed_at = str(review.get("reviewed_at") or "").strip()
+    status = "Designer Reviewed" if is_reviewed else "Not Reviewed"
+    detail = (
+        f"Reviewed at {reviewed_at}."
+        if is_reviewed and reviewed_at
+        else "Designer review has not been completed for this project file."
+    )
+    return {
+        "status": status,
+        "detail": detail,
+        "notes": str(review.get("review_notes") or "").strip(),
+        "override_count": len(review.get("pairing_overrides") or []),
+    }
+
+
+def _draw_review_context(
+    pdf: canvas.Canvas,
+    review_context: dict | None,
+    left: float,
+    y: float,
+    line_gap: float,
+) -> float:
+    if review_context is None:
+        return y
+
+    _draw_line(pdf, "Designer Review Status", left, y, font="Helvetica-Bold", size=12)
+    y -= 8 * mm
+    _draw_line(pdf, f"Status: {review_context['status']}", left, y, font="Helvetica-Bold", size=10)
+    y -= line_gap
+    _draw_line(pdf, str(review_context["detail"])[:110], left, y, size=9)
+    y -= line_gap
+    _draw_line(
+        pdf,
+        f"Pairing override count: {review_context['override_count']}",
+        left,
+        y,
+        size=9,
+    )
+    y -= line_gap
+
+    notes = str(review_context.get("notes") or "").strip()
+    if notes:
+        _draw_line(pdf, f"Review notes: {notes[:100]}", left, y, size=9)
+        y -= line_gap
+
+    return y - 4 * mm
 
 
 def _parse_issue_row(row_text: object) -> dict:
@@ -357,7 +417,7 @@ def _draw_design_review_items_table(
     return y
 
 
-def _generate_qa_pdf(job_dir: Path, display_id: str):
+def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None = None):
     if not job_dir.exists():
         abort(404)
 
@@ -389,6 +449,8 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
     y -= line_gap
     _draw_line(pdf, f"Issue count: {meta.get('issue_count', 0)}", left, y)
     y -= 8 * mm
+
+    y = _draw_review_context(pdf, review_context, left, y, line_gap)
 
     circuit_summary = meta.get("circuit_summary") or {}
     if circuit_summary.get("summary_text"):
@@ -625,4 +687,8 @@ def qa_pdf(job_id: str):
 @pdf_reports_bp.get("/qa/project/<project_id>/<file_id>")
 def qa_pdf_project(project_id: str, file_id: str):
     file_dir = PROJECTS_ROOT / project_id / "files" / file_id
-    return _generate_qa_pdf(file_dir, f"{project_id}_{file_id}")
+    return _generate_qa_pdf(
+        file_dir,
+        f"{project_id}_{file_id}",
+        review_context=_build_review_context(load_review(file_dir)),
+    )

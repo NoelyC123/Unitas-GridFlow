@@ -184,6 +184,30 @@ def test_design_review_item_infers_status_when_severity_missing() -> None:
     assert item["coordinates"] == "54.52100, -3.01400"
 
 
+def test_pdf_review_context_reports_not_reviewed_without_review_json() -> None:
+    context = pdf_reports._build_review_context(None)
+
+    assert context["status"] == "Not Reviewed"
+    assert "not been completed" in context["detail"]
+    assert context["override_count"] == 0
+
+
+def test_pdf_review_context_reports_reviewed_status_notes_and_overrides() -> None:
+    context = pdf_reports._build_review_context(
+        {
+            "review_status": "reviewed",
+            "reviewed_at": "2026-04-28T12:00:00Z",
+            "review_notes": "Checked against field notes",
+            "pairing_overrides": [{"expole_point_id": "20"}],
+        }
+    )
+
+    assert context["status"] == "Designer Reviewed"
+    assert "2026-04-28T12:00:00Z" in context["detail"]
+    assert context["notes"] == "Checked against field notes"
+    assert context["override_count"] == 1
+
+
 def test_pdf_route_returns_404_for_missing_job(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     jobs_root.mkdir(parents=True)

@@ -8,6 +8,25 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Add Designer Review Status To Project PDFs
+
+### Added
+
+- Added a `Designer Review Status` block to project PDF reports showing reviewed/not-reviewed state, reviewed timestamp, review notes, and pairing override count.
+- Added regression coverage for PDF review-context formatting and project PDF generation with `review.json`.
+
+### Changed
+
+- Legacy flat-job PDF reports remain unchanged; designer review status is only shown where a project file can have `review.json`.
+
+### Validated
+
+- `pytest -v` — 295 passed.
+- `pre-commit run --all-files` — passed.
+- Real project PDF smoke checks returned valid PDFs for Gordon `P007/F001` and Bellsprings `P008/F001`.
+
+---
+
 ## 2026-04-28 — Add Map Review Focus Filters
 
 ### Added

@@ -468,6 +468,40 @@ def test_project_pdf_route_returns_200(client_and_root):
     assert response.data.startswith(b"%PDF")
 
 
+def test_project_pdf_route_accepts_designer_review_context(client_and_root):
+    client, projects_root = client_and_root
+
+    file_dir = _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+    _write_json(
+        file_dir / "meta.json",
+        {
+            "project_id": "P001",
+            "file_id": "F001",
+            "filename": "survey.csv",
+            "status": "complete",
+            "rulepack_id": "SPEN_11kV",
+            "pole_count": 4,
+            "issue_count": 0,
+        },
+    )
+    _write_json(
+        file_dir / "review.json",
+        {
+            "file_id": "F001",
+            "review_status": "reviewed",
+            "reviewed_at": "2026-04-28T12:00:00Z",
+            "review_notes": "Checked proximity QA.",
+            "pairing_overrides": [{"expole_point_id": "20", "reviewed_matched_to": "10"}],
+        },
+    )
+
+    response = client.get("/pdf/qa/project/P001/F001")
+
+    assert response.status_code == 200
+    assert response.mimetype == "application/pdf"
+    assert response.data.startswith(b"%PDF")
+
+
 # ---------------------------------------------------------------------------
 # test_project_d2d_chain_route_returns_csv_when_seq_exists
 # ---------------------------------------------------------------------------
