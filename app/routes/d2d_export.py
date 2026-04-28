@@ -35,6 +35,11 @@ _CHAIN_HEADERS = [
     "Design_Pole_No",
     "Section_Seq_No",
     "Sequence_Confidence",
+    "Position_Evidence",
+    "Height_Evidence",
+    "Notes_Evidence",
+    "Replacement_Evidence",
+    "Evidence_Gaps",
     "Remark",
 ]
 
@@ -81,6 +86,10 @@ _INTERLEAVED_HEADERS = [
     "Section_Seq_No",
     "Matched_Proposed_ID",
     "Matched_Design_Pole_No",
+    "Position_Evidence",
+    "Height_Evidence",
+    "Notes_Evidence",
+    "Evidence_Gaps",
 ]
 
 
@@ -132,6 +141,50 @@ def _write_section_summary(buf: io.StringIO, sections: list[dict]) -> None:
     buf.write("#\n")
 
 
+def _has_value(value: object) -> bool:
+    return value is not None and value != ""
+
+
+def _position_evidence(record: dict) -> str:
+    has_grid = _has_value(record.get("easting")) and _has_value(record.get("northing"))
+    has_wgs84 = _has_value(record.get("lat")) and _has_value(record.get("lon"))
+    if has_grid and has_wgs84:
+        return "Surveyed grid + map coordinates"
+    if has_grid:
+        return "Surveyed grid coordinates"
+    if has_wgs84:
+        return "Map coordinates only"
+    return "Missing position evidence"
+
+
+def _field_evidence(record: dict, field_name: str) -> str:
+    return "Captured" if _has_value(record.get(field_name)) else "Missing"
+
+
+def _replacement_evidence(record: dict) -> str:
+    if _has_value(record.get("replaces_point_id")):
+        distance = record.get("replaces_distance_m")
+        if _has_value(distance):
+            return f"Inferred nearby EXpole ({distance}m)"
+        return "Inferred nearby EXpole"
+    return "None"
+
+
+def _evidence_gaps(record: dict, include_sequence: bool = False) -> str:
+    gaps: list[str] = []
+    if _position_evidence(record).startswith("Missing"):
+        gaps.append("position")
+    if not _has_value(record.get("height")):
+        gaps.append("height")
+    if not _has_value(record.get("remark")):
+        gaps.append("notes")
+    if include_sequence and record.get("sequence_confidence") in {"medium", "low"}:
+        gaps.append(f"{record.get('sequence_confidence')} sequence confidence")
+    if _has_value(record.get("replaces_point_id")):
+        gaps.append("replacement proximity inferred")
+    return "; ".join(gaps) if gaps else "none"
+
+
 def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = None) -> Response:
     cfg = seq.get("config_used") or {}
     chain = seq.get("chain") or []
@@ -155,6 +208,10 @@ def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = No
         " EXpole references and context features listed separately.\n"
     )
     buf.write("# For the original file-order audit use the Raw Working Audit export.\n")
+    buf.write(
+        "# Evidence columns describe what is captured in the digital survey export;"
+        " missing items still need field notes, plans, or designer review.\n"
+    )
     if reviewed_label:
         buf.write(f"# {reviewed_label}.\n")
     else:
@@ -200,6 +257,11 @@ def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = No
                 r.get("design_pole_number"),
                 r.get("section_sequence_number"),
                 r.get("sequence_confidence"),
+                _position_evidence(r),
+                _field_evidence(r, "height"),
+                _field_evidence(r, "remark"),
+                _replacement_evidence(r),
+                _evidence_gaps(r, include_sequence=True),
                 r.get("remark"),
             ]
         )
@@ -327,6 +389,10 @@ def _render_interleaved_export(
     )
     buf.write("# Section markers and Role column are added — original file order is preserved.\n")
     buf.write("# This secondary audit view preserves the old manual working-file context.\n")
+    buf.write(
+        "# Evidence columns describe what is captured in the digital survey export;"
+        " missing items still need field notes, plans, or designer review.\n"
+    )
     if reviewed_label:
         buf.write(f"# {reviewed_label}.\n")
     else:
@@ -368,6 +434,10 @@ def _render_interleaved_export(
                 r.get("section_sequence_number"),
                 r.get("matched_proposed_id"),
                 r.get("matched_design_pole_number"),
+                _position_evidence(r),
+                _field_evidence(r, "height"),
+                _field_evidence(r, "remark"),
+                _evidence_gaps(r),
             ]
         )
 

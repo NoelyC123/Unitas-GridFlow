@@ -66,10 +66,11 @@ Completed remediation:
 3. Reframe EX/PR pairing as Existing / Proposed Pole Proximity QA without deleting reviewed override logic.
 4. Add basic map span rendering between sequenced design-chain poles.
 5. Improve PDF findings into a structured issue/action table with coordinates, status, design consequence, and recommended action.
+6. Add first-pass evidence-quality visibility to Design Chain and Raw Working Audit CSV exports.
 
 Next useful step:
 
-- Review the remediation build against real Gordon/Bellsprings outputs in the browser and generated PDF.
+- Review the remediation build against real Gordon/Bellsprings outputs in the browser, generated PDF, and Design Chain / Raw Working Audit CSVs.
 - If the user wants external review, give Claude Desktop the latest commit and ask for a narrow product/UX review of the remediation result.
 - Do not begin Stage 4 or PoleCAD export until this remediation pass has been reviewed against real outputs.
 
@@ -88,6 +89,7 @@ Stage 3 proved:
 Evidence boundary:
 
 - For Bellsprings, do not change EXpole/design-numbering logic yet. The real pole schedule shows some final design poles at EXpole coordinates, but that requires a separate reviewed-design interpretation step before implementation.
+- Evidence-quality export columns are derived from existing sequence fields only; do not treat them as structured field capture, photo provenance, or final engineering certification.
 - Keep Stage 4 structured field capture/tablet/photo/Trimble-GIS integration as future roadmap, not current implementation.
 - Do not implement PoleCAD export until actual PoleCAD import requirements are verified.
 

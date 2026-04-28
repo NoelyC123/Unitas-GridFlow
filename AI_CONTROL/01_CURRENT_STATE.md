@@ -38,8 +38,8 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 - DNO rulepack inference from geography
 - Column/header normalisation for structured CSVs
 - Context feature classification (Hedge, Fence, Wall, Gate, Track, Road, Tree, Stream, Pline, 110xing, 33xing, 11xing, BTxing, HVxing, LVxing, Ignore)
-- Design Chain export (`<job_id>_design_chain.csv`) as a transitional design-handoff output
-- Raw Working Audit export (`<job_id>_raw_working_audit.csv`) for file-order traceability
+- Design Chain export (`<job_id>_design_chain.csv`) as a transitional design-handoff output with evidence-quality columns
+- Raw Working Audit export (`<job_id>_raw_working_audit.csv`) for file-order traceability with evidence-quality columns
 - Route sequencing from raw controller exports
 - EXpole matching to proposed poles
 - Span-to-next and deviation-angle calculations
@@ -79,7 +79,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 
 ## Counts
 
-- **Tests passing:** 289
+- **Tests passing:** 291
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
 
@@ -90,7 +90,8 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
   - The review page now presents Existing / Proposed Pole Proximity QA while preserving reviewed override logic.
   - Map data now exposes basic Design Chain spans from `sequenced_route.json`, and the Leaflet map renders connected route lines.
   - PDF Design Review Items now use a structured table with record reference, coordinates, status, issue, design consequence, and recommended action.
-  - Validation: `pytest -v` — 289 passed; `pre-commit run --all-files` — passed.
+  - Design Chain and Raw Working Audit CSVs now expose position, height, notes, replacement, and evidence-gap status derived from the existing sequence output.
+  - Validation: `pytest -v` — 291 passed; `pre-commit run --all-files` — passed.
 
 - Practitioner-led full tool review
   - Five local-only review documents were created from the Bellsprings real-life survey-to-design test, including practitioner and colleague feedback.
@@ -141,7 +142,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 3. No section boundary editing.
 4. Stage 3A2 uses the local Mac as the origin, so remote access depends on the Mac and `cloudflared` tunnel staying online.
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
-6. Some deeper handoff language may still need operational review against the next real job.
+6. Evidence-quality export columns are a first-pass visibility layer only; field-note/photo/provenance capture remains future Stage 4 work.
 7. The map now shows basic connected spans, but not advanced topology controls, section editing, voltage styling, or combined project-level map overlay.
 8. EX/PR pairing is currently too prominent as a reassignment workflow and should be reframed as proximity QA before deeper workflow changes.
 9. PDF report now has a structured issue/action table, but it is not yet a formal DNO submission pack.

@@ -66,15 +66,15 @@ The tool currently:
 - Renders interactive Leaflet map with basic Design Chain span overlay
 - Generates PDF pre-design briefing with structured design review issue/action table
 - Infers correct DNO rulepack from geography
-- Produces a Design Chain export (`<job_id>_design_chain.csv`) as a transitional design handoff output
-- Produces a Raw Working Audit export (`<job_id>_raw_working_audit.csv`) for file-order traceability
+- Produces a Design Chain export (`<job_id>_design_chain.csv`) as a transitional design handoff output with evidence-quality columns for captured/missing/inferred values
+- Produces a Raw Working Audit export (`<job_id>_raw_working_audit.csv`) for file-order traceability with evidence-quality visibility
 - Handles detached / not-required records
 - Produces section-aware output and global provisional design pole numbering
 - Supports named projects, project file intake metadata, designer review, reviewed/provisional exports, and controlled remote mobile access
 - Provides a repeatable validation evidence-pack utility for raw input, generated outputs, review state, screenshots, notes, and AI review prompts
 - Classifies real-world route context / crossing records such as `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` as context rather than structural poles
 - Maintains a repo-safe domain reference summary for evidence-quality, D2D-elimination, PoleCAD-readiness, and future structured-capture decisions
-- 289 passing tests, active CI
+- 291 passing tests, active CI
 
 Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw Gordon data, manual PR1/PR2 split evidence, a protected iPhone/mobile Gordon field-trial run, and a Bellsprings before/after package with real pole schedule, route map, profile, and technical information sheet.
 
@@ -84,7 +84,7 @@ Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw 
 
 **Practitioner-review remediation after Stage 3 closure**
 
-Stages 1, 2 and 3 are complete for the current evidence set. The first practitioner-review remediation pass has shipped: terminology has moved from D2D/Clean Chain toward Design Chain/Raw Working Audit, EX/PR review wording has been reframed as proximity QA, the map now shows basic connected Design Chain spans, and the PDF now presents front-facing design review items as a structured issue/action table. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
+Stages 1, 2 and 3 are complete for the current evidence set. The practitioner-review remediation pass has shipped: terminology has moved from D2D/Clean Chain toward Design Chain/Raw Working Audit, EX/PR review wording has been reframed as proximity QA, the map now shows basic connected Design Chain spans, the PDF now presents front-facing design review items as a structured issue/action table, and the CSV handoff exports now expose captured/missing/inferred evidence quality. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
 
 ---
 

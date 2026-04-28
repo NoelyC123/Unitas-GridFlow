@@ -8,6 +8,27 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Add Evidence Quality Columns To Handoff Exports
+
+### Added
+
+- Added evidence-quality columns to the Design Chain export: position evidence, height evidence, notes evidence, replacement evidence, and evidence gaps.
+- Added evidence-quality columns to the Raw Working Audit export so file-order traceability also shows whether position, height, and notes evidence is present.
+- Added regression coverage for the new evidence-quality export columns.
+
+### Changed
+
+- Export headers now explain that evidence columns describe what is present in the digital survey export and what still needs field notes, plans, or designer review.
+- Existing processed project files gain the clearer export columns without needing `sequenced_route.json` to be regenerated.
+
+### Validated
+
+- `pytest -v` — 291 passed.
+- `pre-commit run --all-files` — passed.
+- Real project export smoke checks confirmed evidence columns on Gordon `P007/F001` and Bellsprings `P008/F001`.
+
+---
+
 ## 2026-04-28 — Map Span Overlay And PDF Review Table
 
 ### Added

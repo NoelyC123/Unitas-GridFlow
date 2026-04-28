@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import csv
+import io
 import json
 from pathlib import Path
 
@@ -123,6 +125,11 @@ def _make_file_slot(root: Path, project_id: str, file_id: str) -> Path:
     return file_dir
 
 
+def _csv_rows_without_comments(csv_text: str) -> list[list[str]]:
+    body = "\n".join(line for line in csv_text.splitlines() if not line.startswith("#"))
+    return list(csv.reader(io.StringIO(body)))
+
+
 # ── 1. Creating review.json ──────────────────────────────────────────────────
 
 
@@ -228,6 +235,30 @@ def test_export_header_provisional(client_and_root):
     assert "P001_F001_design_chain.csv" in resp.headers["Content-Disposition"]
 
 
+def test_design_chain_export_includes_evidence_quality_columns(client_and_root):
+    client, root = client_and_root
+    _make_file_slot(root, "P001", "F001")
+
+    resp = client.get("/d2d/export/project/P001/F001")
+
+    assert resp.status_code == 200
+    rows = _csv_rows_without_comments(resp.data.decode())
+    header = rows[0]
+    first_chain_row = rows[1]
+    row = dict(zip(header, first_chain_row, strict=False))
+
+    assert "Position_Evidence" in header
+    assert "Height_Evidence" in header
+    assert "Notes_Evidence" in header
+    assert "Replacement_Evidence" in header
+    assert "Evidence_Gaps" in header
+    assert row["Position_Evidence"] == "Surveyed grid + map coordinates"
+    assert row["Height_Evidence"] == "Captured"
+    assert row["Notes_Evidence"] == "Missing"
+    assert row["Replacement_Evidence"] == "Inferred nearby EXpole (1.5m)"
+    assert "replacement proximity inferred" in row["Evidence_Gaps"]
+
+
 # ── 6. Reviewed Design Chain export uses override ────────────────────────────
 
 
@@ -307,4 +338,6 @@ def test_exports_work_without_review(client_and_root):
     assert resp_interleaved.status_code == 200
     assert b"Point_ID" in resp_interleaved.data
     assert b"Raw Working Audit" in resp_interleaved.data
+    assert b"Position_Evidence" in resp_interleaved.data
+    assert b"Evidence_Gaps" in resp_interleaved.data
     assert "P001_F001_raw_working_audit.csv" in resp_interleaved.headers["Content-Disposition"]
