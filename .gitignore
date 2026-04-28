@@ -58,3 +58,7 @@ CLAUDE_REVIEW_BUNDLES/
 
 # Local real survey validation files
 validation_data/
+
+# Local practitioner review evidence (private, large, and screenshot-heavy)
+Unitas GridFlow Full Tool Review 28th April 2026/
+~$*.docx

@@ -27,8 +27,8 @@ This project exists because the project owner has done both the survey job on si
 ### Stage 1 — Post-survey QA gate (COMPLETE)
 Raw controller dump arrives → tool parses it → reports what's there and what's missing → designer knows what they're working with before opening PoleCAD.
 
-### Stage 2 — Survey-to-design direct handoff / D2D elimination (COMPLETE)
-Tool takes raw controller dump and produces structured, sequenced, designer-readable handoff outputs directly. The old manual D2D spreadsheet is treated as the workaround being eliminated, not the long-term product model. GridFlow currently provides transitional clean-chain and designer working-view CSVs so designers can review the route and reduce/rebuild less manual D2D work. Final PoleCAD import format remains a strategic evidence target and must not be built until the actual import requirements are verified.
+### Stage 2 — Design-ready handoff / Design Chain (COMPLETE)
+Tool takes raw controller dump and produces structured, sequenced, designer-readable handoff outputs directly. The old manual D2D spreadsheet is treated as the workaround being eliminated, not the long-term product model. GridFlow currently provides a transitional design chain and working audit so designers can review the route and reduce/rebuild less manual D2D work. Final PoleCAD import format remains a strategic evidence target and must not be built until the actual import requirements are verified.
 
 ### Stage 3 — Live intake platform (COMPLETE)
 Instead of processing files after the fact, the tool becomes what the surveyor sends data to in real-time. Surveyor syncs controller data at end of each day (or continuously). Tool immediately validates, runs QA, produces completeness report. Designer sees job building up in real-time. Feedback loop closes while surveyor is still on site or nearby.
@@ -73,6 +73,7 @@ The tool currently:
 - Supports named projects, project file intake metadata, designer review, reviewed/provisional exports, and controlled remote mobile access
 - Provides a repeatable validation evidence-pack utility for raw input, generated outputs, review state, screenshots, notes, and AI review prompts
 - Classifies real-world route context / crossing records such as `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` as context rather than structural poles
+- Maintains a repo-safe domain reference summary for evidence-quality, D2D-elimination, PoleCAD-readiness, and future structured-capture decisions
 - 287 passing tests, active CI
 
 Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw Gordon data, manual PR1/PR2 split evidence, a protected iPhone/mobile Gordon field-trial run, and a Bellsprings before/after package with real pole schedule, route map, profile, and technical information sheet.
@@ -81,9 +82,9 @@ Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw 
 
 ## Current phase
 
-**Operational use after Stage 3 closure**
+**Practitioner-review remediation after Stage 3 closure**
 
-Stages 1, 2 and 3 are complete for the current evidence set. The immediate priority is using GridFlow on a real operational job and letting real survey-to-design friction define the next build. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
+Stages 1, 2 and 3 are complete for the current evidence set. A detailed practitioner-led review of the Validation, Map, PDF, D2D/chain, and cross-feature workflow has now defined the next remediation pass: improve terminology, retire D2D from forward UI language, reframe the design chain, tighten EX/PR proximity QA wording, add basic map span rendering, and improve PDF issue presentation. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
 
 ---
 
@@ -117,6 +118,8 @@ Every step must answer: **Does this improve the reliability, clarity, and design
 
 - `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — why this project exists, the real workflow observed
 - `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard for survey data
+- `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md` — repo-safe summary of the private domain reference and evidence-quality model
+- `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md` — repo-safe summary of the 2026-04-28 full practitioner review and prioritised remediation plan
 - `AI_CONTROL/16_STAGE_2_COMPLETION_REVIEW.md` — Stage 2 completion decision document
 - `OHL_SURVEY_OPERATIONAL_STANDARD.md` — full operational standard document
 - `VALIDATION_ANALYSIS_JOB_2814_513.md` — first real-file validation findings

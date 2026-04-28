@@ -8,6 +8,51 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Practitioner Review Summary
+
+### Added
+
+- Added `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md` as the repo-safe summary of the detailed practitioner-led review of Validation/Review, View Map, Download PDF, D2D/chain exports, and cross-feature workflow.
+- Added `.gitignore` protection for the full local review folder and Word lock files so private colleague/practitioner feedback, screenshots, PDFs, zips, and large binaries are not accidentally committed.
+
+### Changed
+
+- Updated active control docs to move the current phase from broad operational use to narrow practitioner-review remediation.
+- Reframed Stage 2 language from forward-facing D2D to Design Chain / Design Handoff while preserving D2D as the legacy workaround being eliminated.
+- Recorded the next remediation order:
+  - terminology and wording pass
+  - D2D-to-Design-Chain rename/refocus
+  - EX/PR proximity QA reframing
+  - basic map span rendering
+  - PDF structured issue/action table
+
+### Boundary
+
+- No code or app behaviour changed.
+- Full review documents remain local-only evidence.
+- Stage 4 tablet/photo/structured capture, PoleCAD export, app accounts, hosted deployment, and DNO submission packs remain out of scope until separately justified.
+
+---
+
+## 2026-04-28 — Domain Reference Integration
+
+### Added
+
+- Added `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md` as the repo-safe development summary of the private GridFlow domain reference.
+- Captured the evidence-quality model, D2D-elimination boundary, current product boundary, validated evidence, future implementation candidates, and open questions for PoleCAD/design-numbering/Stage 4 capture.
+
+### Updated
+
+- Updated the private `GRIDFLOW_DOMAIN_REFERENCE_1.md` working document with claim status labels, privacy/repository boundary, current-vs-future product boundary, validated evidence notes, open questions, implementation mapping, and standards caution.
+- Linked the repo-safe domain summary from the active control layer and README.
+
+### Boundary
+
+- The full private master reference remains outside Git and should not be copied wholesale into the repository.
+- No code or product behaviour changed.
+
+---
+
 ## 2026-04-27 — Stage 3A2: Remote Access Trial Plan
 
 ### Strategic Framing

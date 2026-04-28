@@ -1,8 +1,61 @@
 # Session Handoff
 
-## Date: 2026-04-27
+## Date: 2026-04-28
 
 ## What happened this session
+
+### Practitioner-led full tool review — remediation phase defined
+
+A detailed practitioner-led review was completed using the Bellsprings real-life survey-to-design test.
+
+Reviewed local-only documents:
+
+- `GridFlow_Review_Page_Validation_Notes_With_Photos.docx`
+- `Unitas_GridFlow_View_Map_Section_Review.docx`
+- `Unitas_GridFlow_Download_PDF_Feature_Final_Review.docx`
+- `Unitas_GridFlow_D2D_Features_Review_Only.docx`
+- `Unitas_GridFlow_Additional_Improvements_All_4_Features.docx`
+
+Decision:
+
+- Full review folder remains local-only evidence and is ignored by Git.
+- Sanitized repo summary added as `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`.
+- Current phase is practitioner-review remediation, not Stage 4 implementation.
+- First build should start with terminology/wording and D2D-to-Design-Chain refocus before larger functional work.
+
+Prioritised remediation:
+
+1. Terminology and wording pass.
+2. Rename/refocus D2D outputs into Design Chain / Raw Working Audit.
+3. Reframe EX/PR pairing as proximity QA, without deleting override logic until dependencies are inspected.
+4. Add basic map span rendering.
+5. Improve PDF findings into a structured issue/action table with coordinates.
+
+Boundary:
+
+- Do not build photo upload, tablet capture, structured field forms, PoleCAD export, or DNO submission packs from this review alone.
+- Treat the review as evidence to improve the current Stage 3 handoff surfaces first.
+
+---
+
+### Domain reference integrated — repo-safe summary added
+
+The private `GRIDFLOW_DOMAIN_REFERENCE_1.md` master reference was reviewed and strengthened with:
+
+- claim status labels: practitioner knowledge, validated in GridFlow, research-backed, hypothesis/future, commercial/strategic
+- current-versus-future product boundary
+- D2D-as-legacy-workaround framing
+- validated evidence links from Gordon/NIE/Bellsprings work
+- open implementation questions for PoleCAD, design numbering, EXpole interpretation, D2D evidence, and Stage 4 capture
+- standards/privacy cautions
+
+Repository boundary:
+
+- The full private reference remains outside Git and should not be copied wholesale into the repository.
+- A repo-safe development summary was added as `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md`.
+- Future work should use the summary for day-to-day development and the private master only for strategic/domain review.
+
+---
 
 ### Strategic handoff framing correction — D2D is the workaround, not the product
 

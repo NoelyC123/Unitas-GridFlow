@@ -2,7 +2,7 @@
 
 ## Phase
 
-**Stage 3 closed — operational use phase**
+**Stage 3 closed — practitioner-review remediation**
 
 Stage 3A1 (Local Daily Intake MVP) is implemented and validated. It is closed.
 
@@ -37,6 +37,9 @@ Validation completed:
 - Bellsprings processed as project `P008/F001`; initial validation exposed `Pline` and `110xing` as context/crossing records that were incorrectly entering the structural chain.
 - Narrow context-code fix shipped for `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing`; after rerun, issues dropped from 24 to 18 and structural/context counts moved from 46/10 to 40/16.
 - After-fix evidence pack generated: `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_144746_Bellsprings_EWM285_After_Context_Code_Fix.zip`.
+- Full practitioner review completed on 2026-04-28 using the Bellsprings real-life workflow. Reviewed Validation/Review page, View Map, Download PDF, D2D/chain exports, and cross-feature improvements.
+- Sanitized review summary added: `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`.
+- Full review folder remains local-only evidence and is ignored by Git: `/Users/noelcollins/Unitas-GridFlow/Unitas GridFlow Full Tool Review 28th April 2026/`.
 
 ---
 
@@ -52,13 +55,17 @@ Validation completed:
 
 ## Next task
 
-Proceed to **operational use on a real survey-to-design job**.
+Proceed to **practitioner-review remediation** before any Stage 4 build.
 
-Use:
+Immediate development order:
 
-- Primary route: Cloudflare Tunnel + Cloudflare Access
-- Fallback route: Tailscale trusted-device access
-- Deferred: Render/Railway/full hosted deployment
+1. Terminology and wording pass across UI/export/PDF surfaces.
+2. Rename/refocus D2D outputs:
+   - Clean Chain / route-chain output becomes Design Chain / Master Design Chain.
+   - D2D Working View becomes secondary Raw Working Audit / Legacy Working View.
+3. Reframe EX/PR pairing as Existing / Proposed Pole Proximity QA. Do not delete reviewed override logic until dependencies and export behaviour are inspected.
+4. Add basic map span rendering between sequenced design-chain poles.
+5. Improve PDF findings into a structured issue/action table with coordinates.
 
 Stage 3 proved:
 
@@ -70,17 +77,13 @@ Stage 3 proved:
 - real Gordon survey data can be uploaded, reviewed, exported, and packaged as validation evidence
 - mobile project intake is usable enough to stop internal polish and begin operational use
 - Stage 2/3 handoff outputs are transitional replacements for the manual D2D workaround, not the future product model.
+- The practitioner review proved the next priority is trust, terminology, connected map topology, and professional handoff/report clarity.
 
-Next operational use:
+Evidence boundary:
 
-- Use GridFlow on the next real job as the actual survey-to-design handoff workflow.
-- Upload the real controller CSV at end of day or when the file is ready.
-- Review the project dashboard, map, design-readiness findings, EXpole pairings, PDF, Clean Chain, and D2D Working View.
-- Try to use GridFlow's structured handoff outputs instead of rebuilding the manual D2D spreadsheet from scratch.
-- Record whether the designer can skip D2D entirely, and if not, what PoleCAD/design-ready input is still missing.
-- Record friction, missing evidence, export gaps, designer questions, and any need to return to field notes/photos.
 - For Bellsprings, do not change EXpole/design-numbering logic yet. The real pole schedule shows some final design poles at EXpole coordinates, but that requires a separate reviewed-design interpretation step before implementation.
 - Keep Stage 4 structured field capture/tablet/photo/Trimble-GIS integration as future roadmap, not current implementation.
+- Do not implement PoleCAD export until actual PoleCAD import requirements are verified.
 
 ---
 
@@ -105,6 +108,8 @@ Next operational use:
 - `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md`
 - `AI_CONTROL/26_STAGE_3A_OPERATIONAL_RUNBOOK.md`
 - `AI_CONTROL/27_STAGE_3_CLOSURE_AND_OPERATIONAL_USE.md`
+- `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md`
+- `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`
 - `README.md`
 - `app/project_manager.py`
 - `app/routes/api_projects.py`

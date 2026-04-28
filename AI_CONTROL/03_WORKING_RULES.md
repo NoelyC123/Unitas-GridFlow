@@ -61,7 +61,7 @@ Real-world evidence takes priority over abstract feature expansion. Do not build
 The project has 6 stages. Work on the current stage only. Do not jump ahead.
 
 1. Post-survey QA gate ✅
-2. Survey-to-design direct handoff / D2D elimination ✅
+2. Design-ready handoff / Design Chain ✅
 3. Live intake platform ✅
 4. Structured field capture ← FUTURE
 5. Designer workspace

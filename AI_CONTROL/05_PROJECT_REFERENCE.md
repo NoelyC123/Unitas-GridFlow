@@ -109,6 +109,8 @@ The active operational control layer is:
 - `AI_CONTROL/04_SESSION_HANDOFF.md`
 - `AI_CONTROL/05_PROJECT_REFERENCE.md`
 - `AI_CONTROL/06_STRATEGIC_REVIEW_2026-04-22.md`
+- `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md`
+- `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`
 
 ### Purpose of each file
 
@@ -119,6 +121,8 @@ The active operational control layer is:
 - `04_SESSION_HANDOFF.md` — latest session continuity
 - `05_PROJECT_REFERENCE.md` — this file, for historical/reference context
 - `06_STRATEGIC_REVIEW_2026-04-22.md` — distilled conclusions from the external AI strategic review
+- `28_DOMAIN_REFERENCE_SUMMARY.md` — repo-safe development summary of the private domain reference, evidence-quality model, D2D boundary, and future implementation questions
+- `29_PRACTITIONER_REVIEW_SUMMARY.md` — repo-safe summary of the full 2026-04-28 practitioner review and prioritised remediation plan
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Stage 3 complete — enter operational use**
+**Stage 3 complete — practitioner-review remediation**
 
 Stage 1 is complete.
 
@@ -18,9 +18,9 @@ Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was va
 
 Stage 3 mobile validation is complete. The real Gordon file was uploaded through the protected remote workflow as `P007/F001`, reviewed, exported, captured in a validation evidence pack, and used to drive a final map wording clarity polish.
 
-The project is now in an **operational use phase**: use GridFlow on a real survey-to-design job, measure whether the designer can skip or sharply reduce the old manual D2D spreadsheet step, and let real friction define the next build.
+The project is now in a **practitioner-review remediation phase** after Stage 3 closure. A detailed review of the Validation page, Map, PDF, D2D/chain exports, and cross-feature workflow has defined the next narrow improvement pass.
 
-Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the future product model. Current Clean Chain / D2D Working View CSVs are transitional design-handoff outputs. The real destination is a trusted design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
+Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the future product model. Current Clean Chain / D2D Working View CSVs are transitional design-handoff outputs. The Clean Chain should now be reframed as the primary Design Chain / Design Handoff Export, while the old D2D Working View becomes a secondary Raw Working Audit / Legacy Working View. The real destination is a trusted design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
 
 ---
 
@@ -74,6 +74,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 - **Stage 3 mobile polish: homepage/navigation/project-file cards validated with Gordon iPhone screenshots**
 - **Stage 3 validation evidence pack utility: packages raw input, app outputs, review JSON, screenshots, notes, and AI review prompt**
 - **Stage 3 map clarity polish: distinguishes mapped records from total survey records and QA replacement signals from reviewed EXpole assignments**
+- **Practitioner review summary: repo-safe summary of the full 2026-04-28 review added at `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`**
 
 ## Counts
 
@@ -82,6 +83,14 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 - **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
 
 ## What was just shipped
+
+- Practitioner-led full tool review
+  - Five local-only review documents were created from the Bellsprings real-life survey-to-design test, including practitioner and colleague feedback.
+  - Reviewed areas: Validation/Review page, View Map, Download PDF, D2D/chain exports, and cross-feature additional improvements.
+  - Claude Desktop produced a structured product review from those documents.
+  - Sanitized repo summary added: `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`.
+  - Full review folder remains local-only and ignored by Git: `/Users/noelcollins/Unitas-GridFlow/Unitas GridFlow Full Tool Review 28th April 2026/`.
+  - Next remediation sequence: terminology/wording pass, D2D-to-Design-Chain rename/refocus, EX/PR proximity QA reframing, basic map span rendering, then PDF structured issue table.
 
 - Bellsprings EWM285 operational validation and fix
   - Work-colleague evidence was organised locally as a real validation package: raw Bellsprings Trimble/controller CSV, pole schedule, route map, profile, TIS, and separate scope/workplan/site-plan documents.
@@ -124,11 +133,13 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 3. No section boundary editing.
 4. Stage 3A2 uses the local Mac as the origin, so remote access depends on the Mac and `cloudflared` tunnel staying online.
 5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
-6. High-ambiguity files such as `2814_4-474_raw_trimble_export.csv` require designer review.
-7. PDF report still reflects Stage 1/QA style more than final Stage 2 designer workflow.
-8. Reviewed state affects D2D CSV exports only — PDF update deferred.
-9. Stage 4 structured field capture/tablet/photo workflows remain future roadmap and require operational evidence before design.
-10. The old D2D spreadsheet should be used as evidence of current manual decisions and conventions, not as the target product shape. The strategic target is design-ready handoff/PoleCAD-ready evidence once actual import requirements are known.
+6. UI/PDF/export terminology is still too internal/software-oriented for practitioner trust.
+7. The map shows survey points but not yet a connected OHL circuit with spans/topology.
+8. EX/PR pairing is currently too prominent as a reassignment workflow and should be reframed as proximity QA before deeper workflow changes.
+9. PDF report still reflects Stage 1/QA style more than a formal design handoff pack.
+10. Reviewed state affects D2D CSV exports only — PDF update deferred.
+11. Stage 4 structured field capture/tablet/photo workflows remain future roadmap and require operational evidence before design.
+12. The old D2D spreadsheet should be used as evidence of current manual decisions and conventions, not as the target product shape. The strategic target is design-ready handoff/PoleCAD-ready evidence once actual import requirements are known.
 
 ## Strategic position
 
@@ -136,5 +147,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 - Tool validated on real NIE and SPEN survey files
 - Project owner has direct survey and design experience
 - Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3 complete — next work should come from real operational use rather than internal validation polish
+- Stage 3 complete — next work is a narrow practitioner-review remediation pass before Stage 4
 - Stage 4 remains the future structured field-capture layer around Trimble/GNSS/controller/GIS data, not a replacement for Trimble positioning
+- Repo-safe domain reference summary added at `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md`; the full private domain reference remains outside Git and should not be copied wholesale into the repository.
+- Repo-safe practitioner review summary added at `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`; the full review folder remains local-only evidence and ignored by Git.

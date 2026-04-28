@@ -33,7 +33,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 | Stage | Name | Status |
 |-------|------|--------|
 | 1 | Post-survey QA gate | ✅ Complete |
-| 2 | Survey-to-design direct handoff / D2D elimination | ✅ Complete |
+| 2 | Design-ready handoff / Design Chain | ✅ Complete |
 | 3C | Project management (multi-file) | ✅ Complete |
 | 3B | Designer review & export readiness | ✅ Complete |
 | 3A | Live intake platform | ✅ Complete |
@@ -43,7 +43,7 @@ The current survey-to-design workflow in UK overhead line work is fundamentally 
 
 **Stage 1** is complete: the tool parses raw controller dumps, validates their contents, and gives the designer a clear pre-design briefing before they open PoleCAD.
 
-**Stage 2** is complete: the tool produces structured, sequenced, designer-readable handoff outputs directly from raw controller dumps. Clean route-chain export and interleaved working view included. These are transitional D2D-replacement outputs, not a claim that D2D spreadsheets are the future product model. Output is provisional and not a verified final PoleCAD import format.
+**Stage 2** is complete: the tool produces structured, sequenced, designer-readable handoff outputs directly from raw controller dumps. Clean route-chain export and interleaved working view included. These are transitional D2D-replacement outputs, not a claim that D2D spreadsheets are the future product model. The 2026-04-28 practitioner review reframes the clean route-chain output as the future Design Chain / Design Handoff Export, with the D2D working view kept secondary as a raw working audit. Output is provisional and not a verified final PoleCAD import format.
 
 **Stage 3C** is complete: named projects group related survey files. Multiple CSVs can be uploaded to a single project. Each file still runs through the same Stage 1/2 pipeline independently. Map, PDF, D2D chain and working view are all accessible per file from the project overview page. Legacy J##### jobs remain fully accessible.
 
@@ -160,6 +160,8 @@ Project direction is controlled by:
 - `AI_CONTROL/04_SESSION_HANDOFF.md` — session continuity
 - `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard reference
 - `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — project origin and real workflow notes
+- `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md` — repo-safe evidence-quality and domain reference summary
+- `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md` — repo-safe practitioner review and remediation plan
 
 ---
 
