@@ -28,6 +28,7 @@ class MapViewer {
 
     this.map = null;
     this.featureData = [];
+    this.spanLayer = null;
     this.activeFilter = null;
     this.fileType = null;
   }
@@ -53,6 +54,7 @@ class MapViewer {
       const data = await res.json();
       this.renderSummary(data.metadata || {});
       this.renderMarkers(data.features || []);
+      this.renderDesignChainSpans(data.design_chain_spans || []);
     } catch (err) {
       console.error(err);
       if (this.issueNoteEl) {
@@ -221,6 +223,53 @@ class MapViewer {
     } else if (bounds.length > 1) {
       this.map.fitBounds(bounds, { padding: [40, 40] });
     }
+  }
+
+  renderDesignChainSpans(spans) {
+    if (!this.map || !Array.isArray(spans) || spans.length === 0) return;
+
+    this.spanLayer = L.layerGroup().addTo(this.map);
+
+    for (const span of spans) {
+      const coords = span.coordinates || [];
+      if (coords.length !== 2) continue;
+
+      const from = coords[0];
+      const to = coords[1];
+      if (!Array.isArray(from) || !Array.isArray(to) || from.length < 2 || to.length < 2) {
+        continue;
+      }
+
+      const line = L.polyline([from, to], {
+        color: '#2563eb',
+        weight: 4,
+        opacity: 0.82,
+      });
+
+      const label = this.spanLabel(span);
+      if (label) {
+        line.bindTooltip(label, {
+          permanent: false,
+          sticky: true,
+          className: 'span-distance-label',
+          opacity: 0.9,
+        });
+      }
+
+      const popupHtml = `
+        <div class="popup-title">Design Chain Span</div>
+        <div class="popup-row"><strong>From:</strong> ${this.escapeHtml(span.from_point_id || span.from_design_pole_no || 'Unknown')}</div>
+        <div class="popup-row"><strong>To:</strong> ${this.escapeHtml(span.to_point_id || span.to_design_pole_no || 'Unknown')}</div>
+        ${span.distance_m != null ? `<div class="popup-row"><strong>Distance:</strong> ${Number(span.distance_m).toFixed(1)}m</div>` : ''}
+      `;
+      line.bindPopup(popupHtml);
+      line.addTo(this.spanLayer);
+    }
+  }
+
+  spanLabel(span) {
+    if (span.distance_m == null || Number.isNaN(Number(span.distance_m))) return '';
+    return `${Number(span.distance_m).toFixed(1)}m`;
   }
 
   bindFilterButtons() {

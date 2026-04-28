@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import ast
 import csv
 import io
 import json
 from pathlib import Path
 
 from flask import Blueprint, abort, send_file
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
@@ -58,6 +60,290 @@ def _draw_line(
 ) -> None:
     pdf.setFont(font, size)
     pdf.drawString(x, y, text)
+
+
+def _parse_issue_row(row_text: object) -> dict:
+    if isinstance(row_text, dict):
+        return row_text
+    if row_text is None:
+        return {}
+    text = str(row_text).strip()
+    if not text:
+        return {}
+    try:
+        parsed = ast.literal_eval(text)
+    except (SyntaxError, ValueError):
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
+def _issue_record_ref(row: dict) -> str:
+    for key in ("pole_id", "asset_id", "point_id", "id", "asset_ref"):
+        value = row.get(key)
+        if value not in (None, ""):
+            return str(value)
+    row_index = row.get("__row_index__")
+    if isinstance(row_index, int):
+        return f"row {row_index + 1}"
+    return "record"
+
+
+def _issue_coordinates(row: dict) -> str:
+    easting = row.get("easting")
+    northing = row.get("northing")
+    if easting not in (None, "") and northing not in (None, ""):
+        return f"E/N {easting}, {northing}"
+
+    lat = row.get("lat")
+    lon = row.get("lon")
+    if lat not in (None, "") and lon not in (None, ""):
+        try:
+            return f"{float(lat):.5f}, {float(lon):.5f}"
+        except (TypeError, ValueError):
+            return f"{lat}, {lon}"
+
+    return "not captured"
+
+
+def _issue_status_label(severity: str) -> str:
+    sev = severity.strip().upper()
+    if sev == "FAIL":
+        return "Design Blocker"
+    if sev == "WARN":
+        return "Review Required"
+    return "Review Item"
+
+
+def _issue_guidance(issue_text: str) -> tuple[str, str]:
+    lower = issue_text.lower()
+
+    if "missing required field" in lower and "material" in lower:
+        return (
+            "Structural material evidence is missing from the digital file.",
+            "Confirm material from field notes, plan markups, or resurvey.",
+        )
+    if "missing required field" in lower and "height" in lower:
+        return (
+            "Pole height evidence is missing, limiting clearance and loading checks.",
+            "Confirm height before relying on design calculations.",
+        )
+    if "missing required field" in lower:
+        return (
+            "Required survey evidence is missing from the record.",
+            "Fill the missing field from trusted source evidence.",
+        )
+    if "coordinate mismatch" in lower:
+        return (
+            "Grid and latitude/longitude evidence disagree.",
+            "Verify the coordinate source before design use.",
+        )
+    if "duplicate" in lower:
+        return (
+            "Duplicate identity or position evidence may confuse the design chain.",
+            "Resolve duplicate records before handoff.",
+        )
+    if "span" in lower:
+        return (
+            "Span geometry needs review against the intended route sequence.",
+            "Check the route order and adjacent pole positions.",
+        )
+    if "replacement pair" in lower:
+        return (
+            "Existing/proposed pole relationship is inferred, not designer confirmed.",
+            "Verify the intended replacement pairing.",
+        )
+    if "angle structure with no stay" in lower:
+        return (
+            "Angle pole has no digital stay evidence.",
+            "Check whether stay evidence is missing from the survey.",
+        )
+
+    return (
+        "Issue needs review before this record is treated as design-ready.",
+        "Review the source data and supporting field evidence.",
+    )
+
+
+def _build_design_review_item(issue: dict) -> dict:
+    issue_text = str(issue.get("Issue", "Unknown issue")).strip() or "Unknown issue"
+    row = _parse_issue_row(issue.get("Row"))
+    consequence, action = _issue_guidance(issue_text)
+    return {
+        "record_ref": _issue_record_ref(row),
+        "coordinates": _issue_coordinates(row),
+        "status": _issue_status_label(str(issue.get("Severity", ""))),
+        "issue": issue_text,
+        "consequence": consequence,
+        "action": action,
+    }
+
+
+def _wrap_text(
+    pdf: canvas.Canvas,
+    text: str,
+    max_width: float,
+    font: str,
+    size: int,
+    max_lines: int,
+) -> list[str]:
+    words = str(text).split()
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if pdf.stringWidth(candidate, font, size) <= max_width:
+            current = candidate
+            continue
+        if current:
+            lines.append(current)
+        current = word
+        if len(lines) >= max_lines:
+            break
+    if current and len(lines) < max_lines:
+        lines.append(current)
+    if len(lines) == max_lines and len(" ".join(words)) > len(" ".join(lines)):
+        lines[-1] = lines[-1].rstrip(".") + "..."
+    return lines or [""]
+
+
+def _draw_wrapped_lines(
+    pdf: canvas.Canvas,
+    lines: list[str],
+    x: float,
+    y: float,
+    font: str = "Helvetica",
+    size: int = 7,
+) -> None:
+    pdf.setFont(font, size)
+    cursor_y = y
+    for line in lines:
+        pdf.drawString(x, cursor_y, line)
+        cursor_y -= 3.6 * mm
+
+
+def _draw_design_review_table_header(
+    pdf: canvas.Canvas,
+    left: float,
+    y: float,
+    col_widths: list[float],
+) -> None:
+    headers = ["Record", "Coordinates", "Status", "Issue / consequence / action"]
+    header_h = 7 * mm
+    pdf.setFillColor(colors.HexColor("#111827"))
+    pdf.rect(left, y - header_h + 1.5 * mm, sum(col_widths), header_h, fill=True, stroke=False)
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 7)
+    x = left + 2 * mm
+    for header, col_w in zip(headers, col_widths, strict=False):
+        pdf.drawString(x, y - 3.5 * mm, header)
+        x += col_w
+    pdf.setFillColor(colors.black)
+
+
+def _draw_design_review_items_table(
+    pdf: canvas.Canvas,
+    issues: list[dict],
+    left: float,
+    y: float,
+    top: float,
+    line_gap: float,
+) -> float:
+    _draw_line(pdf, "Design Review Items", left, y, font="Helvetica-Bold", size=12)
+    y -= 8 * mm
+
+    if not issues:
+        _draw_line(pdf, "No issues.csv found for this job, or no issues were recorded.", left, y)
+        return y - line_gap
+
+    bottom = 25 * mm
+    max_rows = 25
+    col_widths = [23 * mm, 36 * mm, 28 * mm, 87 * mm]
+    table_width = sum(col_widths)
+
+    def start_new_page() -> float:
+        pdf.showPage()
+        new_y = top
+        _draw_line(
+            pdf,
+            "Unitas GridFlow - QA Report (continued)",
+            left,
+            new_y,
+            font="Helvetica-Bold",
+            size=14,
+        )
+        return new_y - 10 * mm
+
+    _draw_design_review_table_header(pdf, left, y, col_widths)
+    y -= 8 * mm
+
+    for item in [_build_design_review_item(issue) for issue in issues[:max_rows]]:
+        record_lines = _wrap_text(
+            pdf, item["record_ref"], col_widths[0] - 4 * mm, "Helvetica", 7, 2
+        )
+        coord_lines = _wrap_text(
+            pdf, item["coordinates"], col_widths[1] - 4 * mm, "Helvetica", 7, 2
+        )
+        status_lines = _wrap_text(
+            pdf, item["status"], col_widths[2] - 4 * mm, "Helvetica-Bold", 7, 2
+        )
+        detail_lines = []
+        for label, key in (
+            ("Issue", "issue"),
+            ("Consequence", "consequence"),
+            ("Action", "action"),
+        ):
+            detail_lines.extend(
+                _wrap_text(
+                    pdf,
+                    f"{label}: {item[key]}",
+                    col_widths[3] - 4 * mm,
+                    "Helvetica",
+                    7,
+                    2,
+                )
+            )
+
+        row_line_count = max(
+            len(record_lines), len(coord_lines), len(status_lines), len(detail_lines)
+        )
+        row_h = max(17 * mm, (row_line_count * 3.6 * mm) + 5 * mm)
+        if y - row_h < bottom:
+            y = start_new_page()
+            _draw_design_review_table_header(pdf, left, y, col_widths)
+            y -= 8 * mm
+
+        pdf.setStrokeColor(colors.HexColor("#cbd5e1"))
+        pdf.rect(left, y - row_h + 2 * mm, table_width, row_h, fill=False, stroke=True)
+        x = left
+        for col_w in col_widths[:-1]:
+            x += col_w
+            pdf.line(x, y + 2 * mm, x, y - row_h + 2 * mm)
+
+        x = left + 2 * mm
+        text_y = y - 3 * mm
+        _draw_wrapped_lines(pdf, record_lines, x, text_y)
+        x += col_widths[0]
+        _draw_wrapped_lines(pdf, coord_lines, x + 2 * mm, text_y)
+        x += col_widths[1]
+        _draw_wrapped_lines(pdf, status_lines, x + 2 * mm, text_y, font="Helvetica-Bold")
+        x += col_widths[2]
+        _draw_wrapped_lines(pdf, detail_lines, x + 2 * mm, text_y)
+
+        y -= row_h
+
+    if len(issues) > max_rows:
+        if y < bottom:
+            y = start_new_page()
+        _draw_line(
+            pdf,
+            f"... {len(issues) - max_rows} more design review item(s) not shown.",
+            left,
+            y,
+        )
+        y -= line_gap
+
+    pdf.setStrokeColor(colors.black)
+    return y
 
 
 def _generate_qa_pdf(job_dir: Path, display_id: str):
@@ -259,44 +545,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str):
 
         y -= 4 * mm
 
-    _draw_line(pdf, "Design Review Items", left, y, font="Helvetica-Bold", size=12)
-    y -= 8 * mm
-
-    if not issues:
-        _draw_line(pdf, "No issues.csv found for this job, or no issues were recorded.", left, y)
-        y -= line_gap
-    else:
-        max_rows = 30
-
-        for idx, issue in enumerate(issues[:max_rows], start=1):
-            issue_text = str(issue.get("Issue", "Unknown issue")).strip()
-            sev = str(issue.get("Severity", "")).strip().upper()
-            sev_prefix = "[Review Required] " if sev == "WARN" else ""
-
-            _draw_line(pdf, f"{idx}. {sev_prefix}{issue_text}", left, y)
-            y -= line_gap
-
-            if y < 25 * mm:
-                pdf.showPage()
-                y = top
-                _draw_line(
-                    pdf,
-                    "Unitas GridFlow — QA Report (continued)",
-                    left,
-                    y,
-                    font="Helvetica-Bold",
-                    size=14,
-                )
-                y -= 10 * mm
-
-        if len(issues) > max_rows:
-            _draw_line(
-                pdf,
-                f"... {len(issues) - max_rows} more design review item(s) not shown.",
-                left,
-                y,
-            )
-            y -= line_gap
+    y = _draw_design_review_items_table(pdf, issues, left, y, top, line_gap)
 
     y -= 6 * mm
     _draw_line(pdf, "Generated by Unitas GridFlow.", left, y, size=9)

@@ -155,6 +155,23 @@ def test_pdf_route_returns_pdf_for_valid_job(tmp_path, monkeypatch) -> None:
     assert response.data.startswith(b"%PDF")
 
 
+def test_design_review_item_includes_record_coordinates_status_and_action() -> None:
+    item = pdf_reports._build_design_review_item(
+        {
+            "Severity": "WARN",
+            "Issue": "Missing required field: material",
+            "Row": "{'pole_id': 'P-1004', 'easting': 353041, 'northing': 503155}",
+        }
+    )
+
+    assert item["record_ref"] == "P-1004"
+    assert item["coordinates"] == "E/N 353041, 503155"
+    assert item["status"] == "Review Required"
+    assert item["issue"] == "Missing required field: material"
+    assert "material evidence is missing" in item["consequence"]
+    assert "Confirm material" in item["action"]
+
+
 def test_pdf_route_returns_404_for_missing_job(tmp_path, monkeypatch) -> None:
     jobs_root = tmp_path / "jobs"
     jobs_root.mkdir(parents=True)

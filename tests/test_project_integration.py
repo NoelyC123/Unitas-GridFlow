@@ -349,6 +349,61 @@ def test_project_map_route_returns_200(client_and_root):
     assert b"map" in response.data.lower()
 
 
+def test_project_map_data_includes_design_chain_spans(client_and_root):
+    client, projects_root = client_and_root
+
+    file_dir = _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+    _write_json(
+        file_dir / "map_data.json",
+        {
+            "type": "FeatureCollection",
+            "features": [],
+            "metadata": {"job_id": "P001/F001"},
+        },
+    )
+    _write_json(
+        file_dir / "sequenced_route.json",
+        {
+            "status": "ok",
+            "chain": [
+                {
+                    "point_id": "P-1001",
+                    "lat": 54.521,
+                    "lon": -3.014,
+                    "span_to_next_m": 75.0,
+                    "section_id": "SEC-1",
+                    "design_pole_number": 1,
+                },
+                {
+                    "point_id": "P-1002",
+                    "lat": 54.522,
+                    "lon": -3.013,
+                    "span_to_next_m": None,
+                    "section_id": "SEC-1",
+                    "design_pole_number": 2,
+                },
+            ],
+        },
+    )
+
+    response = client.get("/map/data/project/P001/F001")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["metadata"]["design_chain_span_count"] == 1
+    assert data["design_chain_spans"] == [
+        {
+            "from_point_id": "P-1001",
+            "to_point_id": "P-1002",
+            "from_design_pole_no": 1,
+            "to_design_pole_no": 2,
+            "section_id": "SEC-1",
+            "distance_m": 75.0,
+            "coordinates": [[54.521, -3.014], [54.522, -3.013]],
+        }
+    ]
+
+
 def test_project_detail_includes_mobile_file_card_layout(client_and_root):
     client, projects_root = client_and_root
 

@@ -17,6 +17,7 @@ def _empty_feature_collection(job_id: str) -> dict:
     return {
         "type": "FeatureCollection",
         "features": [],
+        "design_chain_spans": [],
         "metadata": {
             "job_id": job_id,
             "rulepack_id": "SPEN_11kV",
@@ -27,6 +28,68 @@ def _empty_feature_collection(job_id: str) -> dict:
             "fail_count": 0,
         },
     }
+
+
+def _safe_float(value: object) -> float | None:
+    try:
+        if value is None or value == "":
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _build_design_chain_spans(seq: dict) -> list[dict]:
+    """Build a lightweight Leaflet-friendly span overlay from sequenced route data."""
+    chain = seq.get("chain") or []
+    spans: list[dict] = []
+
+    for index in range(len(chain) - 1):
+        start = chain[index] or {}
+        end = chain[index + 1] or {}
+        start_lat = _safe_float(start.get("lat"))
+        start_lon = _safe_float(start.get("lon"))
+        end_lat = _safe_float(end.get("lat"))
+        end_lon = _safe_float(end.get("lon"))
+
+        if None in (start_lat, start_lon, end_lat, end_lon):
+            continue
+
+        distance_m = _safe_float(start.get("span_to_next_m"))
+        spans.append(
+            {
+                "from_point_id": start.get("point_id"),
+                "to_point_id": end.get("point_id"),
+                "from_design_pole_no": start.get("design_pole_number"),
+                "to_design_pole_no": end.get("design_pole_number"),
+                "section_id": start.get("section_id"),
+                "distance_m": distance_m,
+                "coordinates": [[start_lat, start_lon], [end_lat, end_lon]],
+            }
+        )
+
+    return spans
+
+
+def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
+    """Attach span overlay data without requiring old map_data.json files to be regenerated."""
+    if not isinstance(data, dict):
+        return data
+    if "design_chain_spans" in data:
+        return data
+    spans: list[dict] = []
+    if seq_path.exists():
+        try:
+            seq = json.loads(seq_path.read_text(encoding="utf-8"))
+            if seq.get("status") == "ok":
+                spans = _build_design_chain_spans(seq)
+        except Exception:
+            spans = []
+    data["design_chain_spans"] = spans
+    metadata = data.setdefault("metadata", {})
+    if isinstance(metadata, dict):
+        metadata["design_chain_span_count"] = len(spans)
+    return data
 
 
 @map_preview_bp.get("/view/<job_id>")
@@ -70,12 +133,14 @@ def map_view(job_id: str):
 @map_preview_bp.get("/data/<job_id>")
 def map_data(job_id: str):
     map_path = JOBS_ROOT / job_id / "map_data.json"
+    seq_path = JOBS_ROOT / job_id / "sequenced_route.json"
 
     if not map_path.exists():
         return jsonify(_empty_feature_collection(job_id))
 
     try:
         data = json.loads(map_path.read_text(encoding="utf-8"))
+        data = _enrich_with_design_chain_spans(data, seq_path)
         return jsonify(data)
     except Exception:
         return jsonify(_empty_feature_collection(job_id))
@@ -120,11 +185,14 @@ def project_map_view(project_id: str, file_id: str):
 @map_preview_bp.get("/data/project/<project_id>/<file_id>")
 def project_map_data(project_id: str, file_id: str):
     display_id = f"{project_id}/{file_id}"
-    map_path = PROJECTS_ROOT / project_id / "files" / file_id / "map_data.json"
+    file_dir = PROJECTS_ROOT / project_id / "files" / file_id
+    map_path = file_dir / "map_data.json"
+    seq_path = file_dir / "sequenced_route.json"
     if not map_path.exists():
         return jsonify(_empty_feature_collection(display_id))
     try:
         data = json.loads(map_path.read_text(encoding="utf-8"))
+        data = _enrich_with_design_chain_spans(data, seq_path)
         return jsonify(data)
     except Exception:
         return jsonify(_empty_feature_collection(display_id))
