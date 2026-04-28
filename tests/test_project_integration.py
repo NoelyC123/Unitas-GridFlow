@@ -349,6 +349,21 @@ def test_project_map_route_returns_200(client_and_root):
     assert b"map" in response.data.lower()
 
 
+def test_project_map_route_includes_review_focus_filters(client_and_root):
+    client, projects_root = client_and_root
+
+    _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+
+    response = client.get("/map/view/project/P001/F001")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "Review Focus" in html
+    assert 'data-focus="design-blockers"' in html
+    assert 'data-focus="replacement-proximity"' in html
+    assert 'data-focus="missing-height"' in html
+
+
 def test_project_map_data_includes_design_chain_spans(client_and_root):
     client, projects_root = client_and_root
 

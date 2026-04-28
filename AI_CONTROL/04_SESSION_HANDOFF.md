@@ -14,17 +14,19 @@ Shipped:
 - The review page was reframed as Existing / Proposed Pole Proximity QA while keeping reviewed override behaviour.
 - The map now draws basic connected Design Chain spans from `sequenced_route.json`.
 - Span distances are available through hover/click detail without permanent label clutter on dense routes.
+- The map side panel now includes Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
 - The PDF front-facing issue list is now a structured `Design Review Items` table with record reference, coordinates, status, issue, design consequence, and recommended action.
 - The technical appendix remains in the PDF for raw issue detail.
 - The Design Chain and Raw Working Audit CSVs now include first-pass evidence-quality columns showing captured/missing/inferred position, height, notes, replacement, and evidence-gap status.
 
 Validation:
 
-- `pytest -v` — 291 passed.
+- `pytest -v` — 292 passed.
 - `pre-commit run --all-files` — passed.
 - Browser smoke check confirmed the span overlay on Gordon `P007/F001`.
 - PDF route smoke check returned a valid PDF for `P007/F001`.
 - Real project CSV export smoke checks confirmed evidence columns on Gordon `P007/F001` and Bellsprings `P008/F001`.
+- Real project map smoke checks confirmed Review Focus controls on Gordon `P007/F001` and Bellsprings `P008/F001`.
 
 Commits:
 

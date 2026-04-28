@@ -8,6 +8,23 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Add Map Review Focus Filters
+
+### Added
+
+- Added map-side `Review Focus` filters for design blockers, review-required records, replacement proximity signals, and missing-height records.
+- Added record-panel cues for missing height and replacement proximity QA signals.
+- Added route regression coverage to ensure the project map renders the new focus controls.
+
+### Validated
+
+- `pytest -v` — 292 passed.
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pre-commit run --all-files` — passed.
+- Real project map smoke checks confirmed the controls on Gordon `P007/F001` and Bellsprings `P008/F001`.
+
+---
+
 ## 2026-04-28 — Add Evidence Quality Columns To Handoff Exports
 
 ### Added

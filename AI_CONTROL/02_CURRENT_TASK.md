@@ -67,6 +67,7 @@ Completed remediation:
 4. Add basic map span rendering between sequenced design-chain poles.
 5. Improve PDF findings into a structured issue/action table with coordinates, status, design consequence, and recommended action.
 6. Add first-pass evidence-quality visibility to Design Chain and Raw Working Audit CSV exports.
+7. Add map Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
 
 Next useful step:
 

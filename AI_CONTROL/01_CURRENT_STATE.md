@@ -33,7 +33,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 - Replacement pair detection (EXpole to Pol matching)
 - Evidence gates (7 scoped design gates)
 - Confidence-aware severity tiers (PASS/WARN/FAIL)
-- Interactive Leaflet map with filtering and basic Design Chain span overlay
+- Interactive Leaflet map with status filtering, review-focus filters, and basic Design Chain span overlay
 - PDF pre-design briefing report with structured design review issue/action table
 - DNO rulepack inference from geography
 - Column/header normalisation for structured CSVs
@@ -79,7 +79,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 
 ## Counts
 
-- **Tests passing:** 291
+- **Tests passing:** 292
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
 
@@ -89,9 +89,10 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
   - Forward-facing D2D/Clean Chain wording has been refocused around Design Chain and Raw Working Audit.
   - The review page now presents Existing / Proposed Pole Proximity QA while preserving reviewed override logic.
   - Map data now exposes basic Design Chain spans from `sequenced_route.json`, and the Leaflet map renders connected route lines.
+  - The map now includes Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
   - PDF Design Review Items now use a structured table with record reference, coordinates, status, issue, design consequence, and recommended action.
   - Design Chain and Raw Working Audit CSVs now expose position, height, notes, replacement, and evidence-gap status derived from the existing sequence output.
-  - Validation: `pytest -v` — 291 passed; `pre-commit run --all-files` — passed.
+  - Validation: `pytest -v` — 292 passed; `pre-commit run --all-files` — passed.
 
 - Practitioner-led full tool review
   - Five local-only review documents were created from the Bellsprings real-life survey-to-design test, including practitioner and colleague feedback.

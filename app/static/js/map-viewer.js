@@ -30,6 +30,7 @@ class MapViewer {
     this.featureData = [];
     this.spanLayer = null;
     this.activeFilter = null;
+    this.activeFilterMode = null;
     this.fileType = null;
   }
 
@@ -217,6 +218,7 @@ class MapViewer {
     }
 
     this.bindFilterButtons();
+    this.bindFocusFilterButtons();
     this.bindAllRecordsButton();
 
     if (bounds.length === 1) {
@@ -278,7 +280,15 @@ class MapViewer {
   bindFilterButtons() {
     document.querySelectorAll('.status-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        this.setFilter(btn.dataset.filter);
+        this.setFilter('status', btn.dataset.filter);
+      });
+    });
+  }
+
+  bindFocusFilterButtons() {
+    document.querySelectorAll('.focus-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.setFilter('focus', btn.dataset.focus);
       });
     });
   }
@@ -290,44 +300,90 @@ class MapViewer {
       // Clear any active status filter without hiding the panel.
       if (this.activeFilter) {
         this.activeFilter = null;
+        this.activeFilterMode = null;
         for (const fd of this.featureData) {
           if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
         }
         document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('filter-active'));
+        document.querySelectorAll('.focus-filter-btn').forEach(b => b.classList.remove('filter-active'));
         if (this.filterNoteEl) this.filterNoteEl.textContent = '';
       }
       this._showRecordPanel(this.featureData, `All Mapped Records (${this.featureData.length})`);
     });
   }
 
-  setFilter(status) {
-    if (this.activeFilter === status) {
+  setFilter(mode, value) {
+    if (this.activeFilterMode === mode && this.activeFilter === value) {
       this.activeFilter = null;
+      this.activeFilterMode = null;
       for (const fd of this.featureData) {
         if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
       }
       document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
+      document.querySelectorAll('.focus-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
       if (this.filterNoteEl) this.filterNoteEl.textContent = '';
       this._hideRecordPanel();
     } else {
-      this.activeFilter = status;
+      this.activeFilter = value;
+      this.activeFilterMode = mode;
+      const filtered = this.filterFeatureData(mode, value);
+      const visibleRecords = new Set(filtered);
       for (const fd of this.featureData) {
-        if (fd.status === status) {
+        if (visibleRecords.has(fd)) {
           if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
         } else {
           if (this.map.hasLayer(fd.marker)) this.map.removeLayer(fd.marker);
         }
       }
       document.querySelectorAll('.status-filter-btn').forEach(btn => {
-        btn.classList.toggle('filter-active', btn.dataset.filter === status);
+        btn.classList.toggle('filter-active', mode === 'status' && btn.dataset.filter === value);
       });
-      const filtered = this.featureData.filter(fd => fd.status === status);
+      document.querySelectorAll('.focus-filter-btn').forEach(btn => {
+        btn.classList.toggle('filter-active', mode === 'focus' && btn.dataset.focus === value);
+      });
       const count = filtered.length;
+      const label = this.filterLabel(mode, value);
       if (this.filterNoteEl) {
-        this.filterNoteEl.textContent = `Showing ${count} ${status} record${count !== 1 ? 's' : ''} — click again to reset`;
+        this.filterNoteEl.textContent = `Showing ${count} ${label} record${count !== 1 ? 's' : ''} — click again to reset`;
       }
-      this._showRecordPanel(filtered, `${status} Records (${count})`);
+      this._showRecordPanel(filtered, `${label} (${count})`);
     }
+  }
+
+  filterFeatureData(mode, value) {
+    if (mode === 'status') {
+      return this.featureData.filter(fd => fd.status === value);
+    }
+    if (value === 'design-blockers') {
+      return this.featureData.filter(fd => fd.status === 'FAIL');
+    }
+    if (value === 'review-required') {
+      return this.featureData.filter(fd => fd.status === 'WARN');
+    }
+    if (value === 'replacement-proximity') {
+      return this.featureData.filter(fd => fd.props.relationship === 'replacement_pair');
+    }
+    if (value === 'missing-height') {
+      return this.featureData.filter(fd => {
+        const role = String(fd.props.record_role || '').toLowerCase();
+        const isContext = role === 'context' || CONTEXT_FEATURE_CODES.has(fd.props.structure_type || '');
+        return !isContext && (fd.props.height == null || fd.props.height === '');
+      });
+    }
+    return this.featureData;
+  }
+
+  filterLabel(mode, value) {
+    const labels = {
+      PASS: 'Pass',
+      WARN: 'Review Required',
+      FAIL: 'Design Blocker',
+      'design-blockers': 'Design Blocker',
+      'review-required': 'Review Required',
+      'replacement-proximity': 'Replacement Proximity',
+      'missing-height': 'Missing Height',
+    };
+    return labels[value] || value || mode;
   }
 
   _showRecordPanel(items, title) {
@@ -371,6 +427,14 @@ class MapViewer {
         ? `<div style="color:#9ca3af;font-size:0.75em;margin-top:1px;font-style:italic;">${this.escapeHtml(p.asset_intent)}</div>`
         : '';
 
+      const missingHeightHtml = (p.record_role !== 'context' && (p.height == null || p.height === ''))
+        ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;">Height not captured</div>'
+        : '';
+
+      const replacementHtml = p.relationship === 'replacement_pair'
+        ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;">Replacement proximity QA signal</div>'
+        : '';
+
       const explainedTypeHtml = explainedType
         ? `<div style="color:#9ca3af;font-size:0.73em;margin-top:1px;font-style:italic;">${this.escapeHtml(explainedType)}</div>`
         : '';
@@ -383,6 +447,8 @@ class MapViewer {
         <div style="color:#6b7280;font-size:0.78rem;">${typeText}${detailText ? ' · ' + detailText : ''}</div>
         ${explainedTypeHtml}
         ${intentHtml}
+        ${missingHeightHtml}
+        ${replacementHtml}
         ${issueHtml}
         ${warnHtml}
       `;
