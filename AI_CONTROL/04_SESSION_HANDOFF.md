@@ -31,15 +31,23 @@ Validation:
 - Real project map smoke checks confirmed Review Focus controls on Gordon `P007/F001` and Bellsprings `P008/F001`.
 - Real project PDF smoke checks returned valid PDFs for Gordon `P007/F001` and Bellsprings `P008/F001`.
 - Real project dashboard smoke checks confirmed Gordon `P007/F001` shows reviewed and Bellsprings `P008/F001` shows needs review.
+- End-of-day closure smoke check passed for Gordon `P007/F001` and Bellsprings `P008/F001` across project dashboard/API, review page, map page/data, PDF, Design Chain, and Raw Working Audit.
 
 Commits:
 
 - `72c1d35 Refocus D2D outputs as design chain`
 - `9e212a7 Improve design handoff map and PDF review`
+- `aee2a9d Polish map route visual hierarchy`
+- `a2dc426 Add map legend for design chain overlays`
+- `9f246c0 Add evidence quality to handoff exports`
+- `543a4be Add map review focus filters`
+- `ce6f455 Add designer review status to project PDFs`
+- `8796e13 Show designer review status on project dashboard`
 
 Next:
 
-- Review the updated map and PDF outputs against real Gordon/Bellsprings evidence before defining the next build.
+- The remediation build has now been reviewed against real Gordon/Bellsprings outputs at route level.
+- The next useful step is either a narrow Claude Desktop product/UX review of the latest remediation result or operational use on the next real job.
 - Do not jump into Stage 4, photo upload, tablet capture, PoleCAD export, or DNO submission packs from this remediation work alone.
 
 ---

@@ -73,8 +73,9 @@ Completed remediation:
 
 Next useful step:
 
-- Review the remediation build against real Gordon/Bellsprings outputs in the browser, generated PDF, and Design Chain / Raw Working Audit CSVs.
-- If the user wants external review, give Claude Desktop the latest commit and ask for a narrow product/UX review of the remediation result.
+- The remediation build has now passed route-level closure smoke checks against real Gordon/Bellsprings project outputs: dashboard/API, review page, map page/data, PDF, Design Chain, and Raw Working Audit.
+- If the user wants external review, give Claude Desktop the latest commits and ask for a narrow product/UX review of the remediation result.
+- Otherwise, the next useful validation step is operational use on the next real job.
 - Do not begin Stage 4 or PoleCAD export until this remediation pass has been reviewed against real outputs.
 
 Stage 3 proved:
