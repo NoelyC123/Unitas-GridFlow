@@ -8,6 +8,28 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Map Span Overlay And PDF Review Table
+
+### Added
+
+- Added a basic Design Chain span overlay to the Leaflet map, using `sequenced_route.json` to draw connected route spans between sequenced design-chain records.
+- Added hover/click span distance detail without permanent label clutter on dense routes.
+- Added a structured PDF `Design Review Items` table with record reference, coordinates, status, issue, design consequence, and recommended action.
+- Added regression coverage for map span data enrichment and PDF review-item formatting.
+
+### Changed
+
+- Existing processed project files can now show span overlays through map-data response enrichment without rerunning intake.
+- The PDF keeps its technical appendix, but the front-facing issue section is now a practitioner-readable issue/action table rather than a simple numbered list.
+
+### Validated
+
+- `pytest -v` — 289 passed.
+- `pre-commit run --all-files` — passed.
+- Existing project PDF route smoke check returned a valid PDF for `P007/F001`.
+
+---
+
 ## 2026-04-28 — Design Chain Terminology Pass
 
 ### Changed

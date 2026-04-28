@@ -4,6 +4,38 @@
 
 ## What happened this session
 
+### Practitioner-review remediation build — implemented
+
+The first remediation pass from the 2026-04-28 practitioner review has now been implemented.
+
+Shipped:
+
+- Forward-facing D2D/Clean Chain language was refocused as Design Chain / Raw Working Audit.
+- The review page was reframed as Existing / Proposed Pole Proximity QA while keeping reviewed override behaviour.
+- The map now draws basic connected Design Chain spans from `sequenced_route.json`.
+- Span distances are available through hover/click detail without permanent label clutter on dense routes.
+- The PDF front-facing issue list is now a structured `Design Review Items` table with record reference, coordinates, status, issue, design consequence, and recommended action.
+- The technical appendix remains in the PDF for raw issue detail.
+
+Validation:
+
+- `pytest -v` — 289 passed.
+- `pre-commit run --all-files` — passed.
+- Browser smoke check confirmed the span overlay on Gordon `P007/F001`.
+- PDF route smoke check returned a valid PDF for `P007/F001`.
+
+Commits:
+
+- `72c1d35 Refocus D2D outputs as design chain`
+- `9e212a7 Improve design handoff map and PDF review`
+
+Next:
+
+- Review the updated map and PDF outputs against real Gordon/Bellsprings evidence before defining the next build.
+- Do not jump into Stage 4, photo upload, tablet capture, PoleCAD export, or DNO submission packs from this remediation work alone.
+
+---
+
 ### Practitioner-led full tool review — remediation phase defined
 
 A detailed practitioner-led review was completed using the Bellsprings real-life survey-to-design test.

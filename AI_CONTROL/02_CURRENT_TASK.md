@@ -53,19 +53,25 @@ Validation completed:
 
 ---
 
-## Next task
+## Current task
 
-Proceed to **practitioner-review remediation** before any Stage 4 build.
+The first practitioner-review remediation pass is implemented and validated.
 
-Immediate development order:
+Completed remediation:
 
 1. Terminology and wording pass across UI/export/PDF surfaces.
 2. Rename/refocus D2D outputs:
-   - Clean Chain / route-chain output becomes Design Chain / Master Design Chain.
-   - D2D Working View becomes secondary Raw Working Audit / Legacy Working View.
-3. Reframe EX/PR pairing as Existing / Proposed Pole Proximity QA. Do not delete reviewed override logic until dependencies and export behaviour are inspected.
+   - Clean Chain / route-chain output became Design Chain / Master Design Chain.
+   - D2D Working View became secondary Raw Working Audit.
+3. Reframe EX/PR pairing as Existing / Proposed Pole Proximity QA without deleting reviewed override logic.
 4. Add basic map span rendering between sequenced design-chain poles.
-5. Improve PDF findings into a structured issue/action table with coordinates.
+5. Improve PDF findings into a structured issue/action table with coordinates, status, design consequence, and recommended action.
+
+Next useful step:
+
+- Review the remediation build against real Gordon/Bellsprings outputs in the browser and generated PDF.
+- If the user wants external review, give Claude Desktop the latest commit and ask for a narrow product/UX review of the remediation result.
+- Do not begin Stage 4 or PoleCAD export until this remediation pass has been reviewed against real outputs.
 
 Stage 3 proved:
 
