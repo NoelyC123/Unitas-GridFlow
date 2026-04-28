@@ -124,13 +124,14 @@ class MapViewer {
 
       const status = (props.qa_status || 'PASS').toUpperCase();
       const color = this.getMarkerColor(status);
+      const markerStyle = this.getMarkerStyle(status);
 
       const marker = L.circleMarker([lat, lon], {
-        radius: 7,
-        color: '#ffffff',
-        weight: 2,
+        radius: markerStyle.radius,
+        color: markerStyle.stroke,
+        weight: markerStyle.weight,
         fillColor: color,
-        fillOpacity: 0.9,
+        fillOpacity: markerStyle.fillOpacity,
       });
 
       const locName = props.name && props.name !== props.id ? props.name : null;
@@ -241,9 +242,11 @@ class MapViewer {
       }
 
       const line = L.polyline([from, to], {
-        color: '#2563eb',
-        weight: 4,
-        opacity: 0.82,
+        color: '#1d4ed8',
+        weight: 5,
+        opacity: 0.88,
+        lineCap: 'round',
+        lineJoin: 'round',
       });
 
       const label = this.spanLabel(span);
@@ -404,6 +407,16 @@ class MapViewer {
     if (status === 'FAIL') return '#d94141';
     if (status === 'WARN') return '#d39e00';
     return '#2e8b57';
+  }
+
+  getMarkerStyle(status) {
+    if (status === 'FAIL') {
+      return { radius: 7, stroke: '#ffffff', weight: 2, fillOpacity: 0.92 };
+    }
+    if (status === 'WARN') {
+      return { radius: 6.5, stroke: '#ffffff', weight: 1.5, fillOpacity: 0.9 };
+    }
+    return { radius: 5, stroke: '#064e3b', weight: 0.7, fillOpacity: 0.78 };
   }
 
   statusBadge(status) {
