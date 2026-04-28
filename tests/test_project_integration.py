@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from app import create_app
-from app.routes import api_jobs, api_projects, d2d_export, map_preview, pdf_reports
+from app.routes import api_jobs, api_projects, api_review, d2d_export, map_preview, pdf_reports
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -84,6 +84,7 @@ def client_and_root(tmp_path, monkeypatch):
     projects_root.mkdir()
 
     monkeypatch.setattr(api_projects, "_PROJECTS_ROOT", projects_root)
+    monkeypatch.setattr(api_review, "_PROJECTS_ROOT", projects_root)
     monkeypatch.setattr(map_preview, "PROJECTS_ROOT", projects_root)
     monkeypatch.setattr(pdf_reports, "PROJECTS_ROOT", projects_root)
     monkeypatch.setattr(d2d_export, "_PROJECTS_ROOT", projects_root)
@@ -296,6 +297,23 @@ def test_update_project_file_intake_feedback(client_and_root):
     )
 
 
+def test_review_save_refreshes_project_dashboard_status(client_and_root):
+    client, projects_root = client_and_root
+
+    _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+
+    response = client.post(
+        "/api/project/P001/file/F001/review",
+        json={"review_status": "reviewed", "review_notes": "Checked.", "pairing_overrides": []},
+    )
+
+    assert response.status_code == 200
+    project = json.loads((projects_root / "P001" / "project.json").read_text())
+    file_entry = project["files"][0]
+    assert file_entry["review_status"] == "reviewed"
+    assert file_entry["intake_status"] == "reviewed"
+
+
 # ---------------------------------------------------------------------------
 # test_legacy_jobs_route_still_works
 # ---------------------------------------------------------------------------
@@ -432,6 +450,8 @@ def test_project_detail_includes_mobile_file_card_layout(client_and_root):
     assert "mobile-file-card" in html
     assert "mobile-action-grid" in html
     assert "Raw Audit" in html
+    assert "Designer Review" in html
+    assert "review-pill" in html
 
 
 # ---------------------------------------------------------------------------

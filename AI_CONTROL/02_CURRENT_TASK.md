@@ -69,6 +69,7 @@ Completed remediation:
 6. Add first-pass evidence-quality visibility to Design Chain and Raw Working Audit CSV exports.
 7. Add map Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
 8. Add project designer review status to PDF reports.
+9. Show designer review status on project dashboard desktop rows and mobile file cards.
 
 Next useful step:
 

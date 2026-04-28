@@ -5,6 +5,7 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 
+from app.project_manager import refresh_project_summary
 from app.review_manager import (
     build_review,
     delete_review,
@@ -71,6 +72,7 @@ def save_review_route(project_id: str, file_id: str):
         existing_review=existing,
     )
     save_review(fd, review)
+    refresh_project_summary(_PROJECTS_ROOT, project_id)
     return jsonify({"ok": True, "review_status": review_status})
 
 
@@ -80,4 +82,5 @@ def reset_review(project_id: str, file_id: str):
     if not fd.exists():
         return jsonify({"ok": False, "error": "File slot not found"}), 404
     deleted = delete_review(fd)
+    refresh_project_summary(_PROJECTS_ROOT, project_id)
     return jsonify({"ok": True, "deleted": deleted})

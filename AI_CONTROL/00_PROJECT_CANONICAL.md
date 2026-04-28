@@ -70,11 +70,11 @@ The tool currently:
 - Produces a Raw Working Audit export (`<job_id>_raw_working_audit.csv`) for file-order traceability with evidence-quality visibility
 - Handles detached / not-required records
 - Produces section-aware output and global provisional design pole numbering
-- Supports named projects, project file intake metadata, designer review, reviewed/provisional exports, and controlled remote mobile access
+- Supports named projects, project file intake metadata, visible designer review status, reviewed/provisional exports, and controlled remote mobile access
 - Provides a repeatable validation evidence-pack utility for raw input, generated outputs, review state, screenshots, notes, and AI review prompts
 - Classifies real-world route context / crossing records such as `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` as context rather than structural poles
 - Maintains a repo-safe domain reference summary for evidence-quality, D2D-elimination, PoleCAD-readiness, and future structured-capture decisions
-- 295 passing tests, active CI
+- 296 passing tests, active CI
 
 Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw Gordon data, manual PR1/PR2 split evidence, a protected iPhone/mobile Gordon field-trial run, and a Bellsprings before/after package with real pole schedule, route map, profile, and technical information sheet.
 

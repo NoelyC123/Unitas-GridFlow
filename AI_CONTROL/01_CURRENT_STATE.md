@@ -57,7 +57,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 - **Stage 3B: review.json overlay per project file**
 - **Stage 3B: per-file designer review page**
 - **Stage 3B: EXpole pairing reassignment / mark unmatched**
-- **Stage 3B: designer reviewed/not-reviewed flag with notes**
+- **Stage 3B: designer reviewed/not-reviewed flag with notes and project-dashboard status visibility**
 - **Stage 3B: D2D Chain and D2D Working exports apply reviewed pairing overrides**
 - **Stage 3B: reviewed/provisional export headers**
 - **Stage 3B: reset to auto-generated deletes review.json; original seq unchanged**
@@ -79,7 +79,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 
 ## Counts
 
-- **Tests passing:** 295
+- **Tests passing:** 296
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
 
@@ -92,8 +92,9 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
   - The map now includes Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
   - PDF Design Review Items now use a structured table with record reference, coordinates, status, issue, design consequence, and recommended action.
   - Project PDFs now show Designer Review Status from `review.json`, including review notes and pairing override count.
+  - Project dashboard file rows and mobile cards now show Designer Review status and refresh it when review state changes.
   - Design Chain and Raw Working Audit CSVs now expose position, height, notes, replacement, and evidence-gap status derived from the existing sequence output.
-  - Validation: `pytest -v` — 295 passed; `pre-commit run --all-files` — passed.
+  - Validation: `pytest -v` — 296 passed; `pre-commit run --all-files` — passed.
 
 - Practitioner-led full tool review
   - Five local-only review documents were created from the Bellsprings real-life survey-to-design test, including practitioner and colleague feedback.

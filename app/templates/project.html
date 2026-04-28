@@ -32,6 +32,9 @@
     .intake-reviewed { background: #e8f7ee; color: #1d7f49; }
     .intake-needs_review, .intake-needs_attention { background: #fff7ed; color: #c2410c; }
     .intake-copy { font-size: 0.78rem; color: #6b7280; line-height: 1.35; max-width: 240px; }
+    .review-pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
+    .review-reviewed { background: #e8f7ee; color: #1d7f49; }
+    .review-not-reviewed { background: #fffbeb; color: #92400e; }
     .feedback-box { min-width: 220px; font-size: 0.82rem; }
     .rulepack-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #4fc3e8; color: #fff; font-size: 0.78rem; font-weight: 700; }
     .pwf-counts { font-size: 0.82rem; color: #374151; line-height: 1.5; }
@@ -112,6 +115,7 @@
                 <th>File</th>
                 <th>Intake</th>
                 <th>Status</th>
+                <th>Designer Review</th>
                 <th>Rulepack</th>
                 <th>Poles</th>
                 <th class="desktop-only">P/W/F</th>
@@ -119,7 +123,7 @@
               </tr>
             </thead>
             <tbody id="files-tbody">
-              <tr><td colspan="7" class="empty-state">Loading files…</td></tr>
+              <tr><td colspan="8" class="empty-state">Loading files…</td></tr>
             </tbody>
           </table>
         </div>
@@ -157,6 +161,22 @@
       if (s === "reviewed") return "intake-reviewed";
       if (s === "needs_review" || s === "needs_attention") return `intake-${s}`;
       return "";
+    }
+
+    function reviewLabel(status) {
+      return String(status || "not_reviewed").toLowerCase() === "reviewed"
+        ? "Designer reviewed"
+        : "Provisional";
+    }
+
+    function reviewClass(status) {
+      return String(status || "not_reviewed").toLowerCase() === "reviewed"
+        ? "review-reviewed"
+        : "review-not-reviewed";
+    }
+
+    function reviewPill(status) {
+      return `<span class="review-pill ${reviewClass(status)}">${escapeHtml(reviewLabel(status))}</span>`;
     }
 
     function buildFileActions(pid, fid, status, seqSummary) {
@@ -213,7 +233,7 @@
       const countLabel = document.getElementById("file-count-label");
 
       if (!Array.isArray(files) || files.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
           No files yet. <a href="/upload?project_id=${escapeHtml(PROJECT_ID)}">Add a survey file</a> to get started.
         </td></tr>`;
         if (mobileList) mobileList.innerHTML = `<div class="empty-state">
@@ -232,6 +252,7 @@
         const rulepack = escapeHtml(f.rulepack_id || "—");
         const intake = f.intake || {};
         const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
+        const reviewStatus = f.review_status || "not_reviewed";
         const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
         const uploadedBy = escapeHtml(intake.uploaded_by || "");
         const surveyorNote = escapeHtml(intake.surveyor_note || "");
@@ -257,6 +278,7 @@
               </div>
             </td>
             <td><span class="status-pill ${statusClass(status)}">${escapeHtml(status)}</span></td>
+            <td>${reviewPill(reviewStatus)}</td>
             <td><span class="rulepack-badge">${rulepack}</span></td>
             <td><strong>${poles}</strong></td>
             <td class="desktop-only"><div class="pwf-counts">
@@ -276,6 +298,7 @@
         const rulepack = escapeHtml(f.rulepack_id || "—");
         const intake = f.intake || {};
         const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
+        const reviewStatus = f.review_status || "not_reviewed";
         const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
         const uploadedBy = escapeHtml(intake.uploaded_by || "");
         const surveyorNote = escapeHtml(intake.surveyor_note || "");
@@ -297,6 +320,7 @@
             </div>
             <div class="mb-2">
               <span class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</span>
+              ${reviewPill(reviewStatus)}
               <span class="rulepack-badge ms-1">${rulepack}</span>
             </div>
             <div class="mobile-file-meta">
@@ -353,7 +377,7 @@
         console.error(err);
         if (errorBox) { errorBox.textContent = err.message || String(err); errorBox.style.display = "block"; }
         const tbody = document.getElementById("files-tbody");
-        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Could not load project.</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Could not load project.</td></tr>`;
       }
     }
 

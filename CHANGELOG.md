@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-28 — Show Designer Review Status On Project Dashboard
+
+### Added
+
+- Added explicit Designer Review status pills to the project dashboard desktop table and mobile file cards.
+- Added project summary refresh when designer review is saved or reset, so dashboard review status updates immediately.
+- Added regression coverage for review-save project summary refresh and dashboard review-status rendering.
+
+### Validated
+
+- `pytest -v` — 296 passed.
+- `pre-commit run --all-files` — passed.
+- Real project dashboard smoke checks confirmed Gordon `P007/F001` shows reviewed and Bellsprings `P008/F001` shows needs review.
+
+---
+
 ## 2026-04-28 — Add Designer Review Status To Project PDFs
 
 ### Added
