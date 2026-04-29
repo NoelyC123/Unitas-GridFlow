@@ -44,6 +44,11 @@ Commits:
 - `ce6f455 Add designer review status to project PDFs`
 - `8796e13 Show designer review status on project dashboard`
 
+Additional context captured 2026-04-29:
+
+- `AI_CONTROL/30_FOUNDER_DOMAIN_AND_AI_USAGE_CONTEXT.md` records the founder's repo-safe context on SaaS clarification, AI tooling cost control, telecoms Field Maps experience, OHL/design background, knowledge-capture needs, and iPad trial idea.
+- Use that note before broad Stage 4, AI-feature, SaaS, or commercial-model discussion.
+
 Next:
 
 - The remediation build has now been reviewed against real Gordon/Bellsprings outputs at route level.

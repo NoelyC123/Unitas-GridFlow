@@ -70,10 +70,12 @@ Completed remediation:
 7. Add map Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
 8. Add project designer review status to PDF reports.
 9. Show designer review status on project dashboard desktop rows and mobile file cards.
+10. Capture founder domain/AI-usage context in `AI_CONTROL/30_FOUNDER_DOMAIN_AND_AI_USAGE_CONTEXT.md`.
 
 Next useful step:
 
 - The remediation build has now passed route-level closure smoke checks against real Gordon/Bellsprings project outputs: dashboard/API, review page, map page/data, PDF, Design Chain, and Raw Working Audit.
+- Before asking for broad Stage 4, AI-feature, SaaS, or commercial review, use `AI_CONTROL/30_FOUNDER_DOMAIN_AND_AI_USAGE_CONTEXT.md` as the boundary note.
 - If the user wants external review, give Claude Desktop the latest commits and ask for a narrow product/UX review of the remediation result.
 - Otherwise, the next useful validation step is operational use on the next real job.
 - Do not begin Stage 4 or PoleCAD export until this remediation pass has been reviewed against real outputs.
