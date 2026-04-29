@@ -449,7 +449,8 @@ def test_project_detail_includes_mobile_file_card_layout(client_and_root):
     assert "files-mobile-list" in html
     assert "mobile-file-card" in html
     assert "mobile-action-grid" in html
-    assert "Raw Audit" in html
+    assert "Working View" in html
+    assert "Suggested order: Review" in html
     assert "Designer Review" in html
     assert "review-pill" in html
 

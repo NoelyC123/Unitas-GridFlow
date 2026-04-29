@@ -49,10 +49,18 @@ Additional context captured 2026-04-29:
 - `AI_CONTROL/30_FOUNDER_DOMAIN_AND_AI_USAGE_CONTEXT.md` records the founder's repo-safe context on SaaS clarification, AI tooling cost control, telecoms Field Maps experience, OHL/design background, knowledge-capture needs, and iPad trial idea.
 - Use that note before broad Stage 4, AI-feature, SaaS, or commercial-model discussion.
 
+Claude Desktop product/UX review fixes applied 2026-04-29:
+
+- Renamed the dashboard `Raw Audit` action to `Working View`.
+- Added `Suggested order: Review → Map → PDF → Export` guidance on completed-file actions.
+- Reworded review-page sign-off labels around existing/proposed pole pairings and export readiness.
+- Added a review-page subtitle explaining that pairings should be confirmed before Design Chain export.
+- Reframed homepage copy away from internal build status toward the actual survey-to-design workflow.
+
 Next:
 
 - The remediation build has now been reviewed against real Gordon/Bellsprings outputs at route level.
-- The next useful step is either a narrow Claude Desktop product/UX review of the latest remediation result or operational use on the next real job.
+- The next useful step is operational use on the next real job.
 - Do not jump into Stage 4, photo upload, tablet capture, PoleCAD export, or DNO submission packs from this remediation work alone.
 
 ---

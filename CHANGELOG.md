@@ -8,6 +8,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-29 — Polish Remediation UX Wording
+
+### Changed
+
+- Renamed the dashboard secondary export action from `Raw Audit` to `Working View`.
+- Added dashboard workflow guidance: `Suggested order: Review → Map → PDF → Export`.
+- Reworded review-page sign-off labels around existing/proposed pole pairings and export readiness.
+- Reframed homepage copy as a survey-to-design workflow rather than an internal capability/build note.
+
+### Validated
+
+- `pytest -v` — 296 passed.
+
+---
+
 ## 2026-04-28 — Show Designer Review Status On Project Dashboard
 
 ### Added
