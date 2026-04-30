@@ -8,6 +8,24 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — P010 Dashboard Clarity Polish
+
+### Changed
+
+- Reframed the project dashboard summary as processing status, survey records, QA findings, and active rulepack.
+- Expanded record-level `Pass / Warning / Fail` wording and clarified that processing complete is not final design approval.
+- Improved survey-file card/action layout so Review, Map, PDF, Design Chain, and Working View actions remain visible without cramped horizontal scrolling.
+- Clarified `Office feedback / intake note` and the suggested review workflow order.
+
+### Validated
+
+- `pytest -v tests/test_project_integration.py` — 16 passed.
+- `pytest -v` — 297 passed.
+- `pre-commit run --all-files` — passed.
+- Browser smoke check confirmed `/project/P010` renders the updated dashboard for `P010/F001`.
+
+---
+
 ## 2026-04-30 — Clarify Review Page Pairing Summary
 
 ### Added

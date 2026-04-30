@@ -10,15 +10,17 @@
 
   <style>
     body { background: #f5f7fb; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .page-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 40px; }
+    .page-wrap { max-width: 1440px; margin: 0 auto; padding: 24px 18px 40px; }
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
     .page-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; color: #111827; }
     .page-sub { color: #6b7280; margin-top: 4px; font-size: 0.95rem; }
     .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
-    .summary-bar { display: flex; gap: 24px; flex-wrap: wrap; padding: 16px 20px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(15,23,42,0.07); margin-bottom: 20px; }
-    .summary-item { text-align: center; }
-    .summary-value { font-size: 1.8rem; font-weight: 700; color: #111827; line-height: 1; }
-    .summary-label { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
+    .summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; padding: 16px; background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(15,23,42,0.07); margin-bottom: 12px; }
+    .summary-item { text-align: left; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 14px; background: #f9fafb; }
+    .summary-value { font-size: 1.45rem; font-weight: 800; color: #111827; line-height: 1.15; }
+    .summary-label { font-size: 0.78rem; color: #6b7280; margin-top: 4px; }
+    .summary-helper { font-size: 0.74rem; color: #6b7280; margin-top: 5px; line-height: 1.35; }
+    .readiness-note { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; margin-bottom: 18px; }
     .files-card { border: 0; border-radius: 16px; box-shadow: 0 10px 28px rgba(15,23,42,0.08); overflow: hidden; margin-bottom: 20px; }
     .table thead th { white-space: nowrap; vertical-align: middle; }
     .table tbody td { vertical-align: middle; }
@@ -36,9 +38,12 @@
     .review-reviewed { background: #e8f7ee; color: #1d7f49; }
     .review-not-reviewed { background: #fffbeb; color: #92400e; }
     .feedback-box { min-width: 220px; font-size: 0.82rem; }
+    .feedback-label { font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-top: 8px; }
+    .feedback-helper { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
     .rulepack-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #4fc3e8; color: #fff; font-size: 0.78rem; font-weight: 700; }
-    .pwf-counts { font-size: 0.82rem; color: #374151; line-height: 1.5; }
-    .actions-cell { white-space: nowrap; }
+    .qa-status-counts { font-size: 0.82rem; color: #374151; line-height: 1.5; min-width: 160px; }
+    .qa-status-helper { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
+    .actions-cell { white-space: normal; display: flex; flex-wrap: wrap; gap: 5px; min-width: 310px; }
     .actions-cell .btn { margin-right: 4px; margin-bottom: 4px; }
     .workflow-note { font-size: 0.74rem; color: #6b7280; margin-top: 2px; white-space: normal; }
     .mobile-file-list { display: none; }
@@ -53,8 +58,7 @@
     @media (max-width: 767.98px) {
       .files-table-wrap { display: none; }
       .mobile-file-list { display: block; }
-      .summary-bar { gap: 16px; justify-content: space-between; }
-      .summary-item { min-width: 72px; }
+      .summary-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .feedback-box { min-width: 0; width: 100%; }
     }
   </style>
@@ -86,21 +90,26 @@
 
     <div class="summary-bar" id="summary-bar" style="display:none;">
       <div class="summary-item">
-        <div class="summary-value" id="sum-files">0</div>
-        <div class="summary-label">Files</div>
+        <div class="summary-value" id="sum-processing">Loading…</div>
+        <div class="summary-label">Processing status</div>
+        <div class="summary-helper">Complete means GridFlow has processed the file. Designer review may still be needed.</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value" id="sum-poles">0</div>
-        <div class="summary-label">Poles</div>
+        <div class="summary-value" id="sum-records">0</div>
+        <div class="summary-label">Survey records</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value" id="sum-issues">0</div>
-        <div class="summary-label">Issues</div>
+        <div class="summary-value" id="sum-findings">0</div>
+        <div class="summary-label">QA findings</div>
+        <div class="summary-helper" id="sum-findings-helper">Warnings and fails are record-level review signals.</div>
       </div>
       <div class="summary-item" id="sum-rulepacks-wrap" style="display:none;">
         <div id="sum-rulepacks"></div>
-        <div class="summary-label">Rulepacks</div>
+        <div class="summary-label">Active rulepack</div>
       </div>
+    </div>
+    <div class="readiness-note" id="readiness-note" style="display:none;">
+      GridFlow has processed this file. Survey output remains provisional until office review confirms the design handoff evidence.
     </div>
 
     <div class="card files-card">
@@ -115,11 +124,11 @@
               <tr>
                 <th>File</th>
                 <th>Intake</th>
-                <th>Status</th>
+                <th>Processing Status</th>
                 <th>Designer Review</th>
                 <th>Rulepack</th>
-                <th>Poles</th>
-                <th class="desktop-only">P/W/F</th>
+                <th>Survey Records</th>
+                <th class="desktop-only">Pass / Warning / Fail</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -146,6 +155,16 @@
       return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
     }
 
+    function displayRulepack(rulepack) {
+      return String(rulepack || "—").replaceAll("_", " ");
+    }
+
+    function processingLabel(status) {
+      const s = String(status || "unknown").toLowerCase();
+      if (s === "complete") return "Processing complete";
+      return String(status || "unknown").replaceAll("_", " ");
+    }
+
     function statusClass(status) {
       const s = String(status || "").toLowerCase();
       if (s === "complete") return "status-complete";
@@ -155,6 +174,17 @@
 
     function intakeLabel(status) {
       return String(status || "pending").replaceAll("_", " ");
+    }
+
+    function intakeHelper(status) {
+      const s = String(status || "").toLowerCase();
+      if (s === "needs_review" || s === "needs_attention") {
+        return "Raw survey intake requires office review before final design use.";
+      }
+      if (s === "reviewed") {
+        return "Office intake review has been recorded.";
+      }
+      return "Office review status for this survey file.";
     }
 
     function intakeClass(status) {
@@ -202,7 +232,7 @@
             <i class="bi bi-layout-text-sidebar"></i> Working View</a>`
         : "";
       const workflowNote = hasSeq
-        ? `<div class="workflow-note">Suggested order: Review → Map → PDF → Export</div>`
+        ? `<div class="workflow-note w-100">Suggested order: Review issues → Check map → Review PDF → Export CSVs</div>`
         : "";
       return `<div class="actions-cell">${reviewBtn}${mapBtn}${pdfBtn}${chainBtn}${workingBtn}${workflowNote}</div>`;
     }
@@ -229,7 +259,7 @@
             <i class="bi bi-layout-text-sidebar"></i> Working View</a>`
         : "";
       const workflowNote = hasSeq
-        ? `<div class="workflow-note">Suggested order: Review → Map → PDF → Export</div>`
+        ? `<div class="workflow-note">Suggested order: Review issues → Check map → Review PDF → Export CSVs</div>`
         : "";
       return `<div class="mobile-action-grid">${mapBtn}${reviewBtn}${pdfBtn}${chainBtn}${workingBtn}</div>${workflowNote}`;
     }
@@ -256,15 +286,16 @@
         const fid = escapeHtml(f.file_id || "");
         const fname = escapeHtml(f.filename || f.file_id || "");
         const status = String(f.status || "unknown");
-        const rulepack = escapeHtml(f.rulepack_id || "—");
+        const rulepack = escapeHtml(displayRulepack(f.rulepack_id));
         const intake = f.intake || {};
         const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
+        const intakeHelp = escapeHtml(intakeHelper(f.intake_status));
         const reviewStatus = f.review_status || "not_reviewed";
         const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
         const uploadedBy = escapeHtml(intake.uploaded_by || "");
         const surveyorNote = escapeHtml(intake.surveyor_note || "");
         const officeFeedback = escapeHtml(intake.office_feedback || "");
-        const poles = f.pole_count ?? "—";
+        const records = f.pole_count ?? "—";
         const pass = f.pass_count ?? 0;
         const warn = f.warn_count ?? 0;
         const fail = f.fail_count ?? 0;
@@ -277,21 +308,28 @@
             </td>
             <td>
               <div class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</div>
+              <div class="intake-copy">${intakeHelp}</div>
               <div class="intake-copy"><strong>${surveyDay}</strong>${uploadedBy ? ` · ${uploadedBy}` : ""}</div>
               ${surveyorNote ? `<div class="intake-copy mt-1">${surveyorNote}</div>` : ""}
+              <div class="feedback-label">Office feedback / intake note</div>
+              <div class="feedback-helper">Use this for office feedback, resurvey prompts, or intake notes for this file.</div>
               <div class="input-group input-group-sm mt-2 feedback-box">
-                <textarea class="form-control" id="feedback-${fid}" rows="2" placeholder="Office feedback for surveyor">${officeFeedback}</textarea>
+                <textarea class="form-control" id="feedback-${fid}" rows="2" placeholder="Office feedback / intake note">${officeFeedback}</textarea>
                 <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}')">Save</button>
               </div>
             </td>
-            <td><span class="status-pill ${statusClass(status)}">${escapeHtml(status)}</span></td>
+            <td>
+              <span class="status-pill ${statusClass(status)}">${escapeHtml(processingLabel(status))}</span>
+              <div class="qa-status-helper">Processing status only, not final design approval.</div>
+            </td>
             <td>${reviewPill(reviewStatus)}</td>
             <td><span class="rulepack-badge">${rulepack}</span></td>
-            <td><strong>${poles}</strong></td>
-            <td class="desktop-only"><div class="pwf-counts">
-              <span style="color:#2e8b57;">${pass} P</span> /
-              <span style="color:#d39e00;">${warn} W</span> /
-              <span style="color:#d94141;">${fail} F</span>
+            <td><strong>${records}</strong></td>
+            <td class="desktop-only"><div class="qa-status-counts">
+              <div><span style="color:#2e8b57;font-weight:700;">${pass} Pass</span></div>
+              <div><span style="color:#d39e00;font-weight:700;">${warn} Warning</span></div>
+              <div><span style="color:#d94141;font-weight:700;">${fail} Fail</span></div>
+              <div class="qa-status-helper">Record-level QA status</div>
             </div></td>
             <td>${buildFileActions(escapeHtml(PROJECT_ID), fid, status, f.sequence_summary)}</td>
           </tr>
@@ -302,15 +340,16 @@
         const fid = escapeHtml(f.file_id || "");
         const fname = escapeHtml(f.filename || f.file_id || "");
         const status = String(f.status || "unknown");
-        const rulepack = escapeHtml(f.rulepack_id || "—");
+        const rulepack = escapeHtml(displayRulepack(f.rulepack_id));
         const intake = f.intake || {};
         const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
+        const intakeHelp = escapeHtml(intakeHelper(f.intake_status));
         const reviewStatus = f.review_status || "not_reviewed";
         const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
         const uploadedBy = escapeHtml(intake.uploaded_by || "");
         const surveyorNote = escapeHtml(intake.surveyor_note || "");
         const officeFeedback = escapeHtml(intake.office_feedback || "");
-        const poles = f.pole_count ?? "—";
+        const records = f.pole_count ?? "—";
         const issues = f.issue_count ?? 0;
         const pass = f.pass_count ?? 0;
         const warn = f.warn_count ?? 0;
@@ -323,7 +362,7 @@
                 <div class="file-name">${fname}</div>
                 <div class="file-id-label">${fid}</div>
               </div>
-              <span class="status-pill ${statusClass(status)}">${escapeHtml(status)}</span>
+              <span class="status-pill ${statusClass(status)}">${escapeHtml(processingLabel(status))}</span>
             </div>
             <div class="mb-2">
               <span class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</span>
@@ -331,13 +370,17 @@
               <span class="rulepack-badge ms-1">${rulepack}</span>
             </div>
             <div class="mobile-file-meta">
-              <div><strong>${poles}</strong> records · <strong>${issues}</strong> issues · P/W/F ${pass}/${warn}/${fail}</div>
+              <div>${intakeHelp}</div>
+              <div><strong>${records}</strong> survey records · <strong>${issues}</strong> QA findings</div>
+              <div>Record status: <span style="color:#2e8b57;">${pass} Pass</span> / <span style="color:#d39e00;">${warn} Warning</span> / <span style="color:#d94141;">${fail} Fail</span></div>
               <div><strong>${surveyDay}</strong>${uploadedBy ? ` · ${uploadedBy}` : ""}</div>
               ${surveyorNote ? `<div>${surveyorNote}</div>` : ""}
             </div>
             ${buildMobileFileActions(escapeHtml(PROJECT_ID), fid, status, f.sequence_summary)}
+            <div class="feedback-label">Office feedback / intake note</div>
+            <div class="feedback-helper">Use this for office feedback, resurvey prompts, or intake notes for this file.</div>
             <div class="input-group input-group-sm mt-3 feedback-box">
-              <textarea class="form-control" id="feedback-mobile-${fid}" rows="2" placeholder="Office feedback for surveyor">${officeFeedback}</textarea>
+              <textarea class="form-control" id="feedback-mobile-${fid}" rows="2" placeholder="Office feedback / intake note">${officeFeedback}</textarea>
               <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}', 'feedback-mobile-${fid}')">Save</button>
             </div>
           </div>
@@ -348,21 +391,35 @@
       if (mobileList) mobileList.innerHTML = cards;
     }
 
-    function renderSummary(summary) {
+    function renderSummary(summary, files) {
       const bar = document.getElementById("summary-bar");
       if (!summary || !bar) return;
-      document.getElementById("sum-files").textContent = summary.total_files ?? 0;
-      document.getElementById("sum-poles").textContent = summary.total_poles ?? 0;
-      document.getElementById("sum-issues").textContent = summary.total_issues ?? 0;
+      const projectFiles = Array.isArray(files) ? files : [];
+      const completeFiles = projectFiles.filter(f => String(f.status || "").toLowerCase() === "complete").length;
+      const totalFiles = summary.total_files ?? projectFiles.length;
+      const totalWarn = projectFiles.reduce((sum, f) => sum + Number(f.warn_count || 0), 0);
+      const totalFail = projectFiles.reduce((sum, f) => sum + Number(f.fail_count || 0), 0);
+      const processingText = totalFiles > 0 && completeFiles === totalFiles
+        ? "Processing complete"
+        : `${completeFiles}/${totalFiles} processed`;
+      document.getElementById("sum-processing").textContent = processingText;
+      document.getElementById("sum-records").textContent = summary.total_poles ?? 0;
+      document.getElementById("sum-findings").textContent = summary.total_issues ?? 0;
+      const findingsHelper = document.getElementById("sum-findings-helper");
+      if (findingsHelper) {
+        findingsHelper.textContent = `${totalWarn} warning${totalWarn !== 1 ? "s" : ""}, ${totalFail} fail${totalFail !== 1 ? "s" : ""}. Record-level QA status.`;
+      }
       const rulepacks = summary.rulepacks_used || [];
       if (rulepacks.length) {
         const wrap = document.getElementById("sum-rulepacks-wrap");
         document.getElementById("sum-rulepacks").innerHTML = rulepacks
-          .map(r => `<span class="rulepack-badge" style="margin:1px;">${escapeHtml(r)}</span>`)
+          .map(r => `<span class="rulepack-badge" style="margin:1px;">${escapeHtml(displayRulepack(r))}</span>`)
           .join(" ");
         if (wrap) wrap.style.display = "";
       }
       bar.style.display = "";
+      const readinessNote = document.getElementById("readiness-note");
+      if (readinessNote) readinessNote.style.display = totalFiles > 0 ? "" : "none";
     }
 
     async function loadProject() {
@@ -378,7 +435,7 @@
         if (titleEl) titleEl.textContent = project.name || project.project_id;
         if (descEl) descEl.textContent = project.description || "";
 
-        renderSummary(project.summary);
+        renderSummary(project.summary, project.files || []);
         renderFiles(project.files || []);
       } catch (err) {
         console.error(err);

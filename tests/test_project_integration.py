@@ -450,9 +450,17 @@ def test_project_detail_includes_mobile_file_card_layout(client_and_root):
     assert "mobile-file-card" in html
     assert "mobile-action-grid" in html
     assert "Working View" in html
-    assert "Suggested order: Review" in html
+    assert "Suggested order: Review issues" in html
     assert "Designer Review" in html
     assert "review-pill" in html
+    assert "Processing Status" in html
+    assert "Survey Records" in html
+    assert "Pass / Warning / Fail" in html
+    assert "Record-level QA status" in html
+    assert "Active rulepack" in html
+    assert "Office feedback / intake note" in html
+    assert "Survey output remains provisional" in html
+    assert "Complete means GridFlow has processed the file" in html
 
 
 # ---------------------------------------------------------------------------
