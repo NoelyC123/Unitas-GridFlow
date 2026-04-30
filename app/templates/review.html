@@ -22,6 +22,16 @@
     .table tbody td { font-size: 0.88rem; vertical-align: middle; }
     .remark-cell { font-size: 0.8rem; color: #6b7280; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dist-cell { font-size: 0.82rem; color: #374151; }
+    .pairing-card-list { display: grid; gap: 12px; }
+    .pairing-card { border: 1px solid #e5e7eb; border-radius: 14px; background: #f9fafb; padding: 14px; }
+    .pairing-card-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 1.2fr); gap: 14px; align-items: start; }
+    .pairing-card-title { font-weight: 800; color: #111827; margin-bottom: 3px; }
+    .pairing-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    .pairing-detail { border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; padding: 8px 10px; min-width: 0; }
+    .pairing-label { color: #6b7280; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+    .pairing-value { color: #111827; font-size: 0.88rem; margin-top: 2px; overflow-wrap: anywhere; }
+    .pairing-action-panel { border: 1px solid #dbeafe; border-radius: 12px; background: #fff; padding: 10px 12px; }
+    .pairing-action-panel .form-select { width: 100%; font-size: 0.86rem; }
     .review-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
     .review-summary-metric { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px 12px; background: #f9fafb; }
     .review-summary-value { font-size: 1.35rem; font-weight: 800; color: #111827; line-height: 1.1; }
@@ -32,7 +42,8 @@
       .page-header h1 { font-size: 1.25rem; }
       .section-card { padding: 18px 16px; border-radius: 12px; }
       .table thead th { font-size: 0.76rem; }
-      .pairing-select { min-width: 190px !important; }
+      .pairing-card-main { grid-template-columns: 1fr; }
+      .pairing-detail-grid { grid-template-columns: 1fr; }
       .remark-cell { max-width: 220px; white-space: normal; }
     }
   </style>
@@ -149,67 +160,70 @@
 
     {% set all_expoles = matched_expoles + unmatched_expoles %}
     {% if all_expoles %}
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0" id="pairings-table">
-        <thead>
-          <tr>
-            <th>Existing survey record</th>
-            <th>Existing pole type</th>
-            <th>Field remark</th>
-            <th>Likely proposed match</th>
-            <th>Separation distance (m)</th>
-            <th>Reviewer-confirmed relationship</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for ex in all_expoles %}
-          {% set ov = override_by_expole.get(ex.get("point_id")|string) %}
-          {% set current_match = ex.get("matched_to_proposed_id") %}
-          {% set reviewed_match = ov.get("reviewed_matched_to") if ov else current_match %}
-          <tr>
-            <td><strong>{{ ex.get("point_id") }}</strong></td>
-            <td><code style="font-size:0.82rem;">{{ ex.get("feature_code","") }}</code></td>
-            <td class="remark-cell" title="{{ ex.get('remark','') }}">{{ ex.get("remark","") or "—" }}</td>
-            <td class="dist-cell">
-              {% if current_match %}
-                {{ current_match }}
-                {% for p in proposed_poles %}{% if p.get("point_id")|string == current_match|string %}
-                  <span style="color:#6b7280;font-size:0.8rem;">({{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %})</span>
-                {% endif %}{% endfor %}
-              {% else %}
-                <span class="text-muted">Unmatched</span>
-              {% endif %}
-            </td>
-            <td class="dist-cell">{{ ex.get("distance_m","") or "—" }}</td>
-            <td>
-              <select class="form-select form-select-sm pairing-select"
-                      style="min-width:220px;font-size:0.83rem;"
-                      data-expole-id="{{ ex.get('point_id') }}"
-                      data-original-match="{{ current_match or '' }}">
-                <option value=""{% if not reviewed_match %} selected{% endif %}>No proposed replacement / unmatched</option>
-                {% if current_match %}
-                  {# Nearby proposed pole shown first #}
-                  {% for p in proposed_poles %}
-                  {% if p.get("point_id")|string == current_match|string %}
-                  <option value="{{ p.get('point_id') }}"{% if reviewed_match|string == p.get("point_id")|string %} selected{% endif %}>
-                    Confirm suggested match: {{ p.get("point_id") }} {{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %}{% if p.get("remark") %} — {{ p.get("remark") }}{% endif %}
-                  </option>
+    <div class="pairing-card-list" id="pairings-list" aria-label="Likely existing-to-proposed pole matches">
+      {% for ex in all_expoles %}
+      {% set ov = override_by_expole.get(ex.get("point_id")|string) %}
+      {% set current_match = ex.get("matched_to_proposed_id") %}
+      {% set reviewed_match = ov.get("reviewed_matched_to") if ov else current_match %}
+      <article class="pairing-card">
+        <div class="pairing-card-main">
+          <div>
+            <div class="pairing-label">Existing survey record</div>
+            <div class="pairing-card-title">{{ ex.get("point_id") }}</div>
+            <div style="color:#6b7280;font-size:0.84rem;">{{ ex.get("feature_code","") or "Existing pole" }}</div>
+            <div class="pairing-detail-grid">
+              <div class="pairing-detail">
+                <div class="pairing-label">Field remark</div>
+                <div class="pairing-value">{{ ex.get("remark","") or "—" }}</div>
+              </div>
+              <div class="pairing-detail">
+                <div class="pairing-label">Likely proposed match</div>
+                <div class="pairing-value">
+                  {% if current_match %}
+                    {{ current_match }}
+                    {% for p in proposed_poles %}{% if p.get("point_id")|string == current_match|string %}
+                      <span style="color:#6b7280;font-size:0.82rem;">({{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %})</span>
+                    {% endif %}{% endfor %}
+                  {% else %}
+                    <span class="text-muted">Unmatched</span>
                   {% endif %}
-                  {% endfor %}
-                {% endif %}
+                </div>
+              </div>
+              <div class="pairing-detail">
+                <div class="pairing-label">Separation distance (m)</div>
+                <div class="pairing-value">{{ ex.get("distance_m","") or "—" }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="pairing-action-panel">
+            <label class="pairing-label" for="pairing-{{ ex.get('point_id') }}">Reviewer-confirmed relationship</label>
+            <select class="form-select form-select-sm pairing-select mt-2"
+                    id="pairing-{{ ex.get('point_id') }}"
+                    data-expole-id="{{ ex.get('point_id') }}"
+                    data-original-match="{{ current_match or '' }}">
+              <option value=""{% if not reviewed_match %} selected{% endif %}>No proposed replacement / unmatched</option>
+              {% if current_match %}
+                {# Nearby proposed pole shown first #}
                 {% for p in proposed_poles %}
-                {% if p.get("point_id")|string != current_match|string %}
+                {% if p.get("point_id")|string == current_match|string %}
                 <option value="{{ p.get('point_id') }}"{% if reviewed_match|string == p.get("point_id")|string %} selected{% endif %}>
-                  Choose different proposed pole: {{ p.get("point_id") }} {{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %}{% if p.get("remark") %} — {{ p.get("remark") }}{% endif %}
+                  Confirm suggested match: {{ p.get("point_id") }} {{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %}{% if p.get("remark") %} — {{ p.get("remark") }}{% endif %}
                 </option>
                 {% endif %}
                 {% endfor %}
-              </select>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              {% endif %}
+              {% for p in proposed_poles %}
+              {% if p.get("point_id")|string != current_match|string %}
+              <option value="{{ p.get('point_id') }}"{% if reviewed_match|string == p.get("point_id")|string %} selected{% endif %}>
+                Choose different proposed pole: {{ p.get("point_id") }} {{ p.get("feature_code","") }}{% if p.get("design_pole_number") %} · {{ p.get("design_pole_number") }}{% endif %}{% if p.get("remark") %} — {{ p.get("remark") }}{% endif %}
+              </option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
     </div>
     {% else %}
       <p class="text-muted" style="font-size:0.9rem;">No existing pole proximity records in this file.</p>

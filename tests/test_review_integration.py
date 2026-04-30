@@ -217,9 +217,12 @@ def test_review_page_shows_review_summary_and_boundary_note(client_and_root):
     assert "Suggested matches are proximity signals only" in html
     assert "Existing/Proposed Pole Match Review" in html
     assert "Likely Existing-to-Proposed Pole Matches" in html
+    assert "pairing-card-list" in html
+    assert "pairing-card" in html
     assert "Do not confirm based on distance alone" in html
     assert "Field Maps attributes where available" in html
     assert "Reviewer-confirmed relationship" in html
+    assert "Separation distance (m)" in html
     assert "No proposed replacement / unmatched" in html
     assert "Confirm suggested match:" in html
     assert "Choose different proposed pole:" in html

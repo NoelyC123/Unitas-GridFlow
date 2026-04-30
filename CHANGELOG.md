@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — P010 Pairing Review Card Layout
+
+### Changed
+
+- Replaced the wide existing/proposed pairing table with responsive pairing cards so the reviewer action control no longer clips on tablet-width screens.
+- Kept the same pairing dropdown actions and save/reset behavior while making each card show the existing record, field remark, likely proposed match, distance, and reviewer-confirmed relationship.
+- Added test coverage for the pairing card layout and clarified field labels.
+
+### Validated
+
+- `pytest -v tests/test_review_integration.py` — 11 passed.
+- `pytest -v` — 298 passed.
+- Browser check confirmed `/review/project/P010/F001` renders pairing cards at tablet width and dropdown options can be changed/restored without saving.
+
+---
+
 ## 2026-04-30 — P010 Terminology Cleanup
 
 ### Changed
