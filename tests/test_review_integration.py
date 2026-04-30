@@ -210,7 +210,7 @@ def test_review_page_shows_review_summary_and_boundary_note(client_and_root):
     assert response.status_code == 200
     html = response.data.decode()
     assert "Review summary" in html
-    assert "Design Chain records" in html
+    assert "route sequence records" in html
     assert "auto-matched existing poles" in html
     assert "unmatched existing poles" in html
     assert "reviewed pairing changes" in html
@@ -227,7 +227,7 @@ def test_review_page_shows_review_summary_and_boundary_note(client_and_root):
     assert "Pairings reviewed" in html
     assert (
         "Final design handoff sign-off should happen only after Review, Map, "
-        "PDF, Design Chain, and Working View" in html
+        "PDF, Design Route Sequence, and Working View" in html
     )
     assert "Reset to automatic matches" in html
 
@@ -245,7 +245,7 @@ def test_export_header_reviewed(client_and_root):
     resp = client.get("/d2d/export/project/P001/F001")
     assert resp.status_code == 200
     csv_text = resp.data.decode()
-    assert "Design Chain Export" in csv_text.splitlines()[0]
+    assert "Design Route Sequence Export" in csv_text.splitlines()[0]
     assert "Designer Reviewed" in csv_text
     assert "provisional" not in csv_text.lower().split("\n")[0]
     assert "P001_F001_design_chain.csv" in resp.headers["Content-Disposition"]
@@ -260,7 +260,7 @@ def test_export_header_provisional(client_and_root):
     resp = client.get("/d2d/export/project/P001/F001")
     assert resp.status_code == 200
     csv_text = resp.data.decode()
-    assert "Design Chain Export" in csv_text.splitlines()[0]
+    assert "Design Route Sequence Export" in csv_text.splitlines()[0]
     assert "provisional" in csv_text.lower()
     assert "Designer Reviewed" not in csv_text
     assert "P001_F001_design_chain.csv" in resp.headers["Content-Disposition"]
@@ -290,7 +290,7 @@ def test_design_chain_export_includes_evidence_quality_columns(client_and_root):
     assert "replacement proximity inferred" in row["Evidence_Gaps"]
 
 
-# ── 6. Reviewed Design Chain export uses override ────────────────────────────
+# ── 6. Reviewed route-sequence export uses override ──────────────────────────
 
 
 def test_export_uses_override(client_and_root):
@@ -364,7 +364,7 @@ def test_exports_work_without_review(client_and_root):
     resp_chain = client.get("/d2d/export/project/P001/F001")
     assert resp_chain.status_code == 200
     assert b"Point_ID" in resp_chain.data
-    assert b"Design Chain Export" in resp_chain.data
+    assert b"Design Route Sequence Export" in resp_chain.data
     resp_interleaved = client.get("/d2d/interleaved/project/P001/F001")
     assert resp_interleaved.status_code == 200
     assert b"Point_ID" in resp_interleaved.data

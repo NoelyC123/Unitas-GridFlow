@@ -27,6 +27,14 @@
     .review-summary-value { font-size: 1.35rem; font-weight: 800; color: #111827; line-height: 1.1; }
     .review-summary-label { font-size: 0.78rem; color: #6b7280; margin-top: 3px; }
     .toast-area { position: fixed; bottom: 24px; right: 24px; z-index: 1060; }
+    @media (max-width: 767.98px) {
+      .page-wrap { padding: 18px 12px 40px; }
+      .page-header h1 { font-size: 1.25rem; }
+      .section-card { padding: 18px 16px; border-radius: 12px; }
+      .table thead th { font-size: 0.76rem; }
+      .pairing-select { min-width: 190px !important; }
+      .remark-cell { max-width: 220px; white-space: normal; }
+    }
   </style>
 </head>
 <body>
@@ -50,10 +58,10 @@
     </h1>
     <div style="font-size:0.88rem;color:#6b7280;margin-top:4px;">
       File ID: {{ file_id }}
-      {% if meta.get("rulepack_id") %} | Rulepack: {{ meta["rulepack_id"] }}{% endif %}
+      {% if meta.get("rulepack_id") %} | Applied QA Rules: {{ meta["rulepack_id"].replace("_", " ") }}{% endif %}
     </div>
     <div style="font-size:0.9rem;color:#4b5563;margin-top:8px;">
-      Review likely existing-to-proposed pole matches before using the Design Chain as a design handoff.
+      Review likely existing-to-proposed pole matches before using the Design Route Sequence as a design handoff.
     </div>
   </div>
 
@@ -73,7 +81,7 @@
     <div class="review-summary-grid" aria-label="Review summary">
       <div class="review-summary-metric">
         <div class="review-summary-value">{{ chain_count }}</div>
-        <div class="review-summary-label">Design Chain records</div>
+        <div class="review-summary-label">route sequence records</div>
       </div>
       <div class="review-summary-metric">
         <div class="review-summary-value">{{ matched_expoles|length }}</div>
@@ -98,7 +106,7 @@
   <div class="section-card">
     <div class="section-title">Sections ({{ sections|length }})</div>
     <table class="table table-sm mb-0">
-      <thead><tr><th>Section</th><th>Design pole range</th><th>Poles</th><th>Section boundary</th></tr></thead>
+      <thead><tr><th>Section</th><th>Route sequence range</th><th>Records</th><th>Section break point</th></tr></thead>
       <tbody>
         {% for sec in sections %}
         <tr>
@@ -122,7 +130,7 @@
       </div>
     {% endif %}
     <span style="font-size:0.87rem;color:#374151;">
-      Chain: {{ chain_count }} proposed poles &nbsp;|&nbsp;
+      Route sequence: {{ chain_count }} proposed records &nbsp;|&nbsp;
       Existing/proposed proximity signals: {{ summary.get("total_matched_expoles", matched_expoles|length) }} &nbsp;|&nbsp;
       Unmatched existing poles: {{ summary.get("total_unmatched_expoles", unmatched_expoles|length) }}
     </span>
@@ -213,7 +221,7 @@
     <div class="section-title">Pairing Review Status</div>
     <p style="font-size:0.87rem;color:#6b7280;margin-bottom:14px;">
       This status records whether the existing/proposed pole relationships on this page have been checked.
-      Final design handoff sign-off should happen only after Review, Map, PDF, Design Chain, and Working View outputs have all been reviewed.
+      Final design handoff sign-off should happen only after Review, Map, PDF, Design Route Sequence, and Working View outputs have all been reviewed.
     </p>
     <div class="mb-3">
       <label class="form-label fw-semibold" style="font-size:0.9rem;">Pairing review status</label>

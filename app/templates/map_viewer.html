@@ -502,7 +502,7 @@
             </div>
 
             <div class="meta-row">
-              <span>Rulepack</span>
+              <span>Applied QA rules</span>
               <span id="rulepack-badge" class="badge-soft">Loading…</span>
             </div>
 
@@ -523,14 +523,14 @@
 
               {% if sequence_summary and sequence_summary.status == 'ok' and sequence_summary.total_sequenced and sequence_summary.total_sequenced > 0 %}
               <a id="btn-download-d2d" href="{{ d2d_url | default('/d2d/export/' ~ job_id) }}" class="btn btn-outline-success">
-                <i class="bi bi-table"></i> Download Design Chain Export
+                <i class="bi bi-table"></i> Download Design Route Sequence
               </a>
               <a id="btn-download-d2d-working" href="{{ d2d_interleaved_url | default('/d2d/interleaved/' ~ job_id) }}" class="btn btn-outline-success">
                 <i class="bi bi-layout-text-sidebar"></i> Download Raw Working Audit
               </a>
               {% else %}
-              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Design chain export unavailable — no sequenced poles found">
-                <i class="bi bi-table"></i> Design chain export unavailable
+              <a id="btn-download-d2d-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Design route sequence unavailable — no sequenced records found">
+                <i class="bi bi-table"></i> Design route sequence unavailable
               </a>
               <a id="btn-download-d2d-working-disabled" class="btn btn-outline-secondary disabled" aria-disabled="true" title="Raw working audit unavailable — no sequenced poles found">
                 <i class="bi bi-layout-text-sidebar"></i> Raw working audit unavailable
@@ -588,7 +588,7 @@
                   {% endfor %}
                 </ul>
                 <div style="font-size:0.74rem; color:#6b7280; margin-top:6px; line-height:1.35;">
-                  Existing/proposed match counts here are map evidence signals. Confirmed EXpole assignments are shown in Pairing Review and reviewed design-chain exports.
+                  Existing/proposed match counts here are map evidence signals. Confirmed EXpole assignments are shown in Pairing Review and reviewed route-sequence exports.
                 </div>
               </div>
               {% endif %}

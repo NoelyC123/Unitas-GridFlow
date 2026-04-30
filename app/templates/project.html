@@ -54,10 +54,12 @@
     .mobile-action-grid .btn { width: 100%; }
     .empty-state { padding: 36px 20px; text-align: center; color: #6b7280; }
     .error-box { display: none; margin-bottom: 16px; }
-    @media (max-width: 900px) { .desktop-only { display: none; } }
-    @media (max-width: 767.98px) {
+    @media (max-width: 1100px) {
       .files-table-wrap { display: none; }
       .mobile-file-list { display: block; }
+    }
+    @media (max-width: 900px) { .desktop-only { display: none; } }
+    @media (max-width: 767.98px) {
       .summary-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .feedback-box { min-width: 0; width: 100%; }
     }
@@ -105,7 +107,7 @@
       </div>
       <div class="summary-item" id="sum-rulepacks-wrap" style="display:none;">
         <div id="sum-rulepacks"></div>
-        <div class="summary-label">Active rulepack</div>
+        <div class="summary-label">Applied QA rules</div>
       </div>
     </div>
     <div class="readiness-note" id="readiness-note" style="display:none;">
@@ -126,7 +128,7 @@
                 <th>Intake</th>
                 <th>Processing Status</th>
                 <th>Designer Review</th>
-                <th>Rulepack</th>
+                <th>Applied QA Rules</th>
                 <th>Survey Records</th>
                 <th class="desktop-only">Pass / Warning / Fail</th>
                 <th>Actions</th>
@@ -155,7 +157,7 @@
       return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
     }
 
-    function displayRulepack(rulepack) {
+    function displayQaRules(rulepack) {
       return String(rulepack || "—").replaceAll("_", " ");
     }
 
@@ -225,7 +227,7 @@
         <i class="bi bi-file-pdf"></i> PDF</a>`;
       const chainBtn = hasSeq
         ? `<a href="/d2d/export/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-table"></i> Design Chain</a>`
+            <i class="bi bi-table"></i> Design Route Sequence</a>`
         : "";
       const workingBtn = hasSeq
         ? `<a href="/d2d/interleaved/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
@@ -252,7 +254,7 @@
         <i class="bi bi-file-pdf"></i> PDF</a>`;
       const chainBtn = hasSeq
         ? `<a href="/d2d/export/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-table"></i> Design Chain</a>`
+            <i class="bi bi-table"></i> Design Route Sequence</a>`
         : "";
       const workingBtn = hasSeq
         ? `<a href="/d2d/interleaved/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
@@ -286,7 +288,7 @@
         const fid = escapeHtml(f.file_id || "");
         const fname = escapeHtml(f.filename || f.file_id || "");
         const status = String(f.status || "unknown");
-        const rulepack = escapeHtml(displayRulepack(f.rulepack_id));
+        const qaRules = escapeHtml(displayQaRules(f.rulepack_id));
         const intake = f.intake || {};
         const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
         const intakeHelp = escapeHtml(intakeHelper(f.intake_status));
@@ -323,7 +325,7 @@
               <div class="qa-status-helper">Processing status only, not final design approval.</div>
             </td>
             <td>${reviewPill(reviewStatus)}</td>
-            <td><span class="rulepack-badge">${rulepack}</span></td>
+            <td><span class="rulepack-badge">${qaRules}</span></td>
             <td><strong>${records}</strong></td>
             <td class="desktop-only"><div class="qa-status-counts">
               <div><span style="color:#2e8b57;font-weight:700;">${pass} Pass</span></div>
@@ -340,7 +342,7 @@
         const fid = escapeHtml(f.file_id || "");
         const fname = escapeHtml(f.filename || f.file_id || "");
         const status = String(f.status || "unknown");
-        const rulepack = escapeHtml(displayRulepack(f.rulepack_id));
+        const qaRules = escapeHtml(displayQaRules(f.rulepack_id));
         const intake = f.intake || {};
         const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
         const intakeHelp = escapeHtml(intakeHelper(f.intake_status));
@@ -367,7 +369,7 @@
             <div class="mb-2">
               <span class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</span>
               ${reviewPill(reviewStatus)}
-              <span class="rulepack-badge ms-1">${rulepack}</span>
+              <span class="rulepack-badge ms-1">${qaRules}</span>
             </div>
             <div class="mobile-file-meta">
               <div>${intakeHelp}</div>
@@ -413,7 +415,7 @@
       if (rulepacks.length) {
         const wrap = document.getElementById("sum-rulepacks-wrap");
         document.getElementById("sum-rulepacks").innerHTML = rulepacks
-          .map(r => `<span class="rulepack-badge" style="margin:1px;">${escapeHtml(displayRulepack(r))}</span>`)
+          .map(r => `<span class="rulepack-badge" style="margin:1px;">${escapeHtml(displayQaRules(r))}</span>`)
           .join(" ");
         if (wrap) wrap.style.display = "";
       }

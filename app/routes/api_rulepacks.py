@@ -53,5 +53,5 @@ def list_rulepacks():
 def get_rulepack(rulepack_id: str):
     """Return truthful metadata for a supported rulepack, or 404."""
     if rulepack_id not in RULEPACKS:
-        return jsonify({"error": f"Rulepack not found: {rulepack_id}"}), 404
+        return jsonify({"error": f"QA rules not found: {rulepack_id}"}), 404
     return jsonify(_summarize_rulepack(rulepack_id, RULEPACKS[rulepack_id]))

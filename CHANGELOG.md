@@ -26,6 +26,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — Remove Remaining Internal UI Terms
+
+### Changed
+
+- Replaced remaining user-facing `Rulepack` wording with `Applied QA Rules` / `QA rules`.
+- Replaced user-facing `Design Chain` wording with `Design Route Sequence` where the surface describes the ordered route handoff.
+- Reworded Review page section summary labels from `Chain` / `Section boundary` to route-sequence and section-break language.
+- Improved dashboard and Review page responsiveness by switching the project file table to cards earlier on narrow screens and tightening Review page spacing on mobile.
+
+### Validated
+
+- `node --check app/static/js/rulepack-selector.js && node --check app/static/js/map-viewer.js` — passed.
+- `pytest -v tests/test_project_integration.py tests/test_review_integration.py tests/test_app_routes.py` — 57 passed.
+
+---
+
 ## 2026-04-30 — P010 Review Page Pairing Framing
 
 ### Changed

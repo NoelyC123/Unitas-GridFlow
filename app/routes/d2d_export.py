@@ -202,7 +202,7 @@ def _render_chain_export(seq: dict, job_id: str, reviewed_label: str | None = No
     status_label = reviewed_label or "provisional"
 
     buf = io.StringIO()
-    buf.write(f"# Unitas GridFlow — Design Chain Export ({status_label})\n")
+    buf.write(f"# Unitas GridFlow — Design Route Sequence Export ({status_label})\n")
     buf.write(
         "# Proposed poles in route sequence order."
         " EXpole references and context features listed separately.\n"

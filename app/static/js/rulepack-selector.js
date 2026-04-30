@@ -21,15 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if(badge) badge.innerHTML = `<span class="badge bg-info">${id}</span>`;
     }catch{
-      if(details) details.innerHTML = `<div class="alert alert-warning mb-0">Failed to load rulepack details</div>`;
-      Toast?.show?.('Failed to load rulepack details','warn');
+      if(details) details.innerHTML = `<div class="alert alert-warning mb-0">Failed to load QA rule details</div>`;
+      Toast?.show?.('Failed to load QA rule details','warn');
     }
   }
 
   sel.addEventListener('change', () => {
     const v = sel.value;
-    if(!v){ setAuto(); Toast?.show?.('Rulepack: Auto (detect)','info'); }
-    else { fetchDetails(v); Toast?.show?.(`Rulepack: ${v}`,'info'); }
+    if(!v){ setAuto(); Toast?.show?.('Applied QA Rules: Auto (detect)','info'); }
+    else { fetchDetails(v); Toast?.show?.(`Applied QA Rules: ${v}`,'info'); }
   });
 
   function escapeHtml(s){ return (''+s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }

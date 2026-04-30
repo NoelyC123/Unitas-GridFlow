@@ -462,10 +462,11 @@ def test_project_detail_includes_mobile_file_card_layout(client_and_root):
     assert "Survey Records" in html
     assert "Pass / Warning / Fail" in html
     assert "Record-level QA status" in html
-    assert "Active rulepack" in html
+    assert "Applied QA rules" in html
     assert "Office feedback / intake note" in html
     assert "Survey output remains provisional" in html
     assert "Complete means GridFlow has processed the file" in html
+    assert "Design Route Sequence" in html
 
 
 # ---------------------------------------------------------------------------
