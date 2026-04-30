@@ -8,6 +8,23 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — P010 Review Page Pairing Framing
+
+### Changed
+
+- Reframed the Review page from final design handoff sign-off to existing/proposed pole match review.
+- Added evidence guidance that distance is only a proximity signal and should be checked against map position, Field Maps attributes where available, survey notes, field remarks, and designer judgement.
+- Renamed pairing table columns and dropdown options to describe reviewer-confirmed relationships, suggested matches, alternative proposed poles, and unmatched existing poles.
+- Renamed the review status block to `Pairing Review Status` and clarified that final design handoff sign-off belongs after Review, Map, PDF, Design Chain, and Working View checks.
+
+### Validated
+
+- `pytest -v tests/test_review_integration.py` — 11 passed.
+- `pytest -v` — 297 passed.
+- Browser smoke check confirmed `/review/project/P010/F001` renders the updated pairing-review workflow.
+
+---
+
 ## 2026-04-30 — P010 Dashboard Clarity Polish
 
 ### Changed

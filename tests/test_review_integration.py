@@ -215,6 +215,21 @@ def test_review_page_shows_review_summary_and_boundary_note(client_and_root):
     assert "unmatched existing poles" in html
     assert "reviewed pairing changes" in html
     assert "Auto-matches are proximity signals only" in html
+    assert "Existing/Proposed Pole Match Review" in html
+    assert "Likely Existing-to-Proposed Pole Matches" in html
+    assert "Do not confirm based on distance alone" in html
+    assert "Field Maps attributes where available" in html
+    assert "Reviewer-confirmed relationship" in html
+    assert "No proposed replacement / unmatched" in html
+    assert "Confirm suggested match:" in html
+    assert "Choose different proposed pole:" in html
+    assert "Pairing Review Status" in html
+    assert "Pairings reviewed" in html
+    assert (
+        "Final design handoff sign-off should happen only after Review, Map, "
+        "PDF, Design Chain, and Working View" in html
+    )
+    assert "Reset to automatic matches" in html
 
 
 # ── 4. Reviewed export header ────────────────────────────────────────────────
