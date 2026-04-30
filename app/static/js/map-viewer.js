@@ -344,7 +344,11 @@ class MapViewer {
       const count = filtered.length;
       const label = this.filterLabel(mode, value);
       if (this.filterNoteEl) {
-        this.filterNoteEl.textContent = `Showing ${count} ${label} record${count !== 1 ? 's' : ''} — click again to reset`;
+        const recordWord = count !== 1 ? 'records' : 'record';
+        const contextNote = value === 'replacement-proximity'
+          ? ' (map records, not reviewed pairing count)'
+          : '';
+        this.filterNoteEl.textContent = `Showing ${count} ${label} ${recordWord}${contextNote} — click again to reset`;
       }
       this._showRecordPanel(filtered, `${label} (${count})`);
     }
