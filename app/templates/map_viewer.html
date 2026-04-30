@@ -314,6 +314,60 @@
       opacity: 0.75;
     }
 
+    .asset-marker {
+      background: transparent;
+      border: 0;
+    }
+
+    .asset-marker-shape {
+      align-items: center;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 5px rgba(15, 23, 42, 0.35);
+      color: #ffffff;
+      display: flex;
+      font-size: 0.58rem;
+      font-weight: 800;
+      height: 25px;
+      justify-content: center;
+      line-height: 1;
+      text-align: center;
+      width: 25px;
+    }
+
+    .asset-marker.status-PASS .asset-marker-shape { background: #2e8b57; }
+    .asset-marker.status-WARN .asset-marker-shape { background: #d39e00; }
+    .asset-marker.status-FAIL .asset-marker-shape { background: #d94141; }
+    .asset-marker.asset-existing .asset-marker-shape { border-radius: 999px; }
+    .asset-marker.asset-proposed .asset-marker-shape { border-radius: 5px; }
+    .asset-marker.asset-angle .asset-marker-shape { border-radius: 5px; transform: rotate(45deg); }
+    .asset-marker.asset-angle .asset-marker-label { transform: rotate(-45deg); }
+    .asset-marker.asset-anchor .asset-marker-shape { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 6px; }
+    .asset-marker.asset-context .asset-marker-shape { border-radius: 999px; font-size: 0.5rem; opacity: 0.88; }
+    .asset-marker.asset-other .asset-marker-shape { border-radius: 999px; }
+
+    .legend-symbol {
+      align-items: center;
+      background: #64748b;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px #cbd5e1;
+      color: #ffffff;
+      display: inline-flex;
+      flex: 0 0 auto;
+      font-size: 0.48rem;
+      font-weight: 800;
+      height: 18px;
+      justify-content: center;
+      line-height: 1;
+      width: 18px;
+    }
+
+    .legend-symbol.existing { border-radius: 999px; }
+    .legend-symbol.proposed { border-radius: 4px; }
+    .legend-symbol.angle { border-radius: 4px; transform: rotate(45deg); }
+    .legend-symbol.angle span { transform: rotate(-45deg); }
+    .legend-symbol.anchor { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 4px; }
+    .legend-symbol.context { border-radius: 999px; font-size: 0.42rem; }
+
     .meta-row {
       display: flex;
       justify-content: space-between;
@@ -482,9 +536,35 @@
                   <span class="legend-line"></span>
                   <span>Surveyed route sequence</span>
                 </div>
+              </div>
+              <div class="map-legend-title" style="margin-top:8px;">Feature Type</div>
+              <div class="map-legend-grid">
+                <div class="map-legend-item">
+                  <span class="legend-symbol existing">EX</span>
+                  <span>Existing pole</span>
+                </div>
+                <div class="map-legend-item">
+                  <span class="legend-symbol proposed">PR</span>
+                  <span>Proposed pole</span>
+                </div>
+                <div class="map-legend-item">
+                  <span class="legend-symbol angle"><span>A</span></span>
+                  <span>Angle pole</span>
+                </div>
+                <div class="map-legend-item">
+                  <span class="legend-symbol anchor">ST</span>
+                  <span>Stay / anchor</span>
+                </div>
+                <div class="map-legend-item">
+                  <span class="legend-symbol context">CTX</span>
+                  <span>Context / crossing record</span>
+                </div>
+              </div>
+              <div class="map-legend-title" style="margin-top:8px;">Review Status Colour</div>
+              <div class="map-legend-grid">
                 <div class="map-legend-item">
                   <span class="legend-dot legend-pass"></span>
-                  <span>Pass / mapped structural record</span>
+                  <span>Pass</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-dot legend-warn"></span>
@@ -493,10 +573,6 @@
                 <div class="map-legend-item">
                   <span class="legend-dot legend-fail"></span>
                   <span>Design blocker</span>
-                </div>
-                <div class="map-legend-item">
-                  <span class="legend-dot legend-context"></span>
-                  <span>Context / crossing records may also be mapped</span>
                 </div>
               </div>
             </div>

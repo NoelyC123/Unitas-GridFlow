@@ -124,15 +124,16 @@ class MapViewer {
       bounds.push([lat, lon]);
 
       const status = (props.qa_status || 'PASS').toUpperCase();
-      const color = this.getMarkerColor(status);
-      const markerStyle = this.getMarkerStyle(status);
+      const assetMarker = this.getAssetMarker(props);
 
-      const marker = L.circleMarker([lat, lon], {
-        radius: markerStyle.radius,
-        color: markerStyle.stroke,
-        weight: markerStyle.weight,
-        fillColor: color,
-        fillOpacity: markerStyle.fillOpacity,
+      const marker = L.marker([lat, lon], {
+        icon: L.divIcon({
+          className: `asset-marker status-${status} asset-${assetMarker.type}`,
+          html: `<span class="asset-marker-shape" title="${this.escapeHtml(assetMarker.title)}"><span class="asset-marker-label">${this.escapeHtml(assetMarker.label)}</span></span>`,
+          iconSize: [25, 25],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -12],
+        }),
       });
 
       const locName = props.name && props.name !== props.id ? props.name : null;
@@ -479,14 +480,27 @@ class MapViewer {
     return '#2e8b57';
   }
 
-  getMarkerStyle(status) {
-    if (status === 'FAIL') {
-      return { radius: 7, stroke: '#ffffff', weight: 2, fillOpacity: 0.92 };
+  getAssetMarker(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    const role = String(props.record_role || '').toLowerCase();
+    const intent = String(props.asset_intent || '').toLowerCase();
+
+    if (st.includes('expole') || intent.includes('existing')) {
+      return { type: 'existing', label: 'EX', title: 'Existing pole' };
     }
-    if (status === 'WARN') {
-      return { radius: 6.5, stroke: '#ffffff', weight: 1.5, fillOpacity: 0.9 };
+    if (st.includes('prpole') || st === 'pol' || intent.includes('proposed')) {
+      return { type: 'proposed', label: 'PR', title: 'Proposed pole' };
     }
-    return { radius: 5, stroke: '#064e3b', weight: 0.7, fillOpacity: 0.78 };
+    if (st.includes('angle')) {
+      return { type: 'angle', label: 'A', title: 'Angle pole' };
+    }
+    if (role === 'anchor' || st.includes('stay') || st.includes('anchor')) {
+      return { type: 'anchor', label: 'ST', title: 'Stay / anchor' };
+    }
+    if (role === 'context' || CONTEXT_FEATURE_CODES.has(props.structure_type || '')) {
+      return { type: 'context', label: 'CTX', title: 'Context / crossing record' };
+    }
+    return { type: 'other', label: 'R', title: 'Mapped survey record' };
   }
 
   statusBadge(status) {

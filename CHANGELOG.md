@@ -26,6 +26,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — Separate Map Asset Type From QA Status
+
+### Changed
+
+- Replaced uniform map point circles with labelled Leaflet markers that show asset role directly on the map (`EX`, `PR`, `A`, `ST`, `CTX`).
+- Kept marker colour dedicated to QA/review status so green/yellow/red remains pass/review/blocker rather than feature type.
+- Split the map legend into route sequence, feature type, and review-status colour sections.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pytest -v tests/test_project_integration.py tests/test_app_routes.py` — 46 passed.
+
+---
+
 ## 2026-04-30 — Remove Remaining Internal UI Terms
 
 ### Changed
