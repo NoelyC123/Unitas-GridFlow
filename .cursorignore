@@ -1,0 +1,12 @@
+_archive/
+uploads/
+validation_data/
+Unitas GridFlow Full Tool Review 28th April 2026/
+.venv312/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+htmlcov/
+*.db
+*.sqlite
+*.log
