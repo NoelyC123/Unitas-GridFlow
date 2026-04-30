@@ -22,6 +22,10 @@
     .table tbody td { font-size: 0.88rem; vertical-align: middle; }
     .remark-cell { font-size: 0.8rem; color: #6b7280; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dist-cell { font-size: 0.82rem; color: #374151; }
+    .review-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+    .review-summary-metric { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px 12px; background: #f9fafb; }
+    .review-summary-value { font-size: 1.35rem; font-weight: 800; color: #111827; line-height: 1.1; }
+    .review-summary-label { font-size: 0.78rem; color: #6b7280; margin-top: 3px; }
     .toast-area { position: fixed; bottom: 24px; right: 24px; z-index: 1060; }
   </style>
 </head>
@@ -66,6 +70,27 @@
     {% else %}
       <span class="status-provisional"><i class="bi bi-clock"></i> Not Reviewed — provisional output</span>
     {% endif %}
+    <div class="review-summary-grid" aria-label="Review summary">
+      <div class="review-summary-metric">
+        <div class="review-summary-value">{{ chain_count }}</div>
+        <div class="review-summary-label">Design Chain records</div>
+      </div>
+      <div class="review-summary-metric">
+        <div class="review-summary-value">{{ matched_expoles|length }}</div>
+        <div class="review-summary-label">auto-matched existing poles</div>
+      </div>
+      <div class="review-summary-metric">
+        <div class="review-summary-value">{{ unmatched_expoles|length }}</div>
+        <div class="review-summary-label">unmatched existing poles</div>
+      </div>
+      <div class="review-summary-metric">
+        <div class="review-summary-value">{{ (review.get("pairing_overrides") if review else [])|length }}</div>
+        <div class="review-summary-label">reviewed pairing changes</div>
+      </div>
+    </div>
+    <div style="font-size:0.84rem;color:#6b7280;margin-top:10px;">
+      Auto-matches are proximity signals only. Leave this file provisional until the pairings and any unmatched existing poles are checked against field evidence.
+    </div>
   </div>
 
   {# ── Section Summary ── #}

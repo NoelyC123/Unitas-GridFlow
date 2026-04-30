@@ -201,6 +201,22 @@ def test_mark_expole_unmatched(client_and_root):
     assert "20" in unmatched_section[1]
 
 
+def test_review_page_shows_review_summary_and_boundary_note(client_and_root):
+    client, root = client_and_root
+    _make_file_slot(root, "P001", "F001")
+
+    response = client.get("/review/project/P001/F001")
+
+    assert response.status_code == 200
+    html = response.data.decode()
+    assert "Review summary" in html
+    assert "Design Chain records" in html
+    assert "auto-matched existing poles" in html
+    assert "unmatched existing poles" in html
+    assert "reviewed pairing changes" in html
+    assert "Auto-matches are proximity signals only" in html
+
+
 # ── 4. Reviewed export header ────────────────────────────────────────────────
 
 
