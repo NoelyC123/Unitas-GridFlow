@@ -606,7 +606,7 @@
             </div>
 
             <div class="meta-row">
-              <span>Applied QA rules</span>
+              <span>Rulepack</span>
               <span id="rulepack-badge" class="badge-soft">Loading…</span>
             </div>
 
@@ -703,7 +703,7 @@
                   {% endfor %}
                 </ul>
                 <div style="font-size:0.74rem; color:#6b7280; margin-top:6px; line-height:1.35;">
-                  Existing/proposed match counts here are map evidence signals. Confirmed EXpole assignments are shown in Pairing Review and reviewed route-sequence exports.
+                  Existing/proposed match counts here are map evidence signals. Confirmed existing pole (EXpole) assignments are shown in Pairing Review and reviewed route-sequence exports.
                 </div>
               </div>
               {% endif %}
@@ -712,7 +712,7 @@
 
             {% if evidence_gates %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
-              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Evidence Gates</div>
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Design readiness checks</div>
               {% for gate in evidence_gates %}
               <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; margin-bottom: 2px;">
                 <span style="color: #374151;">{{ gate.label }}</span>
@@ -807,7 +807,7 @@
             {% if replacement_narratives %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
               <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Probable Replacement Signals</div>
-              <div style="font-size: 0.76rem; color: #6b7280; margin-bottom: 6px; line-height: 1.35;">Map narratives are evidence prompts, not the final reviewed EXpole assignment list.</div>
+              <div style="font-size: 0.76rem; color: #6b7280; margin-bottom: 6px; line-height: 1.35;">Map narratives are evidence prompts, not the final reviewed existing pole assignment list.</div>
               {% for narrative in replacement_narratives[:5] %}
               <div style="font-size: 0.82rem; color: #374151; margin-bottom: 4px; padding-left: 4px; border-left: 2px solid #d39e00;">{{ narrative }}</div>
               {% endfor %}

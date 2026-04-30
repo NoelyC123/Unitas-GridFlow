@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sel.addEventListener('change', () => {
     const v = sel.value;
-    if(!v){ setAuto(); Toast?.show?.('Applied QA Rules: Auto (detect)','info'); }
-    else { fetchDetails(v); Toast?.show?.(`Applied QA Rules: ${v}`,'info'); }
+    if(!v){ setAuto(); Toast?.show?.('Rulepack: Auto (detect)','info'); }
+    else { fetchDetails(v); Toast?.show?.(`Rulepack: ${v}`,'info'); }
   });
 
   function escapeHtml(s){ return (''+s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }

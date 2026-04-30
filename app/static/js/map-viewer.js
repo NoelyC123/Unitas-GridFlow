@@ -511,9 +511,9 @@ class MapViewer {
 
   explainAssetType(st) {
     const map = {
-      'EXpole': 'Existing pole being replaced',
-      'expole': 'Existing pole being replaced',
-      'EXPOLE': 'Existing pole being replaced',
+      'EXpole': 'Existing pole (EXpole) being replaced',
+      'expole': 'Existing pole (EXpole) being replaced',
+      'EXPOLE': 'Existing pole (EXpole) being replaced',
       'PRpole': 'Proposed replacement pole',
       'prpole': 'Proposed replacement pole',
       'PRPOLE': 'Proposed replacement pole',

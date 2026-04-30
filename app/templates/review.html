@@ -58,7 +58,7 @@
     </h1>
     <div style="font-size:0.88rem;color:#6b7280;margin-top:4px;">
       File ID: {{ file_id }}
-      {% if meta.get("rulepack_id") %} | Applied QA Rules: {{ meta["rulepack_id"].replace("_", " ") }}{% endif %}
+      {% if meta.get("rulepack_id") %} | Rulepack: {{ meta["rulepack_id"].replace("_", " ") }}{% endif %}
     </div>
     <div style="font-size:0.9rem;color:#4b5563;margin-top:8px;">
       Review likely existing-to-proposed pole matches before using the Design Route Sequence as a design handoff.
@@ -85,7 +85,7 @@
       </div>
       <div class="review-summary-metric">
         <div class="review-summary-value">{{ matched_expoles|length }}</div>
-        <div class="review-summary-label">auto-matched existing poles</div>
+        <div class="review-summary-label">suggested existing pole matches</div>
       </div>
       <div class="review-summary-metric">
         <div class="review-summary-value">{{ unmatched_expoles|length }}</div>
@@ -97,7 +97,7 @@
       </div>
     </div>
     <div style="font-size:0.84rem;color:#6b7280;margin-top:10px;">
-      Auto-matches are proximity signals only. Leave this file provisional until the pairings and any unmatched existing poles are checked against map position, survey remarks, supporting field evidence, and designer judgement.
+      Suggested matches are proximity signals only. Leave this file provisional until the pairings and any unmatched existing poles are checked against map position, survey remarks, supporting field evidence, and designer judgement.
     </div>
   </div>
 

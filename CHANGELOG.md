@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — P010 Terminology Cleanup
+
+### Changed
+
+- Replaced remaining user-facing `Applied QA Rules` wording with singular `Rulepack` labels across upload, legacy jobs, map, review, PDF, and selector toast messages.
+- Reframed review summary wording from auto-matched/proximity-signal language to suggested existing/proposed match language.
+- Renamed map/PDF `Evidence Gates` headings to `Design readiness checks` and expanded legacy `P/W/F` counts to `Pass / Warning / Fail`.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js && node --check app/static/js/rulepack-selector.js` — passed.
+- `pytest -v tests/test_review_integration.py tests/test_project_integration.py tests/test_app_routes.py` — 58 passed.
+- `pytest -v` — 298 passed.
+
+---
+
 ## 2026-04-30 — P010 Dashboard Cleanup
 
 ### Changed

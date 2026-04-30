@@ -211,10 +211,10 @@ def test_review_page_shows_review_summary_and_boundary_note(client_and_root):
     html = response.data.decode()
     assert "Review summary" in html
     assert "route sequence records" in html
-    assert "auto-matched existing poles" in html
+    assert "suggested existing pole matches" in html
     assert "unmatched existing poles" in html
     assert "reviewed pairing changes" in html
-    assert "Auto-matches are proximity signals only" in html
+    assert "Suggested matches are proximity signals only" in html
     assert "Existing/Proposed Pole Match Review" in html
     assert "Likely Existing-to-Proposed Pole Matches" in html
     assert "Do not confirm based on distance alone" in html

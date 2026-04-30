@@ -441,7 +441,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
     y -= line_gap
     _draw_line(pdf, f"Status: {meta.get('status', 'unknown')}", left, y)
     y -= line_gap
-    _draw_line(pdf, f"Applied QA Rules: {meta.get('rulepack_id', 'SPEN_11kV')}", left, y)
+    _draw_line(pdf, f"Rulepack: {meta.get('rulepack_id', 'SPEN_11kV')}", left, y)
     y -= line_gap
     _draw_line(pdf, f"Auto-normalized: {meta.get('auto_normalized', False)}", left, y)
     y -= line_gap
@@ -501,7 +501,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
 
     evidence_gates = meta.get("evidence_gates") or []
     if evidence_gates:
-        _draw_line(pdf, "Evidence Gates", left, y, font="Helvetica-Bold", size=12)
+        _draw_line(pdf, "Design readiness checks", left, y, font="Helvetica-Bold", size=12)
         y -= 8 * mm
         for gate in evidence_gates:
             label = str(gate.get("label", ""))
