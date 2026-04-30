@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — P010 Dashboard Cleanup
+
+### Changed
+
+- Tightened the project dashboard summary around processing status, survey records, contextual QA findings, and singular `Rulepack` wording.
+- Added explicit design-readiness messaging to each survey file card so provisional files are clearly separated from processed files.
+- Replaced compact QA shorthand with visible `Pass`, `Warning`, and `Fail` count badges while preserving the responsive card layout.
+
+### Validated
+
+- `pytest -v tests/test_project_integration.py` — 17 passed.
+- `pytest -v` — 298 passed.
+- Browser check confirmed `/project/P010` renders cleanly at the constrained/tablet width with all actions visible and no horizontal action-button scroll.
+
+---
+
 ## 2026-04-30 — P010 Map Language Polish
 
 ### Changed

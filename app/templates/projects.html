@@ -14,21 +14,35 @@
     .page-header h1 { margin: 0; font-size: 1.6rem; font-weight: 700; color: #111827; }
     .page-sub { color: #6b7280; margin-top: 4px; }
     .toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
-    .projects-card { border: 0; border-radius: 16px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08); overflow: hidden; }
-    .table thead th { white-space: nowrap; vertical-align: middle; }
-    .table tbody td { vertical-align: middle; }
-    .project-name { font-weight: 700; color: #111827; }
+    .projects-card { border: 0; border-radius: 16px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08); overflow: hidden; margin-bottom: 16px; }
+    .projects-card-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; padding: 16px; background: #f8fafc; }
+    .project-list-card { display: flex; flex-direction: column; gap: 14px; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; background: #fff; box-shadow: 0 1px 4px rgba(15,23,42,0.04); min-width: 0; }
+    .project-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .project-name { font-weight: 700; color: #111827; font-size: 1rem; overflow-wrap: anywhere; }
     .project-name a { color: inherit; text-decoration: none; }
     .project-name a:hover { color: #4f46e5; text-decoration: underline; }
+    .project-id { font-size: 0.76rem; color: #9ca3af; margin-top: 2px; }
+    .project-meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .project-meta-item { border: 1px solid #e5e7eb; border-radius: 10px; padding: 9px 10px; background: #f9fafb; min-width: 0; }
+    .project-meta-value { font-size: 1rem; font-weight: 800; color: #111827; line-height: 1.1; }
+    .project-meta-label { font-size: 0.72rem; color: #6b7280; margin-top: 3px; }
+    .project-card-actions .btn { width: 100%; }
     .status-pill { display: inline-block; padding: 5px 9px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
     .status-complete { background: #e8f7ee; color: #1d7f49; }
+    .status-error { background: #fdeaea; color: #c83737; }
     .status-other { background: #eef2ff; color: #4f46e5; }
-    .count-stack { line-height: 1.4; font-size: 0.9rem; color: #374151; }
-    .rulepack-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #4fc3e8; color: #fff; font-size: 0.8rem; font-weight: 700; }
     .empty-state { padding: 36px 20px; text-align: center; color: #6b7280; }
     .error-box { display: none; margin-bottom: 16px; }
     .small-note { font-size: 0.88rem; color: #6b7280; }
-    @media (max-width: 900px) { .desktop-only { display: none; } }
+    @media (max-width: 767.98px) {
+      .projects-card-list { grid-template-columns: 1fr; padding: 12px; }
+      .project-card-header { flex-direction: column; align-items: stretch; }
+      .project-card-header .status-pill { align-self: flex-start; }
+    }
+    @media (max-width: 420px) {
+      .projects-card-list { padding: 10px; }
+      .project-meta-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -55,23 +69,8 @@
 
     <div class="card projects-card">
       <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Project</th>
-                <th>Files</th>
-                <th>Poles</th>
-                <th>Issues</th>
-                <th class="desktop-only">Applied QA Rules</th>
-                <th class="desktop-only">Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="projects-tbody">
-              <tr><td colspan="7" class="empty-state">Loading projects…</td></tr>
-            </tbody>
-          </table>
+        <div id="projects-card-list" class="projects-card-list">
+          <div class="empty-state">Loading projects…</div>
         </div>
       </div>
     </div>
@@ -92,56 +91,77 @@
       catch { return iso; }
     }
 
+    function projectStatus(project, totalFiles) {
+      const files = Array.isArray(project.files) ? project.files : [];
+      const statuses = files.map(f => String(f.status || "").toLowerCase());
+      if (totalFiles === 0) {
+        return { label: "No files", className: "status-other" };
+      }
+      if (statuses.some(s => s === "error" || s === "failed")) {
+        return { label: "Needs attention", className: "status-error" };
+      }
+      if (files.length > 0 && statuses.every(s => s === "complete")) {
+        return { label: "Processing complete", className: "status-complete" };
+      }
+      return { label: "In progress", className: "status-other" };
+    }
+
     function renderProjects(projects) {
-      const tbody = document.getElementById("projects-tbody");
+      const cardList = document.getElementById("projects-card-list");
       if (!Array.isArray(projects) || projects.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No projects yet. <a href="/upload">Upload a survey</a> to create the first project.</td></tr>`;
+        cardList.innerHTML = `<div class="empty-state">No projects yet. <a href="/upload">Upload a survey</a> to create the first project.</div>`;
         return;
       }
 
-      const sorted = [...projects].sort((a, b) =>
-        String(b.project_id || "").localeCompare(String(a.project_id || ""))
-      );
+      const sorted = [...projects].sort((a, b) => {
+        const bDate = Date.parse(b.updated || b.created || "") || 0;
+        const aDate = Date.parse(a.updated || a.created || "") || 0;
+        if (bDate !== aDate) return bDate - aDate;
+        return String(b.project_id || "").localeCompare(String(a.project_id || ""));
+      });
 
-      tbody.innerHTML = sorted.map(p => {
+      cardList.innerHTML = sorted.map(p => {
         const pid = escapeHtml(p.project_id || "");
         const name = escapeHtml(p.name || p.project_id || "Unnamed");
-        const desc = escapeHtml(p.description || "");
         const summary = p.summary || {};
-        const rulepacks = (summary.rulepacks_used || []).join(", ") || "—";
         const totalFiles = summary.total_files ?? 0;
-        const totalPoles = summary.total_poles ?? 0;
-        const totalIssues = summary.total_issues ?? 0;
-        const created = fmtDate(p.created);
+        const modified = fmtDate(p.updated || p.created);
+        const status = projectStatus(p, totalFiles);
+        const fileLabel = `${totalFiles} file${totalFiles === 1 ? "" : "s"}`;
 
         return `
-          <tr>
-            <td>
+          <article class="project-list-card">
+            <div class="project-card-header">
               <div class="project-name"><a href="/project/${pid}">${name}</a></div>
-              ${desc ? `<div style="font-size:0.8rem;color:#6b7280;">${desc}</div>` : ""}
-              <div style="font-size:0.78rem;color:#9ca3af;">${pid}</div>
-            </td>
-            <td><strong>${totalFiles}</strong></td>
-            <td><strong>${totalPoles}</strong></td>
-            <td><strong>${totalIssues}</strong></td>
-            <td class="desktop-only"><span class="rulepack-badge">${escapeHtml(rulepacks)}</span></td>
-            <td class="desktop-only" style="font-size:0.85rem;">${escapeHtml(created)}</td>
-            <td>
+              <span class="status-pill ${status.className}">${escapeHtml(status.label)}</span>
+            </div>
+            <div class="project-id">${pid}</div>
+            <div class="project-meta-grid" aria-label="Project summary">
+              <div class="project-meta-item">
+                <div class="project-meta-value">${escapeHtml(fileLabel)}</div>
+                <div class="project-meta-label">File count</div>
+              </div>
+              <div class="project-meta-item">
+                <div class="project-meta-value">${escapeHtml(modified)}</div>
+                <div class="project-meta-label">Last modified</div>
+              </div>
+            </div>
+            <div class="project-card-actions">
               <a href="/project/${pid}" class="btn btn-sm btn-outline-primary">
                 <i class="bi bi-folder2-open"></i> View
               </a>
-            </td>
-          </tr>
+            </div>
+          </article>
         `;
       }).join("");
     }
 
     async function loadProjects() {
       const errorBox = document.getElementById("error-box");
-      const tbody = document.getElementById("projects-tbody");
+      const cardList = document.getElementById("projects-card-list");
       try {
         if (errorBox) { errorBox.style.display = "none"; }
-        if (tbody) { tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Loading projects…</td></tr>`; }
+        if (cardList) { cardList.innerHTML = `<div class="empty-state">Loading projects…</div>`; }
         const res = await fetch("/api/projects/", { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
         const data = await res.json();
@@ -149,7 +169,7 @@
       } catch (err) {
         console.error(err);
         if (errorBox) { errorBox.textContent = err.message || String(err); errorBox.style.display = "block"; }
-        if (tbody) { tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Could not load projects.</td></tr>`; }
+        if (cardList) { cardList.innerHTML = `<div class="empty-state">Could not load projects.</div>`; }
       }
     }
 

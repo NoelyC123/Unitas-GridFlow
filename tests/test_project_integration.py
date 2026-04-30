@@ -273,6 +273,25 @@ def test_get_api_projects_returns_all_projects(client_and_root):
     assert names == {"Alpha", "Beta"}
 
 
+def test_projects_page_uses_scannable_card_layout(client_and_root):
+    client, _projects_root = client_and_root
+
+    response = client.get("/projects/")
+
+    assert response.status_code == 200
+    html = response.data.decode("utf-8")
+    assert "projects-card-list" in html
+    assert "project-list-card" in html
+    assert "project-meta-grid" in html
+    assert "File count" in html
+    assert "Last modified" in html
+    assert "Processing complete" in html
+    assert "Needs attention" in html
+    assert "p.description" not in html
+    assert "<th>Poles</th>" not in html
+    assert "Applied QA Rules" not in html
+
+
 def test_update_project_file_intake_feedback(client_and_root):
     client, projects_root = client_and_root
 
@@ -467,16 +486,20 @@ def test_project_detail_includes_responsive_file_card_layout(client_and_root):
     assert "Designer reviewed" in html
     assert "review-pill" in html
     assert "Processing status only, not final design approval" in html
+    assert "Complete = GridFlow has processed. Designer review still needed." in html
     assert "Survey records" in html
     assert "Survey file QA status" in html
     assert "Pass" in html
     assert "Warning" in html
     assert "Fail" in html
-    assert "Record-level QA status" in html
-    assert "Applied QA rules" in html
+    assert "Pass / Warning / Fail counts" in html
+    assert "QA findings" in html
+    assert "Rulepack" in html
+    assert "Design readiness: Provisional" in html
+    assert "Raw survey intake requires office review" in html
     assert "Office feedback / intake note" in html
-    assert "Survey output remains provisional" in html
-    assert "Complete means GridFlow has processed the file" in html
+    assert "Survey is provisional and requires review before design export is final" in html
+    assert "Complete = GridFlow has processed" in html
     assert "Design Route Sequence" in html
 
 
