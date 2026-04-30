@@ -79,7 +79,7 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
 
 ## Counts
 
-- **Tests passing:** 296
+- **Tests passing:** 297
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
 
@@ -93,8 +93,9 @@ Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the
   - PDF Design Review Items now use a structured table with record reference, coordinates, status, issue, design consequence, and recommended action.
   - Project PDFs now show Designer Review Status from `review.json`, including review notes and pairing override count.
   - Project dashboard file rows and mobile cards now show Designer Review status and refresh it when review state changes.
+  - Review page now shows at-a-glance Design Chain, auto-matched EXpole, unmatched EXpole, and reviewed pairing-change counts before export.
   - Design Chain and Raw Working Audit CSVs now expose position, height, notes, replacement, and evidence-gap status derived from the existing sequence output.
-  - Validation: `pytest -v` — 296 passed; `pre-commit run --all-files` — passed.
+  - Validation: `pytest -v` — 297 passed; `pre-commit run --all-files` — passed.
 
 - Practitioner-led full tool review
   - Five local-only review documents were created from the Bellsprings real-life survey-to-design test, including practitioner and colleague feedback.

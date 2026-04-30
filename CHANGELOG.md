@@ -8,6 +8,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — Clarify Review Page Pairing Summary
+
+### Added
+
+- Added an at-a-glance Review page summary for Design Chain records, auto-matched existing poles, unmatched existing poles, and reviewed pairing changes.
+- Added clearer Review page guidance that auto-matches are proximity signals only and should remain provisional until checked against field evidence.
+
+### Validated
+
+- `pytest -v tests/test_review_integration.py` — 11 passed.
+- `pytest -v` — 297 passed.
+- `pre-commit run --all-files` — passed.
+
+---
+
 ## 2026-04-29 — Polish Remediation UX Wording
 
 ### Changed

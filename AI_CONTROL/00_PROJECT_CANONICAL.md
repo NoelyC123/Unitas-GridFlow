@@ -74,7 +74,7 @@ The tool currently:
 - Provides a repeatable validation evidence-pack utility for raw input, generated outputs, review state, screenshots, notes, and AI review prompts
 - Classifies real-world route context / crossing records such as `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` as context rather than structural poles
 - Maintains a repo-safe domain reference summary for evidence-quality, D2D-elimination, PoleCAD-readiness, and future structured-capture decisions
-- 296 passing tests, active CI
+- 297 passing tests, active CI
 
 Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw Gordon data, manual PR1/PR2 split evidence, a protected iPhone/mobile Gordon field-trial run, and a Bellsprings before/after package with real pole schedule, route map, profile, and technical information sheet.
 
@@ -84,7 +84,7 @@ Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw 
 
 **Practitioner-review remediation after Stage 3 closure**
 
-Stages 1, 2 and 3 are complete for the current evidence set. The practitioner-review remediation pass has shipped: terminology has moved from D2D/Clean Chain toward Design Chain/Raw Working Audit, EX/PR review wording has been reframed as proximity QA, the map now shows basic connected Design Chain spans with review-focus filters, the PDF now presents front-facing design review items and designer review status, and the CSV handoff exports now expose captured/missing/inferred evidence quality. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
+Stages 1, 2 and 3 are complete for the current evidence set. The practitioner-review remediation pass has shipped: terminology has moved from D2D/Clean Chain toward Design Chain/Raw Working Audit, EX/PR review wording has been reframed as proximity QA, the Review page now shows at-a-glance pairing summary counts, the map now shows basic connected Design Chain spans with review-focus filters, the PDF now presents front-facing design review items and designer review status, and the CSV handoff exports now expose captured/missing/inferred evidence quality. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
 
 ---
 
