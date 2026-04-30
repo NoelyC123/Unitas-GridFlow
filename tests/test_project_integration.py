@@ -380,6 +380,11 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-focus="design-blockers"' in html
     assert 'data-focus="replacement-proximity"' in html
     assert 'data-focus="missing-height"' in html
+    assert "Existing/proposed matches" in html
+    assert "Missing heights" in html
+    assert "Surveyed route sequence" in html
+    assert "Survey Map Review" in html
+    assert "Open review findings" in html
 
 
 def test_project_map_data_includes_design_chain_spans(client_and_root):

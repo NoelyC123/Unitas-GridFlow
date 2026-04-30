@@ -163,7 +163,7 @@ class MapViewer {
         : '';
 
       const replacementLine = props.relationship === 'replacement_pair'
-        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Likely replacement pair &#8212; existing asset with nearby proposed support</div>`
+        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Likely existing/proposed match &#8212; evidence prompt, not a confirmed design decision</div>`
         : '';
 
       const assetIntentLine = props.asset_intent
@@ -262,7 +262,7 @@ class MapViewer {
       }
 
       const popupHtml = `
-        <div class="popup-title">Design Chain Span</div>
+        <div class="popup-title">Surveyed Route Sequence</div>
         <div class="popup-row"><strong>From:</strong> ${this.escapeHtml(span.from_point_id || span.from_design_pole_no || 'Unknown')}</div>
         <div class="popup-row"><strong>To:</strong> ${this.escapeHtml(span.to_point_id || span.to_design_pole_no || 'Unknown')}</div>
         ${span.distance_m != null ? `<div class="popup-row"><strong>Distance:</strong> ${Number(span.distance_m).toFixed(1)}m</div>` : ''}
@@ -384,7 +384,7 @@ class MapViewer {
       FAIL: 'Design Blocker',
       'design-blockers': 'Design Blocker',
       'review-required': 'Review Required',
-      'replacement-proximity': 'Replacement Proximity',
+      'replacement-proximity': 'Existing/Proposed Match',
       'missing-height': 'Missing Height',
     };
     return labels[value] || value || mode;
@@ -436,7 +436,7 @@ class MapViewer {
         : '';
 
       const replacementHtml = p.relationship === 'replacement_pair'
-        ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;">Replacement proximity QA signal</div>'
+        ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;">Existing/proposed match signal</div>'
         : '';
 
       const explainedTypeHtml = explainedType
@@ -492,7 +492,7 @@ class MapViewer {
   statusBadge(status) {
     if (status === 'FAIL') return '<span style="color:#d94141;font-weight:700;">Design Blocker</span>';
     if (status === 'WARN') return '<span style="color:#d39e00;font-weight:700;">Review Required</span>';
-    return '<span style="color:#2e8b57;font-weight:700;">PASS</span>';
+    return '<span style="color:#2e8b57;font-weight:700;">Pass</span>';
   }
 
   explainAssetType(st) {

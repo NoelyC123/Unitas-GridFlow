@@ -8,6 +8,24 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — P010 Map Language Polish
+
+### Changed
+
+- Reframed the map page title from QA viewer language to `Survey Map Review`.
+- Renamed the route overlay legend and popup from internal Design Chain span wording to `Surveyed route sequence`.
+- Renamed map focus filters for existing/proposed matches and missing heights while keeping existing filter behavior intact.
+- Clarified map-side match wording as evidence prompts rather than confirmed design decisions, and added a note that detailed design-readiness reporting will move to a separate report-style view in a future polish pass.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pytest -v tests/test_project_integration.py tests/test_app_routes.py` — 46 passed.
+- `pytest -v` — 297 passed.
+- Browser smoke check confirmed `/map/view/project/P010/F001` renders the updated survey map wording.
+
+---
+
 ## 2026-04-30 — P010 Review Page Pairing Framing
 
 ### Changed

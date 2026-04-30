@@ -670,7 +670,7 @@ def test_map_view_includes_design_readiness_verdict(tmp_path, monkeypatch) -> No
     assert "PARTIALLY READY" in html
     assert "Survey Coverage" in html
     assert "Position &amp; Identity" in html
-    assert "Replacement counts here are QA signals/clusters" in html
+    assert "Existing/proposed match counts here are map evidence signals" in html
 
 
 def test_map_view_clarifies_replacement_narratives_are_not_reviewed_assignments(
