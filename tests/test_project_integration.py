@@ -446,7 +446,7 @@ def test_project_map_data_includes_design_chain_spans(client_and_root):
     ]
 
 
-def test_project_detail_includes_mobile_file_card_layout(client_and_root):
+def test_project_detail_includes_responsive_file_card_layout(client_and_root):
     client, projects_root = client_and_root
 
     _make_file_slot(projects_root, "P001", "F001", "survey.csv")
@@ -455,16 +455,23 @@ def test_project_detail_includes_mobile_file_card_layout(client_and_root):
 
     assert response.status_code == 200
     html = response.data.decode("utf-8")
-    assert "files-mobile-list" in html
-    assert "mobile-file-card" in html
-    assert "mobile-action-grid" in html
+    assert "files-card-list" in html
+    assert "project-file-card" in html
+    assert "file-card-metrics" in html
+    assert "file-action-grid" in html
     assert "Working View" in html
+    assert "Review</a>" in html
+    assert "Map</a>" in html
+    assert "PDF</a>" in html
     assert "Suggested order: Review issues" in html
-    assert "Designer Review" in html
+    assert "Designer reviewed" in html
     assert "review-pill" in html
-    assert "Processing Status" in html
-    assert "Survey Records" in html
-    assert "Pass / Warning / Fail" in html
+    assert "Processing status only, not final design approval" in html
+    assert "Survey records" in html
+    assert "Survey file QA status" in html
+    assert "Pass" in html
+    assert "Warning" in html
+    assert "Fail" in html
     assert "Record-level QA status" in html
     assert "Applied QA rules" in html
     assert "Office feedback / intake note" in html

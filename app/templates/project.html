@@ -22,8 +22,15 @@
     .summary-helper { font-size: 0.74rem; color: #6b7280; margin-top: 5px; line-height: 1.35; }
     .readiness-note { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; margin-bottom: 18px; }
     .files-card { border: 0; border-radius: 16px; box-shadow: 0 10px 28px rgba(15,23,42,0.08); overflow: hidden; margin-bottom: 20px; }
-    .table thead th { white-space: nowrap; vertical-align: middle; }
-    .table tbody td { vertical-align: middle; }
+    .file-card-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; padding: 16px; background: #f8fafc; }
+    .project-file-card { display: flex; flex-direction: column; gap: 14px; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; background: #fff; box-shadow: 0 1px 4px rgba(15,23,42,0.04); min-width: 0; }
+    .file-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .file-card-pills { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .file-card-meta { color: #6b7280; font-size: 0.84rem; line-height: 1.45; }
+    .file-card-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .file-card-metric { border: 1px solid #e5e7eb; border-radius: 10px; padding: 9px 10px; background: #f9fafb; min-width: 0; }
+    .file-card-metric-value { font-size: 1rem; font-weight: 800; color: #111827; line-height: 1.1; }
+    .file-card-metric-label { font-size: 0.72rem; color: #6b7280; margin-top: 3px; white-space: nowrap; }
     .file-name { font-weight: 600; color: #111827; font-size: 0.92rem; }
     .file-id-label { font-size: 0.75rem; color: #9ca3af; }
     .status-pill { display: inline-block; padding: 5px 9px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
@@ -33,7 +40,7 @@
     .intake-pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 0.76rem; font-weight: 700; background: #eef2ff; color: #4f46e5; margin-bottom: 4px; }
     .intake-reviewed { background: #e8f7ee; color: #1d7f49; }
     .intake-needs_review, .intake-needs_attention { background: #fff7ed; color: #c2410c; }
-    .intake-copy { font-size: 0.78rem; color: #6b7280; line-height: 1.35; max-width: 240px; }
+    .intake-copy { font-size: 0.78rem; color: #6b7280; line-height: 1.35; }
     .review-pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
     .review-reviewed { background: #e8f7ee; color: #1d7f49; }
     .review-not-reviewed { background: #fffbeb; color: #92400e; }
@@ -41,27 +48,23 @@
     .feedback-label { font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-top: 8px; }
     .feedback-helper { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
     .rulepack-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #4fc3e8; color: #fff; font-size: 0.78rem; font-weight: 700; }
-    .qa-status-counts { font-size: 0.82rem; color: #374151; line-height: 1.5; min-width: 160px; }
     .qa-status-helper { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
-    .actions-cell { white-space: normal; display: flex; flex-wrap: wrap; gap: 5px; min-width: 310px; }
-    .actions-cell .btn { margin-right: 4px; margin-bottom: 4px; }
+    .file-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; }
+    .file-action-grid .btn { width: 100%; }
     .workflow-note { font-size: 0.74rem; color: #6b7280; margin-top: 2px; white-space: normal; }
-    .mobile-file-list { display: none; }
-    .mobile-file-card { border-bottom: 1px solid #e5e7eb; padding: 16px; }
-    .mobile-file-card:last-child { border-bottom: 0; }
-    .mobile-file-meta { color: #6b7280; font-size: 0.84rem; line-height: 1.45; }
-    .mobile-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-    .mobile-action-grid .btn { width: 100%; }
     .empty-state { padding: 36px 20px; text-align: center; color: #6b7280; }
     .error-box { display: none; margin-bottom: 16px; }
-    @media (max-width: 1100px) {
-      .files-table-wrap { display: none; }
-      .mobile-file-list { display: block; }
-    }
-    @media (max-width: 900px) { .desktop-only { display: none; } }
     @media (max-width: 767.98px) {
       .summary-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .file-card-list { grid-template-columns: 1fr; padding: 12px; }
+      .file-card-header { flex-direction: column; align-items: stretch; }
+      .file-card-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .file-action-grid { grid-template-columns: 1fr 1fr; }
       .feedback-box { min-width: 0; width: 100%; }
+    }
+    @media (max-width: 420px) {
+      .file-card-list { padding: 10px; }
+      .file-action-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -120,26 +123,7 @@
         <span id="file-count-label" class="text-muted small"></span>
       </div>
       <div class="card-body p-0">
-        <div class="table-responsive files-table-wrap">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>File</th>
-                <th>Intake</th>
-                <th>Processing Status</th>
-                <th>Designer Review</th>
-                <th>Applied QA Rules</th>
-                <th>Survey Records</th>
-                <th class="desktop-only">Pass / Warning / Fail</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="files-tbody">
-              <tr><td colspan="8" class="empty-state">Loading files…</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div id="files-mobile-list" class="mobile-file-list">
+        <div id="files-card-list" class="file-card-list">
           <div class="empty-state">Loading files…</div>
         </div>
       </div>
@@ -236,46 +220,15 @@
       const workflowNote = hasSeq
         ? `<div class="workflow-note w-100">Suggested order: Review issues → Check map → Review PDF → Export CSVs</div>`
         : "";
-      return `<div class="actions-cell">${reviewBtn}${mapBtn}${pdfBtn}${chainBtn}${workingBtn}${workflowNote}</div>`;
-    }
-
-    function buildMobileFileActions(pid, fid, status, seqSummary) {
-      const s = String(status || "").toLowerCase();
-      if (s !== "complete") {
-        return `<span class="text-muted small">Processing…</span>`;
-      }
-
-      const hasSeq = seqSummary && seqSummary.status === "ok" && seqSummary.total_sequenced > 0;
-      const reviewBtn = `<a href="/review/project/${pid}/${fid}" class="btn btn-sm btn-outline-dark">
-        <i class="bi bi-check2-square"></i> Review</a>`;
-      const mapBtn = `<a href="/map/view/project/${pid}/${fid}" class="btn btn-sm btn-outline-primary">
-        <i class="bi bi-map"></i> Map</a>`;
-      const pdfBtn = `<a href="/pdf/qa/project/${pid}/${fid}" class="btn btn-sm btn-outline-danger">
-        <i class="bi bi-file-pdf"></i> PDF</a>`;
-      const chainBtn = hasSeq
-        ? `<a href="/d2d/export/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-table"></i> Design Route Sequence</a>`
-        : "";
-      const workingBtn = hasSeq
-        ? `<a href="/d2d/interleaved/project/${pid}/${fid}" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-layout-text-sidebar"></i> Working View</a>`
-        : "";
-      const workflowNote = hasSeq
-        ? `<div class="workflow-note">Suggested order: Review issues → Check map → Review PDF → Export CSVs</div>`
-        : "";
-      return `<div class="mobile-action-grid">${mapBtn}${reviewBtn}${pdfBtn}${chainBtn}${workingBtn}</div>${workflowNote}`;
+      return `<div class="file-action-grid">${reviewBtn}${mapBtn}${pdfBtn}${chainBtn}${workingBtn}</div>${workflowNote}`;
     }
 
     function renderFiles(files) {
-      const tbody = document.getElementById("files-tbody");
-      const mobileList = document.getElementById("files-mobile-list");
+      const cardList = document.getElementById("files-card-list");
       const countLabel = document.getElementById("file-count-label");
 
       if (!Array.isArray(files) || files.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
-          No files yet. <a href="/upload?project_id=${escapeHtml(PROJECT_ID)}">Add a survey file</a> to get started.
-        </td></tr>`;
-        if (mobileList) mobileList.innerHTML = `<div class="empty-state">
+        if (cardList) cardList.innerHTML = `<div class="empty-state">
           No files yet. <a href="/upload?project_id=${escapeHtml(PROJECT_ID)}">Add a survey file</a> to get started.
         </div>`;
         if (countLabel) countLabel.textContent = "0 files";
@@ -283,60 +236,6 @@
       }
 
       if (countLabel) countLabel.textContent = `${files.length} file${files.length !== 1 ? "s" : ""}`;
-
-      const rows = files.map(f => {
-        const fid = escapeHtml(f.file_id || "");
-        const fname = escapeHtml(f.filename || f.file_id || "");
-        const status = String(f.status || "unknown");
-        const qaRules = escapeHtml(displayQaRules(f.rulepack_id));
-        const intake = f.intake || {};
-        const intakeStatus = escapeHtml(intakeLabel(f.intake_status));
-        const intakeHelp = escapeHtml(intakeHelper(f.intake_status));
-        const reviewStatus = f.review_status || "not_reviewed";
-        const surveyDay = escapeHtml(intake.survey_day_label || "Survey upload");
-        const uploadedBy = escapeHtml(intake.uploaded_by || "");
-        const surveyorNote = escapeHtml(intake.surveyor_note || "");
-        const officeFeedback = escapeHtml(intake.office_feedback || "");
-        const records = f.pole_count ?? "—";
-        const pass = f.pass_count ?? 0;
-        const warn = f.warn_count ?? 0;
-        const fail = f.fail_count ?? 0;
-
-        return `
-          <tr>
-            <td>
-              <div class="file-name">${fname}</div>
-              <div class="file-id-label">${fid}</div>
-            </td>
-            <td>
-              <div class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</div>
-              <div class="intake-copy">${intakeHelp}</div>
-              <div class="intake-copy"><strong>${surveyDay}</strong>${uploadedBy ? ` · ${uploadedBy}` : ""}</div>
-              ${surveyorNote ? `<div class="intake-copy mt-1">${surveyorNote}</div>` : ""}
-              <div class="feedback-label">Office feedback / intake note</div>
-              <div class="feedback-helper">Use this for office feedback, resurvey prompts, or intake notes for this file.</div>
-              <div class="input-group input-group-sm mt-2 feedback-box">
-                <textarea class="form-control" id="feedback-${fid}" rows="2" placeholder="Office feedback / intake note">${officeFeedback}</textarea>
-                <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}')">Save</button>
-              </div>
-            </td>
-            <td>
-              <span class="status-pill ${statusClass(status)}">${escapeHtml(processingLabel(status))}</span>
-              <div class="qa-status-helper">Processing status only, not final design approval.</div>
-            </td>
-            <td>${reviewPill(reviewStatus)}</td>
-            <td><span class="rulepack-badge">${qaRules}</span></td>
-            <td><strong>${records}</strong></td>
-            <td class="desktop-only"><div class="qa-status-counts">
-              <div><span style="color:#2e8b57;font-weight:700;">${pass} Pass</span></div>
-              <div><span style="color:#d39e00;font-weight:700;">${warn} Warning</span></div>
-              <div><span style="color:#d94141;font-weight:700;">${fail} Fail</span></div>
-              <div class="qa-status-helper">Record-level QA status</div>
-            </div></td>
-            <td>${buildFileActions(escapeHtml(PROJECT_ID), fid, status, f.sequence_summary)}</td>
-          </tr>
-        `;
-      }).join("");
 
       const cards = files.map(f => {
         const fid = escapeHtml(f.file_id || "");
@@ -358,39 +257,59 @@
         const fail = f.fail_count ?? 0;
 
         return `
-          <div class="mobile-file-card">
-            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+          <article class="project-file-card">
+            <div class="file-card-header">
               <div>
                 <div class="file-name">${fname}</div>
                 <div class="file-id-label">${fid}</div>
+                <div class="file-card-pills mt-2">
+                  <span class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</span>
+                  ${reviewPill(reviewStatus)}
+                  <span class="rulepack-badge">${qaRules}</span>
+                </div>
               </div>
-              <span class="status-pill ${statusClass(status)}">${escapeHtml(processingLabel(status))}</span>
+              <div>
+                <span class="status-pill ${statusClass(status)}">${escapeHtml(processingLabel(status))}</span>
+                <div class="qa-status-helper">Processing status only, not final design approval.</div>
+              </div>
             </div>
-            <div class="mb-2">
-              <span class="intake-pill ${intakeClass(f.intake_status)}">${intakeStatus}</span>
-              ${reviewPill(reviewStatus)}
-              <span class="rulepack-badge ms-1">${qaRules}</span>
+            <div class="file-card-metrics" aria-label="Survey file QA status">
+              <div class="file-card-metric">
+                <div class="file-card-metric-value">${records}</div>
+                <div class="file-card-metric-label">Survey records</div>
+              </div>
+              <div class="file-card-metric">
+                <div class="file-card-metric-value" style="color:#2e8b57;">${pass}</div>
+                <div class="file-card-metric-label">Pass</div>
+              </div>
+              <div class="file-card-metric">
+                <div class="file-card-metric-value" style="color:#d39e00;">${warn}</div>
+                <div class="file-card-metric-label">Warning</div>
+              </div>
+              <div class="file-card-metric">
+                <div class="file-card-metric-value" style="color:#d94141;">${fail}</div>
+                <div class="file-card-metric-label">Fail</div>
+              </div>
             </div>
-            <div class="mobile-file-meta">
+            <div class="file-card-meta">
               <div>${intakeHelp}</div>
-              <div><strong>${records}</strong> survey records · <strong>${issues}</strong> QA findings</div>
+              <div><strong>${issues}</strong> QA findings · Record-level QA status</div>
               <div>Record status: <span style="color:#2e8b57;">${pass} Pass</span> / <span style="color:#d39e00;">${warn} Warning</span> / <span style="color:#d94141;">${fail} Fail</span></div>
               <div><strong>${surveyDay}</strong>${uploadedBy ? ` · ${uploadedBy}` : ""}</div>
               ${surveyorNote ? `<div>${surveyorNote}</div>` : ""}
             </div>
-            ${buildMobileFileActions(escapeHtml(PROJECT_ID), fid, status, f.sequence_summary)}
+            ${buildFileActions(escapeHtml(PROJECT_ID), fid, status, f.sequence_summary)}
             <div class="feedback-label">Office feedback / intake note</div>
             <div class="feedback-helper">Use this for office feedback, resurvey prompts, or intake notes for this file.</div>
             <div class="input-group input-group-sm mt-3 feedback-box">
-              <textarea class="form-control" id="feedback-mobile-${fid}" rows="2" placeholder="Office feedback / intake note">${officeFeedback}</textarea>
-              <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}', 'feedback-mobile-${fid}')">Save</button>
+              <textarea class="form-control" id="feedback-${fid}" rows="2" placeholder="Office feedback / intake note">${officeFeedback}</textarea>
+              <button class="btn btn-outline-secondary" type="button" onclick="saveIntakeFeedback('${fid}')">Save</button>
             </div>
-          </div>
+          </article>
         `;
       }).join("");
 
-      tbody.innerHTML = rows;
-      if (mobileList) mobileList.innerHTML = cards;
+      if (cardList) cardList.innerHTML = cards;
     }
 
     function renderSummary(summary, files) {
@@ -442,8 +361,8 @@
       } catch (err) {
         console.error(err);
         if (errorBox) { errorBox.textContent = err.message || String(err); errorBox.style.display = "block"; }
-        const tbody = document.getElementById("files-tbody");
-        if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Could not load project.</td></tr>`;
+        const cardList = document.getElementById("files-card-list");
+        if (cardList) cardList.innerHTML = `<div class="empty-state">Could not load project.</div>`;
       }
     }
 
