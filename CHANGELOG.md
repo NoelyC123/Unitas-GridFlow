@@ -26,6 +26,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-04-30 — Collapse Map Report Detail Sections
+
+### Changed
+
+- Kept the map side panel focused on route inspection by collapsing long readiness, evidence, completeness, risk, action, and replacement-signal details behind a report-details disclosure.
+- Added a compact readiness verdict row so the main map panel still shows the key readiness signal without crowding the filters and legend.
+- Updated map guidance copy to direct users to the PDF for the full issue list.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pytest -v tests/test_project_integration.py tests/test_app_routes.py` — 46 passed.
+
+---
+
 ## 2026-04-30 — Separate Map Asset Type From QA Status
 
 ### Changed

@@ -388,6 +388,7 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Review Status Colour" in html
     assert "Survey Map Review" in html
     assert "Open review findings" in html
+    assert "Detailed readiness, evidence, and completeness notes are collapsed" in html
 
 
 def test_project_map_data_includes_design_chain_spans(client_and_root):

@@ -392,6 +392,34 @@
       color: #475569;
     }
 
+    .readiness-mini {
+      align-items: center;
+      border-top: 1px solid #e5e7eb;
+      color: #374151;
+      display: flex;
+      font-size: 0.86rem;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 10px;
+    }
+
+    .map-report-details {
+      border-top: 1px solid #e5e7eb;
+      margin-top: 12px;
+      padding-top: 10px;
+    }
+
+    .map-report-details summary {
+      color: #111827;
+      cursor: pointer;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .map-report-body {
+      margin-top: 10px;
+    }
+
     .leaflet-popup-content {
       min-width: 170px;
     }
@@ -628,11 +656,22 @@
               This job contains flagged issues. Click markers to inspect record details, then use the PDF for the full issue list.
             </div>
             <div style="font-size:0.74rem; color:#6b7280; margin-top:6px; line-height:1.35;">
-              This map is for route and record inspection. Detailed design-readiness reporting is shown below for now and will move into a separate report-style view in a future polish pass.
+              This map is for route and record inspection. Detailed readiness, evidence, and completeness notes are collapsed under Report details; use the PDF for the full issue list.
             </div>
 
             {% if design_readiness and design_readiness.verdict %}
-            <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
+            <div class="readiness-mini">
+              <span>Readiness check</span>
+              <strong style="color: {% if design_readiness.verdict == 'LIKELY READY' %}#2e8b57{% elif design_readiness.verdict == 'PARTIALLY READY' %}#d39e00{% else %}#d94141{% endif %};">{{ design_readiness.verdict }}</strong>
+            </div>
+            {% endif %}
+
+            {% if (design_readiness and design_readiness.verdict) or evidence_gates or (circuit_summary and circuit_summary.summary_text) or top_design_risks or recommended_actions or (completeness and completeness.total_records) or replacement_narratives %}
+            <details class="map-report-details">
+              <summary>Report details: readiness, evidence and completeness</summary>
+              <div class="map-report-body">
+            {% if design_readiness and design_readiness.verdict %}
+            <div>
               <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Design Readiness</div>
               <div style="font-weight: 700; font-size: 1.0rem; margin-bottom: 6px; color: {% if design_readiness.verdict == 'LIKELY READY' %}#2e8b57{% elif design_readiness.verdict == 'PARTIALLY READY' %}#d39e00{% else %}#d94141{% endif %};">
                 {{ design_readiness.verdict }}
@@ -776,6 +815,9 @@
               <div style="font-size: 0.78rem; color: #6b7280; margin-top: 3px;">… and {{ replacement_narratives|length - 5 }} more</div>
               {% endif %}
             </div>
+            {% endif %}
+              </div>
+            </details>
             {% endif %}
           </div>
         </div>
