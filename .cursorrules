@@ -1,53 +1,575 @@
-# Unitas-GridFlow — Cursor Rules
+# Unitas-GridFlow — Cursor AI Rules
 
-## First action — read this before anything else
+## CRITICAL: Read This First
 
-Read these files in this order:
+You are working on **Unitas GridFlow** — a narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
 
-1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
-2. `AI_CONTROL/01_CURRENT_STATE.md`
-3. `AI_CONTROL/02_CURRENT_TASK.md`
-4. `AI_CONTROL/03_WORKING_RULES.md`
-5. `AI_CONTROL/04_SESSION_HANDOFF.md`
-6. `AI_CONTROL/05_PROJECT_REFERENCE.md`
+**Current Status:** Stage 3 complete (survey-to-design handoff working). Future stages require operational evidence before implementation.
 
-These files are the active control layer for the project.
+---
 
-## Then also read
+## 1. MANDATORY STARTUP SEQUENCE
+
+### Step 1: Read Control Layer (REQUIRED)
+
+Read these files in this exact order before doing anything:
+
+1. `AI_CONTROL/00_PROJECT_CANONICAL.md` — project identity and canonical model
+2. `AI_CONTROL/02_CURRENT_TASK.md` — what to work on right now
+3. `AI_CONTROL/01_CURRENT_STATE.md` — current system state (only if needed)
+4. `AI_CONTROL/03_WORKING_RULES.md` — how to work on this project
+5. `AI_CONTROL/04_SESSION_HANDOFF.md` — latest session context (only if needed)
+
+### Step 2: Additional Context (As Needed)
 
 - `CHANGELOG.md` — rolling history of what shipped
-- `README.md` — project overview and setup
-- `_archive/docs/PROJECT_SYNTHESIS/` — only if historical strategic context is needed
-- `_archive/control_layer/old_ai_control/` — only if old control-layer history is needed
+- `README.md` — project overview and quick start
+- `CLAUDE.md` — Claude Code specific instructions
+- `WORKFLOW_SYSTEM.md` — multi-AI orchestration model
+- `PROJECT_DEEP_CONTEXT.md` — why this project exists
 
-## Project identity
+### Step 3: Never Read Unless Explicitly Asked
 
-Unitas GridFlow — narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs.
+- `_archive/` — historical material, reference only
+- Anything in `uploads/` or `validation_data/` — job data
 
-Location: `/Users/noelcollins/Unitas-GridFlow/`
-GitHub: `https://github.com/NoelyC123/Unitas-GridFlow`
-Port: 5001
-Venv: `.venv312`
-Python: 3.13
+---
 
-## Tech stack
+## 2. PROJECT IDENTITY
 
-Flask, pandas, geopandas, reportlab, pyproj, Leaflet, Bootstrap 5
+**Name:** Unitas GridFlow
+**Purpose:** Pre-CAD QA gatekeeper for survey-to-design handoffs
+**Scope:** Narrow (pre-CAD validation only, not design, not CAD, not general platform)
 
-## Key live files
+**Location:** `/Users/noelcollins/Unitas-GridFlow/`
+**GitHub:** `https://github.com/NoelyC123/Unitas-GridFlow`
+**Branch:** `master`
 
-- `app/dno_rules.py` — QA rulepacks
-- `app/qa_engine.py` — QA engine
-- `app/routes/api_intake.py` — main CSV processing pipeline
-- `app/routes/api_rulepacks.py` — rulepack API
-- `tests/` — pytest suite, must stay green
+**Runtime:**
+- Python: 3.13
+- Venv: `.venv312`
+- Flask port: 5001
+- Activate: `source .venv312/bin/activate`
 
-## Hard rules
+---
 
-- Never broaden scope beyond the current task.
-- Always read a file before editing it.
-- After any code change: `pytest -v`.
-- Keep the active control layer and live code aligned.
-- Do not treat archived files as active instructions.
-- Never restore from `_archive/quarantine/old_quarantine/` blindly.
-- Never treat autocomplete or AI suggestions as authoritative for DNO-specific values.
+## 3. TECH STACK
+
+**Backend:**
+- Flask (web framework)
+- pandas, geopandas (data processing)
+- shapely, pyproj (geometry and projection)
+- reportlab (PDF generation)
+
+**Frontend:**
+- Leaflet (mapping)
+- Bootstrap 5 (UI)
+- Vanilla JavaScript (no React/Vue)
+
+**Quality:**
+- pytest (testing)
+- Ruff (linting)
+- pre-commit (hooks)
+- GitHub Actions (CI)
+
+---
+
+## 4. KEY SOURCE FILES
+
+### Core QA Logic
+- `app/dno_rules.py` — DNO rulepack definitions (SPEN, SSEN, NIE, ENWL)
+- `app/qa_engine.py` — QA validation engine
+- `app/routes/api_intake.py` — CSV intake and processing pipeline
+- `app/routes/api_rulepacks.py` — rulepack API endpoint
+
+### Supporting Routes
+- `app/routes/api_upload.py` — file upload handling
+- `app/routes/map_preview.py` — Leaflet map rendering
+- `app/routes/pdf_reports.py` — PDF QA report generation
+- `app/routes/completeness.py` — completeness summary endpoint
+
+### Tests (MUST STAY GREEN)
+- `tests/` — entire pytest suite
+- Current count: 296 passing tests
+
+---
+
+## 5. WORKING BOUNDARIES (NOT RIGID PROHIBITIONS)
+
+### Guideline 1: Always Read Before Edit
+Never assume file contents. Always use the `view` or `read_file` tool before editing.
+
+### Guideline 2: Test After Every Change
+After any code change:
+```bash
+pytest -v
+```
+Tests should pass before committing.
+
+### Guideline 3: Run Pre-Commit
+Before every commit:
+```bash
+pre-commit run --all-files
+```
+
+### Guideline 4: Stay Within Task Scope
+- Read `AI_CONTROL/02_CURRENT_TASK.md` to know what to work on
+- Keep changes focused on current priorities
+- Discuss scope expansion before implementing
+- Verify architectural changes are intentional, not accidental
+
+### Guideline 5: Understand Project Phases
+
+**Current Focus:** Stage 3 operational refinement and practitioner-review remediation
+
+**Completed Stages:**
+- Stage 1: Basic intake and QA
+- Stage 2: Raw controller format support (2A/2B/2C complete)
+- Stage 3: Multi-file projects, designer review, remote access (3A/3B/3C complete)
+
+**Future Stages Requiring Operational Evidence:**
+
+**Stage 4 — Structured Field Capture**
+- Tablet capture interface
+- Photo upload and attachment
+- Real-time GPS validation
+- ArcGIS/Trimble integration
+- Field evidence annotation
+
+**Stage 5 — Designer Workspace**
+- Design task management
+- PoleCAD integration
+- Collaborative review
+- Version control
+
+**Stage 6 — Production Deployment**
+- Multi-tenant hosting
+- User accounts and roles
+- Cloud storage
+- Production monitoring
+
+**Boundary Guidance:**
+If current Stage 3 work naturally extends into Stage 4/5/6 concepts:
+1. Pause and discuss the boundary
+2. Ask: "Does this solve a current Stage 3 operational need?"
+3. If yes → discuss approach and implement narrowly
+4. If no → document as future work and return to current priorities
+
+### Guideline 6: Archive is Reference Only
+- `_archive/` contains historical material
+- Avoid using archived code as current truth
+- Discuss before restoring from `_archive/quarantine/`
+- Treat old synthesis documents as historical context, not active instructions
+
+### Guideline 7: Control Layer is Truth
+- `AI_CONTROL/` files define current state and direction
+- If code and control layer conflict → control layer wins
+- Update control layer files when state changes
+- Keep code and control layer aligned
+
+### Guideline 8: Verify Domain-Specific Values
+- Don't blindly trust autocomplete for DNO-specific values
+- Don't rely on AI suggestions for regulatory constants
+- Always verify domain-specific values against source material
+
+### Guideline 9: Validation-Led Development
+- Real-world evidence takes priority over abstract features
+- Avoid building without validation evidence
+- Consider whether more features are the right step before implementing
+
+### Guideline 10: Commit Standards
+```bash
+git add .
+git commit -m "clear, specific message"
+git push origin master
+```
+Push after successful test + pre-commit.
+
+---
+
+## 6. BOUNDARY JUDGMENT EXAMPLES
+
+**Good examples (encouraged):**
+✅ Adding a photo-reference placeholder column to Stage 3 exports (prepares handoff, no implementation)
+✅ Discussing how Stage 4 capture might integrate with current design chain (planning)
+✅ Structuring Stage 3 data model to accommodate future photo attachments (architecture)
+✅ Asking "Would this Stage 3 fix make Stage 4 harder?" (thinking ahead)
+✅ Implementing a Stage 3 feature that will reduce Stage 4 technical debt
+
+**Requires discussion first:**
+⚠️ Building a tablet photo-upload UI (Stage 4 feature, discuss current operational need)
+⚠️ Implementing GPS validation gating (Stage 4 feature, needs real survey evidence)
+⚠️ Creating user account system (Stage 6 feature, discuss if needed for Stage 3)
+⚠️ Redesigning entire data model for future stages (discuss impact on current work)
+
+**Clear overreach (avoid):**
+❌ Building complete Stage 4 tablet interface because "we might need it eventually"
+❌ Implementing all of Stage 5 designer workspace speculatively
+❌ Deploying to production hosting without operational validation
+❌ Adding features because they "would be cool" without evidence of need
+
+---
+
+## 7. WHAT YOU'RE ENCOURAGED TO DO
+
+You're welcome to:
+- Discuss implications across all 6 stages
+- Ask "what if" questions about future stages
+- Think holistically about the roadmap
+- Prepare current work for future integration
+- Suggest connections between stages
+- Point out when current work might complicate future stages
+- Propose architectural decisions that consider long-term evolution
+
+Just pause and discuss before:
+- Building complete future-stage features
+- Implementing workflows without current operational need
+- Expanding scope significantly without evidence
+
+---
+
+## 8. WORKFLOW COMMANDS
+
+### Activate Environment
+```bash
+source .venv312/bin/activate
+```
+
+### Run Application
+```bash
+python run.py
+# App runs on http://localhost:5001
+```
+
+### Run Tests
+```bash
+pytest -v                    # all tests
+pytest -v tests/test_qa_engine.py  # specific file
+pytest -k test_name          # specific test
+pytest --cov=app            # with coverage
+```
+
+### Run Linting
+```bash
+pre-commit run --all-files  # run all hooks
+ruff check .                # check only
+ruff check --fix .          # auto-fix
+```
+
+### Git Workflow
+```bash
+git status
+git add .
+git commit -m "message"
+git push origin master
+```
+
+### Check Health
+```bash
+curl http://localhost:5001/health/full
+```
+
+---
+
+## 9. CURRENT PHASE AWARENESS
+
+**Completed:**
+- ✅ Working local MVP
+- ✅ Stage 1: Basic intake and QA
+- ✅ Stage 2: Raw controller format support (2A/2B/2C)
+- ✅ Stage 3: Multi-file projects, designer review, remote access (3A/3B/3C)
+- ✅ 296 passing tests
+- ✅ 4 live DNO rulepacks (SPEN, SSEN, NIE, ENWL)
+- ✅ Real job validation (Gordon, 4-474, 513, 474c, Bellsprings)
+
+**Current Focus:**
+- Stage 3 practitioner-review remediation
+- Real-world operational refinement
+- Design-readiness clarity improvements
+
+**Future Work:**
+- Stage 4: Structured field capture (requires evidence)
+- Stage 5: Designer workspace (requires evidence)
+- Stage 6: Production deployment (requires evidence)
+
+---
+
+## 10. WORK TO DISCUSS FIRST (NOT PROHIBIT)
+
+Before implementing these, pause and discuss:
+- Complete tablet capture interfaces
+- Photo upload and management systems
+- Real-time GPS validation gating
+- ArcGIS/Trimble deep integration
+- User account and authentication systems
+- Multi-tenant cloud deployment
+- PoleCAD direct export (need verified schema)
+- Major architectural redesigns
+- Speculative future-stage features
+
+**Why discuss first?**
+- Ensure it solves a current operational need
+- Verify we have evidence the approach works
+- Confirm it's the narrowest solution to the current problem
+- Avoid building features we might not need
+
+**Examples:**
+- "Should we add tablet capture?" → Discuss: Is there a Stage 3 handoff need this solves?
+- "Can we integrate with ArcGIS?" → Discuss: Do we have evidence of the target integration model?
+- "Should we build user accounts?" → Discuss: Is there a current multi-user operational need?
+
+---
+
+## 11. FILE STRUCTURE AWARENESS
+
+### Active Project (USE THIS)
+```
+AI_CONTROL/          # Control layer - project truth
+app/                 # Flask application
+tests/               # pytest suite
+sample_data/         # Example inputs
+scripts/             # Utility scripts
+deploy/              # Deployment configs
+docker/              # Docker setup
+README.md
+CHANGELOG.md
+CLAUDE.md
+WORKFLOW_SYSTEM.md
+PROJECT_DEEP_CONTEXT.md
+```
+
+### Archive (REFERENCE ONLY)
+```
+_archive/            # Historical material
+  control_layer/     # Old control files
+  docs/              # Old documentation
+  quarantine/        # Removed code
+  ai_bundles/        # Old AI handoff packs
+```
+
+### Local/Tool Files (IGNORE AS PROJECT TRUTH)
+```
+.env
+.vscode/
+.claude/
+.venv312/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+uploads/             # Job data - searchable but not auto-indexed
+validation_data/     # Test data - searchable but not auto-indexed
+```
+
+---
+
+## 12. COMMON OPERATIONS
+
+### Creating a New QA Check
+1. Read `app/qa_engine.py`
+2. Add check logic to `run_qa()`
+3. Update relevant rulepacks in `app/dno_rules.py`
+4. Add tests in `tests/test_qa_engine.py`
+5. Run `pytest -v`
+6. Update `CHANGELOG.md`
+
+### Adding a New DNO Rulepack
+1. Read `app/dno_rules.py`
+2. Define rulepack following existing pattern
+3. Add to `RULEPACKS` dict
+4. Add tests in `tests/test_qa_engine.py`
+5. Run `pytest -v`
+6. Update `AI_CONTROL/01_CURRENT_STATE.md`
+7. Update `CHANGELOG.md`
+
+### Improving Input Normalization
+1. Read `app/routes/api_intake.py`
+2. Update `_normalize_dataframe()` function
+3. Add tests in `tests/test_api_intake.py`
+4. Run `pytest -v`
+5. Update `CHANGELOG.md`
+
+### Updating Control Layer
+1. Read relevant `AI_CONTROL/` file
+2. Make targeted update
+3. Keep other files in sync
+4. Update `CHANGELOG.md` if something shipped
+
+---
+
+## 13. ERROR HANDLING
+
+### If Tests Fail
+1. Read the test failure output carefully
+2. Identify which test failed and why
+3. Fix the issue in the source code
+4. Run `pytest -v` again
+5. Avoid committing until tests pass
+
+### If Pre-Commit Fails
+1. Read the pre-commit output
+2. Most issues auto-fix with `ruff check --fix .`
+3. Re-run `pre-commit run --all-files`
+4. Commit after passing
+
+### If CI Fails
+1. Check GitHub Actions tab
+2. Read the failure log
+3. Reproduce locally
+4. Fix and push again
+
+---
+
+## 14. STRATEGIC AWARENESS
+
+### Project Framing
+**Best current framing:**
+- Internal workflow tool
+- Consultancy leverage asset
+- Narrow productivity/QA layer
+
+**Less realistic at this stage:**
+- Broad SaaS platform
+- Major standalone product
+- Fully mature DNO compliance engine
+
+### Main Unresolved Question
+**Does the current tool provide meaningful value on real survey files for real users?**
+
+The next meaningful progress comes from validation evidence, not just new features.
+
+### Development Principle
+**Validation-led, not feature-led.**
+
+Every step should answer: "Does this improve the reliability, clarity, and design-readiness of real survey data?"
+
+---
+
+## 15. CURSOR-SPECIFIC OPTIMIZATIONS
+
+### Use Composer for Multi-File Changes
+- When changing multiple files, use Cursor Composer
+- Keep changes focused and targeted
+- Test after each logical change group
+
+### Use Chat for Questions
+- Ask questions before making changes
+- Clarify scope before implementation
+- Verify understanding of task
+
+### Use Inline Edits for Small Changes
+- Single-line fixes
+- Simple refactors
+- Comment updates
+
+### Index These Paths for Better Context
+```
+AI_CONTROL/**
+app/**
+tests/**
+README.md
+CHANGELOG.md
+CLAUDE.md
+WORKFLOW_SYSTEM.md
+```
+
+### Ignore These Paths for Performance
+```
+.venv312/**
+_archive/**
+.pytest_cache/**
+.ruff_cache/**
+__pycache__/**
+```
+
+### Search These On Demand
+```
+uploads/**           # Real job data - searchable when needed
+validation_data/**   # Validation evidence - searchable when needed
+```
+
+---
+
+## 16. RESPONSE PATTERNS
+
+### When Given a Task
+1. Acknowledge the task
+2. State which files you'll read
+3. Read those files
+4. Propose the change
+5. Implement after confirmation
+6. Run tests
+7. Run pre-commit
+8. Report results
+
+### When Uncertain
+1. State what you're uncertain about
+2. Ask clarifying questions
+3. Reference control layer files
+4. Wait for confirmation before proceeding
+
+### When Encountering Issues
+1. State the issue clearly
+2. Propose solutions
+3. Wait for direction
+4. Avoid guessing or assuming
+
+### When Work Touches Future Stages
+1. Acknowledge the connection
+2. Ask: "Does this solve a current Stage 3 need?"
+3. Propose narrow implementation if yes
+4. Suggest documenting for later if no
+
+---
+
+## 17. QUALITY GATES
+
+Before any commit:
+- ✅ Tests pass (`pytest -v`)
+- ✅ Pre-commit passes (`pre-commit run --all-files`)
+- ✅ Code changes are minimal and targeted
+- ✅ Control layer is updated if state changed
+- ✅ `CHANGELOG.md` updated if something shipped
+
+Before any push:
+- ✅ All quality gates above pass
+- ✅ Commit message is clear and specific
+- ✅ No unrelated changes included
+
+---
+
+## 18. FINAL REMINDERS
+
+**This is a narrow, focused tool.**
+- It validates survey data before design
+- It catches issues early
+- It improves handoff quality
+- It is focused on one problem, not everything
+
+**The control layer is authoritative.**
+- Always defer to `AI_CONTROL/` for direction
+- Never rely on memory or assumptions
+- Keep code and control aligned
+
+**Validation drives development.**
+- Real survey files matter more than abstract features
+- Proof-of-value matters more than feature count
+- Evidence beats speculation
+
+**You're part of a multi-AI system.**
+- Claude Code handles implementation
+- Claude Desktop handles validation
+- ChatGPT handles orchestration
+- You (Cursor) handle rapid iteration and exploration
+
+**Your role:**
+- Fast, focused code changes
+- Test-driven refinement
+- Targeted fixes
+- Quick experiments
+- Strategic questions welcome, but implementation decisions require human approval
+
+---
+
+## END OF CURSOR RULES
+
+**Always read `AI_CONTROL/02_CURRENT_TASK.md` before starting work.**
