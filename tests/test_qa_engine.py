@@ -1327,6 +1327,74 @@ def test_conductor_hv_overhead_skips_third_party_and_lv_and_underground() -> Non
     assert len(issues) == 0
 
 
+def test_connectivity_span_endpoints_warns_when_half_missing() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A",
+                "structure_type": "Pol",
+                "from_support_id": "P1",
+                "to_support_id": None,
+                "_record_role": "structural",
+            }
+        ]
+    )
+    issues = run_qa_checks(df, [{"check": "connectivity_span_endpoints"}])
+    assert len(issues) == 1
+    assert "incomplete" in issues.iloc[0]["Issue"].lower()
+
+
+def test_connectivity_reference_warns_unknown_pole() -> None:
+    df = pd.DataFrame(
+        [
+            {"pole_id": "P1", "structure_type": "Pol", "_record_role": "structural"},
+            {
+                "pole_id": "P2",
+                "structure_type": "Pol",
+                "from_support_id": "P1",
+                "to_support_id": "P99",
+                "_record_role": "structural",
+            },
+        ]
+    )
+    issues = run_qa_checks(df, [{"check": "connectivity_reference_ids"}])
+    assert len(issues) == 1
+    assert "P99" in issues.iloc[0]["Issue"]
+
+
+def test_equipment_expected_transformer_warns_when_empty() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "TX-1",
+                "structure_type": "EXpole",
+                "location": "100kVA transformer pole",
+                "equipment": None,
+                "_record_role": "structural",
+            }
+        ]
+    )
+    issues = run_qa_checks(df, [{"check": "equipment_expected_transformer"}])
+    assert len(issues) == 1
+
+
+def test_survey_metadata_advisory_info_only() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P1",
+                "structure_type": "Pol",
+                "surveyor": None,
+                "survey_date": None,
+                "_record_role": "structural",
+            }
+        ]
+    )
+    issues = run_qa_checks(df, [{"check": "survey_metadata_advisory"}])
+    assert len(issues) == 1
+    assert issues.iloc[0].get("Severity") == "INFO"
+
+
 def test_classify_height_confidence_high_for_measured_rtk() -> None:
     confidence = classify_height_confidence(
         {

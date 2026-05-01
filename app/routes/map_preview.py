@@ -7,8 +7,12 @@ from pathlib import Path
 from flask import Blueprint, jsonify, render_template
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
-from app.electrical_schema import merge_electrical_fields_into_props
+from app.electrical_schema import (
+    merge_electrical_fields_into_props,
+    merge_equipment_fields_into_props,
+)
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
+from app.survey_connectivity import merge_connectivity_into_props, merge_survey_metadata_into_props
 
 map_preview_bp = Blueprint("map_preview", __name__)
 
@@ -78,6 +82,35 @@ POPUP_DATA_FIELDS = {
     "cable_detail": {},
     "cable_size": None,
     "cores_phases": None,
+    "equipment_categories": [],
+    "equipment_primary_category": None,
+    "equipment_type_detail": {},
+    "equipment_kva": None,
+    "equipment_kva_label": None,
+    "equipment_voltage_ratio": None,
+    "pole_top_arrangement": None,
+    "pole_top_detail": {},
+    "insulator_type": None,
+    "crossarm_configuration": None,
+    "earthing_status": None,
+    "asset_plate_id": None,
+    "equipment_mounting": None,
+    "from_support_id": None,
+    "to_support_id": None,
+    "parent_support_id": None,
+    "parent_structure_id": None,
+    "cable_from_asset_id": None,
+    "cable_to_asset_id": None,
+    "connectivity_parent_pole": None,
+    "survey_job_ref": None,
+    "equipment_used": None,
+    "survey_limitations": None,
+    "gnss_fix_type": None,
+    "horizontal_accuracy_m": None,
+    "vertical_accuracy_m": None,
+    "gnss_accuracy_summary": None,
+    "capture_method_key": None,
+    "capture_method_label": None,
 }
 
 
@@ -188,6 +221,9 @@ def _enrich_popup_data_model(data: dict) -> dict:
         if not props.get("voltage"):
             props["voltage"] = _infer_voltage(props, metadata)
         merge_electrical_fields_into_props(props)
+        merge_equipment_fields_into_props(props)
+        merge_connectivity_into_props(props)
+        merge_survey_metadata_into_props(props)
         if props.get("photo_links") and not props.get("photo_count"):
             props["photo_count"] = len(props.get("photo_links") or [])
     return data

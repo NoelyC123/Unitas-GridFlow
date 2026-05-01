@@ -8,6 +8,25 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 2 D2-B–D2-D: Equipment, connectivity, survey metadata
+
+### Added
+
+- **`app/electrical_schema.py` (D2-B):** Equipment taxonomy, kVA / voltage-ratio parsing, pole-top arrangements, insulator/crossarm/earthing/asset plate, `merge_equipment_fields_into_props`.
+- **`app/survey_connectivity.py` (D2-C/D2-D):** Relationship fields on features, GNSS accuracy parsing, capture-method labels, `merge_connectivity_into_props`, `merge_survey_metadata_into_props`.
+- **Intake:** Column aliases for span/stay/cable endpoints, pole-top, survey job ref, equipment used, accuracy columns; feature properties and coercions extended.
+- **`app/qa_engine.py`:** `equipment_expected_transformer`, `connectivity_span_endpoints`, `connectivity_reference_ids`, `connectivity_stay_parent`, `survey_metadata_advisory` (INFO — excluded from per-row WARN/FAIL tallies).
+- **`app/routes/map_preview.py`:** Enrichment merges for equipment, connectivity, survey metadata.
+- **Map viewer:** Sections *Equipment & pole-top*, *Network links*, *Survey metadata*; cache bump `v=27`.
+- **Tests:** `tests/test_survey_connectivity.py`, extended `test_electrical_schema`, `test_qa_engine`, `test_api_intake`.
+
+### Validated
+
+- `pytest` — 336 passed.
+- `pre-commit run --all-files` — passed.
+
+---
+
 ## 2026-05-01 — Phase 2 D2-A: Conductor/Cable Electrical Schema
 
 ### Added

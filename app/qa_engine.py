@@ -6,7 +6,7 @@ import re
 import pandas as pd
 from pyproj import Transformer
 
-from app.electrical_schema import row_suggests_hv_overhead
+from app.electrical_schema import row_suggests_hv_overhead, row_suggests_transformer_equipment
 
 _OSGB_TRANSFORMER = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
 
@@ -562,6 +562,137 @@ def run_qa_checks(df, rules):
                         "Severity": "WARN",
                     }
                 )
+
+        elif check == "equipment_expected_transformer":
+            for _, row in qc.iterrows():
+                if _is_third_party_record(row):
+                    continue
+                role = str(row.get("_record_role") or "").lower()
+                if role in ("context", "anchor"):
+                    continue
+                if not _is_existing_pole_record(row):
+                    continue
+                if not row_suggests_transformer_equipment(row):
+                    continue
+                ev = row.get("equipment") or row.get("mounted_equipment")
+                if not _is_missing_scalar(ev):
+                    continue
+                issues.append(
+                    {
+                        "Issue": (
+                            "Transformer or kVA equipment implied — mounted equipment not recorded"
+                        ),
+                        "Row": row.to_dict(),
+                        "Severity": "WARN",
+                    }
+                )
+
+        elif check == "connectivity_span_endpoints":
+            cols = qc.columns
+            has_from = "from_support_id" in cols
+            has_to = "to_support_id" in cols
+            if has_from or has_to:
+                for _, row in qc.iterrows():
+                    if _is_third_party_record(row):
+                        continue
+                    role = str(row.get("_record_role") or "").lower()
+                    if role in ("context", "anchor"):
+                        continue
+                    f = row.get("from_support_id")
+                    t = row.get("to_support_id")
+                    f_pres = not _is_missing_scalar(f)
+                    t_pres = not _is_missing_scalar(t)
+                    if not f_pres and not t_pres:
+                        continue
+                    if f_pres ^ t_pres:
+                        issues.append(
+                            {
+                                "Issue": (
+                                    "Span connectivity incomplete — record both from and to "
+                                    "support identifiers"
+                                ),
+                                "Row": row.to_dict(),
+                                "Severity": "WARN",
+                            }
+                        )
+
+        elif check == "connectivity_reference_ids":
+            cols = qc.columns
+            if "from_support_id" in cols or "to_support_id" in cols:
+                pid_set: set[str] = set()
+                for _, r in df.iterrows():
+                    p = r.get("pole_id")
+                    if not _is_missing_scalar(p):
+                        pid_set.add(str(p).strip())
+                for _, row in qc.iterrows():
+                    if _is_third_party_record(row):
+                        continue
+                    for fld in ("from_support_id", "to_support_id"):
+                        if fld not in cols:
+                            continue
+                        v = row.get(fld)
+                        if _is_missing_scalar(v):
+                            continue
+                        vs = str(v).strip()
+                        if vs not in pid_set:
+                            issues.append(
+                                {
+                                    "Issue": (
+                                        f"Support reference '{vs}' not found on job pole list"
+                                    ),
+                                    "Row": row.to_dict(),
+                                    "Severity": "WARN",
+                                }
+                            )
+
+        elif check == "connectivity_stay_parent":
+            cols = qc.columns
+            has_linked = "linked_pole_id" in cols
+            has_parent = "parent_support_id" in cols
+            if has_linked or has_parent:
+                for _, row in qc.iterrows():
+                    if _is_third_party_record(row):
+                        continue
+                    if str(row.get("_record_role") or "").lower() == "anchor":
+                        continue
+                    st = str(row.get("structure_type") or "").strip()
+                    if st not in _STAY_EVIDENCE_CODES:
+                        continue
+                    parent = row.get("parent_support_id") if has_parent else None
+                    linked = row.get("linked_pole_id") if has_linked else None
+                    if not _is_missing_scalar(parent) or not _is_missing_scalar(linked):
+                        continue
+                    issues.append(
+                        {
+                            "Issue": "Stay structure has no parent pole identifier",
+                            "Row": row.to_dict(),
+                            "Severity": "WARN",
+                        }
+                    )
+
+        elif check == "survey_metadata_advisory":
+            cols = qc.columns
+            if "surveyor" in cols and "survey_date" in cols:
+                for _, row in qc.iterrows():
+                    if _is_third_party_record(row):
+                        continue
+                    role = str(row.get("_record_role") or "").lower()
+                    if role in ("context", "anchor"):
+                        continue
+                    if not _is_missing_scalar(row.get("surveyor")):
+                        continue
+                    if not _is_missing_scalar(row.get("survey_date")):
+                        continue
+                    issues.append(
+                        {
+                            "Issue": (
+                                "Survey metadata incomplete (surveyor, survey date) — "
+                                "adds audit value for design handoff"
+                            ),
+                            "Row": row.to_dict(),
+                            "Severity": "INFO",
+                        }
+                    )
 
         elif check == "height_source_existing":
             height_source_field = rule.get("height_source_field", "height_source")

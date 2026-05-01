@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
+    merge_equipment_fields_into_props,
     normalize_overhead_conductor_type,
     normalize_phase_config_key,
     normalize_underground_cable_type,
@@ -87,3 +88,21 @@ def test_merge_electrical_fields_mutates_props() -> None:
     assert props["conductor_type_normalized"] == "AAAC"
     assert props["voltage_detail"]["range"] == "33kV"
     assert props["is_overhead"] is True
+
+
+def test_merge_equipment_fields_parses_kva_and_ratio() -> None:
+    props: dict = {
+        "equipment": "Transformer",
+        "equipment_rating": "11/0.4kV 100 kVA",
+        "structure_type": "Pol",
+        "pole_top_arrangement": "terminal",
+        "insulator_type": "Pin",
+        "earthing_status": "TT",
+        "asset_plate_id": "TX-001",
+        "equipment_mounting": "pole mounted",
+    }
+    merge_equipment_fields_into_props(props)
+    assert props["equipment_kva"] == 100.0
+    assert props["equipment_voltage_ratio"] == "11kV / 0.4kV"
+    assert props["pole_top_arrangement"] == "terminal"
+    assert props["equipment_mounting"] == "pole"

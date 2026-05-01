@@ -759,6 +759,9 @@ class MapViewer {
       { title: 'Identity', rows: this.identityRows(props, status, 'Existing Pole') },
       { title: 'Physical', rows: this.physicalRows(props, 'existing') },
       { title: 'Electrical', rows: this.electricalRows(props) },
+      { title: 'Equipment & pole-top', rows: this.equipmentDetailRows(props) },
+      { title: 'Network links', rows: this.connectivityRows(props) },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
       { title: 'Mechanical', rows: this.mechanicalRows(props) },
       { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
@@ -830,6 +833,7 @@ class MapViewer {
           this.popupRow('Wayleave / Coordination', 'May require third-party coordination if work nearby', 'info'),
         ],
       },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
     ];
   }
@@ -841,6 +845,9 @@ class MapViewer {
       { title: 'Specification', rows: this.specificationRows(props) },
       { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Design Requirements', rows: this.designRequirementRows(props) },
+      { title: 'Equipment & pole-top', rows: this.equipmentDetailRows(props) },
+      { title: 'Network links', rows: this.connectivityRows(props) },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
@@ -857,6 +864,9 @@ class MapViewer {
       { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Physical', rows: this.physicalRows(props, 'angle') },
       { title: 'Electrical', rows: this.electricalRows(props) },
+      { title: 'Equipment & pole-top', rows: this.equipmentDetailRows(props) },
+      { title: 'Network links', rows: this.connectivityRows(props) },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
@@ -869,6 +879,8 @@ class MapViewer {
     return [
       { title: 'Identity', rows: this.identityRows(props, status, 'Stay / Anchor') },
       { title: 'Stay Details', rows: this.stayDetailRows(props) },
+      { title: 'Network links', rows: this.connectivityRows(props) },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
@@ -880,6 +892,7 @@ class MapViewer {
       ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Context / Crossing') },
       { title: 'Crossing Details', rows: this.crossingRows(props) },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
@@ -1089,6 +1102,132 @@ class MapViewer {
     return rows;
   }
 
+  equipmentDetailRows(props) {
+    const rows = [];
+    const cats = Array.isArray(props.equipment_categories) && props.equipment_categories.length > 0
+      ? props.equipment_categories.join(', ')
+      : '';
+    const ptc = props.equipment_primary_category || '';
+    rows.push(this.popupRow('Equipment categories', cats || 'none inferred', cats ? 'ok' : 'info'));
+    rows.push(this.popupRow('Primary equipment', ptc || 'not inferred', ptc ? 'ok' : 'info'));
+    const kvaLabel = props.equipment_kva_label || (props.equipment_kva != null ? `${props.equipment_kva} kVA` : '');
+    rows.push(this.popupRow('Parsed kVA', kvaLabel || 'not parsed', kvaLabel ? 'ok' : 'info'));
+    rows.push(
+      this.popupRow(
+        'Voltage ratio',
+        props.equipment_voltage_ratio || 'not recorded',
+        props.equipment_voltage_ratio ? 'ok' : 'info',
+      ),
+    );
+    const ptd = props.pole_top_detail && props.pole_top_detail.label ? String(props.pole_top_detail.label) : '';
+    rows.push(
+      this.popupRow(
+        'Pole-top arrangement',
+        ptd || props.pole_top_arrangement || 'not recorded',
+        ptd || props.pole_top_arrangement ? 'ok' : 'info',
+        props.pole_top_detail && props.pole_top_detail.description ? String(props.pole_top_detail.description) : '',
+      ),
+    );
+    rows.push(
+      this.popupRow('Insulator type', props.insulator_type || 'not recorded', props.insulator_type ? 'ok' : 'info'),
+    );
+    rows.push(
+      this.popupRow(
+        'Crossarm configuration',
+        props.crossarm_configuration || 'not recorded',
+        props.crossarm_configuration ? 'ok' : 'info',
+      ),
+    );
+    rows.push(
+      this.popupRow('Earthing', props.earthing_status || 'not recorded', props.earthing_status ? 'ok' : 'info'),
+    );
+    rows.push(
+      this.popupRow(
+        'Asset plate / label',
+        props.asset_plate_id || 'not recorded',
+        props.asset_plate_id ? 'ok' : 'info',
+      ),
+    );
+    let mount = 'not recorded';
+    if (props.equipment_mounting === 'pole') mount = 'Pole-mounted';
+    else if (props.equipment_mounting === 'ground') mount = 'Ground-mounted';
+    rows.push(this.popupRow('Equipment mounting', mount, props.equipment_mounting ? 'ok' : 'info'));
+    return rows;
+  }
+
+  connectivityRows(props) {
+    const rows = [];
+    rows.push(
+      this.popupRow('From support', props.from_support_id || '—', props.from_support_id ? 'ok' : 'info'),
+    );
+    rows.push(this.popupRow('To support', props.to_support_id || '—', props.to_support_id ? 'ok' : 'info'));
+    rows.push(
+      this.popupRow(
+        'Parent pole (stay / anchor)',
+        props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id || '—',
+        props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id ? 'ok' : 'info',
+      ),
+    );
+    rows.push(
+      this.popupRow(
+        'Parent structure',
+        props.parent_structure_id || '—',
+        props.parent_structure_id ? 'ok' : 'info',
+      ),
+    );
+    rows.push(
+      this.popupRow(
+        'Cable from asset',
+        props.cable_from_asset_id || '—',
+        props.cable_from_asset_id ? 'ok' : 'info',
+      ),
+    );
+    rows.push(
+      this.popupRow(
+        'Cable to asset',
+        props.cable_to_asset_id || '—',
+        props.cable_to_asset_id ? 'ok' : 'info',
+      ),
+    );
+    return rows;
+  }
+
+  surveyMetadataRows(props) {
+    const rows = [];
+    rows.push(this.popupRow('Job / scheme ref', props.survey_job_ref || '—', props.survey_job_ref ? 'ok' : 'info'));
+    rows.push(this.popupRow('Surveyor', props.surveyor || '—', props.surveyor ? 'ok' : 'info'));
+    rows.push(this.popupRow('Survey date', props.survey_date || '—', props.survey_date ? 'ok' : 'info'));
+    rows.push(
+      this.popupRow(
+        'Survey equipment',
+        props.equipment_used || '—',
+        props.equipment_used ? 'ok' : 'info',
+      ),
+    );
+    rows.push(
+      this.popupRow(
+        'Capture method',
+        props.capture_method_label || props.capture_method || '—',
+        props.capture_method_label || props.capture_method ? 'ok' : 'info',
+      ),
+    );
+    const gsum = props.gnss_accuracy_summary || props.gnss_accuracy;
+    rows.push(this.popupRow('GNSS / accuracy', gsum || '—', gsum ? 'ok' : 'info'));
+    if (props.horizontal_accuracy_m != null || props.vertical_accuracy_m != null) {
+      const h = props.horizontal_accuracy_m != null ? `H ±${props.horizontal_accuracy_m} m` : '';
+      const v = props.vertical_accuracy_m != null ? `V ±${props.vertical_accuracy_m} m` : '';
+      rows.push(this.popupRow('Accuracy (parsed)', [h, v].filter(Boolean).join(', ') || '—', 'info'));
+    }
+    rows.push(
+      this.popupRow(
+        'Survey limitations',
+        props.survey_limitations || 'none recorded',
+        props.survey_limitations ? 'warning' : 'info',
+      ),
+    );
+    return rows;
+  }
+
   mechanicalRows(props, prominent = false) {
     const stayStatus = props.stay_evidence_status;
     const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
@@ -1116,7 +1255,11 @@ class MapViewer {
   stayDetailRows(props) {
     return [
       this.popupRow('Type', props.structure_type || 'Stay / anchor'),
-      this.popupRow('Linked Pole', props.linked_pole_id || 'not linked', props.linked_pole_id ? 'ok' : 'info'),
+      this.popupRow(
+        'Parent pole',
+        props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id || 'not linked',
+        props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id ? 'ok' : 'info',
+      ),
       this.popupRow('Direction', props.stay_bearing || 'not captured', props.stay_bearing ? 'ok' : 'info'),
       this.popupRow('Configuration', props.stay_configuration || 'not captured', props.stay_configuration ? 'ok' : 'info'),
       this.popupRow('Nearest Pole', this.nearestStayDetail(props) || 'not calculated', props.nearest_stay_distance_m ? 'ok' : 'info'),

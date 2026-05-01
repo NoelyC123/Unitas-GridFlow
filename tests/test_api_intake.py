@@ -295,6 +295,10 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
     assert props["access_constraint"] == "private lane"
     assert props["clearance_measured"] == "5.4m"
     assert props["distance_from_route_m"] == 3.2
+    assert props["equipment_kva"] == 50.0
+    assert props["equipment_kva_label"] == "50 kVA"
+    assert props["connectivity_parent_pole"] == "P-1001"
+    assert props["gnss_accuracy_summary"]
 
 
 def test_build_feature_collection_adds_source_confidence_detail() -> None:

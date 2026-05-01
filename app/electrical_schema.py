@@ -1,10 +1,11 @@
-"""UK distribution conductor/cable vocabulary for survey display (D2-A).
+"""UK distribution conductor/cable vocabulary and equipment display (D2-A, D2-B).
 
 Reference data only — not a compliance engine. Used for map popups and light QA hints.
 """
 
 from __future__ import annotations
 
+import re
 from typing import Any, Mapping
 
 # Voltage classifications (display reference)
@@ -367,3 +368,248 @@ def merge_electrical_fields_into_props(props: dict[str, Any]) -> None:
     props["cable_detail"] = parsed.get("cable_detail") or {}
     props["cable_size"] = parsed.get("cable_size")
     props["cores_phases"] = parsed.get("cores_phases")
+
+
+# --- D2-B: Equipment & pole-top (taxonomy + parsing) ---
+
+EQUIPMENT_TYPES: dict[str, dict[str, str]] = {
+    "transformer": {
+        "label": "Transformer",
+        "typical_mount": "Pole or ground plinth",
+        "design_note": "Confirm kVA and HV/LV arrangement before design",
+    },
+    "switch": {
+        "label": "Switch / disconnector",
+        "typical_mount": "Pole-top or ground",
+        "design_note": "Identify open/closed state if safety critical",
+    },
+    "fuse": {
+        "label": "Fuse / cut-out",
+        "typical_mount": "Pole-top LV",
+        "design_note": "LV service protection",
+    },
+    "recloser": {
+        "label": "Auto-recloser",
+        "typical_mount": "Pole or ground kiosk",
+        "design_note": "Protection and sectionalising",
+    },
+    "rmu": {
+        "label": "Ring Main Unit (RMU)",
+        "typical_mount": "Ground-mounted housing",
+        "design_note": "HV switching assembly — confirm cable terminations",
+    },
+    "lv_board": {
+        "label": "LV distribution board / fuseways",
+        "typical_mount": "Pole or kiosk",
+        "design_note": "Customer or street lighting multicore take-off",
+    },
+    "surge_arrester": {
+        "label": "Surge arrester / lightning protection",
+        "typical_mount": "Pole-top",
+        "design_note": "Insulation coordination",
+    },
+}
+
+POLE_TOP_ARRANGEMENTS: dict[str, dict[str, str]] = {
+    "crossarm": {
+        "label": "Crossarm arrangement",
+        "description": "Conventional crossarm / pin insulator layout",
+    },
+    "terminal": {
+        "label": "Terminal arrangement",
+        "description": "Line termination / jumpering point",
+    },
+    "tee": {
+        "label": "Tee / branch",
+        "description": "Branch take-off from main line",
+    },
+    "transformer_mount": {
+        "label": "Transformer pole-top",
+        "description": "MV/LV transformer mounted on structure",
+    },
+    "switch_mount": {
+        "label": "Switching pole-top",
+        "description": "Disconnect / switch assembly on pole",
+    },
+    "bundle": {
+        "label": "ABC / covered bundle",
+        "description": "Aerial bundled or covered line hardware",
+    },
+}
+
+_RE_KVA = re.compile(r"(\d+(?:\.\d+)?)\s*k\s*v\s*a", re.I)
+_RE_KVA_COMPACT = re.compile(r"(\d+(?:\.\d+)?)\s*kva", re.I)
+_RE_VOLT_RATIO = re.compile(r"(\d+(?:\.\d+)?)\s*(?:[kK][vV])?\s*/\s*(\d+(?:\.\d+)?)\s*[kK]?[vV]?")
+
+
+def _tokenize_equipment_hint(text: str) -> list[str]:
+    t = text.lower()
+    found: list[str] = []
+    if "transformer" in t or " tx" in t or re.search(r"\btf\b", t) or _RE_KVA.search(text):
+        found.append("transformer")
+    if "rmu" in t:
+        found.append("rmu")
+    if "recloser" in t:
+        found.append("recloser")
+    if "arrester" in t or ("lightning" in t and "strike" not in t):
+        found.append("surge_arrester")
+    if "fuse" in t or "cut-out" in t or "cutout" in t:
+        found.append("fuse")
+    if "switch" in t and "recloser" not in t:
+        found.append("switch")
+    if "lv board" in t or "lvboard" in t or "fuseway" in t:
+        found.append("lv_board")
+    return list(dict.fromkeys(found))
+
+
+def normalize_pole_top_key(raw: object) -> str | None:
+    if raw is None or raw == "":
+        return None
+    s = str(raw).strip().lower().replace(" ", "_").replace("-", "_")
+    aliases = {
+        "cross_arm": "crossarm",
+        "crossarm": "crossarm",
+        "terminal": "terminal",
+        "term": "terminal",
+        "tee": "tee",
+        "t_off": "tee",
+        "transformer": "transformer_mount",
+        "transformer_mount": "transformer_mount",
+        "tx_mount": "transformer_mount",
+        "switch": "switch_mount",
+        "switch_mount": "switch_mount",
+        "abc": "bundle",
+        "bundled": "bundle",
+    }
+    if s in POLE_TOP_ARRANGEMENTS:
+        return s
+    return aliases.get(s)
+
+
+def infer_pole_top_from_structure(structure_type: object, location: object) -> str | None:
+    st = str(structure_type or "").lower()
+    loc = str(location or "").lower()
+    if "terminal" in st:
+        return "terminal"
+    if "transformer" in st or "transformer" in loc or " kva" in loc:
+        return "transformer_mount"
+    return None
+
+
+def parse_equipment_ratings(text: object) -> dict[str, Any]:
+    out: dict[str, Any] = {"kva": None, "voltage_ratio": None, "secondary_v": None}
+    if text is None or text == "":
+        return out
+    s = str(text)
+    m = _RE_KVA.search(s) or _RE_KVA_COMPACT.search(s)
+    if m:
+        try:
+            out["kva"] = float(m.group(1))
+        except ValueError:
+            out["kva"] = None
+    vr = _RE_VOLT_RATIO.search(s)
+    if vr:
+        out["voltage_ratio"] = f"{vr.group(1)}kV / {vr.group(2)}kV"
+    return out
+
+
+def classify_equipment_mounting(raw: object) -> str | None:
+    if raw is None or raw == "":
+        return None
+    s = str(raw).strip().lower()
+    if "ground" in s or "gound" in s or "plinth" in s or "kiosk" in s:
+        return "ground"
+    if "pole" in s or "oh" in s or "overhead" in s:
+        return "pole"
+    return None
+
+
+def parse_equipment_context(record: Mapping[str, Any] | Any) -> dict[str, Any]:
+    """Derive equipment categories and display fields from free-text + structured columns."""
+
+    equip_raw = _get(record, "equipment") or _get(record, "mounted_equipment")
+    rating_raw = _get(record, "equipment_rating") or _get(record, "rating")
+    st = str(_get(record, "structure_type") or "")
+    loc = str(_get(record, "location") or "")
+    blob = f"{equip_raw or ''} {rating_raw or ''} {st} {loc}"
+
+    categories = _tokenize_equipment_hint(blob)
+    primary = categories[0] if categories else None
+    detail = {k: dict(v) for k, v in EQUIPMENT_TYPES.items() if k in categories}
+    ratings = parse_equipment_ratings(rating_raw or equip_raw or "")
+
+    ptk = normalize_pole_top_key(_get(record, "pole_top_arrangement"))
+    if not ptk:
+        ptk = infer_pole_top_from_structure(st, loc)
+    pole_top_detail: dict[str, str] = {}
+    if ptk and ptk in POLE_TOP_ARRANGEMENTS:
+        pole_top_detail = dict(POLE_TOP_ARRANGEMENTS[ptk])
+
+    mounting = classify_equipment_mounting(_get(record, "equipment_mounting"))
+
+    return {
+        "equipment_categories": categories,
+        "equipment_primary_category": primary,
+        "equipment_type_detail": detail,
+        "equipment_kva": ratings.get("kva"),
+        "equipment_voltage_ratio": ratings.get("voltage_ratio"),
+        "pole_top_arrangement": ptk,
+        "pole_top_detail": pole_top_detail,
+        "insulator_type": _clean_str(_get(record, "insulator_type")),
+        "crossarm_configuration": _clean_str(_get(record, "crossarm_configuration")),
+        "earthing_status": _clean_str(_get(record, "earthing_status")),
+        "asset_plate_id": _clean_str(_get(record, "asset_plate_id")),
+        "equipment_mounting": mounting,
+    }
+
+
+def _clean_str(v: object) -> str | None:
+    if v is None or v == "":
+        return None
+    s = str(v).strip()
+    return s or None
+
+
+def row_suggests_transformer_equipment(record: Mapping[str, Any] | Any) -> bool:
+    """True when remarks/structure imply a transformer site needing equipment capture."""
+    ctx = parse_equipment_context(record)
+    if ctx.get("equipment_primary_category") == "transformer":
+        return True
+    st = str(_get(record, "structure_type") or "").lower()
+    loc = str(_get(record, "location") or "").lower()
+    if "transformer" in st or "transformer" in loc:
+        return True
+    if _RE_KVA.search(str(_get(record, "equipment_rating") or "")):
+        return True
+    if _RE_KVA.search(str(_get(record, "location") or "")):
+        return True
+    return False
+
+
+def merge_equipment_fields_into_props(props: dict[str, Any]) -> None:
+    """Populate D2-B equipment / pole-top display keys (mutates ``props``)."""
+    parsed = parse_equipment_context(props)
+    props["equipment_categories"] = parsed.get("equipment_categories") or []
+    props["equipment_primary_category"] = parsed.get("equipment_primary_category")
+    props["equipment_type_detail"] = parsed.get("equipment_type_detail") or {}
+    kva = parsed.get("equipment_kva")
+    props["equipment_kva"] = kva
+    props["equipment_voltage_ratio"] = parsed.get("equipment_voltage_ratio")
+    if kva is not None:
+        props["equipment_kva_label"] = f"{gfmt(kva)} kVA"
+    else:
+        props["equipment_kva_label"] = None
+    props["pole_top_arrangement"] = parsed.get("pole_top_arrangement")
+    props["pole_top_detail"] = parsed.get("pole_top_detail") or {}
+    props["insulator_type"] = parsed.get("insulator_type")
+    props["crossarm_configuration"] = parsed.get("crossarm_configuration")
+    props["earthing_status"] = parsed.get("earthing_status")
+    props["asset_plate_id"] = parsed.get("asset_plate_id")
+    props["equipment_mounting"] = parsed.get("equipment_mounting")
+
+
+def gfmt(x: float) -> str:
+    """Format kVA without trailing .0 when whole."""
+    if float(x).is_integer():
+        return str(int(x))
+    return str(x)

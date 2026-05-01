@@ -23,7 +23,10 @@ from app.controller_intake import (
     parse_raw_controller_dump,
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
-from app.electrical_schema import merge_electrical_fields_into_props
+from app.electrical_schema import (
+    merge_electrical_fields_into_props,
+    merge_equipment_fields_into_props,
+)
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
 from app.qa_engine import (
     classify_height_confidence,
@@ -34,6 +37,7 @@ from app.qa_engine import (
 )
 from app.review_manager import delete_review
 from app.route_sequencer import sequence_route
+from app.survey_connectivity import merge_connectivity_into_props, merge_survey_metadata_into_props
 
 # Compiled once at module level for replacement-pair offset extraction.
 _REPL_OFFSET_RE = re.compile(r"([\d.]+)m offset")
@@ -425,6 +429,88 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
             "third_party",
         ],
     )
+    normalized |= _copy_if_missing(
+        df,
+        "from_support_id",
+        ["from_support_id", "span_from", "from_pole", "from_pole_id", "support_from"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "to_support_id",
+        ["to_support_id", "span_to", "to_pole", "to_pole_id", "support_to"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "parent_support_id",
+        ["parent_support_id", "stay_parent", "stay_parent_pole", "anchor_parent"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "parent_structure_id",
+        ["parent_structure_id", "host_structure_id", "tx_parent_id"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "cable_from_asset_id",
+        ["cable_from_asset_id", "ug_from", "cable_from"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "cable_to_asset_id",
+        ["cable_to_asset_id", "ug_to", "cable_to"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "pole_top_arrangement",
+        ["pole_top_arrangement", "pole_top", "top_arrangement"],
+    )
+    normalized |= _copy_if_missing(df, "insulator_type", ["insulator_type", "insulator"])
+    normalized |= _copy_if_missing(
+        df,
+        "crossarm_configuration",
+        ["crossarm_configuration", "crossarm", "cross_arm_config"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "earthing_status",
+        ["earthing_status", "earthing", "earth_connection"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "asset_plate_id",
+        ["asset_plate_id", "asset_plate", "plate_id"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "equipment_mounting",
+        ["equipment_mounting", "mounting", "equipment_location"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "survey_job_ref",
+        ["survey_job_ref", "scheme_ref", "project_ref", "work_order"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "equipment_used",
+        ["equipment_used", "survey_equipment", "gnss_receiver", "instrument"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "survey_limitations",
+        ["survey_limitations", "limitations", "survey_constraints"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "horizontal_accuracy_m",
+        ["horizontal_accuracy_m", "h_accuracy_m"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "vertical_accuracy_m",
+        ["vertical_accuracy_m", "v_accuracy_m"],
+    )
+    normalized |= _copy_if_missing(df, "gnss_fix_type", ["gnss_fix_type", "gps_fix"])
     normalized |= _copy_if_missing(df, "lat", ["latitude", "lat"])
     normalized |= _copy_if_missing(df, "lon", ["longitude", "lon", "long"])
     normalized |= _copy_if_missing(
@@ -456,6 +542,8 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     _coerce_numeric_column(df, "elevation")
     _coerce_numeric_column(df, "route_deviation_deg")
     _coerce_numeric_column(df, "distance_from_route_m")
+    _coerce_numeric_column(df, "horizontal_accuracy_m")
+    _coerce_numeric_column(df, "vertical_accuracy_m")
 
     return df, normalized
 
@@ -554,6 +642,8 @@ def _collect_per_row_issues(issues_df: pd.DataFrame) -> dict[int, dict[str, Any]
                     result[row_index]["warn_count"] += 1
                     if len(result[row_index]["warn_texts"]) < 3:
                         result[row_index]["warn_texts"].append(issue_text[:80])
+                elif severity == "INFO":
+                    continue
                 else:
                     result[row_index]["count"] += 1
                     if len(result[row_index]["texts"]) < 3:
@@ -866,6 +956,9 @@ def _build_feature_collection(
             "route_type"
         )
         merge_electrical_fields_into_props(electrical_props)
+        merge_equipment_fields_into_props(electrical_props)
+        merge_connectivity_into_props(electrical_props)
+        merge_survey_metadata_into_props(electrical_props)
 
         feature = {
             "type": "Feature",
@@ -909,6 +1002,35 @@ def _build_feature_collection(
                 "cores_phases": _safe_value(electrical_props.get("cores_phases")),
                 "equipment": equipment_items,
                 "equipment_rating": _safe_value(network_fields.get("equipment_rating")),
+                "equipment_categories": electrical_props.get("equipment_categories") or [],
+                "equipment_primary_category": electrical_props.get("equipment_primary_category"),
+                "equipment_type_detail": electrical_props.get("equipment_type_detail") or {},
+                "equipment_kva": electrical_props.get("equipment_kva"),
+                "equipment_kva_label": electrical_props.get("equipment_kva_label"),
+                "equipment_voltage_ratio": electrical_props.get("equipment_voltage_ratio"),
+                "pole_top_arrangement": electrical_props.get("pole_top_arrangement"),
+                "pole_top_detail": electrical_props.get("pole_top_detail") or {},
+                "insulator_type": electrical_props.get("insulator_type"),
+                "crossarm_configuration": electrical_props.get("crossarm_configuration"),
+                "earthing_status": electrical_props.get("earthing_status"),
+                "asset_plate_id": electrical_props.get("asset_plate_id"),
+                "equipment_mounting": electrical_props.get("equipment_mounting"),
+                "from_support_id": electrical_props.get("from_support_id"),
+                "to_support_id": electrical_props.get("to_support_id"),
+                "parent_support_id": electrical_props.get("parent_support_id"),
+                "parent_structure_id": electrical_props.get("parent_structure_id"),
+                "cable_from_asset_id": electrical_props.get("cable_from_asset_id"),
+                "cable_to_asset_id": electrical_props.get("cable_to_asset_id"),
+                "connectivity_parent_pole": electrical_props.get("connectivity_parent_pole"),
+                "survey_job_ref": electrical_props.get("survey_job_ref"),
+                "equipment_used": electrical_props.get("equipment_used"),
+                "survey_limitations": electrical_props.get("survey_limitations"),
+                "gnss_fix_type": electrical_props.get("gnss_fix_type"),
+                "horizontal_accuracy_m": electrical_props.get("horizontal_accuracy_m"),
+                "vertical_accuracy_m": electrical_props.get("vertical_accuracy_m"),
+                "gnss_accuracy_summary": electrical_props.get("gnss_accuracy_summary"),
+                "capture_method_key": electrical_props.get("capture_method_key"),
+                "capture_method_label": electrical_props.get("capture_method_label"),
                 "surveyor": _display_value(row, "surveyor"),
                 "survey_date": _display_value(row, "survey_date"),
                 "gnss_accuracy": _display_value(row, "gnss_accuracy"),

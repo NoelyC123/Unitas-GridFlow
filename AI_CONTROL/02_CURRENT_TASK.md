@@ -2,7 +2,7 @@
 
 ## Domain Accuracy & Electrical Data Model Implementation
 
-**Status:** PHASE 2 IN PROGRESS — D2-A (Conductor/Cable Electrical Schema) shipped
+**Status:** PHASE 2 COMPLETE (D2-A through D2-D) — Phase 3 awaits approval
 **Timeline:** Phase 1 (5-7 days) ✅ → Phase 2 (10-14 days) — started → Phase 3 (5-7 days)
 **Total:** 4-5 weeks / 130-160 hours
 
@@ -18,7 +18,7 @@
 3. ✅ D1-C: Source Confidence & Legacy Data Warnings — `f30ef46`
 4. ✅ D1-D: Third-Party Infrastructure & Attachments — `6349ebd`
 
-**Next:** D2-B (Equipment & Pole-Top Configuration) after review (see `PHASE_2_3_ROADMAP.md`).
+**Next:** Phase 3 integration & validation after review (see `PHASE_2_3_ROADMAP.md`).
 
 ---
 
@@ -112,15 +112,15 @@
 
 All four packages implemented, tested (`pytest` full suite green), committed, and pushed.
 
-### Phase 2 Execution — ACTIVE
+### Phase 2 Execution — COMPLETE
 
-**Approved:** Phase 2 is open. D2-A is implemented; next package is D2-B unless priorities change.
+**Delivered:** Full electrical data model packages D2-A–D2-D (schema, equipment, connectivity QA, survey metadata).
 
 Packages:
 - ✅ D2-A: Conductor/Cable Electrical Schema (`app/electrical_schema.py`, intake/map merge, `conductor_hv_overhead` QA WARN, popup electrical rows)
-- D2-B: Equipment & Pole-Top Configuration
-- D2-C: Network Connectivity & Relationships
-- D2-D: Survey Metadata & Provenance
+- ✅ D2-B: Equipment & Pole-Top Configuration (equipment taxonomy, ratings/kVA parsing, pole-top/earthing/plate, Equipment & pole-top popup section)
+- ✅ D2-C: Network Connectivity & Relationships (from/to support IDs, stay parent, cable endpoints, linkage QA; Network links popup section)
+- ✅ D2-D: Survey Metadata & Provenance (GNSS/capture enrichment, survey job ref, limitations; Survey metadata popup section; INFO-level advisory QA)
 
 ### Phase 3 Execution (After Phase 2 validates)
 
@@ -172,4 +172,4 @@ Update this file when:
 
 ---
 
-**Expected next update:** D2-B kickoff or operational validation on D2-A popups/QA
+**Expected next update:** Phase 3 approval or operational validation on Phase 2 popups and QA
