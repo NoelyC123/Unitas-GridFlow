@@ -17,6 +17,7 @@ from app.electrical_schema import (
 from app.field_ownership import (
     finalize_field_ownership_metadata,
     point_enriched_electrical_leaks,
+    validate_map_feature_collection_field_ownership,
 )
 from app.pole_field_schema import enrich_pole_support_props
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
@@ -260,7 +261,12 @@ def _enrich_popup_data_model(data: dict) -> dict:
             merge_electrical_fields_into_props(cp)
     enrich_context_crossing_records(data)
     enrich_replacement_pair_intelligence(data)
-    finalize_field_ownership_metadata(data, point_leak_total=point_leak_total)
+    post_violations = validate_map_feature_collection_field_ownership(data)
+    finalize_field_ownership_metadata(
+        data,
+        point_leak_total=point_leak_total,
+        post_enrichment_violations=post_violations,
+    )
     return data
 
 

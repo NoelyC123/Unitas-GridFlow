@@ -63,3 +63,5 @@ def test_map_data_endpoint_adds_span_features(tmp_path, monkeypatch) -> None:
     fo = data["metadata"].get("field_ownership_3d") or {}
     assert fo.get("policy") == "enriched_electrical_display_on_spans_and_cables_only"
     assert "point_features" in fo
+    assert fo.get("post_enrichment_clean") is True
+    assert fo.get("post_enrichment_violation_count") == 0

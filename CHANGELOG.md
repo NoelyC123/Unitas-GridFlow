@@ -35,21 +35,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-05-01 — Phase 3D: Electrical field ownership (map points vs spans/cables)
+## 2026-05-01 — Phase 3D: Electrical field ownership (matrix + validation)
 
 ### Added
 
-- **`app/field_ownership.py`:** Phase 3D audit helpers — count enriched electrical keys on pole points before strip, `finalize_field_ownership_metadata()` → `metadata.field_ownership_3d`.
-- **`map_preview` enrichment:** Tallies point leaks, strips enriched electrical display from Point props (unchanged strip behaviour), writes `field_ownership_3d` after span/cable electrical merge.
+- **`app/field_ownership.py`:** `FIELD_OWNERSHIP_MATRIX` (point forbidden enriched keys vs span/cable owners); `POINT_RAW_NETWORK_ECHO_FIELDS`; `validate_map_feature_collection_field_ownership()`; metadata flags `post_enrichment_clean`, `post_enrichment_violation_count`.
+- **`map_preview`:** Runs validation after enrichment; passes violation list into `finalize_field_ownership_metadata`.
 
 ### Tests
 
-- **`tests/test_field_ownership.py`:** Unit tests + map endpoint strip test + optional `J12946` smoke.
-- **Suite:** 372 passing.
-
-### Validated
-
-- `J12946` map data endpoint: `field_ownership_3d` present; no `voltage_detail` / `conductor_detail` / `cable_detail` / `phase_detail` on Point features after enrichment.
+- **`tests/test_field_ownership.py`**, **`tests/test_map_preview.py`:** Ownership matrix, validation behaviour, map `post_enrichment_clean`.
 
 ---
 
