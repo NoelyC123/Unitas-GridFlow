@@ -112,3 +112,26 @@
   padding: 2px 6px;
   text-transform: uppercase;
 }
+
+/* Phase 3H — designer-first popups */
+.popup-raw-details {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.82rem;
+}
+
+.popup-raw-details summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.popup-raw-details .popup-field {
+  font-size: 0.8rem;
+}
+
+.asset-popup .popup-section-title {
+  letter-spacing: 0.01em;
+}

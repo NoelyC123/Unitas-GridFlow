@@ -8,6 +8,7 @@ from flask import Blueprint, jsonify, render_template
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
 from app.cable_generator import attach_cable_features_to_collection
+from app.context_crossing import enrich_context_crossing_records
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
     merge_equipment_fields_into_props,
@@ -17,7 +18,9 @@ from app.field_ownership import (
     finalize_field_ownership_metadata,
     point_enriched_electrical_leaks,
 )
+from app.pole_field_schema import enrich_pole_support_props
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
+from app.replacement_pairs import enrich_replacement_pair_intelligence
 from app.span_generator import attach_span_features_to_collection
 from app.survey_connectivity import merge_connectivity_into_props, merge_survey_metadata_into_props
 
@@ -120,6 +123,26 @@ POPUP_DATA_FIELDS = {
     "capture_method_label": None,
     "burial_depth_m": None,
     "ducting_type": None,
+    "point_id": None,
+    "material": None,
+    "species": None,
+    "treatment": None,
+    "decay_location": None,
+    "decay_severity": None,
+    "measured_height_m": None,
+    "proposed_height_m": None,
+    "specification": None,
+    "specification_source": None,
+    "purpose": None,
+    "unresolved_decisions": [],
+    "qa_status": None,
+    "review_category": None,
+    "design_impact": None,
+    "lifecycle_state": None,
+    "replacement_status": None,
+    "linked_support_id": None,
+    "parent_pole_id": None,
+    "support_schema_role": None,
 }
 
 
@@ -220,6 +243,7 @@ def _enrich_popup_data_model(data: dict) -> dict:
         merge_equipment_fields_into_props(props)
         merge_connectivity_into_props(props)
         merge_survey_metadata_into_props(props)
+        enrich_pole_support_props(props)
         if props.get("photo_links") and not props.get("photo_count"):
             props["photo_count"] = len(props.get("photo_links") or [])
     for span_feat in data.get("span_features") or []:
@@ -234,6 +258,8 @@ def _enrich_popup_data_model(data: dict) -> dict:
         cp = cab_feat.get("properties")
         if isinstance(cp, dict):
             merge_electrical_fields_into_props(cp)
+    enrich_context_crossing_records(data)
+    enrich_replacement_pair_intelligence(data)
     finalize_field_ownership_metadata(data, point_leak_total=point_leak_total)
     return data
 

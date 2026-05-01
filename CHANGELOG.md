@@ -8,6 +8,33 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 3E–3H: Pole schema, context crossing, replacement audit, designer popups
+
+### Phase 3E — Pole/support field redesign
+
+- **`app/pole_field_schema.py`:** Universal / existing / proposed / angle / stay field group definitions; `infer_support_schema_role`, `enrich_pole_support_props`, `validate_support_field_coverage`.
+- **Map enrichment:** `POPUP_DATA_FIELDS` extended; canonical `point_id`, `measured_height_m` / `proposed_height_m`, replacement linkage, optional `unresolved_decisions` when still empty defaults.
+
+### Phase 3F — Context and crossing records
+
+- **`app/context_crossing.py`:** `CONTEXT_TYPES`, `context_profile_for_structure`, `assess_crossing_risk`, `enrich_context_crossing_records` (reverse-link span `crossing_hits_survey` to context points); `metadata.context_crossing_phase3f_count`.
+
+### Phase 3G — Replacement pair intelligence
+
+- **`app/replacement_pairs.py`:** `calculate_replacement_confidence`, `enrich_replacement_pair_intelligence`; `metadata.replacement_pair_audit_count`; `replacement_pair_audit` on paired EX/PR features.
+
+### Phase 3H — Popup redesign (design-decision first)
+
+- **`map-viewer.js` v31:** `buildDesignDecisionSections` (legacy, height, replacement audit, context crossing, angle stay); `rawTechnicalDetailsBlock` (`<details>`); body sections no longer duplicate legacy/height headers; `physicalRows` / spec rows use canonical heights.
+- **`map-viewer.css` v4:** Raw-details styling.
+
+### Tests
+
+- **`tests/test_pole_field_schema.py`**, **`tests/test_context_crossing.py`**, **`tests/test_replacement_pairs.py`**, **`tests/test_map_phase3efg.py`** — integration against `/map/data`.
+- **Suite:** 410 passing.
+
+---
+
 ## 2026-05-01 — Phase 3D: Electrical field ownership (map points vs spans/cables)
 
 ### Added

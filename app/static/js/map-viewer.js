@@ -1193,6 +1193,7 @@ class MapViewer {
   buildPopupHtml(props, status, lat, lon) {
     const assetKind = this.popupAssetKind(props);
     const title = this.escapeHtml(props.name || props.id || 'Record');
+    const designSections = this.buildDesignDecisionSections(props, status, lat, lon);
     const sections = assetKind === 'thirdparty'
       ? this.thirdPartyPopupSections(props, status, lat, lon)
       : assetKind === 'context'
@@ -1207,9 +1208,88 @@ class MapViewer {
     return `
       <div class="asset-popup asset-popup-${assetKind}">
         <div class="popup-title">${title}</div>
+        ${designSections.map(section => this.popupSection(section.title, section.rows)).join('')}
         ${sections.map(section => this.popupSection(section.title, section.rows)).join('')}
+        ${this.rawTechnicalDetailsBlock(props)}
       </div>
     `;
+  }
+
+  buildDesignDecisionSections(props, status, lat, lon) {
+    const sections = [];
+    sections.push(...this.legacyDataWarningSections(props));
+    sections.push(...this.heightEvidenceAlertSections(props));
+    const audit = props.replacement_pair_audit;
+    if (audit && typeof audit === 'object') {
+      const pct = audit.confidence_pct != null ? String(audit.confidence_pct) : '';
+      const rows = [
+        this.popupRow('Replacement pair', `${this.displayValue(audit.ex_pole_id)} → ${this.displayValue(audit.pr_pole_id)}`, 'info'),
+        this.popupRow('Match confidence', `${pct}% — ${this.displayValue(audit.match_type)}`, Number(pct) >= 75 ? 'ok' : 'warning', this.displayValue(audit.match_type_detail)),
+        this.popupRow('Review status', audit.review_status || 'unconfirmed', 'warning', 'Confirm on designer review page before construction.'),
+      ];
+      sections.push({ title: 'Design focus — replacement pairing', rows });
+    }
+    if (this.isContextRecord(props)) {
+      const ca = props.context_crossing_assessment || {};
+      const cp = props.context_type_profile || {};
+      const rows = [];
+      if (cp.owner) rows.push(this.popupRow('Context owner', cp.owner, 'info'));
+      if (ca.risk_level) {
+        rows.push(this.popupRow('Crossing risk', ca.risk_level, ca.risk_level === 'high' ? 'warning' : 'info'));
+      }
+      if (ca.designer_action) {
+        rows.push(this.popupRow('Designer action', ca.designer_action, 'warning'));
+      }
+      const nlink = (props.span_crossing_links || []).length;
+      if (nlink) rows.push(this.popupRow('Span links (survey corridor)', String(nlink), 'info'));
+      if (rows.length) sections.push({ title: 'Design focus — crossing / context', rows });
+    }
+    if (this.isAnglePole(props)) {
+      if (props.stay_evidence_status === 'missing') {
+        sections.push({
+          title: 'Design focus — stay / angle',
+          rows: [this.popupRow('Stay evidence', 'missing — check field notes, photos, or plan', 'warning')],
+        });
+      } else if (props.stay_evidence_status === 'captured') {
+        const st = Array.isArray(props.stay_types) && props.stay_types.length > 0
+          ? props.stay_types.join(', ')
+          : 'Captured';
+        sections.push({
+          title: 'Design focus — stay / angle',
+          rows: [this.popupRow('Stay evidence', st, 'ok')],
+        });
+      }
+    }
+    return sections;
+  }
+
+  rawTechnicalDetailsBlock(props) {
+    const rawPairs = [
+      ['support_schema_role', props.support_schema_role],
+      ['primary_type', props.primary_type],
+      ['asset_intent', props.asset_intent],
+      ['lifecycle_state', props.lifecycle_state],
+      ['replacement_status', props.replacement_status],
+      ['linked_support_id', props.linked_support_id],
+      ['match_role', props.match_role],
+      ['gnss_fix_type', props.gnss_fix_type],
+      ['horizontal_accuracy_m', props.horizontal_accuracy_m],
+      ['vertical_accuracy_m', props.vertical_accuracy_m],
+    ];
+    const rows = [];
+    for (const [k, v] of rawPairs) {
+      if (v != null && v !== '') rows.push(this.popupRow(k, String(v), 'info'));
+    }
+    if (props.classification_basis != null && props.classification_basis !== '') {
+      const b = props.classification_basis;
+      rows.push(this.popupRow('classification_basis', typeof b === 'object' ? JSON.stringify(b) : String(b), 'info'));
+    }
+    if (Array.isArray(props.classification_warnings) && props.classification_warnings.length > 0) {
+      rows.push(this.popupRow('classification_warnings', props.classification_warnings.join('; '), 'info'));
+    }
+    if (rows.length === 0) return '';
+    const inner = rows.join('');
+    return `<details class="popup-raw-details"><summary>Raw / technical fields</summary>${inner}</details>`;
   }
 
   popupAssetKind(props) {
@@ -1223,8 +1303,6 @@ class MapViewer {
 
   existingPopupSections(props, status, lat, lon) {
     return [
-      ...this.legacyDataWarningSections(props),
-      ...this.heightEvidenceAlertSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Existing Pole') },
       { title: 'Physical', rows: this.physicalRows(props, 'existing') },
       { title: 'Equipment & pole-top', rows: this.equipmentDetailRows(props) },
@@ -1267,7 +1345,13 @@ class MapViewer {
       {
         title: 'Height Evidence',
         rows: [
-          this.popupRow('Measured Height', this.hasValue(props.height) ? `${props.height}m` : 'not captured', heightConf.status),
+          this.popupRow(
+            'Measured Height',
+            this.hasValue(props.measured_height_m ?? props.height)
+              ? `${this.displayValue(props.measured_height_m ?? props.height)}m`
+              : 'not captured',
+            heightConf.status,
+          ),
           this.popupRow('Height Source', props.height_source || 'not captured', props.height_source ? 'info' : 'warning'),
           this.popupRow('Height Confidence', this.formatHeightConfidence(heightConf.level), heightConf.status, heightConf.warning),
         ],
@@ -1308,7 +1392,6 @@ class MapViewer {
 
   proposedPopupSections(props, status, lat, lon) {
     return [
-      ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Proposed Pole') },
       { title: 'Specification', rows: this.specificationRows(props) },
       { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
@@ -1326,7 +1409,6 @@ class MapViewer {
 
   anglePopupSections(props, status, lat, lon) {
     return [
-      ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Angle Pole') },
       { title: 'Mechanical', rows: this.mechanicalRows(props, true) },
       { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
@@ -1356,7 +1438,6 @@ class MapViewer {
 
   contextPopupSections(props, status, lat, lon) {
     return [
-      ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Context / Crossing') },
       { title: 'Crossing Details', rows: this.crossingRows(props) },
       { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
@@ -1381,12 +1462,15 @@ class MapViewer {
   }
 
   physicalRows(props, mode) {
-    const hasHeight = this.hasValue(props.height);
+    const rawHeight = mode === 'proposed'
+      ? (props.proposed_height_m ?? props.height)
+      : (props.measured_height_m ?? props.height);
+    const hasHeight = this.hasValue(rawHeight);
     const heightConf = props.height_confidence || {};
     return [
       this.popupRow(
         mode === 'proposed' ? 'Proposed Height' : 'Measured Height',
-        hasHeight ? `${props.height}m` : 'not captured',
+        hasHeight ? `${rawHeight}m` : 'not captured',
         heightConf.status || (hasHeight ? 'ok' : mode === 'existing' ? 'blocker' : 'info'),
         heightConf.warning || (mode === 'existing' && !hasHeight ? 'Clearance check impossible without measured existing pole height.' : ''),
       ),
@@ -1466,7 +1550,7 @@ class MapViewer {
       this.popupRow('Pole Class', props.pole_class || 'not specified', props.pole_class ? 'ok' : 'review'),
       this.popupRow('Material', props.material || 'not specified', props.material ? 'ok' : 'review'),
       this.popupRow('Condition', props.condition || 'not applicable yet', 'info'),
-      this.popupRow('Design Height', props.height ? `${props.height}m` : 'not yet specified', props.height ? 'ok' : 'review'),
+      this.popupRow('Design Height', props.proposed_height_m != null ? `${props.proposed_height_m}m` : (props.height ? `${props.height}m` : 'not yet specified'), props.proposed_height_m != null || props.height ? 'ok' : 'review'),
     ];
   }
 
