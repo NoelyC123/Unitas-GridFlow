@@ -28,6 +28,7 @@ from app.qa_engine import (
     classify_height_confidence,
     classify_source_confidence,
     infer_display_network_fields,
+    parse_attachments,
     run_qa_checks,
 )
 from app.review_manager import delete_review
@@ -395,6 +396,17 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
             "site",
             "site_name",
             "description",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "third_party_attachments",
+        [
+            "third_party_attachments",
+            "attachments",
+            "attached_assets",
+            "pole_attachments",
+            "third_party",
         ],
     )
     normalized |= _copy_if_missing(df, "lat", ["latitude", "lat"])
@@ -819,6 +831,7 @@ def _build_feature_collection(
             }
         )
         source_confidence_detail = classify_source_confidence(row)
+        attachments_detail = parse_attachments(row)
 
         feature = {
             "type": "Feature",
@@ -856,6 +869,8 @@ def _build_feature_collection(
                 "source_confidence": _safe_value(network_fields.get("source_confidence")),
                 "source_confidence_detail": source_confidence_detail,
                 "capture_method": _display_value(row, "capture_method"),
+                "third_party_attachments": _display_value(row, "third_party_attachments"),
+                "attachments_detail": attachments_detail,
                 "primary_type": _safe_value(classification.get("primary_type")),
                 "infrastructure_owner": _safe_value(classification.get("infrastructure_owner")),
                 "asset_subtype": _safe_value(classification.get("subtype")),

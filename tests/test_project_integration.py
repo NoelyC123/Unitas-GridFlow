@@ -510,6 +510,7 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
                         "pole_id": "P-1001",
                         "structure_type": "EXpole",
                         "height": 9.2,
+                        "third_party_attachments": "streetlight",
                     },
                 }
             ],
@@ -528,6 +529,8 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
     assert props["source_confidence"] == "legacy map data"
     assert props["source_confidence_detail"]["provenance"] == "legacy_map_data"
     assert props["source_confidence_detail"]["geometry_trust"] == "unverified"
+    assert props["attachments_detail"]["has_attachments"] is True
+    assert props["attachments_detail"]["attachment_types"] == ["streetlight"]
     assert props["height_confidence"]["level"] == "low"
     assert props["height_confidence"]["status"] == "warning"
     assert props["primary_type"] == "electric_network"

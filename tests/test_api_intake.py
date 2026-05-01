@@ -36,6 +36,7 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
                 "position_accuracy": "RTK",
                 "data_source": "field observed",
                 "survey_method": "rtk",
+                "attached_assets": "streetlight",
                 "photo_refs": "pole-1.jpg;top-1.jpg",
                 "install_year": "1998",
                 "feeder_id": "CIR-11-04",
@@ -85,6 +86,7 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
     assert normalized_df.loc[0, "gnss_accuracy"] == "RTK"
     assert normalized_df.loc[0, "source_confidence"] == "field observed"
     assert normalized_df.loc[0, "capture_method"] == "rtk"
+    assert normalized_df.loc[0, "third_party_attachments"] == "streetlight"
     assert normalized_df.loc[0, "photo_links"] == "pole-1.jpg;top-1.jpg"
     assert normalized_df.loc[0, "year_installed"] == "1998"
     assert normalized_df.loc[0, "circuit_id"] == "CIR-11-04"
@@ -325,6 +327,38 @@ def test_build_feature_collection_adds_source_confidence_detail() -> None:
     assert detail["confidence"] == "low"
     assert detail["geometry_trust"] == "unverified"
     assert "Field verification required before design" in detail["warnings"]
+
+
+def test_build_feature_collection_adds_attachment_detail() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-ATT",
+                "location": "Pole with streetlight",
+                "structure_type": "EXpole",
+                "height": 10.5,
+                "height_source": "measured_rtk",
+                "third_party_attachments": "streetlight",
+                "lat": 54.5210,
+                "lon": -3.0140,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    feature_collection = _build_feature_collection(
+        df=df,
+        issues_df=issues_df,
+        job_id="J_TEST",
+        rulepack_id="SPEN_11kV",
+    )
+
+    detail = feature_collection["features"][0]["properties"]["attachments_detail"]
+    assert detail["has_attachments"] is True
+    assert detail["attachment_count"] == 1
+    assert detail["attachment_types"] == ["streetlight"]
+    assert detail["coordination_required"] is True
 
 
 def test_normalize_dataframe_handles_capitalised_headers() -> None:

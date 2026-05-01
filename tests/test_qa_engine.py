@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.qa_engine import classify_height_confidence, classify_source_confidence, run_qa_checks
+from app.qa_engine import (
+    classify_height_confidence,
+    classify_source_confidence,
+    parse_attachments,
+    run_qa_checks,
+)
 
 
 def test_required_treats_blank_string_as_missing() -> None:
@@ -1267,6 +1272,15 @@ def test_classify_source_confidence_legacy_map_data_requires_verification() -> N
     assert detail["confidence"] == "low"
     assert detail["geometry_trust"] == "unverified"
     assert "NOT FIELD VERIFIED" in detail["warnings"][0]
+
+
+def test_parse_attachments_detects_streetlight_coordination() -> None:
+    detail = parse_attachments({"remarks": "Existing pole with streetlight attached"})
+
+    assert detail["has_attachments"] is True
+    assert detail["coordination_required"] is True
+    assert detail["attachment_types"] == ["streetlight"]
+    assert detail["attachment_list"][0]["owner"] == "Local Authority"
 
 
 def test_expole_height_above_max_remains_range_fail() -> None:

@@ -760,6 +760,7 @@ class MapViewer {
       { title: 'Physical', rows: this.physicalRows(props, 'existing') },
       { title: 'Electrical', rows: this.electricalRows(props) },
       { title: 'Mechanical', rows: this.mechanicalRows(props) },
+      { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
@@ -838,6 +839,7 @@ class MapViewer {
       ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Proposed Pole') },
       { title: 'Specification', rows: this.specificationRows(props) },
+      { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Design Requirements', rows: this.designRequirementRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
@@ -852,6 +854,7 @@ class MapViewer {
       ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Angle Pole') },
       { title: 'Mechanical', rows: this.mechanicalRows(props, true) },
+      { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Physical', rows: this.physicalRows(props, 'angle') },
       { title: 'Electrical', rows: this.electricalRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
@@ -1099,6 +1102,48 @@ class MapViewer {
         this.popupRow('Warning', warning, 'warning')
       )),
     ];
+  }
+
+  attachmentsRows(props) {
+    const attachments = props.attachments_detail || {};
+    if (!attachments.has_attachments) {
+      return [
+        this.popupRow('Third-Party Attachments', 'None recorded', 'info'),
+      ];
+    }
+
+    return [
+      this.popupRow(
+        'Attachments Present',
+        `Yes (${attachments.attachment_count})`,
+        'warning',
+        'Third-party coordination may be required',
+      ),
+      ...(attachments.attachment_list || []).map(attachment => (
+        this.popupRow(
+          `${attachment.icon || ''} ${this.formatAttachmentType(attachment.type)}`.trim(),
+          `Owner: ${attachment.owner || 'unknown'}`,
+          'warning',
+          attachment.impact || '',
+        )
+      )),
+      this.popupRow(
+        'Coordination Required',
+        'Yes - notify third parties before pole work',
+        'warning',
+      ),
+    ];
+  }
+
+  formatAttachmentType(type) {
+    const labels = {
+      telecoms: 'Telecoms',
+      streetlight: 'Streetlight',
+      customer_service: 'Customer Service',
+      signage: 'Signage',
+      cctv: 'CCTV / Security',
+    };
+    return labels[type] || type || 'Attachment';
   }
 
   formatProvenance(provenance) {

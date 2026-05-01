@@ -347,6 +347,88 @@ def classify_source_confidence(record: "pd.Series | dict") -> dict[str, object]:
     }
 
 
+def parse_attachments(record: "pd.Series | dict") -> dict[str, object]:
+    """Detect third-party attachments that create coordination dependencies."""
+
+    attachments_text = " ".join(
+        _text_value(record, key).lower()
+        for key in (
+            "third_party_attachments",
+            "attachments",
+            "third_party",
+            "attached_assets",
+            "pole_attachments",
+            "remarks",
+            "location",
+            "name",
+        )
+    )
+    attachments: list[dict[str, str]] = []
+
+    def add_once(
+        attachment_type: str,
+        owner: str,
+        impact: str,
+        icon: str,
+        keywords: tuple[str, ...],
+    ) -> None:
+        if attachment_type in {item["type"] for item in attachments}:
+            return
+        if any(keyword in attachments_text for keyword in keywords):
+            attachments.append(
+                {
+                    "type": attachment_type,
+                    "owner": owner,
+                    "impact": impact,
+                    "icon": icon,
+                }
+            )
+
+    add_once(
+        "telecoms",
+        "BT/Openreach/Virgin",
+        "Wayleave coordination may be required",
+        "TEL",
+        ("bt", "openreach", "virgin", "telecom", "fibre", "fiber", "copper"),
+    )
+    add_once(
+        "streetlight",
+        "Local Authority",
+        "LA coordination required if pole replacement planned",
+        "SL",
+        ("streetlight", "street light", "lamp", "lighting"),
+    )
+    add_once(
+        "customer_service",
+        "Customer",
+        "Customer notification required",
+        "CS",
+        ("customer", "service", "private supply", "house service"),
+    )
+    add_once(
+        "signage",
+        "Various",
+        "Relocate/replace signage if pole removed",
+        "SIGN",
+        ("sign", "signage", "notice", "warning plate"),
+    )
+    add_once(
+        "cctv",
+        "LA/Private",
+        "Security equipment coordination required",
+        "CCTV",
+        ("cctv", "camera", "security"),
+    )
+
+    return {
+        "has_attachments": bool(attachments),
+        "attachment_count": len(attachments),
+        "attachment_types": [attachment["type"] for attachment in attachments],
+        "attachment_list": attachments,
+        "coordination_required": bool(attachments),
+    }
+
+
 def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
     """Return True when this row represents a non-structural contextual feature."""
     if row.get("_record_role") in {"context", "third_party"}:
