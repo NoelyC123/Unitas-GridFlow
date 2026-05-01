@@ -284,6 +284,12 @@
       width: 24px;
     }
 
+    .legend-line.suggested-match {
+      background: transparent;
+      border-top: 2px dashed #f59e0b;
+      height: 0;
+    }
+
     .legend-dot {
       border-radius: 999px;
       display: inline-block;
@@ -293,8 +299,9 @@
     }
 
     .legend-pass {
-      background: #2e8b57;
-      border: 1px solid #064e3b;
+      background: #2563eb;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px #cbd5e1;
     }
 
     .legend-warn {
@@ -334,7 +341,7 @@
       width: 25px;
     }
 
-    .asset-marker.status-PASS .asset-marker-shape { background: #2e8b57; }
+    .asset-marker.status-PASS .asset-marker-shape { background: #2563eb; }
     .asset-marker.status-WARN .asset-marker-shape { background: #d39e00; }
     .asset-marker.status-FAIL .asset-marker-shape { background: #d94141; }
     .asset-marker.asset-existing .asset-marker-shape { border-radius: 999px; }
@@ -344,6 +351,23 @@
     .asset-marker.asset-anchor .asset-marker-shape { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 6px; }
     .asset-marker.asset-context .asset-marker-shape { border-radius: 999px; font-size: 0.5rem; opacity: 0.88; }
     .asset-marker.asset-other .asset-marker-shape { border-radius: 999px; }
+    .asset-marker.lifecycle-recovered .asset-marker-shape { opacity: 0.48; position: relative; }
+    .asset-marker.lifecycle-recovered .asset-marker-shape::after {
+      background: #111827;
+      content: "";
+      height: 2px;
+      left: 3px;
+      position: absolute;
+      right: 3px;
+      top: 50%;
+      transform: rotate(-16deg);
+    }
+    .asset-marker.lifecycle-proposed .asset-marker-shape,
+    .asset-marker.lifecycle-proposed-replacement .asset-marker-shape {
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.28), 0 2px 8px rgba(15, 23, 42, 0.42);
+      font-weight: 900;
+    }
+    .asset-marker.lifecycle-unmatched .asset-marker-shape { border-style: dashed; }
 
     .legend-symbol {
       align-items: center;
@@ -571,6 +595,16 @@
                   <span class="legend-line"></span>
                   <span>Surveyed route sequence</span>
                 </div>
+                <div class="map-legend-item">
+                  <span class="legend-line suggested-match"></span>
+                  <span>Suggested Existing/Proposed Match</span>
+                </div>
+                <div class="map-legend-item">
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;cursor:pointer;">
+                    <input id="lifecycle-match-toggle" type="checkbox" checked>
+                    <span>Show suggested matches</span>
+                  </label>
+                </div>
               </div>
               <div class="map-legend-title" style="margin-top:8px;">Feature Type</div>
               <div class="map-legend-grid">
@@ -609,6 +643,17 @@
                   <span class="legend-dot legend-fail"></span>
                   <span>Design blocker</span>
                 </div>
+              </div>
+              <div class="map-legend-title" style="margin-top:8px;">Asset Lifecycle</div>
+              <div class="map-legend-grid">
+                <div class="map-legend-item"><span>Existing Pole</span></div>
+                <div class="map-legend-item"><span>Proposed Pole</span></div>
+                <div class="map-legend-item"><span>Existing Pole being Replaced (Recovered)</span></div>
+                <div class="map-legend-item"><span>Proposed Replacement Pole</span></div>
+                <div class="map-legend-item"><span>Retained Pole</span></div>
+                <div class="map-legend-item"><span>Repositioned Pole</span></div>
+                <div class="map-legend-item"><span>Unmatched Existing Pole</span></div>
+                <div class="map-legend-item"><span>Suggested Existing/Proposed Match</span></div>
               </div>
             </div>
 

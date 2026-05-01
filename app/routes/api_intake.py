@@ -340,6 +340,83 @@ def _collect_per_row_issues(issues_df: pd.DataFrame) -> dict[int, dict[str, Any]
     return result
 
 
+def _build_replacement_links(
+    df: pd.DataFrame,
+    issues_df: pd.DataFrame,
+) -> dict[int, dict[str, Any]]:
+    """Map replacement-pair WARN rows to both lifecycle endpoints."""
+
+    if issues_df.empty or "Issue" not in issues_df.columns:
+        return {}
+
+    _expole_codes = {"EXpole", "expole", "EXPOLE"}
+    links: dict[int, dict[str, Any]] = {}
+
+    structural_indices: list[int] = sorted(
+        int(row.get("__row_index__"))
+        for _, row in df.iterrows()
+        if isinstance(row.get("__row_index__"), int)
+        and row.get("_record_role") not in ("context", "anchor")
+    )
+    prev_of: dict[int, int] = {}
+    for i in range(1, len(structural_indices)):
+        prev_of[structural_indices[i]] = structural_indices[i - 1]
+
+    row_by_index: dict[int, Any] = {
+        int(row.get("__row_index__")): row
+        for _, row in df.iterrows()
+        if isinstance(row.get("__row_index__"), int)
+    }
+
+    for _, issue_row in issues_df.iterrows():
+        issue_text = str(issue_row.get("Issue", ""))
+        if "Replacement pair" not in issue_text:
+            continue
+        row_payload = issue_row.get("Row", {})
+        if not isinstance(row_payload, dict):
+            continue
+        curr_idx = row_payload.get("__row_index__")
+        if not isinstance(curr_idx, int):
+            continue
+
+        curr_row = row_by_index.get(curr_idx)
+        prev_idx = prev_of.get(curr_idx)
+        if curr_row is None or prev_idx is None:
+            continue
+        prev_row = row_by_index.get(prev_idx)
+        if prev_row is None:
+            continue
+
+        curr_id = str(_safe_value(curr_row.get("pole_id")) or curr_idx)
+        prev_id = str(_safe_value(prev_row.get("pole_id")) or prev_idx)
+        curr_st = str(_safe_value(curr_row.get("structure_type")) or "")
+
+        if curr_st in _expole_codes:
+            ex_idx, pr_idx = curr_idx, prev_idx
+            ex_id, pr_id = curr_id, prev_id
+        else:
+            ex_idx, pr_idx = prev_idx, curr_idx
+            ex_id, pr_id = prev_id, curr_id
+
+        offset_match = _REPL_OFFSET_RE.search(issue_text)
+        offset_m = float(offset_match.group(1)) if offset_match else None
+
+        links[ex_idx] = {
+            "lifecycle_state": "Existing Pole being Replaced (Recovered)",
+            "being_replaced_by": pr_id,
+            "match_offset_m": offset_m,
+            "match_role": "recovered_existing",
+        }
+        links[pr_idx] = {
+            "lifecycle_state": "Proposed Replacement Pole",
+            "replacing": ex_id,
+            "match_offset_m": offset_m,
+            "match_role": "proposed_replacement",
+        }
+
+    return links
+
+
 def _build_feature_collection(
     df: pd.DataFrame,
     issues_df: pd.DataFrame,
@@ -348,6 +425,7 @@ def _build_feature_collection(
     file_type: str = "structured",
 ) -> dict[str, Any]:
     per_row = _collect_per_row_issues(issues_df)
+    replacement_links = _build_replacement_links(df, issues_df)
     features: list[dict[str, Any]] = []
 
     pass_count = 0
@@ -403,6 +481,23 @@ def _build_feature_collection(
         else:
             asset_intent = None
 
+        lifecycle_link = replacement_links.get(row_index, {}) if isinstance(row_index, int) else {}
+        if lifecycle_link:
+            lifecycle_state = lifecycle_link.get("lifecycle_state")
+        elif _st in ("EXpole", "expole", "EXPOLE"):
+            lifecycle_state = "Existing Pole"
+        elif asset_intent == "Proposed support" or _st in (
+            "PRpole",
+            "prpole",
+            "PRPOLE",
+            "Pol",
+            "pol",
+            "POL",
+        ):
+            lifecycle_state = "Proposed Pole"
+        else:
+            lifecycle_state = None
+
         feature = {
             "type": "Feature",
             "geometry": {
@@ -431,6 +526,11 @@ def _build_feature_collection(
                 "record_role": _safe_value(row.get("_record_role")),
                 "relationship": "replacement_pair" if is_replacement else None,
                 "asset_intent": asset_intent,
+                "lifecycle_state": lifecycle_state,
+                "replacing": lifecycle_link.get("replacing"),
+                "being_replaced_by": lifecycle_link.get("being_replaced_by"),
+                "match_offset_m": lifecycle_link.get("match_offset_m"),
+                "match_role": lifecycle_link.get("match_role"),
             },
         }
         features.append(feature)

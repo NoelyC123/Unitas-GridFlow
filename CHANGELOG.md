@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase C2 Asset Lifecycle Visualization
+
+### Changed
+
+- Added lifecycle metadata for replacement-pair endpoints, including `Existing Pole being Replaced (Recovered)`, `Proposed Replacement Pole`, `Replacing: Point ...`, and `Being replaced by: Point ...`.
+- Added map styling for recovered and proposed lifecycle states plus a toggleable dashed `Suggested Existing/Proposed Match` layer with clickable match details.
+- Added the full 8-state asset lifecycle key to the map legend.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pytest -v tests/test_api_intake.py tests/test_project_integration.py` — 36 passed.
+- `pytest -v` — 299 passed.
+
+---
+
 ## 2026-05-01 — Phase C1 Feature Filters and Blank Fields
 
 ### Changed

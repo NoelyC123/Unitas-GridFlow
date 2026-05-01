@@ -410,9 +410,14 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Missing existing heights" in html
     assert "Missing specifications" in html
     assert "Surveyed route sequence" in html
+    assert "Suggested Existing/Proposed Match" in html
+    assert "Show suggested matches" in html
     assert "Feature Type" in html
     assert "Existing pole" in html
     assert "Review Status Colour" in html
+    assert "Asset Lifecycle" in html
+    assert "Existing Pole being Replaced (Recovered)" in html
+    assert "Proposed Replacement Pole" in html
     assert "Survey Map Review" in html
     assert "Open review findings" in html
     assert "Detailed readiness, evidence, and completeness notes are collapsed" in html

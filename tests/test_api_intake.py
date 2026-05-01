@@ -427,6 +427,52 @@ def test_build_feature_collection_replacement_pair_non_expole_gets_proposed_supp
     assert props["specification"] == "11m Medium Pole"
 
 
+def test_build_feature_collection_adds_lifecycle_links_for_replacement_pair() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "48",
+                "structure_type": "EXpole",
+                "height": 10.0,
+                "material": "Wood",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            },
+            {
+                "pole_id": "49",
+                "structure_type": "Pol",
+                "height": None,
+                "material": None,
+                "lat": 54.5201,
+                "lon": -3.0001,
+                "__row_index__": 1,
+            },
+        ]
+    )
+    issues_df = pd.DataFrame(
+        [
+            {
+                "Issue": "Replacement pair detected (EX → PR, 3.3m offset)",
+                "Row": {"pole_id": "49", "__row_index__": 1},
+                "Severity": "WARN",
+            }
+        ]
+    )
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    existing_props = fc["features"][0]["properties"]
+    proposed_props = fc["features"][1]["properties"]
+    assert existing_props["lifecycle_state"] == "Existing Pole being Replaced (Recovered)"
+    assert existing_props["being_replaced_by"] == "49"
+    assert proposed_props["lifecycle_state"] == "Proposed Replacement Pole"
+    assert proposed_props["replacing"] == "48"
+    assert proposed_props["match_offset_m"] == 3.3
+
+
 def test_build_feature_collection_regular_pole_has_no_asset_intent() -> None:
     """A regular Pol with no replacement-pair issues must have asset_intent=None."""
     df = pd.DataFrame(

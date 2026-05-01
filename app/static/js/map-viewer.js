@@ -29,6 +29,7 @@ class MapViewer {
     this.map = null;
     this.featureData = [];
     this.spanLayer = null;
+    this.lifecycleMatchLayer = null;
     this.activeFilter = null;
     this.activeFilterMode = null;
     this.fileType = null;
@@ -125,10 +126,11 @@ class MapViewer {
 
       const status = (props.qa_status || 'PASS').toUpperCase();
       const assetMarker = this.getAssetMarker(props);
+      const lifecycleClass = this.lifecycleMarkerClass(props);
 
       const marker = L.marker([lat, lon], {
         icon: L.divIcon({
-          className: `asset-marker status-${status} asset-${assetMarker.type}`,
+          className: `asset-marker status-${status} asset-${assetMarker.type} ${lifecycleClass}`,
           html: `<span class="asset-marker-shape" title="${this.escapeHtml(assetMarker.title)}"><span class="asset-marker-label">${this.escapeHtml(assetMarker.label)}</span></span>`,
           iconSize: [25, 25],
           iconAnchor: [12, 12],
@@ -189,6 +191,18 @@ class MapViewer {
         ? `<div class="popup-row" style="color:#9ca3af;font-size:0.85em;margin-top:1px;"><em>Asset role: ${this.escapeHtml(props.asset_intent)}</em></div>`
         : '';
 
+      const lifecycleLine = props.lifecycle_state
+        ? `<div class="popup-row" style="margin-top:4px;"><strong>Lifecycle:</strong> ${this.escapeHtml(props.lifecycle_state)}</div>`
+        : '';
+
+      const replacingLine = props.replacing
+        ? `<div class="popup-row"><strong>Replacing:</strong> Point ${this.escapeHtml(props.replacing)}</div>`
+        : '';
+
+      const beingReplacedLine = props.being_replaced_by
+        ? `<div class="popup-row"><strong>Being replaced by:</strong> Point ${this.escapeHtml(props.being_replaced_by)}</div>`
+        : '';
+
       // General WARN block — shown for WARN features that are not replacement pairs
       // (replacement pairs have their own dedicated replacementLine above).
       const warnTexts = props.warn_texts || [];
@@ -207,6 +221,9 @@ class MapViewer {
         ${props.structure_type != null ? `<div class="popup-row"><strong>Type:</strong> ${this.escapeHtml(props.structure_type)}</div>` : ''}
         ${explainedType ? `<div class="popup-row" style="color:#6b7280;font-size:0.83em;padding-left:8px;">${this.escapeHtml(explainedType)}</div>` : ''}
         ${assetIntentLine}
+        ${lifecycleLine}
+        ${replacingLine}
+        ${beingReplacedLine}
         ${heightLine}
         ${materialLine}
         ${specificationLine}
@@ -242,12 +259,59 @@ class MapViewer {
 
     this.bindFilterButtons();
     this.bindFocusFilterButtons();
+    this.bindLifecycleMatchToggle();
     this.bindAllRecordsButton();
+    this.renderLifecycleMatches();
 
     if (bounds.length === 1) {
       this.map.setView(bounds[0], 13);
     } else if (bounds.length > 1) {
       this.map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }
+
+  renderLifecycleMatches() {
+    if (!this.map || this.featureData.length === 0) return;
+
+    if (this.lifecycleMatchLayer) {
+      this.lifecycleMatchLayer.clearLayers();
+      this.map.removeLayer(this.lifecycleMatchLayer);
+    }
+
+    this.lifecycleMatchLayer = L.layerGroup();
+    const byPoleId = new Map();
+    for (const fd of this.featureData) {
+      if (this.hasValue(fd.props.pole_id)) byPoleId.set(String(fd.props.pole_id), fd);
+    }
+
+    for (const fd of this.featureData) {
+      if (!this.hasValue(fd.props.replacing)) continue;
+      const existing = byPoleId.get(String(fd.props.replacing));
+      if (!existing) continue;
+
+      const line = L.polyline([[existing.lat, existing.lon], [fd.lat, fd.lon]], {
+        color: '#f59e0b',
+        weight: 3,
+        opacity: 0.9,
+        dashArray: '6 6',
+        lineCap: 'round',
+      });
+      const offsetLine = fd.props.match_offset_m != null
+        ? `<div class="popup-row"><strong>Offset:</strong> ${Number(fd.props.match_offset_m).toFixed(1)}m</div>`
+        : '';
+      line.bindPopup(`
+        <div class="popup-title">Suggested Existing/Proposed Match</div>
+        <div class="popup-row"><strong>Existing:</strong> Point ${this.escapeHtml(fd.props.replacing)}</div>
+        <div class="popup-row"><strong>Proposed:</strong> Point ${this.escapeHtml(fd.props.pole_id || fd.props.id || 'Unknown')}</div>
+        ${offsetLine}
+        <div class="popup-row" style="color:#92400e;font-size:0.82em;margin-top:4px;">GridFlow-generated proximity pairing — verify intended pairing before design proceeds.</div>
+      `);
+      line.addTo(this.lifecycleMatchLayer);
+    }
+
+    const toggle = document.getElementById('lifecycle-match-toggle');
+    if (!toggle || toggle.checked) {
+      this.lifecycleMatchLayer.addTo(this.map);
     }
   }
 
@@ -332,6 +396,19 @@ class MapViewer {
         if (this.filterNoteEl) this.filterNoteEl.textContent = '';
       }
       this._showRecordPanel(this.featureData, `All Mapped Records (${this.featureData.length})`);
+    });
+  }
+
+  bindLifecycleMatchToggle() {
+    const toggle = document.getElementById('lifecycle-match-toggle');
+    if (!toggle) return;
+    toggle.addEventListener('change', () => {
+      if (!this.lifecycleMatchLayer) return;
+      if (toggle.checked) {
+        this.lifecycleMatchLayer.addTo(this.map);
+      } else if (this.map.hasLayer(this.lifecycleMatchLayer)) {
+        this.map.removeLayer(this.lifecycleMatchLayer);
+      }
     });
   }
 
@@ -577,7 +654,7 @@ class MapViewer {
   getMarkerColor(status) {
     if (status === 'FAIL') return '#d94141';
     if (status === 'WARN') return '#d39e00';
-    return '#2e8b57';
+    return '#2563eb';
   }
 
   getAssetMarker(props) {
@@ -601,6 +678,23 @@ class MapViewer {
       return { type: 'context', label: 'CTX', title: 'Context / crossing record' };
     }
     return { type: 'other', label: 'R', title: 'Mapped survey record' };
+  }
+
+  lifecycleMarkerClass(props) {
+    const state = String(props.lifecycle_state || '').toLowerCase();
+    if (state.includes('being replaced') || state.includes('recovered')) {
+      return 'lifecycle-recovered';
+    }
+    if (state.includes('proposed replacement')) {
+      return 'lifecycle-proposed-replacement';
+    }
+    if (state.includes('proposed pole')) {
+      return 'lifecycle-proposed';
+    }
+    if (state.includes('unmatched existing')) {
+      return 'lifecycle-unmatched';
+    }
+    return 'lifecycle-standard';
   }
 
   statusBadge(status) {
