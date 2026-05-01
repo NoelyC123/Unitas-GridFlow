@@ -991,16 +991,102 @@ class MapViewer {
   }
 
   electricalRows(props) {
+    const rows = [];
+    const isUg = props.is_underground === true;
+    const voltageLabel =
+      props.voltage_detail && props.voltage_detail.label
+        ? String(props.voltage_detail.label)
+        : '';
+
+    rows.push(
+      this.popupRow(
+        'Line Voltage',
+        props.voltage || 'not recorded',
+        props.voltage ? 'ok' : 'review',
+        voltageLabel,
+      ),
+    );
+
+    if (!isUg) {
+      rows.push(
+        this.popupRow(
+          'Conductor Type',
+          props.conductor_type || 'not recorded',
+          props.conductor_type ? 'ok' : 'review',
+          props.conductor_detail && props.conductor_detail.name ? String(props.conductor_detail.name) : '',
+        ),
+      );
+      rows.push(
+        this.popupRow(
+          'Conductor Size',
+          props.conductor_size || 'not recorded',
+          props.conductor_size ? 'ok' : 'info',
+          props.conductor_size_description ? String(props.conductor_size_description) : '',
+        ),
+      );
+      rows.push(
+        this.popupRow(
+          'Phase Configuration',
+          props.phase_count || 'not recorded',
+          props.phase_count ? 'ok' : 'info',
+          props.phase_detail && props.phase_detail.description
+            ? String(props.phase_detail.description)
+            : '',
+        ),
+      );
+      const ct = String(props.conductor_type || '').toUpperCase();
+      let form = 'Not specified';
+      if (ct.includes('BARE')) form = 'Bare conductor';
+      else if (ct.includes('ABC')) form = 'Aerial bundled cable (ABC)';
+      else if (ct.includes('COVERED')) form = 'Covered conductor';
+      rows.push(this.popupRow('Conductor Form', form, 'info'));
+    } else {
+      rows.push(
+        this.popupRow(
+          'Cable Type',
+          props.cable_type || 'not recorded',
+          props.cable_type ? 'ok' : 'review',
+          props.cable_detail && props.cable_detail.name ? String(props.cable_detail.name) : '',
+        ),
+      );
+      rows.push(
+        this.popupRow(
+          'Cable Size',
+          props.cable_size || props.conductor_size || 'not recorded',
+          props.cable_size || props.conductor_size ? 'ok' : 'info',
+          props.conductor_size_description ? String(props.conductor_size_description) : '',
+        ),
+      );
+      rows.push(
+        this.popupRow(
+          'Cores/Phases',
+          props.cores_phases || props.phase_count || 'not recorded',
+          props.cores_phases || props.phase_count ? 'ok' : 'info',
+          props.phase_detail && props.phase_detail.description
+            ? String(props.phase_detail.description)
+            : '',
+        ),
+      );
+    }
+
     const equipment = Array.isArray(props.equipment) && props.equipment.length > 0
       ? props.equipment.join(', ')
       : props.equipment;
-    return [
-      this.popupRow('Line Voltage', props.voltage || 'not recorded', props.voltage ? 'ok' : 'info'),
-      this.popupRow('Conductor Type', props.conductor_type || 'not recorded', props.conductor_type ? 'ok' : 'info'),
-      this.popupRow('Phases', props.phase_count || 'not recorded', props.phase_count ? 'ok' : 'info'),
-      this.popupRow('Mounted Equipment', equipment || 'none recorded', equipment ? 'ok' : 'info'),
-      this.popupRow('Equipment Rating', props.equipment_rating || 'not recorded', props.equipment_rating ? 'ok' : 'info'),
-    ];
+    rows.push(
+      this.popupRow(
+        'Mounted Equipment',
+        equipment || 'none recorded',
+        equipment ? 'ok' : 'info',
+      ),
+    );
+    rows.push(
+      this.popupRow(
+        'Equipment Rating',
+        props.equipment_rating || 'not recorded',
+        props.equipment_rating ? 'ok' : 'info',
+      ),
+    );
+    return rows;
   }
 
   mechanicalRows(props, prominent = false) {

@@ -8,6 +8,27 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 2 D2-A: Conductor/Cable Electrical Schema
+
+### Added
+
+- **`app/electrical_schema.py`:** Voltage, overhead conductor, underground cable, and phase reference data; normalizers; `parse_conductor_data` / `merge_electrical_fields_into_props` for feature properties.
+- **Intake & map:** Electrical fields merged onto GeoJSON features and popup model; map viewer electrical section shows voltage/conductor/cable detail.
+- **QA:** `conductor_hv_overhead` base rule — WARN on existing network poles when HV overhead is inferred and conductor type is missing.
+- **Tests:** `tests/test_electrical_schema.py`, `conductor_hv_overhead` cases in `tests/test_qa_engine.py`.
+
+### Fixed
+
+- Intake normalization no longer maps `conductor_size` into `conductor_type` aliases.
+
+### Validated
+
+- `pytest` — 327 passed.
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pre-commit run --all-files` — passed.
+
+---
+
 ## 2026-05-01 — Phase 1 Domain Accuracy (D1-A through D1-D)
 
 ### Added

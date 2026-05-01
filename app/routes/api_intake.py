@@ -23,6 +23,7 @@ from app.controller_intake import (
     parse_raw_controller_dump,
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
+from app.electrical_schema import merge_electrical_fields_into_props
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
 from app.qa_engine import (
     classify_height_confidence,
@@ -265,7 +266,22 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     normalized |= _copy_if_missing(
         df,
         "conductor_type",
-        ["conductor_type", "conductor", "conductor_size"],
+        ["conductor_type", "conductor", "oh_conductor_type"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "conductor_size",
+        ["conductor_size", "wire_size", "oh_conductor_size", "line_size"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "cable_type",
+        ["cable_type", "ug_cable_type", "u_cable_type", "buried_cable_type"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "route_type",
+        ["route_type", "line_route", "circuit_route"],
     )
     normalized |= _copy_if_missing(
         df,
@@ -833,6 +849,24 @@ def _build_feature_collection(
         source_confidence_detail = classify_source_confidence(row)
         attachments_detail = parse_attachments(row)
 
+        electrical_props = dict(row.to_dict())
+        electrical_props["voltage"] = network_fields.get("voltage")
+        electrical_props["line_voltage"] = network_fields.get("voltage")
+        electrical_props["conductor_type"] = network_fields.get("conductor_type")
+        electrical_props["conductor"] = network_fields.get("conductor_type")
+        electrical_props["phase_count"] = network_fields.get("phase_count")
+        electrical_props["phases"] = network_fields.get("phase_count")
+        electrical_props["conductor_size"] = electrical_props.get(
+            "conductor_size"
+        ) or network_fields.get("conductor_size")
+        electrical_props["cable_type"] = electrical_props.get("cable_type") or network_fields.get(
+            "cable_type"
+        )
+        electrical_props["route_type"] = electrical_props.get("route_type") or network_fields.get(
+            "route_type"
+        )
+        merge_electrical_fields_into_props(electrical_props)
+
         feature = {
             "type": "Feature",
             "geometry": {
@@ -861,6 +895,18 @@ def _build_feature_collection(
                 "voltage": _safe_value(network_fields.get("voltage")),
                 "conductor_type": _safe_value(network_fields.get("conductor_type")),
                 "phase_count": _safe_value(network_fields.get("phase_count")),
+                "voltage_detail": electrical_props.get("voltage_detail") or {},
+                "is_overhead": bool(electrical_props.get("is_overhead", True)),
+                "is_underground": bool(electrical_props.get("is_underground", False)),
+                "conductor_detail": electrical_props.get("conductor_detail") or {},
+                "conductor_type_normalized": electrical_props.get("conductor_type_normalized"),
+                "conductor_size": _safe_value(electrical_props.get("conductor_size")),
+                "conductor_size_description": electrical_props.get("conductor_size_description"),
+                "phase_detail": electrical_props.get("phase_detail") or {},
+                "cable_type": _safe_value(electrical_props.get("cable_type")),
+                "cable_detail": electrical_props.get("cable_detail") or {},
+                "cable_size": _safe_value(electrical_props.get("cable_size")),
+                "cores_phases": _safe_value(electrical_props.get("cores_phases")),
                 "equipment": equipment_items,
                 "equipment_rating": _safe_value(network_fields.get("equipment_rating")),
                 "surveyor": _display_value(row, "surveyor"),

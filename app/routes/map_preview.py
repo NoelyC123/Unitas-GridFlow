@@ -7,6 +7,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify, render_template
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
+from app.electrical_schema import merge_electrical_fields_into_props
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
 
 map_preview_bp = Blueprint("map_preview", __name__)
@@ -65,6 +66,18 @@ POPUP_DATA_FIELDS = {
     "access_constraint": None,
     "clearance_measured": None,
     "distance_from_route_m": None,
+    "voltage_detail": {},
+    "is_overhead": True,
+    "is_underground": False,
+    "conductor_detail": {},
+    "conductor_type_normalized": None,
+    "conductor_size": None,
+    "conductor_size_description": None,
+    "phase_detail": {},
+    "cable_type": None,
+    "cable_detail": {},
+    "cable_size": None,
+    "cores_phases": None,
 }
 
 
@@ -174,6 +187,7 @@ def _enrich_popup_data_model(data: dict) -> dict:
             props["attachments_detail"] = parse_attachments(props)
         if not props.get("voltage"):
             props["voltage"] = _infer_voltage(props, metadata)
+        merge_electrical_fields_into_props(props)
         if props.get("photo_links") and not props.get("photo_count"):
             props["photo_count"] = len(props.get("photo_links") or [])
     return data

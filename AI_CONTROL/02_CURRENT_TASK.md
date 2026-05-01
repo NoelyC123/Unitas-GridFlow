@@ -2,8 +2,8 @@
 
 ## Domain Accuracy & Electrical Data Model Implementation
 
-**Status:** PHASE 1 COMPLETE — Phase 2 awaits explicit approval
-**Timeline:** Phase 1 (5-7 days) ✅ → Phase 2 (10-14 days) → Phase 3 (5-7 days)
+**Status:** PHASE 2 IN PROGRESS — D2-A (Conductor/Cable Electrical Schema) shipped
+**Timeline:** Phase 1 (5-7 days) ✅ → Phase 2 (10-14 days) — started → Phase 3 (5-7 days)
 **Total:** 4-5 weeks / 130-160 hours
 
 ---
@@ -18,7 +18,7 @@
 3. ✅ D1-C: Source Confidence & Legacy Data Warnings — `f30ef46`
 4. ✅ D1-D: Third-Party Infrastructure & Attachments — `6349ebd`
 
-**Next:** Do not start Phase 2 until explicitly approved (see `PHASE_2_3_ROADMAP.md`).
+**Next:** D2-B (Equipment & Pole-Top Configuration) after review (see `PHASE_2_3_ROADMAP.md`).
 
 ---
 
@@ -112,12 +112,12 @@
 
 All four packages implemented, tested (`pytest` full suite green), committed, and pushed.
 
-### Phase 2 Execution (After Phase 1 validates)
+### Phase 2 Execution — ACTIVE
 
-**NOT STARTED** — Waiting for **explicit** Phase 2 approval (see roadmap; do not assume scope)
+**Approved:** Phase 2 is open. D2-A is implemented; next package is D2-B unless priorities change.
 
 Packages:
-- D2-A: Conductor/Cable Electrical Schema
+- ✅ D2-A: Conductor/Cable Electrical Schema (`app/electrical_schema.py`, intake/map merge, `conductor_hv_overhead` QA WARN, popup electrical rows)
 - D2-B: Equipment & Pole-Top Configuration
 - D2-C: Network Connectivity & Relationships
 - D2-D: Survey Metadata & Provenance
@@ -138,7 +138,7 @@ Packages:
 
 - ❌ Do NOT skip testing after each package
 - ❌ Do NOT proceed to next package without approval
-- ❌ Do NOT start Phase 2 without explicit approval
+- ❌ Do NOT start Phase 3 before Phase 2 scope is agreed
 - ❌ Do NOT add features outside Phase 1 scope
 - ❌ Do NOT modify files not listed in package spec
 
@@ -172,4 +172,4 @@ Update this file when:
 
 ---
 
-**Expected next update:** Phase 2 approval to begin D2-A, or operational validation notes on Phase 1
+**Expected next update:** D2-B kickoff or operational validation on D2-A popups/QA

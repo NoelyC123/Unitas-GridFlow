@@ -9,6 +9,7 @@ BASE_RULES = [
     {"check": "required", "field": "pole_id"},
     {"check": "required", "field": "height", "structural_only": True},
     {"check": "height_source_existing"},
+    {"check": "conductor_hv_overhead"},
     {"check": "required", "field": "material"},
     {"check": "required", "field": "location"},
     {"check": "required", "field": "structure_type"},

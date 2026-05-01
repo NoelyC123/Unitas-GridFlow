@@ -6,6 +6,8 @@ import re
 import pandas as pd
 from pyproj import Transformer
 
+from app.electrical_schema import row_suggests_hv_overhead
+
 _OSGB_TRANSFORMER = Transformer.from_crs("EPSG:4326", "EPSG:27700", always_xy=True)
 
 # Contextual/environmental survey markers — not structural poles.
@@ -144,6 +146,9 @@ def infer_display_network_fields(
     return {
         "voltage": row.get("voltage") or row.get("line_voltage") or inferred_voltage,
         "conductor_type": row.get("conductor_type") or row.get("conductor"),
+        "conductor_size": row.get("conductor_size") or row.get("wire_size"),
+        "cable_type": row.get("cable_type") or row.get("ug_cable_type"),
+        "route_type": row.get("route_type") or row.get("line_route"),
         "phase_count": row.get("phase_count") or row.get("phases"),
         "equipment": row.get("equipment") or row.get("mounted_equipment"),
         "equipment_rating": row.get("equipment_rating") or row.get("rating"),
@@ -540,6 +545,23 @@ def run_qa_checks(df, rules):
                             "Row": row.to_dict(),
                         }
                     )
+
+        elif check == "conductor_hv_overhead":
+            for _, row in qc.iterrows():
+                if not _is_existing_pole_record(row):
+                    continue
+                if not row_suggests_hv_overhead(row):
+                    continue
+                conductor_val = row.get("conductor_type") or row.get("conductor")
+                if not _is_missing_scalar(conductor_val):
+                    continue
+                issues.append(
+                    {
+                        "Issue": ("Overhead conductor type not recorded — specify for HV design"),
+                        "Row": row.to_dict(),
+                        "Severity": "WARN",
+                    }
+                )
 
         elif check == "height_source_existing":
             height_source_field = rule.get("height_source_field", "height_source")

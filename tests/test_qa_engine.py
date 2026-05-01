@@ -1251,6 +1251,82 @@ def test_height_source_existing_fails_when_existing_height_missing() -> None:
     assert issues.iloc[0]["Severity"] == "FAIL"
 
 
+def test_conductor_hv_overhead_warns_when_conductor_missing_on_existing_pole() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "voltage": "11kV",
+                "conductor_type": None,
+                "conductor": None,
+                "_record_role": "structural",
+            }
+        ]
+    )
+    rules = [{"check": "conductor_hv_overhead"}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert "Overhead conductor type not recorded" in str(issues.iloc[0]["Issue"])
+    assert issues.iloc[0]["Severity"] == "WARN"
+
+
+def test_conductor_hv_overhead_passes_when_conductor_present() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "voltage": "11kV",
+                "conductor_type": "ACSR",
+                "_record_role": "structural",
+            }
+        ]
+    )
+    rules = [{"check": "conductor_hv_overhead"}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0
+
+
+def test_conductor_hv_overhead_skips_third_party_and_lv_and_underground() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "TP-1",
+                "structure_type": "EXpole",
+                "primary_type": "third_party_infrastructure",
+                "voltage": "11kV",
+                "conductor_type": None,
+                "_record_role": "structural",
+            },
+            {
+                "pole_id": "EX-2",
+                "structure_type": "EXpole",
+                "voltage": "LV",
+                "conductor_type": None,
+                "_record_role": "structural",
+            },
+            {
+                "pole_id": "EX-3",
+                "structure_type": "EXpole",
+                "voltage": "11kV",
+                "cable_type": "XLPE",
+                "conductor_type": None,
+                "_record_role": "structural",
+            },
+        ]
+    )
+    rules = [{"check": "conductor_hv_overhead"}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 0
+
+
 def test_classify_height_confidence_high_for_measured_rtk() -> None:
     confidence = classify_height_confidence(
         {
