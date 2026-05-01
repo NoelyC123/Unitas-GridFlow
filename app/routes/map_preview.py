@@ -13,6 +13,10 @@ from app.electrical_schema import (
     merge_equipment_fields_into_props,
     strip_electrical_fields_from_point_props,
 )
+from app.field_ownership import (
+    finalize_field_ownership_metadata,
+    point_enriched_electrical_leaks,
+)
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
 from app.span_generator import attach_span_features_to_collection
 from app.survey_connectivity import merge_connectivity_into_props, merge_survey_metadata_into_props
@@ -183,6 +187,7 @@ def _enrich_popup_data_model(data: dict) -> dict:
     """Backfill C2-2 display fields for previously generated map_data.json files."""
     if not isinstance(data, dict):
         return data
+    point_leak_total = 0
     for feature in data.get("features") or []:
         props = feature.get("properties") if isinstance(feature, dict) else None
         if not isinstance(props, dict):
@@ -210,6 +215,7 @@ def _enrich_popup_data_model(data: dict) -> dict:
             props["source_confidence_detail"] = classify_source_confidence(props)
         if not props.get("attachments_detail"):
             props["attachments_detail"] = parse_attachments(props)
+        point_leak_total += len(point_enriched_electrical_leaks(props))
         strip_electrical_fields_from_point_props(props)
         merge_equipment_fields_into_props(props)
         merge_connectivity_into_props(props)
@@ -228,6 +234,7 @@ def _enrich_popup_data_model(data: dict) -> dict:
         cp = cab_feat.get("properties")
         if isinstance(cp, dict):
             merge_electrical_fields_into_props(cp)
+    finalize_field_ownership_metadata(data, point_leak_total=point_leak_total)
     return data
 
 

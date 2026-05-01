@@ -8,6 +8,24 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 3D: Electrical field ownership (map points vs spans/cables)
+
+### Added
+
+- **`app/field_ownership.py`:** Phase 3D audit helpers — count enriched electrical keys on pole points before strip, `finalize_field_ownership_metadata()` → `metadata.field_ownership_3d`.
+- **`map_preview` enrichment:** Tallies point leaks, strips enriched electrical display from Point props (unchanged strip behaviour), writes `field_ownership_3d` after span/cable electrical merge.
+
+### Tests
+
+- **`tests/test_field_ownership.py`:** Unit tests + map endpoint strip test + optional `J12946` smoke.
+- **Suite:** 372 passing.
+
+### Validated
+
+- `J12946` map data endpoint: `field_ownership_3d` present; no `voltage_detail` / `conductor_detail` / `cable_detail` / `phase_detail` on Point features after enrichment.
+
+---
+
 ## 2026-05-01 — Phase 3C: Underground / cable LineString model & map overlay
 
 ### Added

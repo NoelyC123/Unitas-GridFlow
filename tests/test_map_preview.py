@@ -60,3 +60,6 @@ def test_map_data_endpoint_adds_span_features(tmp_path, monkeypatch) -> None:
     assert sf["properties"].get("voltage_detail")
     assert "cable_features" in data
     assert data["metadata"].get("cable_feature_count") == 0
+    fo = data["metadata"].get("field_ownership_3d") or {}
+    assert fo.get("policy") == "enriched_electrical_display_on_spans_and_cables_only"
+    assert "point_features" in fo
