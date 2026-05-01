@@ -225,6 +225,10 @@
       margin: 0;
     }
 
+    .layer-toggle:hover {
+      background-color: #f3f4f6;
+    }
+
     .review-focus-title {
       color: #111827;
       font-size: 0.82rem;
@@ -249,10 +253,17 @@
       line-height: 1.2;
       padding: 7px 8px;
       text-align: left;
+      transition: box-shadow 0.15s, transform 0.15s;
     }
 
     .focus-filter-btn:hover {
       background: #f1f5f9;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transform: translateX(2px);
+    }
+
+    .focus-filter-btn:active {
+      transform: translateX(0);
     }
 
     .record-item {
@@ -363,13 +374,13 @@
       box-shadow: 0 1px 5px rgba(15, 23, 42, 0.35);
       color: #ffffff;
       display: flex;
-      font-size: 0.44rem;
+      font-size: 0.32rem;
       font-weight: 800;
-      height: 17px;
+      height: 10px;
       justify-content: center;
       line-height: 1;
       text-align: center;
-      width: 17px;
+      width: 10px;
     }
 
     .asset-marker.status-PASS .asset-marker-shape { border-color: #10b981; }
@@ -377,11 +388,11 @@
     .asset-marker.status-FAIL .asset-marker-shape { border-color: #ef4444; }
     .asset-marker.asset-existing .asset-marker-shape { background: #ffffff; border-radius: 3px; color: #111827; }
     .asset-marker.asset-proposed .asset-marker-shape { background: #bfdbfe; border-radius: 999px; color: #1e3a8a; }
-    .asset-marker.asset-anchor .asset-marker-shape { background: #f3f4f6; color: #374151; clip-path: polygon(50% 0, 100% 100%, 0 100%); height: 14px; padding-top: 4px; width: 14px; }
-    .asset-marker.asset-context .asset-marker-shape { background: #f3f4f6 !important; border-color: #9ca3af !important; border-radius: 3px; color: #6b7280; font-size: 0.34rem; height: 11px; opacity: 0.62; transform: rotate(45deg); width: 11px; }
+    .asset-marker.asset-anchor .asset-marker-shape { background: #f3f4f6; color: #374151; clip-path: polygon(50% 0, 100% 100%, 0 100%); font-size: 0.28rem; height: 8px; padding-top: 2px; width: 8px; }
+    .asset-marker.asset-context .asset-marker-shape { background: #f3f4f6 !important; border-color: #9ca3af !important; border-radius: 3px; color: #6b7280; font-size: 0.22rem; height: 6px; opacity: 0.62; transform: rotate(45deg); width: 6px; }
     .asset-marker.asset-context .asset-marker-label { transform: rotate(-45deg); }
     .asset-marker.asset-other .asset-marker-shape { border-radius: 999px; }
-    .asset-marker.is-angle .asset-marker-shape { position: relative; }
+    .asset-marker.is-angle .asset-marker-shape { font-size: 0.36rem; height: 12px; position: relative; width: 12px; }
     .asset-marker-angle-badge {
       align-items: center;
       background: #111827;
@@ -389,15 +400,15 @@
       border-radius: 999px;
       color: #ffffff;
       display: flex;
-      font-size: 0.42rem;
+      font-size: 0.3rem;
       font-weight: 900;
-      height: 10px;
+      height: 7px;
       justify-content: center;
       line-height: 1;
       position: absolute;
-      right: -5px;
-      top: -5px;
-      width: 10px;
+      right: -4px;
+      top: -4px;
+      width: 7px;
     }
     .asset-marker.lifecycle-recovered .asset-marker-shape { opacity: 0.48; position: relative; }
     .asset-marker.lifecycle-recovered .asset-marker-shape::after {
@@ -1079,6 +1090,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=18"></script>
+  <script src="/static/js/map-viewer.js?v=19"></script>
 </body>
 </html>

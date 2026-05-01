@@ -15,12 +15,12 @@ const CONTEXT_FEATURE_CODES = new Set([
 ]);
 
 const MARKER_SIZES = {
-  existing: 17,
-  proposed: 17,
-  angle: 19,
-  anchor: 14,
-  context: 11,
-  other: 15,
+  existing: 10,
+  proposed: 10,
+  angle: 12,
+  anchor: 8,
+  context: 6,
+  other: 9,
 };
 
 class MapViewer {

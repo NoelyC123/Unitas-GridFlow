@@ -168,6 +168,25 @@ input[type="submit"]:hover {
 }
 
 /* ========================================
+   MAP CONTROL POLISH
+   ======================================== */
+
+.layer-toggle:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.filter-btn:hover,
+.focus-filter-btn:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateX(2px);
+}
+
+.filter-btn:active,
+.focus-filter-btn:active {
+  transform: translateX(0);
+}
+
+/* ========================================
    RESPONSIVE
    ======================================== */
 
