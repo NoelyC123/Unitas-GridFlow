@@ -29,6 +29,19 @@ from app.route_sequencer import sequence_route
 
 # Compiled once at module level for replacement-pair offset extraction.
 _REPL_OFFSET_RE = re.compile(r"([\d.]+)m offset")
+_ANGLE_CODES = {"Angle", "angle", "ANGLE"}
+_STAY_EVIDENCE_CODES = {
+    "Stay",
+    "stay",
+    "STAY",
+    "Staywire",
+    "staywire",
+    "STAYWIRE",
+    "Stay wire",
+    "stay wire",
+    "Stay pole",
+    "stay pole",
+}
 
 api_intake_bp = Blueprint("api_intake", __name__)
 
@@ -417,6 +430,87 @@ def _build_replacement_links(
     return links
 
 
+def _latlon_distance_m(lat1: Any, lon1: Any, lat2: Any, lon2: Any) -> float | None:
+    try:
+        lat1_f = float(lat1)
+        lon1_f = float(lon1)
+        lat2_f = float(lat2)
+        lon2_f = float(lon2)
+    except (TypeError, ValueError):
+        return None
+
+    mean_lat_rad = math.radians((lat1_f + lat2_f) / 2)
+    metres_per_lat = 111_320.0
+    metres_per_lon = 111_320.0 * math.cos(mean_lat_rad)
+    dx = (lon2_f - lon1_f) * metres_per_lon
+    dy = (lat2_f - lat1_f) * metres_per_lat
+    return math.sqrt(dx * dx + dy * dy)
+
+
+def _build_angle_stay_evidence(
+    df: pd.DataFrame,
+    proximity_m: float = 20.0,
+) -> dict[int, dict[str, Any]]:
+    """Return stay-evidence summaries for angle records in the map payload."""
+
+    if "structure_type" not in df.columns:
+        return {}
+
+    stay_records: list[dict[str, Any]] = []
+    for _, row in df.iterrows():
+        st = str(_safe_value(row.get("structure_type")) or "")
+        if st not in _STAY_EVIDENCE_CODES:
+            continue
+        stay_records.append(
+            {
+                "type": st,
+                "lat": row.get("lat"),
+                "lon": row.get("lon"),
+            }
+        )
+
+    result: dict[int, dict[str, Any]] = {}
+    for _, row in df.iterrows():
+        row_index = row.get("__row_index__")
+        st = str(_safe_value(row.get("structure_type")) or "")
+        if not isinstance(row_index, int) or st not in _ANGLE_CODES:
+            continue
+
+        captured: list[tuple[str, float]] = []
+        for stay in stay_records:
+            distance_m = _latlon_distance_m(
+                row.get("lat"),
+                row.get("lon"),
+                stay["lat"],
+                stay["lon"],
+            )
+            if distance_m is not None and distance_m <= proximity_m:
+                captured.append((stay["type"], distance_m))
+
+        remarks = str(_safe_value(row.get("location")) or "")
+        if captured:
+            captured.sort(key=lambda item: item[1])
+            result[row_index] = {
+                "stay_evidence_status": "captured",
+                "stay_types": sorted({item[0] for item in captured}),
+                "nearest_stay_distance_m": round(captured[0][1], 1),
+            }
+        elif "stay" in remarks.lower():
+            result[row_index] = {
+                "stay_evidence_status": "captured",
+                "stay_types": ["Stay evidence in remarks"],
+                "nearest_stay_distance_m": None,
+            }
+        else:
+            result[row_index] = {
+                "stay_evidence_status": "missing",
+                "stay_types": [],
+                "nearest_stay_distance_m": None,
+            }
+
+    return result
+
+
 def _build_feature_collection(
     df: pd.DataFrame,
     issues_df: pd.DataFrame,
@@ -426,6 +520,7 @@ def _build_feature_collection(
 ) -> dict[str, Any]:
     per_row = _collect_per_row_issues(issues_df)
     replacement_links = _build_replacement_links(df, issues_df)
+    angle_stay_evidence = _build_angle_stay_evidence(df)
     features: list[dict[str, Any]] = []
 
     pass_count = 0
@@ -435,7 +530,8 @@ def _build_feature_collection(
     for _, row in df.reset_index(drop=True).iterrows():
         # Exclude anchor rows (reference control points) from the map output.
         # They are not survey records and may be at distant unrelated locations.
-        if row.get("_record_role") == "anchor":
+        _st_for_anchor = str(_safe_value(row.get("structure_type")) or "")
+        if row.get("_record_role") == "anchor" and _st_for_anchor not in _STAY_EVIDENCE_CODES:
             continue
 
         row_index = row.get("__row_index__")
@@ -482,6 +578,7 @@ def _build_feature_collection(
             asset_intent = None
 
         lifecycle_link = replacement_links.get(row_index, {}) if isinstance(row_index, int) else {}
+        stay_evidence = angle_stay_evidence.get(row_index, {}) if isinstance(row_index, int) else {}
         if lifecycle_link:
             lifecycle_state = lifecycle_link.get("lifecycle_state")
         elif _st in ("EXpole", "expole", "EXPOLE"):
@@ -531,6 +628,9 @@ def _build_feature_collection(
                 "being_replaced_by": lifecycle_link.get("being_replaced_by"),
                 "match_offset_m": lifecycle_link.get("match_offset_m"),
                 "match_role": lifecycle_link.get("match_role"),
+                "stay_evidence_status": stay_evidence.get("stay_evidence_status"),
+                "stay_types": stay_evidence.get("stay_types", []),
+                "nearest_stay_distance_m": stay_evidence.get("nearest_stay_distance_m"),
             },
         }
         features.append(feature)
@@ -777,14 +877,14 @@ def process_job(
             angle_no_stay_count = int(
                 (
                     (issues_df["Severity"] == "WARN")
-                    & issues_df["Issue"].str.contains("Angle structure with no stay", na=False)
+                    & issues_df["Issue"].str.contains("stay evidence not captured", na=False)
                 ).sum()
             )
         if angle_no_stay_count > 0:
             noun = "structure" if angle_no_stay_count == 1 else "structures"
             design_readiness.setdefault("reasons", []).append(
                 f"{angle_no_stay_count} angle {noun} with no stay evidence"
-                f" — check whether stay capture is missing from this survey"
+                f" — check field notes, photos or plan evidence"
             )
             design_readiness["angle_no_stay_count"] = angle_no_stay_count
 

@@ -405,10 +405,12 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-focus="replacement-proximity"' in html
     assert 'data-focus="missing-height"' in html
     assert 'data-focus="missing-specification"' in html
+    assert 'data-focus="angle-missing-stay"' in html
     assert 'data-focus="records-with-remarks"' in html
     assert "Existing/proposed matches" in html
     assert "Missing existing heights" in html
     assert "Missing specifications" in html
+    assert "Show angle poles missing stay evidence" in html
     assert "Surveyed route sequence" in html
     assert "Suggested Existing/Proposed Match" in html
     assert "Show suggested matches" in html

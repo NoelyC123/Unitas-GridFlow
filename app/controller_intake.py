@@ -556,23 +556,20 @@ def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[
     )
     has_issues = not issues_df.empty and "Issue" in issues_df.columns
 
-    # Risk: Angle structures with no stay evidence
+    # Risk: angle poles missing stay evidence
     angle_count = 0
     if has_issues:
         angle_count = int(
-            issues_df["Issue"].str.contains("Angle structure with no stay", na=False).sum()
+            issues_df["Issue"].str.contains("stay evidence not captured", na=False).sum()
         )
     if angle_count > 0:
-        noun = "structure" if angle_count == 1 else "structures"
+        noun = "pole" if angle_count == 1 else "poles"
         risks.append(
             {
-                "title": "Angle structures with no clear stay evidence",
+                "title": "Angle poles missing stay evidence",
                 "count": angle_count,
-                "summary": f"{angle_count} angle {noun} with no proximate stay evidence.",
-                "designer_impact": (
-                    "Stay requirements cannot be confirmed — check site notes or plan"
-                    " before design proceeds."
-                ),
+                "summary": f"{angle_count} angle {noun} with no captured stay evidence.",
+                "designer_impact": ("Check field notes, photos or plan evidence."),
                 "severity": "WARN",
             }
         )

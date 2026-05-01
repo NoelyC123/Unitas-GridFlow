@@ -179,7 +179,7 @@ def _issue_status_label(severity: str, issue_text: str = "") -> str:
         or "height likely estimated" in lower
         or "span" in lower
         or "replacement pair" in lower
-        or "angle structure with no stay" in lower
+        or "stay evidence not captured" in lower
     ):
         return "Review Required"
     return "Review Item"
@@ -223,10 +223,10 @@ def _issue_guidance(issue_text: str) -> tuple[str, str]:
             "Existing/proposed pole relationship is inferred, not designer confirmed.",
             "Verify the intended replacement pairing.",
         )
-    if "angle structure with no stay" in lower:
+    if "stay evidence not captured" in lower:
         return (
-            "Angle pole has no digital stay evidence.",
-            "Check whether stay evidence is missing from the survey.",
+            "Angle pole — stay evidence not captured.",
+            "Check field notes, photos or plan evidence.",
         )
 
     return (

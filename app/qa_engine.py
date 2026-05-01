@@ -443,7 +443,7 @@ def run_qa_checks(df, rules):
             # the angle record's own remarks), emit a cautious WARN.
             lat_field = rule.get("lat_field", "lat")
             lon_field = rule.get("lon_field", "lon")
-            proximity_m = rule.get("proximity_m", 30)
+            proximity_m = rule.get("proximity_m", 20)
 
             if "structure_type" not in qc.columns:
                 continue
@@ -485,9 +485,8 @@ def run_qa_checks(df, rules):
                     issues.append(
                         {
                             "Issue": (
-                                "Angle structure with no stay evidence detected"
-                                " — verify whether stay capture is missing"
-                                " or not required for this job"
+                                "⚠️ Angle pole — stay evidence not captured."
+                                " Check field notes, photos or plan evidence."
                             ),
                             "Row": angle_row.to_dict(),
                             "Severity": "WARN",

@@ -523,8 +523,8 @@ def test_build_feature_collection_warn_texts_populated_in_properties() -> None:
         [
             {
                 "Issue": (
-                    "Angle structure with no stay evidence detected"
-                    " — verify whether stay capture is missing"
+                    "⚠️ Angle pole — stay evidence not captured."
+                    " Check field notes, photos or plan evidence."
                 ),
                 "Row": {"pole_id": "A-1", "__row_index__": 0},
                 "Severity": "WARN",
@@ -539,8 +539,42 @@ def test_build_feature_collection_warn_texts_populated_in_properties() -> None:
     props = fc["features"][0]["properties"]
     assert props["warn_count"] == 1
     assert len(props["warn_texts"]) == 1
-    assert "Angle structure" in props["warn_texts"][0]
+    assert "stay evidence not captured" in props["warn_texts"][0]
+    assert props["stay_evidence_status"] == "missing"
     assert props["issue_count"] == 0  # WARN, not FAIL
+
+
+def test_build_feature_collection_shows_captured_stay_evidence_for_angle() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "A-1",
+                "structure_type": "Angle",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            },
+            {
+                "pole_id": "ST-1",
+                "structure_type": "Stay",
+                "lat": 54.52005,
+                "lon": -3.0000,
+                "_record_role": "anchor",
+                "__row_index__": 1,
+            },
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    angle_props = fc["features"][0]["properties"]
+    stay_props = fc["features"][1]["properties"]
+    assert angle_props["stay_evidence_status"] == "captured"
+    assert angle_props["stay_types"] == ["Stay"]
+    assert stay_props["structure_type"] == "Stay"
 
 
 # ---------------------------------------------------------------------------

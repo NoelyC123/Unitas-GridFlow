@@ -35,7 +35,7 @@ BASE_RULES = [
         "check": "angle_stay",
         "lat_field": "lat",
         "lon_field": "lon",
-        "proximity_m": 30,
+        "proximity_m": 20,
     },
 ]
 

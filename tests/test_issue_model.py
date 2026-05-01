@@ -24,7 +24,7 @@ def test_classify_issue_replacement_pair_is_observation() -> None:
 
 def test_classify_issue_angle_no_stay_is_warning_with_action() -> None:
     meta = classify_issue(
-        "Angle structure with no stay evidence detected — verify whether stay capture is missing"
+        "⚠️ Angle pole — stay evidence not captured. Check field notes, photos or plan evidence."
     )
     assert meta["issue_code"] == "ANGLE_NO_STAY"
     assert meta["severity"] == "warning"
@@ -158,7 +158,7 @@ def test_enrich_issues_preserves_existing_columns() -> None:
     issues_df = pd.DataFrame(
         [
             {
-                "Issue": "Angle structure with no stay evidence detected",
+                "Issue": "⚠️ Angle pole — stay evidence not captured.",
                 "Row": {"pole_id": "1"},
                 "Severity": "WARN",
             }
@@ -217,7 +217,7 @@ def test_enrich_issues_row_count_unchanged() -> None:
     issues_df = pd.DataFrame(
         [
             {"Issue": "Span very short: 1.5m — likely duplicate", "Row": {}},
-            {"Issue": "Angle structure with no stay evidence detected", "Row": {}},
+            {"Issue": "⚠️ Angle pole — stay evidence not captured.", "Row": {}},
             {"Issue": "Missing required field: material", "Row": {}},
         ]
     )
@@ -324,7 +324,7 @@ def test_build_recommended_actions_integration_with_enrich_issues() -> None:
             {"Issue": "Missing required field: height", "Row": {}, "Severity": None},
             {"Issue": "Missing required field: height", "Row": {}, "Severity": None},
             {
-                "Issue": "Angle structure with no stay evidence detected",
+                "Issue": "⚠️ Angle pole — stay evidence not captured.",
                 "Row": {},
                 "Severity": "WARN",
             },

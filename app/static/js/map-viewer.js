@@ -168,6 +168,10 @@ class MapViewer {
         ? '<div class="popup-row" style="color:#6b7280;font-size:0.85em;">Context record — height field hidden where not applicable</div>'
         : '';
 
+      const stayEvidenceLine = this.isAnglePole(props)
+        ? this.stayEvidenceLine(props)
+        : '';
+
       const materialLine = props.material != null && props.material !== ''
         ? `<div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material)}</div>`
         : '';
@@ -230,6 +234,7 @@ class MapViewer {
         ${missingExistingHeightLine}
         ${missingProposedSpecLine}
         ${contextLine}
+        ${stayEvidenceLine}
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
         ${coordLine}
         ${replacementLine}
@@ -499,6 +504,12 @@ class MapViewer {
         && fd.props.name !== fd.props.pole_id
       ));
     }
+    if (value === 'angle-missing-stay') {
+      return this.featureData.filter(fd => (
+        this.isAnglePole(fd.props)
+        && fd.props.stay_evidence_status === 'missing'
+      ));
+    }
     return this.featureData;
   }
 
@@ -517,6 +528,7 @@ class MapViewer {
       'stays-anchors': 'Stay / anchor',
       'context-crossings': 'Context / crossing',
       'missing-specification': 'Missing proposed specification',
+      'angle-missing-stay': 'Angle pole missing stay evidence',
       'records-with-remarks': 'Record with remarks',
     };
     return labels[value] || value || mode;
@@ -552,6 +564,22 @@ class MapViewer {
     const st = String(props.structure_type || '').toLowerCase();
     const role = String(props.record_role || '').toLowerCase();
     return role === 'anchor' || st.includes('stay') || st.includes('anchor');
+  }
+
+  stayEvidenceLine(props) {
+    if (props.stay_evidence_status === 'missing') {
+      return '<div class="popup-row" style="color:#92400e;font-weight:700;">⚠️ Angle pole — stay evidence not captured. Check field notes, photos or plan evidence.</div>';
+    }
+    if (props.stay_evidence_status === 'captured') {
+      const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
+        ? props.stay_types.join(', ')
+        : 'Stay evidence captured';
+      const distanceText = props.nearest_stay_distance_m != null
+        ? ` within ${Number(props.nearest_stay_distance_m).toFixed(1)}m`
+        : '';
+      return `<div class="popup-row" style="color:#166534;font-weight:600;">Stay evidence: ${this.escapeHtml(stayTypes)}${distanceText}</div>`;
+    }
+    return '';
   }
 
   _showRecordPanel(items, title) {
@@ -611,6 +639,10 @@ class MapViewer {
         ? '<div style="color:#6b7280;font-size:0.75em;margin-top:1px;">Context record — height field hidden where not applicable</div>'
         : '';
 
+      const stayEvidenceHtml = this.isAnglePole(p)
+        ? `<div style="font-size:0.75em;margin-top:1px;">${this.stayEvidenceLine(p)}</div>`
+        : '';
+
       const replacementHtml = p.relationship === 'replacement_pair'
         ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;">Existing/proposed match signal</div>'
         : '';
@@ -630,6 +662,7 @@ class MapViewer {
         ${missingHeightHtml}
         ${missingSpecHtml}
         ${contextHtml}
+        ${stayEvidenceHtml}
         ${replacementHtml}
         ${issueHtml}
         ${warnHtml}

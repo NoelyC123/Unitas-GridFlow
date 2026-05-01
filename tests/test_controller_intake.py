@@ -481,7 +481,7 @@ def test_build_top_design_risks_includes_angle_no_stay_warn() -> None:
     issues_df = pd.DataFrame(
         [
             {
-                "Issue": "Angle structure with no stay evidence detected — verify",
+                "Issue": "⚠️ Angle pole — stay evidence not captured.",
                 "Row": {"__row_index__": 0},
                 "Severity": "WARN",
             }

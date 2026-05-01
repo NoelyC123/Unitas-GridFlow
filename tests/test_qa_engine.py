@@ -923,10 +923,10 @@ def test_angle_no_stay_emits_warn() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    warn_issues = [t for t in issue_texts if "stay evidence not captured" in t]
     assert len(warn_issues) == 1, f"Expected one angle/stay WARN, got: {issue_texts}"
     assert "Severity" in issues.columns
-    sev = issues[issues["Issue"].str.contains("Angle structure with no stay")]["Severity"].iloc[0]
+    sev = issues[issues["Issue"].str.contains("stay evidence not captured")]["Severity"].iloc[0]
     assert sev == "WARN", f"Expected Severity='WARN', got: {sev}"
 
 
@@ -967,7 +967,7 @@ def test_angle_with_stay_within_proximity_no_warn() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist() if "Issue" in issues.columns else []
 
-    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    warn_issues = [t for t in issue_texts if "stay evidence not captured" in t]
     assert len(warn_issues) == 0, f"Unexpected WARN with stay in proximity: {issue_texts}"
 
 
@@ -1008,7 +1008,7 @@ def test_angle_with_stay_beyond_proximity_emits_warn() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    warn_issues = [t for t in issue_texts if "stay evidence not captured" in t]
     assert len(warn_issues) == 1, f"Expected WARN when stay is beyond proximity, got: {issue_texts}"
 
 
@@ -1042,7 +1042,7 @@ def test_angle_stay_remarks_evidence_suppresses_warn() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist() if "Issue" in issues.columns else []
 
-    warn_issues = [t for t in issue_texts if "Angle structure with no stay" in t]
+    warn_issues = [t for t in issue_texts if "stay evidence not captured" in t]
     assert len(warn_issues) == 0, f"Expected no WARN when remarks mention stay, got: {issue_texts}"
 
 
@@ -1070,7 +1070,7 @@ def test_angle_stay_no_issue_for_pol_only_file() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist() if "Issue" in issues.columns else []
 
-    warn_issues = [t for t in issue_texts if "Angle structure" in t]
+    warn_issues = [t for t in issue_texts if "stay evidence not captured" in t]
     assert len(warn_issues) == 0, f"Unexpected angle_stay issues for Pol-only file: {issue_texts}"
 
 

@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase C3 Stay Evidence at Angle Poles
+
+### Changed
+
+- Updated angle-pole stay validation to the Phase C 20m evidence radius and exact warning text: `⚠️ Angle pole — stay evidence not captured. Check field notes, photos or plan evidence.`
+- Added map feature properties for angle stay evidence so captured stay types and nearest stay distance can appear in the popup.
+- Added `Show angle poles missing stay evidence` as a map review filter and preserved stay/anchor records as visible map evidence when they represent stay capture.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- Focused C3 angle/stay tests — 8 passed.
+- `pytest -v` — 300 passed.
+
+---
+
 ## 2026-05-01 — Phase C2 Asset Lifecycle Visualization
 
 ### Changed

@@ -30,7 +30,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
     ),
     # --- structural evidence ---
     (
-        "Angle structure with no stay evidence",
+        "Angle pole — stay evidence not captured",
         {
             "issue_code": "ANGLE_NO_STAY",
             "severity": "warning",
@@ -39,7 +39,7 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "confidence": "medium",
             "is_observation": False,
             "recommended_action": (
-                "Verify whether stay capture is missing or not required for this job"
+                "Check field notes, photos or plan evidence for stay requirements."
             ),
         },
     ),
