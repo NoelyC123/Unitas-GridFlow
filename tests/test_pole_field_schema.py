@@ -79,3 +79,19 @@ def test_validate_existing_missing_height() -> None:
 def test_validate_stay_missing_parent() -> None:
     props = {"support_schema_role": "stay", "pole_id": "S1", "structure_type": "stay"}
     assert "stay_parent_missing" in validate_support_field_coverage(props)
+
+
+def test_field_groups_proposed_is_universal_plus_proposed() -> None:
+    groups = field_groups_for_role("proposed")
+    assert len(groups) == 2
+
+
+def test_enrich_independent_replacement_status() -> None:
+    props = {"pole_id": "Z", "structure_type": "EXpole", "height": 8.0}
+    enrich_pole_support_props(props)
+    assert props.get("replacement_status") == "independent"
+
+
+def test_validate_proposed_height_gap() -> None:
+    props = {"support_schema_role": "proposed", "pole_id": "p1"}
+    assert "proposed_height_missing" in validate_support_field_coverage(props)
