@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Unitas GridFlow — Field Capture (Stage 4 PoC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fc-project-id" content="{{ project_id }}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body { background: #f0f4fa; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+    .status-online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.35); }
+    .status-offline { background: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.35); }
+    .gnss-readout { font-family: ui-monospace, monospace; font-size: 0.82rem; }
+    #record-log { max-height: 220px; overflow-y: auto; font-size: 0.85rem; }
+    .collapsed-raw textarea { min-height: 82px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="container py-4" style="max-width: 920px;">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+      <div>
+        <div class="small text-muted mb-1">
+          <a href="/projects/" class="text-decoration-none text-muted">Projects</a>
+          {% if project_id %}
+          · <a href="/project/{{ project_id }}" class="text-decoration-none text-muted">This project</a>
+          {% endif %}
+        </div>
+        <h1 class="h3 mb-1">Field capture</h1>
+        <p class="text-muted small mb-0">Stage 4 proof-of-concept — structured capture for GridFlow intake.</p>
+      </div>
+      <div class="text-end">
+        <div id="net-label" class="small fw-semibold mb-1">
+          <span class="status-dot status-offline" id="net-dot" aria-hidden="true"></span>
+          <span id="net-text">Checking…</span>
+        </div>
+        <div class="small text-muted" id="queue-label">Sync queue: 0</div>
+      </div>
+    </div>
+
+    <div class="alert alert-warning small py-2" role="status">
+      PoC: drafts and queued records are stored in this browser only. Photos for poles are required before submit.
+    </div>
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-body row">
+        <div class="col-md-7">
+          <label class="form-label small">Project / job id</label>
+          <input type="text" class="form-control form-control-sm" id="fc-job-id" value="{{ project_id }}"
+                 placeholder="e.g. P001" autocomplete="off" />
+          <div class="form-text">Must match an existing GridFlow project to import.</div>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label small">Surveyor</label>
+          <input type="text" class="form-control form-control-sm" id="fc-surveyor" placeholder="Name" autocomplete="name" />
+        </div>
+        <div class="col-12 mt-2 d-flex flex-wrap gap-2 align-items-center">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-start-session">
+            <i class="bi bi-play-fill"></i> Start session
+          </button>
+          <span class="small text-muted" id="session-label">No active session</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+        <strong class="small">GNSS (auto on load)</strong>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-refresh-gnss">Refresh</button>
+      </div>
+      <div class="card-body py-2">
+        <div class="gnss-readout text-muted" id="gnss-readout">Waiting for position…</div>
+        <input type="hidden" id="fc-lat" />
+        <input type="hidden" id="fc-lon" />
+        <input type="hidden" id="fc-elev" />
+      </div>
+    </div>
+
+    <ul class="nav nav-pills mb-3 gap-2" id="fc-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-pole" data-bs-toggle="pill" data-bs-target="#pane-pole" type="button">Pole</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-span" data-bs-toggle="pill" data-bs-target="#pane-span" type="button">Span</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-context" data-bs-toggle="pill" data-bs-target="#pane-context" type="button">Context</button>
+      </li>
+    </ul>
+
+    <div class="tab-content card shadow-sm">
+      <div class="tab-pane fade show active p-3" id="pane-pole" role="tabpanel">
+        <form id="form-pole">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label small">Point ID</label>
+              <input class="form-control form-control-sm" name="point_id" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Record type</label>
+              <select class="form-select form-select-sm" name="record_type">
+                <option>EXpole</option>
+                <option>PR</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Height (m)</label>
+              <input class="form-control form-control-sm" name="height_m" type="number" step="0.01" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Material</label>
+              <input class="form-control form-control-sm" name="material" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Condition</label>
+              <input class="form-control form-control-sm" name="condition" />
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="stay_required" id="pole-stay" />
+                <label class="form-check-label small" for="pole-stay">Stay required</label>
+              </div>
+            </div>
+            <div class="col-12 collapsed-raw">
+              <label class="form-label small">Remarks</label>
+              <textarea class="form-control form-control-sm" name="remarks" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label small">Photos (min. 1)</label>
+              <input class="form-control form-control-sm" type="file" name="photos" accept="image/*" multiple capture="environment" />
+            </div>
+          </div>
+          <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-sm">Save pole record</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-draft-pole">Save draft locally</button>
+          </div>
+        </form>
+      </div>
+      <div class="tab-pane fade p-3" id="pane-span" role="tabpanel">
+        <form id="form-span">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label small">From pole ID</label>
+              <input class="form-control form-control-sm" name="from_pole_id" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small">To pole ID</label>
+              <input class="form-control form-control-sm" name="to_pole_id" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Conductor type</label>
+              <input class="form-control form-control-sm" name="conductor_type" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Conductor size</label>
+              <input class="form-control form-control-sm" name="conductor_size" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Phases</label>
+              <input class="form-control form-control-sm" name="phases" type="number" min="0" step="1" />
+            </div>
+            <div class="col-12 collapsed-raw">
+              <label class="form-label small">Remarks</label>
+              <textarea class="form-control form-control-sm" name="remarks" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-success btn-sm">Save span record</button>
+          </div>
+        </form>
+      </div>
+      <div class="tab-pane fade p-3" id="pane-context" role="tabpanel">
+        <form id="form-context">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label small">Structure type</label>
+              <select class="form-select form-select-sm" name="structure_type">
+                <option value="road">road</option>
+                <option value="fence">fence</option>
+                <option value="bt">BT</option>
+                <option value="crossing">crossing</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small">Distance (m)</label>
+              <input class="form-control form-control-sm" name="distance_m" type="number" step="0.01" />
+            </div>
+            <div class="col-12 collapsed-raw">
+              <label class="form-label small">Remarks</label>
+              <textarea class="form-control form-control-sm" name="remarks" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-success btn-sm">Save context record</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+      <div class="card-header bg-white py-2 d-flex justify-content-between">
+        <strong class="small">Session actions</strong>
+      </div>
+      <div class="card-body py-2 d-flex flex-wrap gap-2 align-items-center">
+        <button type="button" class="btn btn-outline-primary btn-sm" id="btn-import" disabled>
+          <i class="bi bi-file-earmark-arrow-up"></i> Export session → GridFlow CSV &amp; process
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-refresh-log">Refresh log</button>
+        <span class="small text-muted" id="import-hint">Start a session and add at least one record.</span>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+      <div class="card-header bg-white py-2">
+        <strong class="small">Record history (this browser)</strong>
+      </div>
+      <div class="card-body py-2">
+        <ul class="list-group list-group-flush" id="record-log">
+          <li class="list-group-item text-muted small">No local events yet.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/field_capture.js') }}"></script>
+</body>
+</html>

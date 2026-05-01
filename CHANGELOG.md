@@ -8,6 +8,19 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-02 — Stage 4 proof-of-concept: structured field capture
+
+### Added
+
+- **`app/field_capture.py`:** `FieldCaptureSession` / `CaptureRecord` persistence in per-project SQLite (`field_capture.db`); photos under `field_capture/<session_id>/photos/`; CSV export aligned with Stage 1 `_normalize_dataframe` (`pole`, `span`, `context` rows).
+- **`app/routes/api_field_capture.py`:** `POST /api/field_capture/session`, `POST /api/field_capture/record` (multipart + JSON), `GET /api/field_capture/sessions/<job_id>`, `GET /api/field_capture/session/<session_id>/records`, `POST /api/field_capture/import/<session_id>` → new project file slot + `process_job`.
+- **`/field-capture`:** `field_capture_form.html` + `app/static/js/field_capture.js` — tabbed pole/span/context forms, GNSS on load, local drafts, offline sync queue with replay, import to GridFlow.
+- **Project page:** “Field capture” button linking PoC UI with `project_id` preset.
+
+### Tests
+
+- **Suite:** 451+ passing; storage/API/import/map coverage with isolated `PROJECTS_ROOT` temp dirs.
+
 ## 2026-05-02 — Phase 3D (strict): electrical field ownership cleanup
 
 ### Changed

@@ -97,6 +97,13 @@ def create_app() -> Flask:
         app.logger.warning(f"api_projects blueprint not loaded: {exc}")
 
     try:
+        from app.routes.api_field_capture import api_field_capture_bp
+
+        app.register_blueprint(api_field_capture_bp, url_prefix="/api/field_capture")
+    except Exception as exc:
+        app.logger.warning(f"api_field_capture blueprint not loaded: {exc}")
+
+    try:
         from app.routes.projects_page import projects_page_bp
 
         app.register_blueprint(projects_page_bp)
