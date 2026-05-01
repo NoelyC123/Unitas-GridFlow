@@ -1,126 +1,175 @@
 # Current Task
 
-## Immediate task
+## Domain Accuracy & Electrical Data Model Implementation
 
-**Phase C2/D implementation — Map UX + Popup Data Model professional refinement**
-
----
-
-## Status
-
-**Phase C (C1-C4) foundation:** Complete (300 tests passing)
-**Phase C2/D specification:** Created (`PHASE_C2_CURSOR_TASKS.md`)
-**Next:** Cursor implements Package C2-1 (Map UX Refinement)
+**Status:** PHASE 1 COMPLETE — Phase 2 awaits explicit approval
+**Timeline:** Phase 1 (5-7 days) ✅ → Phase 2 (10-14 days) → Phase 3 (5-7 days)
+**Total:** 4-5 weeks / 130-160 hours
 
 ---
 
-## What Phase C2/D delivers
+## Current Priority
 
-**Completes Phase C to professional survey-display standards:**
+**PHASE 1: Emergency Domain Fixes — SHIPPED**
 
-### Package C2-1: Map UX Refinement (1 week)
-- Reduce marker sizes 25-40% (fix visual clutter)
-- Split panel: Map Layers + Review Filters (clear separation)
-- Better EX/PR symbols (square vs circle, shape + color clarity)
-- Angle as overlay badge (not lifecycle replacement)
-- Context visually secondary (muted, off by default)
-- Shorter match warnings + visual dashed lines
-- Map key with real symbol examples
+**Packages:**
+1. ✅ D1-A: Asset Classification Fix (BT pole → third-party) — `b6dbc7c`
+2. ✅ D1-B: Height Source Validation — `e618590`
+3. ✅ D1-C: Source Confidence & Legacy Data Warnings — `f30ef46`
+4. ✅ D1-D: Third-Party Infrastructure & Attachments — `6349ebd`
 
-### Package C2-2: Popup Data Model Expansion (1-2 weeks)
-- Expand from 12 fields → 25-35 fields per popup
-- Add 15-20 priority fields from survey research:
-  - Physical: pole class, material, condition, lean, defects
-  - Electrical: voltage, conductor, equipment
-  - Mechanical: stay presence, stay type, stay bearing
-  - Evidence: surveyor/date, GNSS accuracy, photos
-- Asset-specific layouts (existing vs proposed vs angle vs stay vs context)
-- Field Maps display parity
-
-### Package C2-3: Field Maps Parity (Optional, 4-6 hours)
-- Match NIE MV_Poles 19-field schema
-- Confirm display parity with production Field Maps
+**Next:** Do not start Phase 2 until explicitly approved (see `PHASE_2_3_ROADMAP.md`).
 
 ---
 
-## Evidence base
+## Critical Problems Being Fixed
 
-All specifications validated by:
-1. **Phase C Review** (3,924 words) — Map UX issues identified
-2. **Survey Research** (4,544 words) — 50-field complete data model
-3. **P011 Operational Feedback** — Real designer use gaps
-4. **Field Maps Evidence** — Production NIE MV_Poles schema
-5. **Domain Reference Summary** — Evidence quality principles
-6. **Practitioner Review Summary** — Terminology and display requirements
+### Problem 1: BT Pole Misclassification
+**Current:** Point 72 "bt pole" classified as "EXpole being replaced"
+**Impact:** Designer thinks it's part of electric network to replace
+**Fix:** Classify as third-party telecoms infrastructure
 
----
+### Problem 2: Height Source Missing
+**Current:** "Measured Height: 6.5m" but "Height Source: not captured"
+**Impact:** Can't trust height for clearance calculations
+**Fix:** Enforce height_source field (measured RTK/tape/estimated/plan)
 
-## Timeline
+### Problem 3: Legacy Data Not Flagged
+**Current:** "Source Confidence: legacy map data" shown as regular field
+**Impact:** Designer doesn't know geometry is unverified
+**Fix:** Add ⚠️ LEGACY MAP DATA — NOT FIELD VERIFIED warning banner
 
-**Package C2-1:** 1 week / 8-10 hours
-**Package C2-2:** 1-2 weeks / 12-16 hours
-**Package C2-3:** Optional / 4-6 hours
-
-**Total:** 2-4 weeks / 24-32 hours Cursor work
-
----
-
-## Current focus
-
-**Package C2-1: Map UX Refinement**
-
-Cursor should:
-1. Read `PHASE_C2_CURSOR_TASKS.md` fully
-2. Implement all 7 map UX improvements
-3. Test on Gordon or Bellsprings
-4. Verify 300+ tests still passing
-5. Report completion
-6. Wait for Package C2-2 approval
+### Problem 4: Third-Party Attachments Invisible
+**Current:** No tracking of BT/streetlight/customer attachments on poles
+**Impact:** Construction planning misses coordination requirements
+**Fix:** Parse and display third-party attachments with owner/impact
 
 ---
 
-## After Phase C2/D complete
+## Evidence Base
 
-**Validation:**
-- Test on P010, P011, Gordon, Bellsprings
-- Collect designer feedback
-- Confirm professional quality achieved
+**Research Documents (2 weeks of work):**
+- UK Electrical Grid Survey Data Capture Report (4,544 words)
+- UK Electrical Grid Survey Capture Model and GridFlow Gap Analysis
+- Real operational evidence (BT pole Point 72, missing conductor data)
 
-**Then decide:**
-- Stage 4 (structured capture, tablets, photos) — 6-12 months
-- OR more refinement
-- OR operational use focus
-
----
-
-## What NOT to do
-
-- Do NOT start Stage 4 (structured capture) yet
-- Do NOT add features outside Phase C2/D scope
-- Do NOT skip testing after each package
-- Do NOT proceed to C2-2 without C2-1 complete
+**All specifications validated against:**
+- ESQCR requirements
+- ENA G81 standards
+- ENWL underground record guidance
+- Ofgem CNAIM condition assessment
+- Esri Field Maps best practice
 
 ---
 
-## Files created this session
+## Phase 1 Deliverables
 
-- ✅ `PHASE_C2_CURSOR_TASKS.md` — Complete implementation specification
+**After Phase 1 complete:**
+
+✅ **Asset Classification:**
+- BT/Openreach poles → third-party telecoms infrastructure
+- Streetlights → local authority infrastructure
+- Customer poles → customer-owned
+- Electric network poles → DNO structural
+
+✅ **Height Source Validation:**
+- Height source required for existing poles
+- Confidence levels: survey-grade/mapping-grade/unverified
+- Legacy/estimated heights flagged for field verification
+
+✅ **Source Confidence Framework:**
+- Provenance types: field_observed_rtk/gnss, dno_gis, legacy, drawing, inferred
+- Geometry trust: survey-grade/mapping-grade/unverified/indicative
+- Legacy data warning banner in popups
+
+✅ **Third-Party Attachments:**
+- Telecoms, streetlight, customer service, signage, CCTV detection
+- Owner and coordination impact visible
+- Construction planning flags
+
+---
+
+## Files Created/Modified This Session
+
+**Specifications:**
+- ✅ `CURSOR_DOMAIN_ACCURACY_COMPLETE_IMPLEMENTATION.md` — Complete Phase 1 implementation (15,000+ words)
+- ✅ `PHASE_1_EMERGENCY_DOMAIN_FIXES.md` — Phase 1 execution guide
+- ✅ `PHASE_2_3_ROADMAP.md` — Phases 2-3 summary roadmap
 - ✅ `AI_CONTROL/02_CURRENT_TASK.md` — This file (updated)
 
+**Implementation Files (will be created by Cursor in Phase 1):**
+- `app/asset_classifier.py` (new)
+- `app/routes/map_preview.py` (modified)
+- `app/qa_engine.py` (modified)
+- `app/static/js/map-viewer.js` (modified)
+- `app/static/style.css` (modified)
+
 ---
 
-## Next checkpoint
+## Execution Protocol
+
+### Phase 1 Execution — COMPLETE
+
+All four packages implemented, tested (`pytest` full suite green), committed, and pushed.
+
+### Phase 2 Execution (After Phase 1 validates)
+
+**NOT STARTED** — Waiting for **explicit** Phase 2 approval (see roadmap; do not assume scope)
+
+Packages:
+- D2-A: Conductor/Cable Electrical Schema
+- D2-B: Equipment & Pole-Top Configuration
+- D2-C: Network Connectivity & Relationships
+- D2-D: Survey Metadata & Provenance
+
+### Phase 3 Execution (After Phase 2 validates)
+
+**NOT STARTED YET** — Waiting for Phase 2 completion
+
+Packages:
+- D3-A: Backend Data Model Integration
+- D3-B: Frontend Display & Forms
+- D3-C: Validation Rules & QA Engine
+- D3-D: Export & Handoff Quality
+
+---
+
+## What NOT to Do
+
+- ❌ Do NOT skip testing after each package
+- ❌ Do NOT proceed to next package without approval
+- ❌ Do NOT start Phase 2 without explicit approval
+- ❌ Do NOT add features outside Phase 1 scope
+- ❌ Do NOT modify files not listed in package spec
+
+---
+
+## Success Criteria
+
+**Phase 1 complete when:**
+- ✅ All 4 packages implemented (D1-A, D1-B, D1-C, D1-D)
+- ✅ All 300+ tests passing
+- ✅ Manual validation on Gordon, Bellsprings, P010, P011 successful
+- ✅ Screenshots confirm all acceptance criteria met
+- ✅ All packages committed and pushed to GitHub
+- ✅ BT pole correctly classified
+- ✅ Height source enforced
+- ✅ Legacy data clearly flagged
+- ✅ Third-party attachments visible
+
+---
+
+## Next Checkpoint
 
 Update this file when:
-- Package C2-1 completes
-- Package C2-2 completes
-- Phase C2/D validation complete
+- Package D1-A completes
+- Package D1-B completes
+- Package D1-C completes
+- Package D1-D completes
+- Phase 1 completes
+- Phase 2 approved to begin
 - Material change to priorities
 
 ---
 
-## Expected next update
-
-This file should next be updated when:
-
-**Package C2-1 (Map UX Refinement) implementation completes and tests pass**
+**Expected next update:** Phase 2 approval to begin D2-A, or operational validation notes on Phase 1

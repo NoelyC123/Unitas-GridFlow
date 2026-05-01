@@ -2,11 +2,11 @@
 
 ## Project phase
 
-**Stage 3 complete + Phase B shipped + Phase C (C1-C4) shipped + Phase C2/D in progress**
+**Stage 3 complete + Phase B shipped + Phase C (C1-C4) shipped + Phase C2/D shipped + Phase 1 Domain Accuracy (D1-A–D1-D) shipped**
 
-All previous stages are complete. Phase B (UI polish) shipped successfully. Phase C foundation (C1-C4) implemented and verified (300 tests passing).
+All previous stages are complete. Phase B (UI polish) shipped successfully. Phase C foundation (C1-C4) implemented and verified. Phase C2/D map/popups shipped. **Emergency domain fixes (Phase 1 packages D1-A through D1-D)** are implemented and pushed (316 tests passing).
 
-**Current state:** Phase C2/D professional refinement in progress. This completes Phase C to professional survey-display standards before Stage 4. Packages: C2-1 (Map UX), C2-2 (Popup Data Model), C2-3 (Field Maps Parity - optional).
+**Current state:** Practitioner operational validation on real jobs; **Phase 2 electrical data model** (`PHASE_2_3_ROADMAP.md`) is **not started** until explicitly approved.
 
 ---
 
@@ -58,11 +58,18 @@ upload CSV → save file → run QA → save outputs → view map → download P
 - **Phase B: Dashboard clarity improvements**
 
 ### Testing and quality
-- **300 tests passing** (up from 298 after Phase C)
+- **316 tests passing** (includes Phase 1 domain packages)
 - Pre-commit hooks active
 - Ruff linting active
 - GitHub Actions CI active
 - All commits pushed to master
+
+### Phase 1 Domain Accuracy — Emergency fixes (2026-05-01)
+
+- **D1-A:** Third-party asset classification (e.g. BT pole remarks) — `b6dbc7c`
+- **D1-B:** Height source + confidence + `height_source_existing` QA — `e618590`
+- **D1-C:** `classify_source_confidence`, legacy map banner, Source & Confidence popup — `f30ef46`
+- **D1-D:** `parse_attachments`, attachments in map data + Third-Party Attachments popup — `6349ebd`
 
 ### Phase C shipped (2026-05-01)
 - **C1: Feature-Type Filtering + Blank Field Framework** (commit 733fd99)

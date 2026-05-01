@@ -8,6 +8,23 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 1 Domain Accuracy (D1-A through D1-D)
+
+### Added
+
+- **D1-A:** Third-party telecoms classification for BT/Openreach-style remarks on `EXpole`; TP map layer and third-party popup framing (`b6dbc7c`).
+- **D1-B:** `height_source` normalization, `classify_height_confidence`, `height_source_existing` QA in base rules, height evidence rows in popups (`e618590`).
+- **D1-C:** `classify_source_confidence`, `source_confidence_detail` on features, legacy-map warning section, Source & Confidence popup section, legacy marker outline (`f30ef46`).
+- **D1-D:** `parse_attachments` (telecoms, streetlight, customer, signage, CCTV), `attachments_detail` on features and backfill, Third-Party Attachments popup section (`6349ebd`).
+
+### Validated
+
+- `pytest -v` — 316 passed.
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pre-commit run --all-files` — passed.
+
+---
+
 ## 2026-05-01 — Phase C4 Span Anomalies and Crossing Context
 
 ### Changed
