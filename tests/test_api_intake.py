@@ -34,6 +34,19 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
                 "capture_date": "2026-04-30",
                 "position_accuracy": "RTK",
                 "photo_refs": "pole-1.jpg;top-1.jpg",
+                "install_year": "1998",
+                "feeder_id": "CIR-11-04",
+                "has_stay": "yes",
+                "stay_spec": "storm stay",
+                "stay_direction": "245",
+                "stay_arrangement": "single stay",
+                "anchor_type": "screw anchor",
+                "parent_pole_id": "P-1001",
+                "angle_deviation": 32.5,
+                "required_action": "verify stay",
+                "access_notes": "private lane",
+                "measured_clearance": "5.4m",
+                "route_offset_m": 3.2,
                 "location_name": "Dalton Road Junction",
                 "easting": 352841,
                 "northing": 503122,
@@ -67,6 +80,19 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
     assert normalized_df.loc[0, "survey_date"] == "2026-04-30"
     assert normalized_df.loc[0, "gnss_accuracy"] == "RTK"
     assert normalized_df.loc[0, "photo_links"] == "pole-1.jpg;top-1.jpg"
+    assert normalized_df.loc[0, "year_installed"] == "1998"
+    assert normalized_df.loc[0, "circuit_id"] == "CIR-11-04"
+    assert normalized_df.loc[0, "stay_present"] == "yes"
+    assert normalized_df.loc[0, "stay_type"] == "storm stay"
+    assert normalized_df.loc[0, "stay_bearing"] == "245"
+    assert normalized_df.loc[0, "stay_configuration"] == "single stay"
+    assert normalized_df.loc[0, "anchor_details"] == "screw anchor"
+    assert normalized_df.loc[0, "linked_pole_id"] == "P-1001"
+    assert normalized_df.loc[0, "route_deviation_deg"] == 32.5
+    assert normalized_df.loc[0, "action_required"] == "verify stay"
+    assert normalized_df.loc[0, "access_constraint"] == "private lane"
+    assert normalized_df.loc[0, "clearance_measured"] == "5.4m"
+    assert normalized_df.loc[0, "distance_from_route_m"] == 3.2
     assert normalized_df.loc[0, "location"] == "Dalton Road Junction"
     assert normalized_df.loc[0, "lat"] == 54.5210
     assert normalized_df.loc[0, "lon"] == -3.0140
@@ -198,6 +224,19 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
                 "survey_date": "2026-04-30",
                 "gnss_accuracy": "RTK +/-0.02m",
                 "photo_links": "full.jpg;top.jpg",
+                "year_installed": "1998",
+                "circuit_id": "CIR-11-04",
+                "stay_present": "yes",
+                "stay_type": "storm stay",
+                "stay_bearing": "245",
+                "stay_configuration": "single stay",
+                "anchor_details": "screw anchor",
+                "linked_pole_id": "P-1001",
+                "route_deviation_deg": 32.5,
+                "action_required": "verify stay",
+                "access_constraint": "private lane",
+                "clearance_measured": "5.4m",
+                "distance_from_route_m": 3.2,
                 "structure_type": "EXpole",
                 "easting": 352841,
                 "northing": 503122,
@@ -233,6 +272,19 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
     assert props["photo_count"] == 2
     assert props["elevation"] == 127.3
     assert props["source_confidence"] == "raw survey export"
+    assert props["year_installed"] == "1998"
+    assert props["circuit_id"] == "CIR-11-04"
+    assert props["stay_present"] == "yes"
+    assert props["stay_type"] == "storm stay"
+    assert props["stay_bearing"] == "245"
+    assert props["stay_configuration"] == "single stay"
+    assert props["anchor_details"] == "screw anchor"
+    assert props["linked_pole_id"] == "P-1001"
+    assert props["route_deviation_deg"] == 32.5
+    assert props["action_required"] == "verify stay"
+    assert props["access_constraint"] == "private lane"
+    assert props["clearance_measured"] == "5.4m"
+    assert props["distance_from_route_m"] == 3.2
 
 
 def test_normalize_dataframe_handles_capitalised_headers() -> None:

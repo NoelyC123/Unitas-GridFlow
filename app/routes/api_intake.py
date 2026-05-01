@@ -286,6 +286,71 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     )
     normalized |= _copy_if_missing(
         df,
+        "year_installed",
+        ["year_installed", "install_year", "year", "installation_year"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "circuit_id",
+        ["circuit_id", "circuit", "feeder_id", "network_circuit"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "stay_present",
+        ["stay_present", "has_stay", "stay_captured"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "stay_type",
+        ["stay_type", "stay_types", "stay_spec"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "stay_bearing",
+        ["stay_bearing", "stay_direction", "stay_bearing_deg"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "stay_configuration",
+        ["stay_configuration", "stay_config", "stay_arrangement"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "anchor_details",
+        ["anchor_details", "anchor_type", "anchor_spec"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "linked_pole_id",
+        ["linked_pole_id", "linked_pole", "parent_pole_id"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "route_deviation_deg",
+        ["route_deviation_deg", "angle_deviation", "deviation_deg"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "action_required",
+        ["action_required", "required_action", "design_action"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "access_constraint",
+        ["access_constraint", "access_notes", "access_issue"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "clearance_measured",
+        ["clearance_measured", "clearance", "measured_clearance"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "distance_from_route_m",
+        ["distance_from_route_m", "route_offset_m", "offset_from_route_m"],
+    )
+    normalized |= _copy_if_missing(
+        df,
         "height_source",
         ["height_source", "pole_height_source", "measurement_source"],
     )
@@ -334,6 +399,8 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     _coerce_numeric_column(df, "easting")
     _coerce_numeric_column(df, "northing")
     _coerce_numeric_column(df, "elevation")
+    _coerce_numeric_column(df, "route_deviation_deg")
+    _coerce_numeric_column(df, "distance_from_route_m")
 
     return df, normalized
 
@@ -746,6 +813,19 @@ def _build_feature_collection(
                 "gnss_accuracy": _display_value(row, "gnss_accuracy"),
                 "source_confidence": _safe_value(network_fields.get("source_confidence")),
                 "elevation": _display_value(row, "elevation"),
+                "year_installed": _display_value(row, "year_installed"),
+                "circuit_id": _display_value(row, "circuit_id"),
+                "stay_present": _display_value(row, "stay_present"),
+                "stay_type": _display_value(row, "stay_type"),
+                "stay_bearing": _display_value(row, "stay_bearing"),
+                "stay_configuration": _display_value(row, "stay_configuration"),
+                "anchor_details": _display_value(row, "anchor_details"),
+                "linked_pole_id": _display_value(row, "linked_pole_id"),
+                "route_deviation_deg": _display_value(row, "route_deviation_deg"),
+                "action_required": _display_value(row, "action_required"),
+                "access_constraint": _display_value(row, "access_constraint"),
+                "clearance_measured": _display_value(row, "clearance_measured"),
+                "distance_from_route_m": _display_value(row, "distance_from_route_m"),
                 **photo_fields,
                 "qa_status": qa_status,
                 "structure_type": _safe_value(row.get("structure_type")),

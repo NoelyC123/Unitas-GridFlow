@@ -796,6 +796,8 @@ class MapViewer {
       this.popupRow('Point', props.pole_id || props.id),
       this.popupRow('Type', this.explainAssetType(props.structure_type) || fallbackType),
       this.popupRow('Feature Code', props.structure_type),
+      this.popupRow('Circuit ID', props.circuit_id || 'not captured', props.circuit_id ? 'ok' : 'info'),
+      this.popupRow('Year Installed', props.year_installed || 'not captured', props.year_installed ? 'ok' : 'info'),
       this.popupRow('Function', this.isAnglePole(props) ? 'Angle' : props.record_role),
       this.popupRow('Status', this.statusText(status), this.statusToFieldStatus(status)),
       this.popupRow('Role', props.asset_intent || props.record_role || 'mapped survey record'),
@@ -863,11 +865,13 @@ class MapViewer {
     const stayStatus = props.stay_evidence_status;
     const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
       ? props.stay_types.join(', ')
-      : null;
+      : props.stay_type;
     return [
       this.popupRow(
         'Stay Evidence',
-        stayStatus === 'captured' ? `captured: ${stayTypes || 'stay record'}` : 'not captured',
+        stayStatus === 'captured' || props.stay_present
+          ? `captured: ${stayTypes || props.stay_present || 'stay record'}`
+          : 'not captured',
         stayStatus === 'captured' ? 'ok' : prominent ? 'warning' : 'info',
         stayStatus === 'captured'
           ? this.nearestStayDetail(props)
@@ -893,6 +897,7 @@ class MapViewer {
 
   designRequirementRows(props) {
     return [
+      this.popupRow('Action Required', props.action_required || 'not captured', props.action_required ? 'warning' : 'info'),
       this.popupRow('Clearance', this.isClearanceCrossing(props) ? this.contextReviewLabel(props) : 'check route context / plans', 'info'),
       this.popupRow('Stay Required', this.isAnglePole(props) ? 'review angle/stay evidence' : 'not indicated by current data', this.isAnglePole(props) ? 'warning' : 'info'),
       this.popupRow('Access', props.access_constraint || 'check field notes / plans', 'info'),
@@ -924,6 +929,7 @@ class MapViewer {
     return [
       this.popupRow('Surveyed By', props.surveyor || 'not captured', props.surveyor ? 'ok' : 'info'),
       this.popupRow('Survey Date', props.survey_date || 'not captured', props.survey_date ? 'ok' : 'info'),
+      this.popupRow('GNSS Accuracy', props.gnss_accuracy || 'not captured', props.gnss_accuracy ? 'ok' : 'info'),
       this.popupRow('Photo Evidence', photos, photos === 'no linked photos' ? 'info' : 'ok'),
       this.popupRow('Source Confidence', props.source_confidence || 'raw survey export', 'info'),
       this.popupRow('Remarks', props.name && props.name !== props.id ? props.name : 'not captured', props.name && props.name !== props.id ? 'ok' : 'info'),

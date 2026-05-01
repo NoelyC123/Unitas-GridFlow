@@ -523,6 +523,11 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
     assert props["voltage"] == "11kV"
     assert props["photo_links"] == []
     assert props["source_confidence"] == "legacy map data"
+    assert props["year_installed"] is None
+    assert props["circuit_id"] is None
+    assert props["stay_bearing"] is None
+    assert props["action_required"] is None
+    assert props["distance_from_route_m"] is None
 
 
 def test_project_detail_includes_responsive_file_card_layout(client_and_root):

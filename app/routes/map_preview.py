@@ -35,6 +35,19 @@ POPUP_DATA_FIELDS = {
     "has_defect_photo": False,
     "photo_count": 0,
     "elevation": None,
+    "year_installed": None,
+    "circuit_id": None,
+    "stay_present": None,
+    "stay_type": None,
+    "stay_bearing": None,
+    "stay_configuration": None,
+    "anchor_details": None,
+    "linked_pole_id": None,
+    "route_deviation_deg": None,
+    "action_required": None,
+    "access_constraint": None,
+    "clearance_measured": None,
+    "distance_from_route_m": None,
 }
 
 
