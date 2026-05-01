@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.qa_engine import classify_height_confidence, run_qa_checks
+from app.qa_engine import classify_height_confidence, classify_source_confidence, run_qa_checks
 
 
 def test_required_treats_blank_string_as_missing() -> None:
@@ -1258,6 +1258,15 @@ def test_classify_height_confidence_high_for_measured_rtk() -> None:
     assert confidence["level"] == "high"
     assert confidence["status"] == "ok"
     assert confidence["warning"] == ""
+
+
+def test_classify_source_confidence_legacy_map_data_requires_verification() -> None:
+    detail = classify_source_confidence({"source_confidence": "legacy map data"})
+
+    assert detail["provenance"] == "legacy_map_data"
+    assert detail["confidence"] == "low"
+    assert detail["geometry_trust"] == "unverified"
+    assert "NOT FIELD VERIFIED" in detail["warnings"][0]
 
 
 def test_expole_height_above_max_remains_range_fail() -> None:

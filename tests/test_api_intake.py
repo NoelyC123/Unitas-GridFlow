@@ -34,6 +34,8 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
                 "surveyed_by": "J. Smith",
                 "capture_date": "2026-04-30",
                 "position_accuracy": "RTK",
+                "data_source": "field observed",
+                "survey_method": "rtk",
                 "photo_refs": "pole-1.jpg;top-1.jpg",
                 "install_year": "1998",
                 "feeder_id": "CIR-11-04",
@@ -81,6 +83,8 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
     assert normalized_df.loc[0, "surveyor"] == "J. Smith"
     assert normalized_df.loc[0, "survey_date"] == "2026-04-30"
     assert normalized_df.loc[0, "gnss_accuracy"] == "RTK"
+    assert normalized_df.loc[0, "source_confidence"] == "field observed"
+    assert normalized_df.loc[0, "capture_method"] == "rtk"
     assert normalized_df.loc[0, "photo_links"] == "pole-1.jpg;top-1.jpg"
     assert normalized_df.loc[0, "year_installed"] == "1998"
     assert normalized_df.loc[0, "circuit_id"] == "CIR-11-04"
@@ -289,6 +293,38 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
     assert props["access_constraint"] == "private lane"
     assert props["clearance_measured"] == "5.4m"
     assert props["distance_from_route_m"] == 3.2
+
+
+def test_build_feature_collection_adds_source_confidence_detail() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-LEGACY",
+                "location": "Legacy record",
+                "structure_type": "EXpole",
+                "height": 10.5,
+                "height_source": "legacy_data",
+                "source_confidence": "legacy map data",
+                "lat": 54.5210,
+                "lon": -3.0140,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    feature_collection = _build_feature_collection(
+        df=df,
+        issues_df=issues_df,
+        job_id="J_TEST",
+        rulepack_id="SPEN_11kV",
+    )
+
+    detail = feature_collection["features"][0]["properties"]["source_confidence_detail"]
+    assert detail["provenance"] == "legacy_map_data"
+    assert detail["confidence"] == "low"
+    assert detail["geometry_trust"] == "unverified"
+    assert "Field verification required before design" in detail["warnings"]
 
 
 def test_normalize_dataframe_handles_capitalised_headers() -> None:

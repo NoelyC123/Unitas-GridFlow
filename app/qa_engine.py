@@ -251,6 +251,102 @@ def classify_height_confidence(record: "pd.Series | dict") -> dict[str, str]:
     }
 
 
+def classify_source_confidence(record: "pd.Series | dict") -> dict[str, object]:
+    """Classify survey-record provenance and geometry trust for display."""
+
+    source = (
+        _text_value(record, "source_confidence").lower()
+        or _text_value(record, "data_source").lower()
+    )
+    capture_method = _text_value(record, "capture_method").lower()
+
+    if "field" in source and ("rtk" in capture_method or "ppk" in capture_method):
+        return {
+            "provenance": "field_observed_rtk",
+            "confidence": "high",
+            "geometry_trust": "survey_grade",
+            "warnings": [],
+            "designer_note": "Field survey with RTK GNSS - geometry is survey-grade",
+        }
+
+    if "field" in source and "gnss" in capture_method:
+        return {
+            "provenance": "field_observed_gnss",
+            "confidence": "medium-high",
+            "geometry_trust": "mapping_grade",
+            "warnings": ["Standalone GNSS - adequate for design"],
+            "designer_note": "Field survey with standalone GNSS",
+        }
+
+    if "field" in source or "observed" in source:
+        return {
+            "provenance": "field_observed",
+            "confidence": "medium",
+            "geometry_trust": "field_verified",
+            "warnings": ["Capture method not specified - assume mapping-grade accuracy"],
+            "designer_note": "Field survey (method not specified)",
+        }
+
+    if "gis" in source or "dno" in source:
+        return {
+            "provenance": "dno_gis_import",
+            "confidence": "medium",
+            "geometry_trust": "gis_inherited",
+            "warnings": ["Imported from DNO GIS - verify critical attributes before design"],
+            "designer_note": (
+                "DNO GIS import - position likely reliable, attributes may be outdated"
+            ),
+        }
+
+    if "legacy" in source or "map data" in source:
+        return {
+            "provenance": "legacy_map_data",
+            "confidence": "low",
+            "geometry_trust": "unverified",
+            "warnings": [
+                "LEGACY MAP DATA - NOT FIELD VERIFIED",
+                "Geometry and attributes from historical records",
+                "Field verification required before design",
+            ],
+            "designer_note": "Legacy map data - field verification required",
+        }
+
+    if "drawing" in source or "plan" in source or "digitised" in source:
+        return {
+            "provenance": "digitised_from_drawing",
+            "confidence": "low",
+            "geometry_trust": "indicative",
+            "warnings": ["Digitised from plan/drawing - field verification required"],
+            "designer_note": "Digitised from drawing - not field-verified",
+        }
+
+    if "proposed" in source or "design" in source:
+        return {
+            "provenance": "proposed_by_design",
+            "confidence": "n/a",
+            "geometry_trust": "design_intent",
+            "warnings": ["Proposed design location - not survey data"],
+            "designer_note": "Design proposal - not field-verified",
+        }
+
+    if "inferred" in source or "calculated" in source:
+        return {
+            "provenance": "inferred",
+            "confidence": "low",
+            "geometry_trust": "estimated",
+            "warnings": ["Inferred/calculated position - field verification recommended"],
+            "designer_note": "Inferred position - verify if critical",
+        }
+
+    return {
+        "provenance": "unknown",
+        "confidence": "unknown",
+        "geometry_trust": "unknown",
+        "warnings": ["DATA SOURCE UNKNOWN - reliability cannot be determined"],
+        "designer_note": "Source unknown - treat with caution",
+    }
+
+
 def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
     """Return True when this row represents a non-structural contextual feature."""
     if row.get("_record_role") in {"context", "third_party"}:

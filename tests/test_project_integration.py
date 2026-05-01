@@ -526,6 +526,8 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
     assert props["voltage"] == "11kV"
     assert props["photo_links"] == []
     assert props["source_confidence"] == "legacy map data"
+    assert props["source_confidence_detail"]["provenance"] == "legacy_map_data"
+    assert props["source_confidence_detail"]["geometry_trust"] == "unverified"
     assert props["height_confidence"]["level"] == "low"
     assert props["height_confidence"]["status"] == "warning"
     assert props["primary_type"] == "electric_network"

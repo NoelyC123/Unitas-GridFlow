@@ -153,12 +153,13 @@ class MapViewer {
       const status = (props.qa_status || 'PASS').toUpperCase();
       const assetMarker = this.getAssetMarker(props);
       const lifecycleClass = this.lifecycleMarkerClass(props);
+      const sourceClass = this.sourceConfidenceMarkerClass(props);
       const isAngle = this.isAnglePole(props);
       const markerSize = MARKER_SIZES[isAngle ? 'angle' : assetMarker.type] || MARKER_SIZES.other;
 
       const marker = L.marker([lat, lon], {
         icon: L.divIcon({
-          className: `asset-marker status-${status} asset-${assetMarker.type} ${lifecycleClass}${isAngle ? ' is-angle' : ''}`,
+          className: `asset-marker status-${status} asset-${assetMarker.type} ${lifecycleClass} ${sourceClass}${isAngle ? ' is-angle' : ''}`,
           html: `<span class="asset-marker-shape" title="${this.escapeHtml(assetMarker.title)}"><span class="asset-marker-label">${this.escapeHtml(assetMarker.label)}</span>${isAngle ? '<span class="asset-marker-angle-badge">A</span>' : ''}</span>`,
           iconSize: [markerSize, markerSize],
           iconAnchor: [Math.round(markerSize / 2), Math.round(markerSize / 2)],
@@ -753,6 +754,7 @@ class MapViewer {
 
   existingPopupSections(props, status, lat, lon) {
     return [
+      ...this.legacyDataWarningSections(props),
       ...this.heightEvidenceAlertSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Existing Pole') },
       { title: 'Physical', rows: this.physicalRows(props, 'existing') },
@@ -760,8 +762,27 @@ class MapViewer {
       { title: 'Mechanical', rows: this.mechanicalRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
       { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  legacyDataWarningSections(props) {
+    const sourceConf = props.source_confidence_detail || {};
+    if (sourceConf.provenance !== 'legacy_map_data') return [];
+    return [
+      {
+        title: 'Legacy Map Data - Not Field Verified',
+        rows: [
+          this.popupRow(
+            'Designer Action',
+            'Field verification required before design or construction',
+            'warning',
+            'Geometry and attributes are from historical records and may be outdated.',
+          ),
+        ],
+      },
     ];
   }
 
@@ -814,11 +835,13 @@ class MapViewer {
 
   proposedPopupSections(props, status, lat, lon) {
     return [
+      ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Proposed Pole') },
       { title: 'Specification', rows: this.specificationRows(props) },
       { title: 'Design Requirements', rows: this.designRequirementRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
       { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
     ];
@@ -826,12 +849,14 @@ class MapViewer {
 
   anglePopupSections(props, status, lat, lon) {
     return [
+      ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Angle Pole') },
       { title: 'Mechanical', rows: this.mechanicalRows(props, true) },
       { title: 'Physical', rows: this.physicalRows(props, 'angle') },
       { title: 'Electrical', rows: this.electricalRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
       { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
     ];
@@ -849,10 +874,12 @@ class MapViewer {
 
   contextPopupSections(props, status, lat, lon) {
     return [
+      ...this.legacyDataWarningSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Context / Crossing') },
       { title: 'Crossing Details', rows: this.crossingRows(props) },
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
     ];
   }
@@ -1046,6 +1073,81 @@ class MapViewer {
       this.popupRow('Source Confidence', props.source_confidence || 'raw survey export', 'info'),
       this.popupRow('Remarks', props.name && props.name !== props.id ? props.name : 'not captured', props.name && props.name !== props.id ? 'ok' : 'info'),
     ];
+  }
+
+  sourceConfidenceRows(props) {
+    const sourceConf = props.source_confidence_detail || {};
+    const confidence = sourceConf.confidence || 'unknown';
+    return [
+      this.popupRow(
+        'Data Provenance',
+        this.formatProvenance(sourceConf.provenance),
+        this.getProvenanceStatus(confidence),
+        sourceConf.designer_note || '',
+      ),
+      this.popupRow(
+        'Confidence Level',
+        this.formatSourceConfidence(confidence),
+        this.getProvenanceStatus(confidence),
+      ),
+      this.popupRow(
+        'Geometry Trust',
+        this.formatGeometryTrust(sourceConf.geometry_trust),
+        this.getProvenanceStatus(confidence),
+      ),
+      ...(sourceConf.warnings || []).map(warning => (
+        this.popupRow('Warning', warning, 'warning')
+      )),
+    ];
+  }
+
+  formatProvenance(provenance) {
+    const labels = {
+      field_observed_rtk: 'Field Survey (RTK GNSS)',
+      field_observed_gnss: 'Field Survey (Standalone GNSS)',
+      field_observed: 'Field Survey',
+      dno_gis_import: 'DNO GIS Import',
+      legacy_map_data: 'Legacy Map Data',
+      digitised_from_drawing: 'Digitised from Drawing',
+      proposed_by_design: 'Design Proposal',
+      inferred: 'Inferred / Calculated',
+      unknown: 'Unknown Source',
+    };
+    return labels[provenance] || provenance || 'Unknown Source';
+  }
+
+  formatSourceConfidence(confidence) {
+    const labels = {
+      high: 'High',
+      'medium-high': 'Medium-high',
+      medium: 'Medium',
+      low: 'Low',
+      'n/a': 'N/A',
+      unknown: 'Unknown',
+    };
+    return labels[confidence] || confidence || 'Unknown';
+  }
+
+  getProvenanceStatus(confidence) {
+    if (confidence === 'high') return 'ok';
+    if (confidence === 'medium-high' || confidence === 'medium') return 'info';
+    if (confidence === 'low') return 'warning';
+    return 'review';
+  }
+
+  formatGeometryTrust(trust) {
+    const labels = {
+      survey_grade: 'Survey-grade',
+      mapping_grade: 'Mapping-grade',
+      field_verified: 'Field-verified',
+      gis_inherited: 'GIS inherited (verify if critical)',
+      unverified: 'Unverified (field check required)',
+      indicative: 'Indicative only',
+      design_intent: 'Design proposal',
+      estimated: 'Estimated',
+      unknown: 'Unknown',
+    };
+    return labels[trust] || trust || 'Unknown';
   }
 
   lifecycleRows(props) {
@@ -1280,6 +1382,11 @@ class MapViewer {
       return 'lifecycle-unmatched';
     }
     return 'lifecycle-standard';
+  }
+
+  sourceConfidenceMarkerClass(props) {
+    const provenance = String(props.source_confidence_detail?.provenance || '').toLowerCase();
+    return provenance === 'legacy_map_data' ? 'source-legacy-data' : '';
   }
 
   statusBadge(status) {

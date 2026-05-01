@@ -24,7 +24,12 @@ from app.controller_intake import (
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
-from app.qa_engine import classify_height_confidence, infer_display_network_fields, run_qa_checks
+from app.qa_engine import (
+    classify_height_confidence,
+    classify_source_confidence,
+    infer_display_network_fields,
+    run_qa_checks,
+)
 from app.review_manager import delete_review
 from app.route_sequencer import sequence_route
 
@@ -290,6 +295,16 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
         df,
         "gnss_accuracy",
         ["gnss_accuracy", "gps_accuracy", "accuracy", "position_accuracy"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "source_confidence",
+        ["source_confidence", "data_source", "source", "provenance"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "capture_method",
+        ["capture_method", "survey_method", "position_method", "collection_method"],
     )
     normalized |= _copy_if_missing(
         df,
@@ -803,6 +818,7 @@ def _build_feature_collection(
                 "primary_type": classification.get("primary_type"),
             }
         )
+        source_confidence_detail = classify_source_confidence(row)
 
         feature = {
             "type": "Feature",
@@ -838,6 +854,8 @@ def _build_feature_collection(
                 "survey_date": _display_value(row, "survey_date"),
                 "gnss_accuracy": _display_value(row, "gnss_accuracy"),
                 "source_confidence": _safe_value(network_fields.get("source_confidence")),
+                "source_confidence_detail": source_confidence_detail,
+                "capture_method": _display_value(row, "capture_method"),
                 "primary_type": _safe_value(classification.get("primary_type")),
                 "infrastructure_owner": _safe_value(classification.get("infrastructure_owner")),
                 "asset_subtype": _safe_value(classification.get("subtype")),

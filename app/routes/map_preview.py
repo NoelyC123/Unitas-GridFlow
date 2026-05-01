@@ -7,7 +7,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify, render_template
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
-from app.qa_engine import classify_height_confidence
+from app.qa_engine import classify_height_confidence, classify_source_confidence
 
 map_preview_bp = Blueprint("map_preview", __name__)
 
@@ -33,6 +33,8 @@ POPUP_DATA_FIELDS = {
     "survey_date": None,
     "gnss_accuracy": None,
     "source_confidence": "legacy map data",
+    "source_confidence_detail": {},
+    "capture_method": None,
     "primary_type": None,
     "infrastructure_owner": None,
     "asset_subtype": None,
@@ -164,6 +166,8 @@ def _enrich_popup_data_model(data: dict) -> dict:
             props["asset_intent"] = "third_party_not_network"
         if not props.get("height_confidence"):
             props["height_confidence"] = classify_height_confidence(props)
+        if not props.get("source_confidence_detail"):
+            props["source_confidence_detail"] = classify_source_confidence(props)
         if not props.get("voltage"):
             props["voltage"] = _infer_voltage(props, metadata)
         if props.get("photo_links") and not props.get("photo_count"):
