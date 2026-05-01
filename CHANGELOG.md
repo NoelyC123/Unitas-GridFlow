@@ -8,6 +8,39 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 3C: Underground / cable LineString model & map overlay
+
+### Added
+
+- **`app/cable_generator.py`:** `cable_features` GeoJSON LineStrings from `cable_from_asset_id` / `cable_to_asset_id`, `from_support_id` / `to_support_id` (UG records), endpoint electrical coalesce, crossing profile, `designer_suggested_actions`, `metadata.cable_feature_count`.
+- **`app/span_generator.py`:** `line_segment_crossing_profile()` for reuse by cable segments.
+- **Intake:** Normalization aliases for `burial_depth_m`, `ducting_type`; map point properties include those fields.
+- **Map API / `map_data.json`:** `cable_features` attached on load (with spans); enrichment merges electrical display onto cable lines.
+- **Map viewer (`v=30`, CSS `v=3`):** Dashed purple **Underground cables** layer, popups (route, installation, crossings, actions), legend line, **UG cable — incomplete spec** review focus; sidebar cable count hint.
+
+### Validated
+
+- `pytest` — 361 passing; `J12946` cable enrichment smoke-tested (`cable_feature_count` 0 — no UG links in that job).
+
+---
+
+## 2026-05-01 — Phase 3B: Span crossing context, designer actions, map sidebar
+
+### Added
+
+- **`app/span_generator.py`:** Per-span crossing risk from proximity of surveyed context points to the span line; `previous_span` / `next_span` / `span_sequence_label`; `designer_suggested_actions`; `metadata.span_crossing_*_count`.
+- **Map viewer:** Right sidebar **Circuit spans** list (click to zoom + open popup); richer span popups (sequence, clearance hits, auto-suggested actions); **Span crossing context** review focus; risk-based line colouring; `map-viewer.js` v29.
+
+### Fixed
+
+- **`map_viewer.html`:** Leaflet CSS link closed correctly; inline `<style>` opened so the template parses.
+
+### Validated
+
+- `pytest` — 351 passed; sample real job `J12946` span enrichment smoke-tested.
+
+---
+
 ## 2026-05-01 — Phase 3A Sprint 1: Span LineString model & electrical on spans
 
 ### Added

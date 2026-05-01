@@ -339,6 +339,8 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
     assert spanp["to_point_id"] == "P-1002"
     assert spanp.get("voltage_detail", {}).get("label")
     assert "voltage_detail" not in props
+    assert "cable_features" in feature_collection
+    assert isinstance(feature_collection["cable_features"], list)
 
 
 def test_build_feature_collection_adds_source_confidence_detail() -> None:

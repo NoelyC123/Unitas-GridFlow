@@ -404,6 +404,7 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-layer="thirdparty"' in html
     assert 'data-layer="context"' in html
     assert 'data-layer="spans"' in html
+    assert 'data-layer="cables"' in html
     assert "Context/Crossings" in html
     assert "Third-party infrastructure" in html
     assert 'data-focus="design-blockers"' in html
@@ -412,6 +413,8 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-focus="missing-specification"' in html
     assert 'data-focus="angle-missing-stay"' in html
     assert 'data-focus="span-anomalies"' in html
+    assert 'data-focus="span-crossing-risk"' in html
+    assert 'data-focus="ug-cable-missing-spec"' in html
     assert 'data-focus="clearance-crossings"' in html
     assert 'data-focus="records-with-remarks"' in html
     assert "EX/PR matches" in html
@@ -419,6 +422,8 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Missing specifications" in html
     assert "Missing stay evidence" in html
     assert "Span anomalies" in html
+    assert "Span crossing context" in html
+    assert "UG cable" in html
     assert "Crossings requiring clearance" in html
     assert "Circuit spans" in html
     assert "Suggested Existing/Proposed Match" in html

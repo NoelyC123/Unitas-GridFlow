@@ -14,6 +14,17 @@ from app.qa_engine import infer_display_network_fields
 
 EARTH_RADIUS_M = 6371000.0
 
+# Context / crossing-related structure_type tokens
+# (aligned with map-viewer.js CONTEXT_FEATURE_CODES).
+_HIGH_CLEARANCE_CROSSING_HINTS = frozenset(
+    ("road", "track", "xing", "pline", "btxing", "lvxing", "hvxing")
+)
+_MEDIUM_CROSSING_HINTS = frozenset(("wall", "fence", "gate", "hedge", "tree", "post", "stream"))
+
+_SPAN_CROSSING_BUFFER_HIGH_M = 40.0
+_SPAN_CROSSING_BUFFER_MEDIUM_M = 28.0
+_SPAN_CROSSING_BUFFER_LOW_M = 18.0
+
 
 def haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Great-circle distance in metres between two WGS84 points."""
@@ -43,6 +54,289 @@ def _norm_id(v: Any) -> str | None:
         return None
     s = str(v).strip()
     return s or None
+
+
+def _planar_xy_m(lat: float, lon: float, ref_lat: float, ref_lon: float) -> tuple[float, float]:
+    """Local tangent-plane metres (adequate for span-scale distances in UK)."""
+    r = math.radians(ref_lat)
+    x = (lon - ref_lon) * 111_320.0 * math.cos(r)
+    y = (lat - ref_lat) * 110_540.0
+    return x, y
+
+
+def distance_point_to_segment_m(
+    lat_p: float,
+    lon_p: float,
+    lat_a: float,
+    lon_a: float,
+    lat_b: float,
+    lon_b: float,
+) -> float:
+    """Shortest distance in metres from point P to segment A–B."""
+    ref_lat = (lat_a + lat_b + lat_p) / 3.0
+    ref_lon = (lon_a + lon_b + lon_p) / 3.0
+    px, py = _planar_xy_m(lat_p, lon_p, ref_lat, ref_lon)
+    ax, ay = _planar_xy_m(lat_a, lon_a, ref_lat, ref_lon)
+    bx, by = _planar_xy_m(lat_b, lon_b, ref_lat, ref_lon)
+    abx, aby = bx - ax, by - ay
+    apx, apy = px - ax, py - ay
+    ab2 = abx * abx + aby * aby
+    if ab2 < 1e-9:
+        return round(math.hypot(apx, apy), 1)
+    t = max(0.0, min(1.0, (apx * abx + apy * aby) / ab2))
+    cx, cy = ax + t * abx, ay + t * aby
+    return round(math.hypot(px - cx, py - cy), 1)
+
+
+def _structure_type_lower(props: dict[str, Any]) -> str:
+    return str(props.get("structure_type") or "").strip().lower()
+
+
+def _is_route_context_point(props: dict[str, Any]) -> bool:
+    role = str(props.get("record_role") or "").strip().lower()
+    if role == "context":
+        return True
+    st = _structure_type_lower(props)
+    if not st:
+        return False
+    for hint in _HIGH_CLEARANCE_CROSSING_HINTS | _MEDIUM_CROSSING_HINTS:
+        if hint in st:
+            return True
+    if st in (
+        "hedge",
+        "tree",
+        "wall",
+        "fence",
+        "post",
+        "gate",
+        "road",
+        "track",
+        "stream",
+        "btxing",
+        "lvxing",
+        "hvxing",
+        "11xing",
+        "33xing",
+    ):
+        return True
+    if len(st) <= 6 and st.isalpha():
+        _short = {"HEDGE", "TREE", "WALL", "FENCE", "POST", "GATE", "ROAD", "TRACK", "STREAM"}
+        if st.upper() in _short:
+            return True
+    return False
+
+
+def _crossing_tier_for_structure(st_lower: str) -> str | None:
+    if not st_lower:
+        return None
+    if any(h in st_lower for h in _HIGH_CLEARANCE_CROSSING_HINTS):
+        return "high"
+    if any(h in st_lower for h in _MEDIUM_CROSSING_HINTS):
+        return "medium"
+    if st_lower in ("post", "11xing", "33xing"):
+        return "medium"
+    return "low"
+
+
+def _iter_context_points(point_features: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for feat in point_features:
+        if not isinstance(feat, dict) or feat.get("type") != "Feature":
+            continue
+        geom = feat.get("geometry")
+        if not isinstance(geom, dict) or geom.get("type") != "Point":
+            continue
+        coords = geom.get("coordinates") or []
+        if len(coords) < 2:
+            continue
+        lon, lat = _safe_float(coords[0]), _safe_float(coords[1])
+        if lat is None or lon is None:
+            continue
+        props = feat.get("properties")
+        if not isinstance(props, dict):
+            continue
+        if not _is_route_context_point(props):
+            continue
+        pid = (
+            _norm_id(props.get("pole_id"))
+            or _norm_id(props.get("id"))
+            or _norm_id(props.get("name"))
+        )
+        st = str(props.get("structure_type") or "").strip()
+        out.append(
+            {
+                "pole_id": pid or "",
+                "lat": lat,
+                "lon": lon,
+                "structure_type": st,
+                "structure_type_lower": st.lower(),
+            }
+        )
+    return out
+
+
+def line_segment_crossing_profile(
+    from_lat: float,
+    from_lon: float,
+    to_lat: float,
+    to_lon: float,
+    point_features: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], str]:
+    """Crossing / route context near a line segment (OHL span or underground cable)."""
+    return _hits_for_span(from_lat, from_lon, to_lat, to_lon, _iter_context_points(point_features))
+
+
+def _hits_for_span(
+    from_lat: float,
+    from_lon: float,
+    to_lat: float,
+    to_lon: float,
+    context_points: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], str]:
+    """Return crossing hits (sorted by distance) and aggregate crossing_risk_level."""
+    hits: list[dict[str, Any]] = []
+    for ctx in context_points:
+        d = distance_point_to_segment_m(ctx["lat"], ctx["lon"], from_lat, from_lon, to_lat, to_lon)
+        tier_token = _crossing_tier_for_structure(ctx["structure_type_lower"])
+        if tier_token is None:
+            continue
+        if tier_token == "high" and d > _SPAN_CROSSING_BUFFER_HIGH_M:
+            continue
+        if tier_token == "medium" and d > _SPAN_CROSSING_BUFFER_MEDIUM_M:
+            continue
+        if tier_token == "low" and d > _SPAN_CROSSING_BUFFER_LOW_M:
+            continue
+        hits.append(
+            {
+                "point_id": ctx.get("pole_id") or "",
+                "structure_type": ctx.get("structure_type") or "",
+                "distance_m": d,
+                "crossing_tier": tier_token,
+            }
+        )
+
+    hits.sort(key=lambda h: (h["distance_m"], h["structure_type"]))
+    level = "none"
+    for h in hits:
+        t = h.get("crossing_tier") or "low"
+        if t == "high":
+            level = "high"
+            break
+        if t == "medium":
+            level = "medium"
+        elif t == "low" and level == "none":
+            level = "low"
+    return hits, level
+
+
+def derive_designer_actions_for_span(props: dict[str, Any]) -> list[str]:
+    """Suggested office actions from span enrichment (advisory, not rulepack verdict)."""
+    actions: list[str] = []
+    risk = str(props.get("crossing_risk_level") or "none").lower()
+    if risk == "high":
+        actions.append(
+            "Confirm statutory clearance and crossing profile for this span — "
+            "road/track/utility crossing context within survey corridor.",
+        )
+    elif risk == "medium":
+        actions.append(
+            "Review obstruction / access constraints along this span — fence, wall, watercourse, "
+            "or vegetation context near the conductor path.",
+        )
+    elif risk == "low":
+        actions.append(
+            "Spot-check route context near this span against field notes or photos.",
+        )
+
+    vd = props.get("voltage_detail")
+    if isinstance(vd, dict) and len(vd) == 0:
+        vd = None
+    vac = props.get("voltage") or props.get("line_voltage") or vd
+    if not vac and not props.get("is_underground"):
+        actions.append("Confirm line voltage / circuit identity for this span segment.")
+
+    ct = props.get("conductor_type") or props.get("conductor")
+    if not ct and not props.get("is_underground"):
+        actions.append("Confirm conductor type and size for sag / tension design on this span.")
+
+    ph = props.get("phase_count") or props.get("phases")
+    if not ph and not props.get("is_underground"):
+        actions.append("Confirm phase configuration for electrical loading on this span.")
+
+    dist = props.get("distance_m")
+    try:
+        dm = float(dist) if dist is not None else None
+    except (TypeError, ValueError):
+        dm = None
+    if dm is not None and dm > 280:
+        actions.append(
+            "Long span — verify conductor choice and structure strength; "
+            "confirm no intermediate support omitted.",
+        )
+    if dm is not None and dm < 12:
+        actions.append("Very short span — verify adjacent structure IDs and survey sequence.")
+
+    seen: set[str] = set()
+    uniq: list[str] = []
+    for a in actions:
+        if a not in seen:
+            seen.add(a)
+            uniq.append(a)
+    return uniq
+
+
+def enrich_spans_phase3b(
+    spans: list[dict[str, Any]],
+    point_features: list[dict[str, Any]],
+) -> None:
+    """Add sequence, crossing-risk hits, and designer actions to span props (in place)."""
+
+    total = len(spans)
+    ctx_pts = _iter_context_points(point_features)
+
+    for i, feat in enumerate(spans):
+        if not isinstance(feat, dict):
+            continue
+        props = feat.get("properties")
+        if not isinstance(props, dict):
+            continue
+        geom = feat.get("geometry")
+        coords: list[Any] = []
+        if isinstance(geom, dict) and geom.get("type") == "LineString":
+            coords = geom.get("coordinates") or []
+
+        from_lat = from_lon = to_lat = to_lon = None
+        if len(coords) >= 2 and isinstance(coords[0], list) and isinstance(coords[-1], list):
+            from_lon, from_lat = _safe_float(coords[0][0]), _safe_float(coords[0][1])
+            to_lon, to_lat = _safe_float(coords[-1][0]), _safe_float(coords[-1][1])
+
+        hits: list[dict[str, Any]] = []
+        level = "none"
+        if None not in (from_lat, from_lon, to_lat, to_lon):
+            hits, level = _hits_for_span(from_lat, from_lon, to_lat, to_lon, ctx_pts)
+
+        props["span_total"] = total
+        props["span_sequence_label"] = f"{i + 1} of {total}" if total else "—"
+        if i > 0:
+            prev_p = spans[i - 1].get("properties") if isinstance(spans[i - 1], dict) else None
+            if isinstance(prev_p, dict):
+                props["previous_span"] = {
+                    "from_point_id": prev_p.get("from_point_id"),
+                    "to_point_id": prev_p.get("to_point_id"),
+                    "span_index": prev_p.get("span_index"),
+                }
+        if i < total - 1:
+            next_p = spans[i + 1].get("properties") if isinstance(spans[i + 1], dict) else None
+            if isinstance(next_p, dict):
+                props["next_span"] = {
+                    "from_point_id": next_p.get("from_point_id"),
+                    "to_point_id": next_p.get("to_point_id"),
+                    "span_index": next_p.get("span_index"),
+                }
+
+        props["crossing_hits_survey"] = hits
+        props["crossing_risk_level"] = level
+        props["designer_suggested_actions"] = derive_designer_actions_for_span(props)
 
 
 def index_point_features_by_pole_id(features: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -207,6 +501,8 @@ def generate_span_features_geojson(
             )
         )
 
+    if spans:
+        enrich_spans_phase3b(spans, point_features)
     return spans
 
 
@@ -226,3 +522,18 @@ def attach_span_features_to_collection(
     span_features = generate_span_features_geojson(feats, sequence_payload, meta)
     collection["span_features"] = span_features
     meta["span_feature_count"] = len(span_features)
+    high = med = low = 0
+    for sf in span_features:
+        sp = sf.get("properties") if isinstance(sf, dict) else None
+        if not isinstance(sp, dict):
+            continue
+        r = str(sp.get("crossing_risk_level") or "").lower()
+        if r == "high":
+            high += 1
+        elif r == "medium":
+            med += 1
+        elif r == "low":
+            low += 1
+    meta["span_crossing_high_count"] = high
+    meta["span_crossing_medium_count"] = med
+    meta["span_crossing_low_count"] = low

@@ -58,3 +58,5 @@ def test_map_data_endpoint_adds_span_features(tmp_path, monkeypatch) -> None:
     assert sf["geometry"]["type"] == "LineString"
     assert sf["properties"]["distance_m"] == 88
     assert sf["properties"].get("voltage_detail")
+    assert "cable_features" in data
+    assert data["metadata"].get("cable_feature_count") == 0

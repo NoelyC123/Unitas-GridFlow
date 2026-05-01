@@ -44,6 +44,7 @@ class MapViewer {
     this.map = null;
     this.featureData = [];
     this.spanLayer = null;
+    this.cableLayer = null;
     this.lifecycleMatchLayer = null;
     this.activeFilter = null;
     this.activeFilterMode = null;
@@ -57,7 +58,12 @@ class MapViewer {
       context: false,
       spans: true,
       matches: true,
+      cables: true,
     };
+    this._spanFeatureList = [];
+    this._spanLineRefs = [];
+    this._spanCrossingFilterOnly = false;
+    this._cableLineRefs = [];
   }
 
   init() {
@@ -88,6 +94,8 @@ class MapViewer {
       } else {
         this.renderDesignChainSpans(this._fallbackDesignSpans);
       }
+      const cableFeatures = data.cable_features || [];
+      this.renderCableFeatures(Array.isArray(cableFeatures) ? cableFeatures : []);
     } catch (err) {
       console.error(err);
       if (this.issueNoteEl) {
@@ -126,6 +134,35 @@ class MapViewer {
         frameSummaryEl.style.display = 'block';
       } else {
         frameSummaryEl.style.display = 'none';
+      }
+    }
+
+    const spanPanelMeta = document.getElementById('span-panel-meta');
+    if (spanPanelMeta) {
+      const n = meta.span_feature_count ?? 0;
+      if (n > 0 || (meta.span_crossing_high_count ?? 0) > 0) {
+        const bits = [`${n} span segment${n !== 1 ? 's' : ''}`];
+        const hi = meta.span_crossing_high_count ?? 0;
+        const med = meta.span_crossing_medium_count ?? 0;
+        const lo = meta.span_crossing_low_count ?? 0;
+        if (hi) bits.push(`<span class="span-meta-risk-high">${hi} high clearance context</span>`);
+        if (med) bits.push(`<span class="span-meta-risk-med">${med} medium</span>`);
+        if (lo) bits.push(`<span class="span-meta-risk-low">${lo} low</span>`);
+        spanPanelMeta.innerHTML = bits.join(' · ');
+      } else {
+        spanPanelMeta.textContent = '';
+      }
+    }
+
+    const cablePanelMeta = document.getElementById('cable-panel-meta');
+    if (cablePanelMeta) {
+      const nc = meta.cable_feature_count ?? 0;
+      if (nc > 0) {
+        cablePanelMeta.textContent = `${nc} underground cable segment${nc !== 1 ? 's' : ''} (dashed purple)`;
+        cablePanelMeta.style.display = 'block';
+      } else {
+        cablePanelMeta.textContent = '';
+        cablePanelMeta.style.display = 'none';
       }
     }
 
@@ -364,24 +401,27 @@ class MapViewer {
       this.map.removeLayer(this.spanLayer);
     }
     this.spanLayer = L.layerGroup();
+    this._spanFeatureList = spanFeatures.slice();
+    this._spanLineRefs = [];
 
-    for (const feat of spanFeatures) {
-      if (!feat || feat.type !== 'Feature') continue;
+    spanFeatures.forEach((feat, si) => {
+      if (!feat || feat.type !== 'Feature') return;
       const geom = feat.geometry || {};
-      if (geom.type !== 'LineString') continue;
+      if (geom.type !== 'LineString') return;
       const coords = geom.coordinates || [];
-      if (coords.length < 2) continue;
+      if (coords.length < 2) return;
       const latLngs = coords.map((c) => {
         if (!Array.isArray(c) || c.length < 2) return null;
         return [c[1], c[0]];
       }).filter(Boolean);
-      if (latLngs.length < 2) continue;
+      if (latLngs.length < 2) return;
 
       const props = feat.properties || {};
+      const vis = this.spanPolylineVisual(props, false);
       const line = L.polyline(latLngs, {
-        color: '#1d4ed8',
-        weight: 5,
-        opacity: 0.88,
+        color: vis.color,
+        weight: vis.weight,
+        opacity: vis.opacity,
         lineCap: 'round',
         lineJoin: 'round',
         className: 'gridflow-span-line',
@@ -399,11 +439,215 @@ class MapViewer {
 
       line.bindPopup(this.buildSpanPopupHtml(props));
       line.addTo(this.spanLayer);
-    }
+      this._spanLineRefs.push({ line, props, index: si });
+    });
 
     if (this.layerState.spans) {
       this.spanLayer.addTo(this.map);
     }
+
+    this.refreshSpanListPanel({ onlyCrossingRisk: this._spanCrossingFilterOnly });
+  }
+
+  spanPolylineVisual(props, focusDimOthers) {
+    const risk = String(props.crossing_risk_level || 'none').toLowerCase();
+    let color = '#1d4ed8';
+    let weight = 5;
+    let opacity = 0.88;
+    if (risk === 'high') {
+      color = '#c2410c';
+      weight = 6;
+    } else if (risk === 'medium') {
+      color = '#d97706';
+      weight = 5;
+    } else if (risk === 'low') {
+      color = '#2563eb';
+      weight = 5;
+    }
+    if (focusDimOthers) {
+      const has = risk !== 'none' && risk !== '';
+      if (!has) {
+        opacity = 0.22;
+        weight = 3;
+        color = '#93c5fd';
+      } else {
+        opacity = 0.95;
+        weight = Math.max(weight, 6);
+      }
+    }
+    return { color, weight, opacity };
+  }
+
+  refreshSpanListPanel({ onlyCrossingRisk = false } = {}) {
+    const panel = document.getElementById('span-panel');
+    const list = document.getElementById('span-list');
+    if (!panel || !list) return;
+    if (!this._spanLineRefs.length) {
+      panel.style.display = 'none';
+      list.innerHTML = '';
+      return;
+    }
+    panel.style.display = 'block';
+    const refs = onlyCrossingRisk
+      ? this._spanLineRefs.filter(({ props }) => {
+        const r = String(props.crossing_risk_level || 'none').toLowerCase();
+        return r !== 'none' && r !== '';
+      })
+      : this._spanLineRefs.slice();
+
+    list.innerHTML = '';
+    refs.forEach(({ line, props, index }) => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'span-list-item';
+      const r = String(props.crossing_risk_level || 'none').toLowerCase();
+      if (r === 'high') row.classList.add('span-list-item-risk-high');
+      else if (r === 'medium') row.classList.add('span-list-item-risk-med');
+      else if (r === 'low') row.classList.add('span-list-item-risk-low');
+      const seq = props.span_sequence_label || `#${index + 1}`;
+      const dist = props.distance_m != null && !Number.isNaN(Number(props.distance_m))
+        ? `${Number(props.distance_m).toFixed(1)} m`
+        : '';
+      const fromTo = `${this.escapeHtml(props.from_point_id || '?')} → ${this.escapeHtml(props.to_point_id || '?')}`;
+      row.innerHTML = `<span class="span-list-seq">${this.escapeHtml(seq)}</span><span class="span-list-route">${fromTo}</span>${dist ? `<span class="span-list-dist">${dist}</span>` : ''}${r !== 'none' ? `<span class="span-list-risk">${r}</span>` : ''}`;
+      row.addEventListener('click', () => {
+        if (!this.map || !line.getBounds) return;
+        this.map.fitBounds(line.getBounds(), { padding: [48, 48], maxZoom: 17 });
+        line.openPopup();
+      });
+      list.appendChild(row);
+    });
+  }
+
+  _applySpanCrossingFocusMode(active) {
+    if (!this._spanLineRefs || !this.map) return;
+    for (const { line, props } of this._spanLineRefs) {
+      const vis = this.spanPolylineVisual(props, active);
+      line.setStyle({ color: vis.color, weight: vis.weight, opacity: vis.opacity });
+    }
+  }
+
+  cablePolylineVisual(props) {
+    const risk = String(props.crossing_risk_level || 'none').toLowerCase();
+    let color = '#6b21a8';
+    let weight = 4;
+    let opacity = 0.9;
+    if (risk === 'high') {
+      color = '#9f1239';
+      weight = 5;
+    } else if (risk === 'medium') {
+      color = '#7e22ce';
+    } else if (risk === 'low') {
+      color = '#9333ea';
+    }
+    return { color, weight, opacity };
+  }
+
+  renderCableFeatures(cableFeatures) {
+    if (!this.map) return;
+    if (this.cableLayer) {
+      this.cableLayer.clearLayers();
+      this.map.removeLayer(this.cableLayer);
+    }
+    this._cableLineRefs = [];
+    if (!Array.isArray(cableFeatures) || cableFeatures.length === 0) {
+      this.cableLayer = null;
+      return;
+    }
+    this.cableLayer = L.layerGroup();
+    cableFeatures.forEach((feat, ci) => {
+      if (!feat || feat.type !== 'Feature') return;
+      const geom = feat.geometry || {};
+      if (geom.type !== 'LineString') return;
+      const coords = geom.coordinates || [];
+      if (coords.length < 2) return;
+      const latLngs = coords.map((c) => {
+        if (!Array.isArray(c) || c.length < 2) return null;
+        return [c[1], c[0]];
+      }).filter(Boolean);
+      if (latLngs.length < 2) return;
+      const props = feat.properties || {};
+      const vis = this.cablePolylineVisual(props);
+      const line = L.polyline(latLngs, {
+        color: vis.color,
+        weight: vis.weight,
+        opacity: vis.opacity,
+        dashArray: '10, 7',
+        lineCap: 'round',
+        lineJoin: 'round',
+        className: 'gridflow-cable-line',
+      });
+      const dist = props.distance_m != null && !Number.isNaN(Number(props.distance_m))
+        ? `${Number(props.distance_m).toFixed(1)} m UG`
+        : 'UG';
+      line.bindTooltip(dist, {
+        permanent: false,
+        direction: 'center',
+        className: 'gridflow-cable-tooltip',
+        sticky: true,
+      });
+      line.bindPopup(this.buildCablePopupHtml(props));
+      line.addTo(this.cableLayer);
+      this._cableLineRefs.push({ line, props, index: ci });
+    });
+    if (this.layerState.cables) {
+      this.cableLayer.addTo(this.map);
+    }
+  }
+
+  cableCrossingRiskLabel(props) {
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'high') return 'High — road/track/utility-type context near cable trace';
+    if (r === 'medium') return 'Medium — obstruction or environmental context nearby';
+    if (r === 'low') return 'Low — general route context nearby';
+    return 'None — no surveyed context points matched near this segment';
+  }
+
+  cablePopupSections(props) {
+    const routeRows = [
+      this.popupRow('From structure', props.from_point_id || '—', props.from_point_id ? 'ok' : 'info'),
+      this.popupRow('To structure', props.to_point_id || '—', props.to_point_id ? 'ok' : 'info'),
+      this.popupRow(
+        'Trace length',
+        props.distance_m != null ? `${Number(props.distance_m).toFixed(1)} m (plan)` : '—',
+        props.distance_m != null ? 'ok' : 'info',
+      ),
+      this.popupRow(
+        'Routing source',
+        props.routing_source === 'support_span' ? 'Support IDs (UG record)' : 'Cable link fields',
+        'info',
+      ),
+    ];
+    const installRows = [
+      this.popupRow('Depth of lay', props.burial_depth_m != null ? String(props.burial_depth_m) : '—', props.burial_depth_m ? 'ok' : 'warning'),
+      this.popupRow('Duct / protection', props.ducting_type || '—', props.ducting_type ? 'ok' : 'info'),
+    ];
+    const clearanceRows = [
+      this.popupRow('Crossing risk (survey context)', this.cableCrossingRiskLabel(props), this.spanCrossingRiskRowStatus(props)),
+      ...this.crossingHitRowsForSpan(props),
+    ];
+    const acts = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    const actionSection = acts.length
+      ? [{ title: 'Designer actions (auto-suggested)', rows: acts.map((t) => this.popupRow('Action', t, 'review')) }]
+      : [];
+    return [
+      { title: 'Underground cable route', rows: routeRows },
+      { title: 'Installation', rows: installRows },
+      { title: 'Clearance & crossings', rows: clearanceRows },
+      ...actionSection,
+      { title: 'Electrical', rows: this.electricalRows(props) },
+    ];
+  }
+
+  buildCablePopupHtml(props) {
+    const title = `${this.escapeHtml(props.from_point_id || '?')} → ${this.escapeHtml(props.to_point_id || '?')} (UG)`;
+    const sections = this.cablePopupSections(props);
+    return `
+      <div class="asset-popup asset-popup-cable">
+        <div class="popup-title">${title}</div>
+        ${sections.map((s) => this.popupSection(s.title, s.rows)).join('')}
+      </div>
+    `;
   }
 
   spanDistanceLabel(props) {
@@ -411,20 +655,100 @@ class MapViewer {
     return `${Number(props.distance_m).toFixed(1)} m`;
   }
 
+  spanCrossingRiskLabel(props) {
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'high') return 'High — road/track/utility-type context near span';
+    if (r === 'medium') return 'Medium — obstruction or environmental context nearby';
+    if (r === 'low') return 'Low — general route context nearby';
+    return 'None — no surveyed context points matched near this span';
+  }
+
+  spanCrossingRiskRowStatus(props) {
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'high') return 'blocker';
+    if (r === 'medium') return 'warning';
+    if (r === 'low') return 'review';
+    return 'info';
+  }
+
+  crossingHitRowsForSpan(props) {
+    const hits = props.crossing_hits_survey;
+    if (!Array.isArray(hits) || !hits.length) {
+      return [this.popupRow('Context hits', 'No crossing/context records within correlation distance', 'info')];
+    }
+    return hits.slice(0, 8).map((h) => {
+      const t = String(h.crossing_tier || 'low').toLowerCase();
+      const st = this.escapeHtml(h.structure_type || 'context');
+      const pid = h.point_id ? ` · ${this.escapeHtml(h.point_id)}` : '';
+      return this.popupRow(
+        `${st} · ${h.distance_m}m${pid}`,
+        `Tier: ${t}`,
+        t === 'high' ? 'blocker' : t === 'medium' ? 'warning' : 'info',
+      );
+    });
+  }
+
   spanPopupSections(props) {
+    const seqRows = [
+      this.popupRow(
+        'Position',
+        props.span_sequence_label || (props.span_index != null ? `Span ${Number(props.span_index) + 1}` : '—'),
+        'info',
+      ),
+      this.popupRow('Section', props.section_id != null && props.section_id !== '' ? String(props.section_id) : '—', 'info'),
+      this.popupRow(
+        'Design chain',
+        (props.from_design_pole_no != null || props.to_design_pole_no != null)
+          ? `${props.from_design_pole_no ?? '—'} → ${props.to_design_pole_no ?? '—'}`
+          : '—',
+        'info',
+      ),
+    ];
+    if (props.previous_span && typeof props.previous_span === 'object') {
+      const ps = props.previous_span;
+      seqRows.push(this.popupRow(
+        'Previous span',
+        `${ps.from_point_id || '—'} → ${ps.to_point_id || '—'}`,
+        'info',
+      ));
+    }
+    if (props.next_span && typeof props.next_span === 'object') {
+      const ns = props.next_span;
+      seqRows.push(this.popupRow(
+        'Next span',
+        `${ns.from_point_id || '—'} → ${ns.to_point_id || '—'}`,
+        'info',
+      ));
+    }
+
+    const routeRows = [
+      this.popupRow('From support', props.from_point_id || '—', props.from_point_id ? 'ok' : 'info'),
+      this.popupRow('To support', props.to_point_id || '—', props.to_point_id ? 'ok' : 'info'),
+      this.popupRow(
+        'Distance',
+        props.distance_m != null ? `${Number(props.distance_m).toFixed(1)} m` : '—',
+        props.distance_m != null ? 'ok' : 'info',
+      ),
+    ];
+
+    const clearanceRows = [
+      this.popupRow('Crossing risk (survey context)', this.spanCrossingRiskLabel(props), this.spanCrossingRiskRowStatus(props)),
+      ...this.crossingHitRowsForSpan(props),
+    ];
+
+    const actions = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    const actionSection = actions.length
+      ? [{
+        title: 'Designer actions (auto-suggested)',
+        rows: actions.map((text) => this.popupRow('Action', text, 'review')),
+      }]
+      : [];
+
     return [
-      {
-        title: 'Circuit span',
-        rows: [
-          this.popupRow('From support', props.from_point_id || '—', props.from_point_id ? 'ok' : 'info'),
-          this.popupRow('To support', props.to_point_id || '—', props.to_point_id ? 'ok' : 'info'),
-          this.popupRow(
-            'Distance',
-            props.distance_m != null ? `${Number(props.distance_m).toFixed(1)} m` : '—',
-            props.distance_m != null ? 'ok' : 'info',
-          ),
-        ],
-      },
+      { title: 'Sequence', rows: seqRows },
+      { title: 'Route span', rows: routeRows },
+      { title: 'Clearance & crossings', rows: clearanceRows },
+      ...actionSection,
       { title: 'Electrical', rows: this.electricalRows(props) },
     ];
   }
@@ -444,21 +768,40 @@ class MapViewer {
     if (!this.map || !Array.isArray(spans) || spans.length === 0) return;
 
     this.spanLayer = L.layerGroup();
+    this._spanFeatureList = spans.slice();
+    this._spanLineRefs = [];
 
-    for (const span of spans) {
+    spans.forEach((span, si) => {
       const coords = span.coordinates || [];
-      if (coords.length !== 2) continue;
+      if (coords.length !== 2) return;
 
       const from = coords[0];
       const to = coords[1];
       if (!Array.isArray(from) || !Array.isArray(to) || from.length < 2 || to.length < 2) {
-        continue;
+        return;
       }
 
+      const props = {
+        from_point_id: span.from_point_id,
+        to_point_id: span.to_point_id,
+        from_design_pole_no: span.from_design_pole_no,
+        to_design_pole_no: span.to_design_pole_no,
+        section_id: span.section_id,
+        distance_m: span.distance_m,
+        span_index: si,
+        span_total: spans.length,
+        span_sequence_label: `${si + 1} of ${spans.length}`,
+        crossing_risk_level: 'none',
+        crossing_hits_survey: [],
+        designer_suggested_actions: [],
+        feature_type: 'circuit_span',
+      };
+
+      const vis = this.spanPolylineVisual(props, false);
       const line = L.polyline([from, to], {
-        color: '#1d4ed8',
-        weight: 5,
-        opacity: 0.88,
+        color: vis.color,
+        weight: vis.weight,
+        opacity: vis.opacity,
         lineCap: 'round',
         lineJoin: 'round',
         className: 'gridflow-span-line',
@@ -474,19 +817,16 @@ class MapViewer {
         });
       }
 
-      const popupHtml = `
-        <div class="popup-title">Surveyed Route Sequence</div>
-        <div class="popup-row"><strong>From:</strong> ${this.escapeHtml(span.from_point_id || span.from_design_pole_no || 'Unknown')}</div>
-        <div class="popup-row"><strong>To:</strong> ${this.escapeHtml(span.to_point_id || span.to_design_pole_no || 'Unknown')}</div>
-        ${span.distance_m != null ? `<div class="popup-row"><strong>Distance:</strong> ${Number(span.distance_m).toFixed(1)}m</div>` : ''}
-      `;
-      line.bindPopup(popupHtml);
+      line.bindPopup(this.buildSpanPopupHtml(props));
       line.addTo(this.spanLayer);
-    }
+      this._spanLineRefs.push({ line, props, index: si });
+    });
 
     if (this.layerState.spans) {
       this.spanLayer.addTo(this.map);
     }
+
+    this.refreshSpanListPanel({ onlyCrossingRisk: this._spanCrossingFilterOnly });
   }
 
   spanLabel(span) {
@@ -520,6 +860,8 @@ class MapViewer {
         this.layerState[layerName] = input.checked;
         if (layerName === 'spans') {
           this.toggleLayer(this.spanLayer, input.checked);
+        } else if (layerName === 'cables') {
+          this.toggleLayer(this.cableLayer, input.checked);
         } else if (layerName === 'matches') {
           this.toggleLayer(this.lifecycleMatchLayer, input.checked);
         } else {
@@ -537,10 +879,13 @@ class MapViewer {
       if (this.activeFilter) {
         this.activeFilter = null;
         this.activeFilterMode = null;
+        this._spanCrossingFilterOnly = false;
         this.applyVisibility();
         document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('filter-active'));
         document.querySelectorAll('.focus-filter-btn').forEach(b => b.classList.remove('filter-active'));
         if (this.filterNoteEl) this.filterNoteEl.textContent = '';
+        this.refreshSpanListPanel({ onlyCrossingRisk: false });
+        this._applySpanCrossingFocusMode(false);
       }
       this._showRecordPanel(this.featureData, `All Mapped Records (${this.featureData.length})`);
     });
@@ -564,15 +909,19 @@ class MapViewer {
     if (this.activeFilterMode === mode && this.activeFilter === value) {
       this.activeFilter = null;
       this.activeFilterMode = null;
+      this._spanCrossingFilterOnly = false;
       this.applyVisibility();
       document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
       document.querySelectorAll('.focus-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
       if (this.filterNoteEl) this.filterNoteEl.textContent = '';
       this._hideRecordPanel();
+      this.refreshSpanListPanel({ onlyCrossingRisk: false });
+      this._applySpanCrossingFocusMode(false);
     } else {
       this.activeFilter = value;
       this.activeFilterMode = mode;
-      const filtered = this.filterFeatureData(mode, value);
+      const isSpanCrossing = mode === 'focus' && value === 'span-crossing-risk';
+      const filtered = isSpanCrossing ? this.featureData : this.filterFeatureData(mode, value);
       this.applyVisibility(filtered);
       document.querySelectorAll('.status-filter-btn').forEach(btn => {
         btn.classList.toggle('filter-active', mode === 'status' && btn.dataset.filter === value);
@@ -580,16 +929,33 @@ class MapViewer {
       document.querySelectorAll('.focus-filter-btn').forEach(btn => {
         btn.classList.toggle('filter-active', mode === 'focus' && btn.dataset.focus === value);
       });
-      const count = filtered.length;
       const label = this.filterLabel(mode, value);
-      if (this.filterNoteEl) {
+      if (isSpanCrossing) {
+        this._spanCrossingFilterOnly = true;
+        const crossing = this._spanLineRefs.filter(({ props }) => {
+          const r = String(props.crossing_risk_level || 'none').toLowerCase();
+          return r !== 'none' && r !== '';
+        });
+        if (this.filterNoteEl) {
+          this.filterNoteEl.textContent = `${crossing.length} span(s) with crossing/route context — list filtered; click again to reset`;
+        }
+        this._hideRecordPanel();
+        this.refreshSpanListPanel({ onlyCrossingRisk: true });
+        this._applySpanCrossingFocusMode(true);
+      } else {
+        this._spanCrossingFilterOnly = false;
+        this.refreshSpanListPanel({ onlyCrossingRisk: false });
+        this._applySpanCrossingFocusMode(false);
+        const count = filtered.length;
         const recordWord = count !== 1 ? 'records' : 'record';
         const contextNote = value === 'replacement-proximity'
           ? ' (map records, not reviewed pairing count)'
           : '';
-        this.filterNoteEl.textContent = `Showing ${count} ${label} ${recordWord}${contextNote} — click again to reset`;
+        if (this.filterNoteEl) {
+          this.filterNoteEl.textContent = `Showing ${count} ${label} ${recordWord}${contextNote} — click again to reset`;
+        }
+        this._showRecordPanel(filtered, `${label} (${count})`);
       }
-      this._showRecordPanel(filtered, `${label} (${count})`);
     }
   }
 
@@ -647,14 +1013,17 @@ class MapViewer {
     if (value === 'span-anomalies') {
       return this.featureData.filter(fd => this.hasSpanAnomaly(fd.props));
     }
-    if (value === 'clearance-crossings') {
-      return this.featureData.filter(fd => this.isClearanceCrossing(fd.props));
+    if (value === 'ug-cable-missing-spec') {
+      return this.featureData.filter((fd) => this.hasUgCableIncompleteSpec(fd.props));
     }
     return this.featureData;
   }
 
   currentFilteredFeatureData() {
     if (!this.activeFilter) return this.featureData;
+    if (this.activeFilterMode === 'focus' && this.activeFilter === 'span-crossing-risk') {
+      return this.featureData;
+    }
     return this.filterFeatureData(this.activeFilterMode, this.activeFilter);
   }
 
@@ -708,7 +1077,8 @@ class MapViewer {
       'missing-specification': 'Missing proposed specification',
       'angle-missing-stay': 'Angle pole missing stay evidence',
       'span-anomalies': 'Span anomaly',
-      'clearance-crossings': 'Crossing requiring clearance check',
+      'span-crossing-risk': 'Span crossing context',
+      'ug-cable-missing-spec': 'UG record — incomplete cable spec',
       'records-with-remarks': 'Record with remarks',
     };
     return labels[value] || value || mode;
@@ -745,6 +1115,14 @@ class MapViewer {
       || allText.includes('Span borderline short')
       || allText.includes('Span too long')
     );
+  }
+
+  hasUgCableIncompleteSpec(props) {
+    if (props.is_underground !== true) return false;
+    const hasCableType = this.hasValue(props.cable_type)
+      || (props.cable_detail && typeof props.cable_detail === 'object' && props.cable_detail.name);
+    const hasBurial = this.hasValue(props.burial_depth_m);
+    return !hasCableType || !hasBurial;
   }
 
   isClearanceCrossing(props) {

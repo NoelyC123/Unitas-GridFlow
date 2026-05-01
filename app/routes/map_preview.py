@@ -7,6 +7,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify, render_template
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
+from app.cable_generator import attach_cable_features_to_collection
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
     merge_equipment_fields_into_props,
@@ -113,6 +114,8 @@ POPUP_DATA_FIELDS = {
     "gnss_accuracy_summary": None,
     "capture_method_key": None,
     "capture_method_label": None,
+    "burial_depth_m": None,
+    "ducting_type": None,
 }
 
 
@@ -122,6 +125,7 @@ def _empty_feature_collection(job_id: str) -> dict:
         "features": [],
         "design_chain_spans": [],
         "span_features": [],
+        "cable_features": [],
         "metadata": {
             "job_id": job_id,
             "rulepack_id": "SPEN_11kV",
@@ -218,6 +222,12 @@ def _enrich_popup_data_model(data: dict) -> dict:
         sp = span_feat.get("properties")
         if isinstance(sp, dict):
             merge_electrical_fields_into_props(sp)
+    for cab_feat in data.get("cable_features") or []:
+        if not isinstance(cab_feat, dict):
+            continue
+        cp = cab_feat.get("properties")
+        if isinstance(cp, dict):
+            merge_electrical_fields_into_props(cp)
     return data
 
 
@@ -234,6 +244,7 @@ def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
             seq_payload = {}
 
     attach_span_features_to_collection(data, seq_payload)
+    attach_cable_features_to_collection(data)
 
     if "design_chain_spans" not in data:
         spans: list[dict] = []

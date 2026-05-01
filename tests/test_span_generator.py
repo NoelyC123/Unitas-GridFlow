@@ -6,6 +6,8 @@ from app.span_generator import (
     attach_span_features_to_collection,
     build_span_feature,
     coalesce_electrical_source,
+    derive_designer_actions_for_span,
+    distance_point_to_segment_m,
     generate_span_features_geojson,
     haversine_distance_m,
     index_point_features_by_pole_id,
@@ -122,6 +124,149 @@ def test_attach_span_features_to_collection_mutates() -> None:
     attach_span_features_to_collection(fc, seq)
     assert fc["metadata"]["span_feature_count"] == 1
     assert len(fc["span_features"]) == 1
+
+
+def test_distance_point_to_segment_midpoint_zero() -> None:
+    d = distance_point_to_segment_m(54.521, -3.014, 54.521, -3.014, 54.522, -3.013)
+    assert d < 1.0
+
+
+def test_crossing_risk_high_when_road_context_on_span() -> None:
+    point_features = [
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.014, 54.521]},
+            "properties": {"pole_id": "P-1001", "voltage": "11kV"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.013, 54.522]},
+            "properties": {"pole_id": "P-1002"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.0135, 54.5215]},
+            "properties": {
+                "pole_id": "CTX-R1",
+                "structure_type": "Road",
+                "record_role": "context",
+            },
+        },
+    ]
+    seq = {
+        "status": "ok",
+        "chain": [
+            {
+                "point_id": "P-1001",
+                "lat": 54.521,
+                "lon": -3.014,
+                "span_to_next_m": 75.0,
+                "design_pole_number": 1,
+                "section_id": "S1",
+            },
+            {
+                "point_id": "P-1002",
+                "lat": 54.522,
+                "lon": -3.013,
+                "design_pole_number": 2,
+            },
+        ],
+    }
+    spans = generate_span_features_geojson(point_features, seq, {"rulepack_id": "SPEN_11kV"})
+    assert len(spans) == 1
+    prop = spans[0]["properties"]
+    assert prop["crossing_risk_level"] == "high"
+    assert prop["span_sequence_label"] == "1 of 1"
+    assert len(prop["crossing_hits_survey"]) >= 1
+
+
+def test_span_sequence_adjacent_links() -> None:
+    point_features = [
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.02, 54.51]},
+            "properties": {"pole_id": "A"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.019, 54.511]},
+            "properties": {"pole_id": "B"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.018, 54.512]},
+            "properties": {"pole_id": "C"},
+        },
+    ]
+    seq = {
+        "status": "ok",
+        "chain": [
+            {"point_id": "A", "lat": 54.51, "lon": -3.02, "span_to_next_m": 50},
+            {"point_id": "B", "lat": 54.511, "lon": -3.019, "span_to_next_m": 50},
+            {"point_id": "C", "lat": 54.512, "lon": -3.018},
+        ],
+    }
+    spans = generate_span_features_geojson(point_features, seq, {})
+    assert len(spans) == 2
+    first = spans[0]["properties"]
+    assert "previous_span" not in first
+    assert first["next_span"]["from_point_id"] == "B"
+    mid = spans[1]["properties"]
+    assert mid["previous_span"]["to_point_id"] == "B"
+    assert "next_span" not in mid
+
+
+def test_derive_designer_actions_includes_voltage_gap() -> None:
+    acts = derive_designer_actions_for_span(
+        {"crossing_risk_level": "none", "is_underground": False}
+    )
+    assert any("voltage" in a.lower() for a in acts)
+
+
+def test_attach_span_features_sets_crossing_counts() -> None:
+    point_features = [
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.014, 54.521]},
+            "properties": {"pole_id": "P1"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.0135, 54.5215]},
+            "properties": {"pole_id": "R1", "structure_type": "Road", "record_role": "context"},
+        },
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-3.013, 54.522]},
+            "properties": {"pole_id": "P2"},
+        },
+    ]
+    fc = {
+        "type": "FeatureCollection",
+        "features": point_features,
+        "metadata": {"rulepack_id": "SPEN_11kV"},
+    }
+    seq = {
+        "status": "ok",
+        "chain": [
+            {"point_id": "P1", "lat": 54.521, "lon": -3.014, "span_to_next_m": 70},
+            {"point_id": "P2", "lat": 54.522, "lon": -3.013},
+        ],
+    }
+    attach_span_features_to_collection(fc, seq)
+    assert fc["metadata"]["span_crossing_high_count"] >= 1
+
+
+def test_derive_designer_actions_long_span() -> None:
+    acts = derive_designer_actions_for_span(
+        {"crossing_risk_level": "none", "is_underground": True, "distance_m": 300},
+    )
+    assert any("Long span" in a for a in acts)
+
+
+def test_distance_point_to_segment_far_from_line() -> None:
+    d = distance_point_to_segment_m(54.53, -3.0, 54.521, -3.014, 54.522, -3.013)
+    assert d > 500
 
 
 def test_build_span_feature_computes_distance_when_missing() -> None:

@@ -10,6 +10,7 @@ import pandas as pd
 from flask import Blueprint, jsonify, request
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
+from app.cable_generator import attach_cable_features_to_collection
 from app.controller_intake import (
     build_circuit_summary,
     build_completeness_summary,
@@ -456,6 +457,16 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
         df,
         "cable_to_asset_id",
         ["cable_to_asset_id", "ug_to", "cable_to"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "burial_depth_m",
+        ["burial_depth_m", "depth_of_lay", "depth_of_lay_m", "cover_depth_m", "cable_depth_m"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "ducting_type",
+        ["ducting_type", "duct_type", "cable_duct", "ducting"],
     )
     normalized |= _copy_if_missing(
         df,
@@ -1050,6 +1061,8 @@ def _build_feature_collection(
                 "access_constraint": _display_value(row, "access_constraint"),
                 "clearance_measured": _display_value(row, "clearance_measured"),
                 "distance_from_route_m": _display_value(row, "distance_from_route_m"),
+                "burial_depth_m": _display_value(row, "burial_depth_m"),
+                "ducting_type": _display_value(row, "ducting_type"),
                 **photo_fields,
                 "qa_status": qa_status,
                 "structure_type": _safe_value(row.get("structure_type")),
@@ -1093,6 +1106,7 @@ def _build_feature_collection(
     }
     if sequence_payload is not None:
         attach_span_features_to_collection(fc, sequence_payload)
+    attach_cable_features_to_collection(fc)
     return _sanitize_for_json(fc)
 
 
