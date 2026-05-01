@@ -395,12 +395,15 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
 
     assert response.status_code == 200
     html = response.data.decode("utf-8")
+    assert "Map Layers" in html
     assert "Review Focus" in html
-    assert 'data-focus="existing-poles"' in html
-    assert 'data-focus="proposed-poles"' in html
-    assert 'data-focus="angle-poles"' in html
-    assert 'data-focus="stays-anchors"' in html
-    assert 'data-focus="context-crossings"' in html
+    assert 'data-layer="existing"' in html
+    assert 'data-layer="proposed"' in html
+    assert 'data-layer="angle"' in html
+    assert 'data-layer="stays"' in html
+    assert 'data-layer="context"' in html
+    assert 'data-layer="spans"' in html
+    assert "Context/Crossings" in html
     assert 'data-focus="design-blockers"' in html
     assert 'data-focus="replacement-proximity"' in html
     assert 'data-focus="missing-height"' in html
@@ -409,18 +412,22 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-focus="span-anomalies"' in html
     assert 'data-focus="clearance-crossings"' in html
     assert 'data-focus="records-with-remarks"' in html
-    assert "Existing/proposed matches" in html
+    assert "EX/PR matches" in html
     assert "Missing existing heights" in html
     assert "Missing specifications" in html
-    assert "Show angle poles missing stay evidence" in html
-    assert "Show span anomalies" in html
-    assert "Show crossings requiring clearance check" in html
+    assert "Missing stay evidence" in html
+    assert "Span anomalies" in html
+    assert "Crossings requiring clearance" in html
     assert "Surveyed route sequence" in html
     assert "Suggested Existing/Proposed Match" in html
-    assert "Show suggested matches" in html
-    assert "Feature Type" in html
-    assert "Existing pole" in html
-    assert "Review Status Colour" in html
+    assert "Suggested Replacement Links" in html
+    assert "Asset Types (by shape)" in html
+    assert "Existing pole (square)" in html
+    assert "Proposed pole (circle)" in html
+    assert "Angle function (A badge)" in html
+    assert "QA Status (by stroke color)" in html
+    assert "popup-section-title" in html
+    assert "popup-field-label" in html
     assert "Asset Lifecycle" in html
     assert "Existing Pole being Replaced (Recovered)" in html
     assert "Proposed Replacement Pole" in html
@@ -482,6 +489,40 @@ def test_project_map_data_includes_design_chain_spans(client_and_root):
             "coordinates": [[54.521, -3.014], [54.522, -3.013]],
         }
     ]
+
+
+def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
+    client, projects_root = client_and_root
+
+    file_dir = _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+    _write_json(
+        file_dir / "map_data.json",
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [-3.014, 54.521]},
+                    "properties": {
+                        "pole_id": "P-1001",
+                        "structure_type": "EXpole",
+                        "height": 9.2,
+                    },
+                }
+            ],
+            "metadata": {"job_id": "P001/F001", "rulepack_id": "SPEN_11kV"},
+        },
+    )
+
+    response = client.get("/map/data/project/P001/F001")
+
+    assert response.status_code == 200
+    props = response.get_json()["features"][0]["properties"]
+    assert props["pole_class"] is None
+    assert props["condition"] is None
+    assert props["voltage"] == "11kV"
+    assert props["photo_links"] == []
+    assert props["source_confidence"] == "legacy map data"
 
 
 def test_project_detail_includes_responsive_file_card_layout(client_and_root):

@@ -2,11 +2,11 @@
 
 ## Project phase
 
-**Stage 3 complete + Phase B shipped → Evidence gathering complete → Phase C ready**
+**Stage 3 complete + Phase B shipped + Phase C (C1-C4) shipped + Phase C2/D in progress**
 
-All previous stages are complete. Phase B (UI polish) shipped successfully (298 tests passing).
+All previous stages are complete. Phase B (UI polish) shipped successfully. Phase C foundation (C1-C4) implemented and verified (300 tests passing).
 
-**Current state:** Evidence gathering phase complete. Comprehensive technical specifications received and validated. Ready for Phase C approval and implementation.
+**Current state:** Phase C2/D professional refinement in progress. This completes Phase C to professional survey-display standards before Stage 4. Packages: C2-1 (Map UX), C2-2 (Popup Data Model), C2-3 (Field Maps Parity - optional).
 
 ---
 
@@ -58,11 +58,32 @@ upload CSV → save file → run QA → save outputs → view map → download P
 - **Phase B: Dashboard clarity improvements**
 
 ### Testing and quality
-- **298 tests passing** (up from 297)
+- **300 tests passing** (up from 298 after Phase C)
 - Pre-commit hooks active
 - Ruff linting active
 - GitHub Actions CI active
 - All commits pushed to master
+
+### Phase C shipped (2026-05-01)
+- **C1: Feature-Type Filtering + Blank Field Framework** (commit 733fd99)
+  - 8 feature-type filter buttons
+  - Blank field framework (existing/proposed/context)
+  - Visual symbol hierarchy
+  - 8-section popup organization
+- **C2: Asset Lifecycle Visualization** (commit 0b5b7d0)
+  - 8-state lifecycle metadata
+  - EX↔PR match visualization (dashed lines)
+  - Toggleable lifecycle layer
+  - Lifecycle popup section
+- **C3: Stay Evidence at Angle Poles** (commit 6aefa15)
+  - Angle pole detection (>10° deviation OR function="Angle")
+  - 20m stay evidence scanning
+  - Missing stay warnings
+  - "Show angle poles missing stay evidence" filter
+- **C4: Span Anomaly Detection + Crossing Context** (commit da01811)
+  - Span anomaly flagging (<10m duplicate / >500m missing pole)
+  - Enriched crossing labels (Road/Wall/Stream with priority)
+  - "Show span anomalies" and "Show crossings requiring clearance" filters
 
 ---
 

@@ -82,9 +82,15 @@ Validated on Gordon, NIE, and Bellsprings/SPEN real survey files, including raw 
 
 ## Current phase
 
-**Practitioner-review remediation after Stage 3 closure**
+**Practitioner-review remediation + Phase C2/D professional refinement**
 
-Stages 1, 2 and 3 are complete for the current evidence set. The practitioner-review remediation pass has shipped: terminology has moved from D2D/Clean Chain toward Design Chain/Raw Working Audit, EX/PR review wording has been reframed as proximity QA, the Review page now shows at-a-glance pairing summary counts, the map now shows basic connected Design Chain spans with review-focus filters, the PDF now presents front-facing design review items and designer review status, and the CSV handoff exports now expose captured/missing/inferred evidence quality. Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work.
+Stages 1, 2 and 3 are complete for the current evidence set. The practitioner-review remediation pass has shipped: terminology has moved from D2D/Clean Chain toward Design Chain/Raw Working Audit, EX/PR review wording has been reframed as proximity QA, the Review page now shows at-a-glance pairing summary counts, the map now shows basic connected Design Chain spans with review-focus filters, the PDF now presents front-facing design review items and designer review status, and the CSV handoff exports now expose captured/missing/inferred evidence quality.
+
+**Phase C foundation (C1-C4) complete:** Feature filters, lifecycle visualization, stay evidence, span anomalies.
+
+**Phase C2/D in progress:** Professional refinement to bring map UX and popup data model to survey-display standards. Packages: C2-1 (Map UX - 1 week), C2-2 (Popup Data Model - 1-2 weeks), C2-3 (Field Maps Parity - optional). See `PHASE_C2_CURSOR_TASKS.md` for complete specification.
+
+Stage 4 structured field capture, tablet/iPad use, photo evidence, and richer Trimble/GIS integration remain the future roadmap but are not current implementation work (deferred until Phase C2/D validates).
 
 ---
 

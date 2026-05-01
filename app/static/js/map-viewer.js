@@ -14,6 +14,15 @@ const CONTEXT_FEATURE_CODES = new Set([
   '11xing', '33xing',
 ]);
 
+const MARKER_SIZES = {
+  existing: 17,
+  proposed: 17,
+  angle: 19,
+  anchor: 14,
+  context: 11,
+  other: 15,
+};
+
 class MapViewer {
   constructor() {
     this.jobId = document.querySelector('meta[name="job-id"]')?.content;
@@ -38,6 +47,15 @@ class MapViewer {
     this.activeFilter = null;
     this.activeFilterMode = null;
     this.fileType = null;
+    this.layerState = {
+      existing: true,
+      proposed: true,
+      angle: true,
+      stays: true,
+      context: false,
+      spans: true,
+      matches: true,
+    };
   }
 
   init() {
@@ -132,14 +150,16 @@ class MapViewer {
       const status = (props.qa_status || 'PASS').toUpperCase();
       const assetMarker = this.getAssetMarker(props);
       const lifecycleClass = this.lifecycleMarkerClass(props);
+      const isAngle = this.isAnglePole(props);
+      const markerSize = MARKER_SIZES[isAngle ? 'angle' : assetMarker.type] || MARKER_SIZES.other;
 
       const marker = L.marker([lat, lon], {
         icon: L.divIcon({
-          className: `asset-marker status-${status} asset-${assetMarker.type} ${lifecycleClass}`,
-          html: `<span class="asset-marker-shape" title="${this.escapeHtml(assetMarker.title)}"><span class="asset-marker-label">${this.escapeHtml(assetMarker.label)}</span></span>`,
-          iconSize: [25, 25],
-          iconAnchor: [12, 12],
-          popupAnchor: [0, -12],
+          className: `asset-marker status-${status} asset-${assetMarker.type} ${lifecycleClass}${isAngle ? ' is-angle' : ''}`,
+          html: `<span class="asset-marker-shape" title="${this.escapeHtml(assetMarker.title)}"><span class="asset-marker-label">${this.escapeHtml(assetMarker.label)}</span>${isAngle ? '<span class="asset-marker-angle-badge">A</span>' : ''}</span>`,
+          iconSize: [markerSize, markerSize],
+          iconAnchor: [Math.round(markerSize / 2), Math.round(markerSize / 2)],
+          popupAnchor: [0, -Math.round(markerSize / 2)],
         }),
       });
 
@@ -193,7 +213,7 @@ class MapViewer {
         : '';
 
       const replacementLine = props.relationship === 'replacement_pair'
-        ? `<div class="popup-row" style="color:#d39e00;font-weight:600;margin-top:4px;">&#9888; Likely existing/proposed match &#8212; evidence prompt, not a confirmed design decision</div>`
+        ? '<div class="popup-row" style="color:#92400e;font-weight:600;margin-top:4px;">Suggested replacement link — unconfirmed. Review pairing page to confirm.</div>'
         : '';
 
       const assetIntentLine = props.asset_intent
@@ -247,8 +267,7 @@ class MapViewer {
         ${issueBlock}
       `;
 
-      marker.bindPopup(popupHtml);
-      marker.addTo(this.map);
+      marker.bindPopup(this.buildPopupHtml(props, status, lat, lon));
       this.featureData.push({ marker, status, lat, lon, props });
     }
 
@@ -269,9 +288,11 @@ class MapViewer {
 
     this.bindFilterButtons();
     this.bindFocusFilterButtons();
+    this.bindLayerToggles();
     this.bindLifecycleMatchToggle();
     this.bindAllRecordsButton();
     this.renderLifecycleMatches();
+    this.applyVisibility();
 
     if (bounds.length === 1) {
       this.map.setView(bounds[0], 13);
@@ -300,10 +321,10 @@ class MapViewer {
       if (!existing) continue;
 
       const line = L.polyline([[existing.lat, existing.lon], [fd.lat, fd.lon]], {
-        color: '#f59e0b',
-        weight: 3,
-        opacity: 0.9,
-        dashArray: '6 6',
+        color: '#94a3b8',
+        weight: 1,
+        opacity: 0.55,
+        dashArray: '5 5',
         lineCap: 'round',
       });
       const offsetLine = fd.props.match_offset_m != null
@@ -314,7 +335,7 @@ class MapViewer {
         <div class="popup-row"><strong>Existing:</strong> Point ${this.escapeHtml(fd.props.replacing)}</div>
         <div class="popup-row"><strong>Proposed:</strong> Point ${this.escapeHtml(fd.props.pole_id || fd.props.id || 'Unknown')}</div>
         ${offsetLine}
-        <div class="popup-row" style="color:#92400e;font-size:0.82em;margin-top:4px;">GridFlow-generated proximity pairing — verify intended pairing before design proceeds.</div>
+        <div class="popup-row" style="color:#64748b;font-size:0.82em;margin-top:4px;">Suggested replacement link — unconfirmed. Review pairing page to confirm.</div>
       `);
       line.addTo(this.lifecycleMatchLayer);
     }
@@ -328,7 +349,7 @@ class MapViewer {
   renderDesignChainSpans(spans) {
     if (!this.map || !Array.isArray(spans) || spans.length === 0) return;
 
-    this.spanLayer = L.layerGroup().addTo(this.map);
+    this.spanLayer = L.layerGroup();
 
     for (const span of spans) {
       const coords = span.coordinates || [];
@@ -367,6 +388,10 @@ class MapViewer {
       line.bindPopup(popupHtml);
       line.addTo(this.spanLayer);
     }
+
+    if (this.layerState.spans) {
+      this.spanLayer.addTo(this.map);
+    }
   }
 
   spanLabel(span) {
@@ -390,6 +415,25 @@ class MapViewer {
     });
   }
 
+  bindLayerToggles() {
+    document.querySelectorAll('input[data-layer]').forEach(input => {
+      const layerName = input.dataset.layer;
+      if (Object.prototype.hasOwnProperty.call(this.layerState, layerName)) {
+        this.layerState[layerName] = input.checked;
+      }
+      input.addEventListener('change', () => {
+        this.layerState[layerName] = input.checked;
+        if (layerName === 'spans') {
+          this.toggleLayer(this.spanLayer, input.checked);
+        } else if (layerName === 'matches') {
+          this.toggleLayer(this.lifecycleMatchLayer, input.checked);
+        } else {
+          this.applyVisibility();
+        }
+      });
+    });
+  }
+
   bindAllRecordsButton() {
     const btn = document.getElementById('all-records-btn');
     if (!btn) return;
@@ -398,9 +442,7 @@ class MapViewer {
       if (this.activeFilter) {
         this.activeFilter = null;
         this.activeFilterMode = null;
-        for (const fd of this.featureData) {
-          if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
-        }
+        this.applyVisibility();
         document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('filter-active'));
         document.querySelectorAll('.focus-filter-btn').forEach(b => b.classList.remove('filter-active'));
         if (this.filterNoteEl) this.filterNoteEl.textContent = '';
@@ -414,6 +456,7 @@ class MapViewer {
     if (!toggle) return;
     toggle.addEventListener('change', () => {
       if (!this.lifecycleMatchLayer) return;
+      this.layerState.matches = toggle.checked;
       if (toggle.checked) {
         this.lifecycleMatchLayer.addTo(this.map);
       } else if (this.map.hasLayer(this.lifecycleMatchLayer)) {
@@ -426,9 +469,7 @@ class MapViewer {
     if (this.activeFilterMode === mode && this.activeFilter === value) {
       this.activeFilter = null;
       this.activeFilterMode = null;
-      for (const fd of this.featureData) {
-        if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
-      }
+      this.applyVisibility();
       document.querySelectorAll('.status-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
       document.querySelectorAll('.focus-filter-btn').forEach(btn => btn.classList.remove('filter-active'));
       if (this.filterNoteEl) this.filterNoteEl.textContent = '';
@@ -437,14 +478,7 @@ class MapViewer {
       this.activeFilter = value;
       this.activeFilterMode = mode;
       const filtered = this.filterFeatureData(mode, value);
-      const visibleRecords = new Set(filtered);
-      for (const fd of this.featureData) {
-        if (visibleRecords.has(fd)) {
-          if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
-        } else {
-          if (this.map.hasLayer(fd.marker)) this.map.removeLayer(fd.marker);
-        }
-      }
+      this.applyVisibility(filtered);
       document.querySelectorAll('.status-filter-btn').forEach(btn => {
         btn.classList.toggle('filter-active', mode === 'status' && btn.dataset.filter === value);
       });
@@ -522,6 +556,43 @@ class MapViewer {
       return this.featureData.filter(fd => this.isClearanceCrossing(fd.props));
     }
     return this.featureData;
+  }
+
+  currentFilteredFeatureData() {
+    if (!this.activeFilter) return this.featureData;
+    return this.filterFeatureData(this.activeFilterMode, this.activeFilter);
+  }
+
+  applyVisibility(filteredItems = this.currentFilteredFeatureData()) {
+    if (!this.map) return;
+    const visibleRecords = new Set(filteredItems);
+    for (const fd of this.featureData) {
+      const shouldShow = visibleRecords.has(fd) && this.passesLayerState(fd);
+      if (shouldShow) {
+        if (!this.map.hasLayer(fd.marker)) fd.marker.addTo(this.map);
+      } else if (this.map.hasLayer(fd.marker)) {
+        this.map.removeLayer(fd.marker);
+      }
+    }
+  }
+
+  passesLayerState(fd) {
+    const props = fd.props || {};
+    if (this.isContextRecord(props)) return this.layerState.context;
+    if (this.isStayOrAnchor(props)) return this.layerState.stays;
+    if (this.isAnglePole(props) && !this.layerState.angle) return false;
+    if (this.isExistingPole(props)) return this.layerState.existing;
+    if (this.isProposedPole(props)) return this.layerState.proposed;
+    return true;
+  }
+
+  toggleLayer(layer, shouldShow) {
+    if (!this.map || !layer) return;
+    if (shouldShow) {
+      if (!this.map.hasLayer(layer)) layer.addTo(this.map);
+    } else if (this.map.hasLayer(layer)) {
+      this.map.removeLayer(layer);
+    }
   }
 
   filterLabel(mode, value) {
@@ -604,7 +675,7 @@ class MapViewer {
   isProposedPole(props) {
     const st = String(props.structure_type || '').toLowerCase();
     const intent = String(props.asset_intent || '').toLowerCase();
-    return st.includes('prpole') || st === 'pol' || intent.includes('proposed');
+    return st.includes('prpole') || st === 'pol' || st.includes('angle') || intent.includes('proposed');
   }
 
   isAnglePole(props) {
@@ -632,6 +703,312 @@ class MapViewer {
       return `<div class="popup-row" style="color:#166534;font-weight:600;">Stay evidence: ${this.escapeHtml(stayTypes)}${distanceText}</div>`;
     }
     return '';
+  }
+
+  buildPopupHtml(props, status, lat, lon) {
+    const assetKind = this.popupAssetKind(props);
+    const title = this.escapeHtml(props.name || props.id || 'Record');
+    const sections = assetKind === 'context'
+      ? this.contextPopupSections(props, status, lat, lon)
+      : assetKind === 'stay'
+        ? this.stayPopupSections(props, status, lat, lon)
+        : assetKind === 'proposed'
+          ? this.proposedPopupSections(props, status, lat, lon)
+          : assetKind === 'angle'
+            ? this.anglePopupSections(props, status, lat, lon)
+            : this.existingPopupSections(props, status, lat, lon);
+    return `
+      <div class="asset-popup asset-popup-${assetKind}">
+        <div class="popup-title">${title}</div>
+        ${sections.map(section => this.popupSection(section.title, section.rows)).join('')}
+      </div>
+    `;
+  }
+
+  popupAssetKind(props) {
+    if (this.isContextRecord(props)) return 'context';
+    if (this.isStayOrAnchor(props)) return 'stay';
+    if (this.isAnglePole(props)) return 'angle';
+    if (this.isProposedPole(props)) return 'proposed';
+    return 'existing';
+  }
+
+  existingPopupSections(props, status, lat, lon) {
+    return [
+      { title: 'Identity', rows: this.identityRows(props, status, 'Existing Pole') },
+      { title: 'Physical', rows: this.physicalRows(props, 'existing') },
+      { title: 'Electrical', rows: this.electricalRows(props) },
+      { title: 'Mechanical', rows: this.mechanicalRows(props) },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
+      { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  proposedPopupSections(props, status, lat, lon) {
+    return [
+      { title: 'Identity', rows: this.identityRows(props, status, 'Proposed Pole') },
+      { title: 'Specification', rows: this.specificationRows(props) },
+      { title: 'Design Requirements', rows: this.designRequirementRows(props) },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
+      { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  anglePopupSections(props, status, lat, lon) {
+    return [
+      { title: 'Identity', rows: this.identityRows(props, status, 'Angle Pole') },
+      { title: 'Mechanical', rows: this.mechanicalRows(props, true) },
+      { title: 'Physical', rows: this.physicalRows(props, 'angle') },
+      { title: 'Electrical', rows: this.electricalRows(props) },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
+      { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  stayPopupSections(props, status, lat, lon) {
+    return [
+      { title: 'Identity', rows: this.identityRows(props, status, 'Stay / Anchor') },
+      { title: 'Stay Details', rows: this.stayDetailRows(props) },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  contextPopupSections(props, status, lat, lon) {
+    return [
+      { title: 'Identity', rows: this.identityRows(props, status, 'Context / Crossing') },
+      { title: 'Crossing Details', rows: this.crossingRows(props) },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  identityRows(props, status, fallbackType) {
+    return [
+      this.popupRow('Point', props.pole_id || props.id),
+      this.popupRow('Type', this.explainAssetType(props.structure_type) || fallbackType),
+      this.popupRow('Feature Code', props.structure_type),
+      this.popupRow('Function', this.isAnglePole(props) ? 'Angle' : props.record_role),
+      this.popupRow('Status', this.statusText(status), this.statusToFieldStatus(status)),
+      this.popupRow('Role', props.asset_intent || props.record_role || 'mapped survey record'),
+    ];
+  }
+
+  physicalRows(props, mode) {
+    const hasHeight = this.hasValue(props.height);
+    return [
+      this.popupRow(
+        mode === 'proposed' ? 'Proposed Height' : 'Measured Height',
+        hasHeight ? `${props.height}m` : 'not captured',
+        hasHeight ? 'ok' : mode === 'existing' ? 'blocker' : 'info',
+        mode === 'existing' && !hasHeight ? 'Clearance check impossible without measured existing pole height.' : '',
+      ),
+      this.popupRow('Height Source', props.height_source || 'not captured', props.height_source ? 'ok' : 'review'),
+      this.popupRow('Pole Class', props.pole_class || 'not captured', props.pole_class ? 'ok' : 'review'),
+      this.popupRow(
+        'Material / Condition',
+        `${this.displayValue(props.material)} / ${this.displayValue(props.condition)}`,
+        props.material || props.condition ? 'ok' : 'review',
+      ),
+      this.popupRow(
+        'Lean',
+        props.lean_severity || props.lean_direction
+          ? `${this.displayValue(props.lean_severity)} ${this.displayValue(props.lean_direction)}`.trim()
+          : 'not captured',
+        props.lean_severity || props.lean_direction ? 'warning' : 'info',
+      ),
+      this.popupRow('Defects', props.defect_type || 'not captured', props.defect_type ? 'warning' : 'info'),
+      this.popupRow('Foundation', props.foundation_type || 'not captured', props.foundation_type ? 'ok' : 'info'),
+    ];
+  }
+
+  specificationRows(props) {
+    const hasSpec = this.hasValue(props.specification) || this.hasValue(props.material);
+    return [
+      this.popupRow(
+        'Specification',
+        props.specification || 'not specified',
+        hasSpec ? 'ok' : 'review',
+        hasSpec ? '' : 'Design decision required; this is not a field-capture error.',
+      ),
+      this.popupRow('Pole Class', props.pole_class || 'not specified', props.pole_class ? 'ok' : 'review'),
+      this.popupRow('Material', props.material || 'not specified', props.material ? 'ok' : 'review'),
+      this.popupRow('Condition', props.condition || 'not applicable yet', 'info'),
+      this.popupRow('Design Height', props.height ? `${props.height}m` : 'not yet specified', props.height ? 'ok' : 'review'),
+    ];
+  }
+
+  electricalRows(props) {
+    const equipment = Array.isArray(props.equipment) && props.equipment.length > 0
+      ? props.equipment.join(', ')
+      : props.equipment;
+    return [
+      this.popupRow('Line Voltage', props.voltage || 'not recorded', props.voltage ? 'ok' : 'info'),
+      this.popupRow('Conductor Type', props.conductor_type || 'not recorded', props.conductor_type ? 'ok' : 'info'),
+      this.popupRow('Phases', props.phase_count || 'not recorded', props.phase_count ? 'ok' : 'info'),
+      this.popupRow('Mounted Equipment', equipment || 'none recorded', equipment ? 'ok' : 'info'),
+      this.popupRow('Equipment Rating', props.equipment_rating || 'not recorded', props.equipment_rating ? 'ok' : 'info'),
+    ];
+  }
+
+  mechanicalRows(props, prominent = false) {
+    const stayStatus = props.stay_evidence_status;
+    const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
+      ? props.stay_types.join(', ')
+      : null;
+    return [
+      this.popupRow(
+        'Stay Evidence',
+        stayStatus === 'captured' ? `captured: ${stayTypes || 'stay record'}` : 'not captured',
+        stayStatus === 'captured' ? 'ok' : prominent ? 'warning' : 'info',
+        stayStatus === 'captured'
+          ? this.nearestStayDetail(props)
+          : 'Angle pole — stay evidence not captured. Check field notes, photos or plan evidence.',
+      ),
+      this.popupRow('Stay Type', stayTypes || 'not captured', stayTypes ? 'ok' : 'info'),
+      this.popupRow('Stay Bearing', props.stay_bearing || 'not captured', props.stay_bearing ? 'ok' : 'info'),
+      this.popupRow('Anchor Details', props.anchor_details || 'not linked', props.anchor_details ? 'ok' : 'info'),
+      this.popupRow('Route Deviation', props.route_deviation_deg ? `${props.route_deviation_deg}°` : 'not calculated', props.route_deviation_deg ? 'warning' : 'info'),
+      this.popupRow('Action', prominent ? 'Verify stay configuration before design' : 'Check field notes if stay evidence is expected', prominent ? 'warning' : 'info'),
+    ];
+  }
+
+  stayDetailRows(props) {
+    return [
+      this.popupRow('Type', props.structure_type || 'Stay / anchor'),
+      this.popupRow('Linked Pole', props.linked_pole_id || 'not linked', props.linked_pole_id ? 'ok' : 'info'),
+      this.popupRow('Direction', props.stay_bearing || 'not captured', props.stay_bearing ? 'ok' : 'info'),
+      this.popupRow('Configuration', props.stay_configuration || 'not captured', props.stay_configuration ? 'ok' : 'info'),
+      this.popupRow('Nearest Pole', this.nearestStayDetail(props) || 'not calculated', props.nearest_stay_distance_m ? 'ok' : 'info'),
+    ];
+  }
+
+  designRequirementRows(props) {
+    return [
+      this.popupRow('Clearance', this.isClearanceCrossing(props) ? this.contextReviewLabel(props) : 'check route context / plans', 'info'),
+      this.popupRow('Stay Required', this.isAnglePole(props) ? 'review angle/stay evidence' : 'not indicated by current data', this.isAnglePole(props) ? 'warning' : 'info'),
+      this.popupRow('Access', props.access_constraint || 'check field notes / plans', 'info'),
+      this.popupRow('Design Note', props.name && props.name !== props.id ? props.name : 'not captured', props.name && props.name !== props.id ? 'ok' : 'info'),
+    ];
+  }
+
+  crossingRows(props) {
+    return [
+      this.popupRow('Priority', this.isClearanceCrossing(props) ? 'HIGH' : 'Review', this.isClearanceCrossing(props) ? 'warning' : 'info'),
+      this.popupRow('Label', this.contextReviewLabel(props), this.isClearanceCrossing(props) ? 'warning' : 'info'),
+      this.popupRow('Clearance Measured', props.clearance_measured || 'No', props.clearance_measured ? 'ok' : 'warning'),
+      this.popupRow('Distance from Route', props.distance_from_route_m ? `${props.distance_from_route_m}m` : 'not calculated', 'info'),
+      this.popupRow('Action', this.isClearanceCrossing(props) ? 'Measure statutory clearance to crossing surface' : 'Review site constraint before design', 'warning'),
+    ];
+  }
+
+  locationRows(props, lat, lon) {
+    return [
+      this.popupRow('Easting / Northing', props.easting ? `${props.easting}, ${props.northing}` : 'not captured', props.easting ? 'ok' : 'info'),
+      this.popupRow('Lat / Lon', `${lat.toFixed(5)}, ${lon.toFixed(5)}`, 'ok'),
+      this.popupRow('Elevation', props.elevation != null && props.elevation !== '' ? `${props.elevation}m` : 'not captured', props.elevation ? 'ok' : 'info'),
+      this.popupRow('GNSS Accuracy', props.gnss_accuracy || 'not captured', props.gnss_accuracy ? 'ok' : 'info'),
+    ];
+  }
+
+  evidenceRows(props) {
+    const photos = this.photoEvidenceText(props);
+    return [
+      this.popupRow('Surveyed By', props.surveyor || 'not captured', props.surveyor ? 'ok' : 'info'),
+      this.popupRow('Survey Date', props.survey_date || 'not captured', props.survey_date ? 'ok' : 'info'),
+      this.popupRow('Photo Evidence', photos, photos === 'no linked photos' ? 'info' : 'ok'),
+      this.popupRow('Source Confidence', props.source_confidence || 'raw survey export', 'info'),
+      this.popupRow('Remarks', props.name && props.name !== props.id ? props.name : 'not captured', props.name && props.name !== props.id ? 'ok' : 'info'),
+    ];
+  }
+
+  lifecycleRows(props) {
+    return [
+      this.popupRow('Lifecycle', props.lifecycle_state || 'not classified', props.lifecycle_state ? 'ok' : 'info'),
+      this.popupRow('Replacing', props.replacing ? `Point ${props.replacing}` : 'not linked', props.replacing ? 'warning' : 'info'),
+      this.popupRow('Being Replaced By', props.being_replaced_by ? `Point ${props.being_replaced_by}` : 'not linked', props.being_replaced_by ? 'warning' : 'info'),
+      this.popupRow('Match Status', props.relationship === 'replacement_pair' ? 'suggested, unconfirmed' : 'none', props.relationship === 'replacement_pair' ? 'warning' : 'info'),
+      this.popupRow('Match Offset', props.match_offset_m != null ? `${Number(props.match_offset_m).toFixed(1)}m` : 'not applicable', 'info'),
+      this.popupRow('Action', props.relationship === 'replacement_pair' ? 'Review pairing page to confirm or reassign' : 'No pairing action from current data', props.relationship === 'replacement_pair' ? 'warning' : 'info'),
+    ];
+  }
+
+  qaRows(props) {
+    const rows = [];
+    if (props.warn_count > 0) {
+      rows.push(this.popupRow('Review Notes', `${props.warn_count}`, 'warning', (props.warn_texts || []).join(' | ')));
+    }
+    if (props.issue_count > 0) {
+      rows.push(this.popupRow('Design Blockers', `${props.issue_count}`, 'blocker', (props.issue_texts || []).join(' | ')));
+    }
+    if (rows.length === 0) rows.push(this.popupRow('QA Items', 'none recorded', 'ok'));
+    return rows;
+  }
+
+  popupSection(title, rows) {
+    const renderedRows = rows.filter(Boolean).map(row => row).join('');
+    return `
+      <div class="popup-section">
+        <div class="popup-section-title">${this.escapeHtml(title)}</div>
+        ${renderedRows}
+      </div>
+    `;
+  }
+
+  popupRow(label, value, status = 'info', detail = '') {
+    const display = this.displayValue(value);
+    const detailHtml = detail ? `<div class="popup-field-detail">${this.escapeHtml(detail)}</div>` : '';
+    return `
+      <div class="popup-field status-${this.escapeHtml(status)}">
+        <div class="popup-field-label">${this.escapeHtml(label)}</div>
+        <div class="popup-field-value">${this.escapeHtml(display)}</div>
+        ${detailHtml}
+      </div>
+    `;
+  }
+
+  displayValue(value) {
+    if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return 'not captured';
+    }
+    if (Array.isArray(value)) return value.join(', ');
+    return String(value);
+  }
+
+  statusText(status) {
+    if (status === 'FAIL') return 'Design Blocker';
+    if (status === 'WARN') return 'Review Required';
+    return 'Pass';
+  }
+
+  statusToFieldStatus(status) {
+    if (status === 'FAIL') return 'blocker';
+    if (status === 'WARN') return 'warning';
+    return 'ok';
+  }
+
+  nearestStayDetail(props) {
+    if (props.nearest_stay_distance_m == null) return '';
+    return `within ${Number(props.nearest_stay_distance_m).toFixed(1)}m`;
+  }
+
+  photoEvidenceText(props) {
+    const photos = [];
+    if (props.has_full_pole_photo) photos.push('full pole');
+    if (props.has_pole_top_photo) photos.push('pole top');
+    if (props.has_defect_photo) photos.push('defect');
+    if (Array.isArray(props.photo_links) && props.photo_links.length > 0) {
+      photos.push(`${props.photo_links.length} linked ref${props.photo_links.length === 1 ? '' : 's'}`);
+    }
+    return photos.length > 0 ? photos.join(', ') : 'no linked photos';
   }
 
   _showRecordPanel(items, title) {
@@ -755,11 +1132,8 @@ class MapViewer {
     if (st.includes('expole') || intent.includes('existing')) {
       return { type: 'existing', label: 'EX', title: 'Existing pole' };
     }
-    if (st.includes('prpole') || st === 'pol' || intent.includes('proposed')) {
+    if (st.includes('prpole') || st === 'pol' || st.includes('angle') || intent.includes('proposed')) {
       return { type: 'proposed', label: 'PR', title: 'Proposed pole' };
-    }
-    if (st.includes('angle')) {
-      return { type: 'angle', label: 'A', title: 'Angle pole' };
     }
     if (role === 'anchor' || st.includes('stay') || st.includes('anchor')) {
       return { type: 'anchor', label: 'ST', title: 'Stay / anchor' };

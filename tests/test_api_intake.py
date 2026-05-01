@@ -23,6 +23,17 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
                 "height_m": 11.0,
                 "material": "Wood",
                 "pole_specification": "11m Medium Pole",
+                "grade": "Class 9 Medium",
+                "pole_condition": "Fair",
+                "lean_direction": "west",
+                "defects": "rot at base",
+                "line_voltage": "11kV",
+                "conductor": "AAC",
+                "mounted_equipment": "Transformer",
+                "surveyed_by": "J. Smith",
+                "capture_date": "2026-04-30",
+                "position_accuracy": "RTK",
+                "photo_refs": "pole-1.jpg;top-1.jpg",
                 "location_name": "Dalton Road Junction",
                 "easting": 352841,
                 "northing": 503122,
@@ -45,6 +56,17 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
     assert normalized_df.loc[0, "height"] == 11.0
     assert normalized_df.loc[0, "material"] == "Wood"
     assert normalized_df.loc[0, "specification"] == "11m Medium Pole"
+    assert normalized_df.loc[0, "pole_class"] == "Class 9 Medium"
+    assert normalized_df.loc[0, "condition"] == "Fair"
+    assert normalized_df.loc[0, "lean_direction"] == "west"
+    assert normalized_df.loc[0, "defect_type"] == "rot at base"
+    assert normalized_df.loc[0, "voltage"] == "11kV"
+    assert normalized_df.loc[0, "conductor_type"] == "AAC"
+    assert normalized_df.loc[0, "equipment"] == "Transformer"
+    assert normalized_df.loc[0, "surveyor"] == "J. Smith"
+    assert normalized_df.loc[0, "survey_date"] == "2026-04-30"
+    assert normalized_df.loc[0, "gnss_accuracy"] == "RTK"
+    assert normalized_df.loc[0, "photo_links"] == "pole-1.jpg;top-1.jpg"
     assert normalized_df.loc[0, "location"] == "Dalton Road Junction"
     assert normalized_df.loc[0, "lat"] == 54.5210
     assert normalized_df.loc[0, "lon"] == -3.0140
@@ -150,6 +172,67 @@ def test_build_feature_collection_counts_pass_and_fail_correctly() -> None:
     assert feature_collection["metadata"]["pass_count"] == 1
     assert feature_collection["metadata"]["fail_count"] == 1
     assert feature_collection["metadata"]["issue_count"] == 1
+
+
+def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "P-1001",
+                "location": "Dalton Road Junction",
+                "material": "Wood",
+                "height": 11.0,
+                "height_source": "measured",
+                "pole_class": "Class 9 Medium",
+                "condition": "Fair",
+                "lean_direction": "west",
+                "lean_severity": "minor",
+                "defect_type": "rot at base",
+                "foundation_type": "direct buried",
+                "voltage": "11kV",
+                "conductor_type": "AAC 7/3.75",
+                "phase_count": "3-phase",
+                "equipment": "Transformer;Fuse",
+                "equipment_rating": "50kVA",
+                "surveyor": "J. Smith",
+                "survey_date": "2026-04-30",
+                "gnss_accuracy": "RTK +/-0.02m",
+                "photo_links": "full.jpg;top.jpg",
+                "structure_type": "EXpole",
+                "easting": 352841,
+                "northing": 503122,
+                "elevation": 127.3,
+                "lat": 54.5210,
+                "lon": -3.0140,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    feature_collection = _build_feature_collection(
+        df=df,
+        issues_df=issues_df,
+        job_id="J_TEST",
+        rulepack_id="SPEN_11kV",
+    )
+
+    props = feature_collection["features"][0]["properties"]
+    assert props["pole_class"] == "Class 9 Medium"
+    assert props["condition"] == "Fair"
+    assert props["lean_direction"] == "west"
+    assert props["defect_type"] == "rot at base"
+    assert props["voltage"] == "11kV"
+    assert props["conductor_type"] == "AAC 7/3.75"
+    assert props["equipment"] == ["Transformer", "Fuse"]
+    assert props["equipment_rating"] == "50kVA"
+    assert props["surveyor"] == "J. Smith"
+    assert props["survey_date"] == "2026-04-30"
+    assert props["gnss_accuracy"] == "RTK +/-0.02m"
+    assert props["photo_links"] == ["full.jpg", "top.jpg"]
+    assert props["photo_count"] == 2
+    assert props["elevation"] == 127.3
+    assert props["source_confidence"] == "raw survey export"
 
 
 def test_normalize_dataframe_handles_capitalised_headers() -> None:

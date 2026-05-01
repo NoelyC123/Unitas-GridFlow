@@ -119,6 +119,38 @@ _STRUCTURAL_FEATURE_CODES: frozenset[str] = frozenset(
 )
 
 
+def infer_display_network_fields(
+    row: "pd.Series | dict",
+    rulepack_id: str | None = None,
+) -> dict[str, object]:
+    """Infer non-authoritative display context for map popups.
+
+    This is not QA logic and must not create compliance conclusions. It only
+    fills display scaffolding where the current survey export lacks richer
+    structured fields that Stage 4 capture can populate later.
+    """
+    st = str(row.get("structure_type") or "").lower()
+    rulepack = str(rulepack_id or "")
+    inferred_voltage = None
+    if "11" in st:
+        inferred_voltage = "11kV"
+    elif "33" in st:
+        inferred_voltage = "33kV"
+    elif "lv" in st:
+        inferred_voltage = "LV"
+    elif "11kv" in rulepack.lower() or "11kv" in rulepack.replace("_", "").lower():
+        inferred_voltage = "11kV"
+
+    return {
+        "voltage": row.get("voltage") or row.get("line_voltage") or inferred_voltage,
+        "conductor_type": row.get("conductor_type") or row.get("conductor"),
+        "phase_count": row.get("phase_count") or row.get("phases"),
+        "equipment": row.get("equipment") or row.get("mounted_equipment"),
+        "equipment_rating": row.get("equipment_rating") or row.get("rating"),
+        "source_confidence": row.get("source_confidence") or "raw survey export",
+    }
+
+
 def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
     """Return True when this row represents a non-structural contextual feature."""
     if not has_structure_type:

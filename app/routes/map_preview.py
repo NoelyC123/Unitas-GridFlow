@@ -12,6 +12,31 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 JOBS_ROOT = PROJECT_ROOT / "uploads" / "jobs"
 PROJECTS_ROOT = PROJECT_ROOT / "uploads" / "projects"
 
+POPUP_DATA_FIELDS = {
+    "height_source": None,
+    "pole_class": None,
+    "condition": None,
+    "lean_direction": None,
+    "lean_severity": None,
+    "defect_type": None,
+    "foundation_type": None,
+    "voltage": None,
+    "conductor_type": None,
+    "phase_count": None,
+    "equipment": [],
+    "equipment_rating": None,
+    "surveyor": None,
+    "survey_date": None,
+    "gnss_accuracy": None,
+    "source_confidence": "legacy map data",
+    "photo_links": [],
+    "has_full_pole_photo": False,
+    "has_pole_top_photo": False,
+    "has_defect_photo": False,
+    "photo_count": 0,
+    "elevation": None,
+}
+
 
 def _empty_feature_collection(job_id: str) -> dict:
     return {
@@ -71,12 +96,45 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
     return spans
 
 
+def _infer_voltage(props: dict, metadata: dict) -> str | None:
+    st = str(props.get("structure_type") or "").lower()
+    rulepack = str(metadata.get("rulepack_id") or "")
+    if "11" in st:
+        return "11kV"
+    if "33" in st:
+        return "33kV"
+    if "lv" in st:
+        return "LV"
+    if "11kv" in rulepack.lower() or "11kv" in rulepack.replace("_", "").lower():
+        return "11kV"
+    return None
+
+
+def _enrich_popup_data_model(data: dict) -> dict:
+    """Backfill C2-2 display fields for previously generated map_data.json files."""
+    if not isinstance(data, dict):
+        return data
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
+    for feature in data.get("features") or []:
+        props = feature.get("properties") if isinstance(feature, dict) else None
+        if not isinstance(props, dict):
+            continue
+        for field, default in POPUP_DATA_FIELDS.items():
+            if field not in props:
+                props[field] = list(default) if isinstance(default, list) else default
+        if not props.get("voltage"):
+            props["voltage"] = _infer_voltage(props, metadata)
+        if props.get("photo_links") and not props.get("photo_count"):
+            props["photo_count"] = len(props.get("photo_links") or [])
+    return data
+
+
 def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
     """Attach span overlay data without requiring old map_data.json files to be regenerated."""
     if not isinstance(data, dict):
         return data
     if "design_chain_spans" in data:
-        return data
+        return _enrich_popup_data_model(data)
     spans: list[dict] = []
     if seq_path.exists():
         try:
@@ -89,7 +147,7 @@ def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
     metadata = data.setdefault("metadata", {})
     if isinstance(metadata, dict):
         metadata["design_chain_span_count"] = len(spans)
-    return data
+    return _enrich_popup_data_model(data)
 
 
 @map_preview_bp.get("/view/<job_id>")

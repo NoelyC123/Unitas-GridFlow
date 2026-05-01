@@ -23,7 +23,7 @@ from app.controller_intake import (
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
-from app.qa_engine import run_qa_checks
+from app.qa_engine import infer_display_network_fields, run_qa_checks
 from app.review_manager import delete_review
 from app.route_sequencer import sequence_route
 
@@ -211,6 +211,91 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     )
     normalized |= _copy_if_missing(
         df,
+        "pole_class",
+        ["pole_class", "class", "grade", "strength_class", "pole_grade"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "condition",
+        ["condition", "pole_condition", "asset_condition"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "lean_direction",
+        ["lean_direction", "lean_dir", "lean_bearing"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "lean_severity",
+        ["lean_severity", "lean", "lean_angle"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "defect_type",
+        ["defect_type", "defects", "defect", "pole_defects"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "foundation_type",
+        ["foundation_type", "foundation", "base_type"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "voltage",
+        ["voltage", "line_voltage", "network_voltage"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "conductor_type",
+        ["conductor_type", "conductor", "conductor_size"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "phase_count",
+        ["phase_count", "phases", "phase"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "equipment",
+        ["equipment", "mounted_equipment", "pole_equipment"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "equipment_rating",
+        ["equipment_rating", "rating", "transformer_rating"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "surveyor",
+        ["surveyor", "surveyed_by", "operator", "crew"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "survey_date",
+        ["survey_date", "date_surveyed", "capture_date", "date"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "gnss_accuracy",
+        ["gnss_accuracy", "gps_accuracy", "accuracy", "position_accuracy"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "photo_links",
+        ["photo_links", "photos", "attachments", "photo_refs"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "height_source",
+        ["height_source", "pole_height_source", "measurement_source"],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "elevation",
+        ["elevation", "elev", "gps_elevation", "z"],
+    )
+    normalized |= _copy_if_missing(
+        df,
         "location",
         [
             "location_name",
@@ -248,6 +333,7 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     _coerce_numeric_column(df, "lon")
     _coerce_numeric_column(df, "easting")
     _coerce_numeric_column(df, "northing")
+    _coerce_numeric_column(df, "elevation")
 
     return df, normalized
 
@@ -511,6 +597,33 @@ def _build_angle_stay_evidence(
     return result
 
 
+def _split_display_list(value: Any) -> list[str]:
+    value = _safe_value(value)
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    text = str(value).strip()
+    if not text:
+        return []
+    return [part.strip() for part in re.split(r"[;,|]", text) if part.strip()]
+
+
+def _photo_indicators(row: pd.Series) -> dict[str, Any]:
+    links = _split_display_list(row.get("photo_links"))
+    return {
+        "photo_links": links,
+        "has_full_pole_photo": bool(_safe_value(row.get("has_full_pole_photo"))) or bool(links),
+        "has_pole_top_photo": bool(_safe_value(row.get("has_pole_top_photo"))),
+        "has_defect_photo": bool(_safe_value(row.get("has_defect_photo"))),
+        "photo_count": len(links),
+    }
+
+
+def _display_value(row: pd.Series, field: str) -> Any:
+    return _safe_value(row.get(field))
+
+
 def _build_feature_collection(
     df: pd.DataFrame,
     issues_df: pd.DataFrame,
@@ -595,6 +708,10 @@ def _build_feature_collection(
         else:
             lifecycle_state = None
 
+        network_fields = infer_display_network_fields(row, rulepack_id)
+        photo_fields = _photo_indicators(row)
+        equipment_items = _split_display_list(network_fields.get("equipment"))
+
         feature = {
             "type": "Feature",
             "geometry": {
@@ -612,6 +729,24 @@ def _build_feature_collection(
                 "material": _safe_value(row.get("material")),
                 "specification": _safe_value(row.get("specification")),
                 "height": _safe_value(row.get("height")),
+                "height_source": _display_value(row, "height_source"),
+                "pole_class": _display_value(row, "pole_class"),
+                "condition": _display_value(row, "condition"),
+                "lean_direction": _display_value(row, "lean_direction"),
+                "lean_severity": _display_value(row, "lean_severity"),
+                "defect_type": _display_value(row, "defect_type"),
+                "foundation_type": _display_value(row, "foundation_type"),
+                "voltage": _safe_value(network_fields.get("voltage")),
+                "conductor_type": _safe_value(network_fields.get("conductor_type")),
+                "phase_count": _safe_value(network_fields.get("phase_count")),
+                "equipment": equipment_items,
+                "equipment_rating": _safe_value(network_fields.get("equipment_rating")),
+                "surveyor": _display_value(row, "surveyor"),
+                "survey_date": _display_value(row, "survey_date"),
+                "gnss_accuracy": _display_value(row, "gnss_accuracy"),
+                "source_confidence": _safe_value(network_fields.get("source_confidence")),
+                "elevation": _display_value(row, "elevation"),
+                **photo_fields,
                 "qa_status": qa_status,
                 "structure_type": _safe_value(row.get("structure_type")),
                 "easting": _safe_value(row.get("easting")),
