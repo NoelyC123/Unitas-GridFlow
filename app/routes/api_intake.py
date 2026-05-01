@@ -900,7 +900,9 @@ def process_job(
             issue_groups["span_issues"] = int(
                 issues_df["Issue"]
                 .str.contains(
-                    "Span very short|Span unusually short|Span borderline short", na=False
+                    "Probable duplicate pole|Probable missing intermediate pole|"
+                    "Span very short|Span unusually short|Span borderline short",
+                    na=False,
                 )
                 .sum()
             )

@@ -122,6 +122,30 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
     ),
     # --- span geometry: all tiers share one grouped action so they deduplicate naturally ---
     (
+        "Probable duplicate pole or GPS bounce:",
+        {
+            "issue_code": "SPAN_DUPLICATE_OR_GPS_BOUNCE",
+            "severity": "critical",
+            "category": "span_geometry",
+            "scope": "structural",
+            "confidence": "high",
+            "is_observation": False,
+            "recommended_action": _SPAN_ACTION,
+        },
+    ),
+    (
+        "Probable missing intermediate pole:",
+        {
+            "issue_code": "SPAN_MISSING_INTERMEDIATE",
+            "severity": "warning",
+            "category": "span_geometry",
+            "scope": "structural",
+            "confidence": "medium",
+            "is_observation": False,
+            "recommended_action": _SPAN_ACTION,
+        },
+    ),
+    (
         "Span very short:",
         {
             "issue_code": "SPAN_VERY_SHORT",

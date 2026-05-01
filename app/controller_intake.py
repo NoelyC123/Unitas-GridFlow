@@ -620,7 +620,9 @@ def build_top_design_risks(issues_df: pd.DataFrame, completeness: dict) -> list[
     short_span_count = 0
     if has_issues:
         span_mask = (
-            issues_df["Issue"].str.contains("Span very short", na=False)
+            issues_df["Issue"].str.contains("Probable duplicate pole", na=False)
+            | issues_df["Issue"].str.contains("Probable missing intermediate pole", na=False)
+            | issues_df["Issue"].str.contains("Span very short", na=False)
             | issues_df["Issue"].str.contains("Span unusually short", na=False)
             | issues_df["Issue"].str.contains("Span borderline short", na=False)
         )

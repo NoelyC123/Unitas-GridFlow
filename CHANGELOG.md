@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase C4 Span Anomalies and Crossing Context
+
+### Changed
+
+- Updated span anomaly wording so spans under 10m are flagged as `Probable duplicate pole or GPS bounce` and spans over 500m are flagged as `Probable missing intermediate pole`.
+- Added map review filters for `Show span anomalies` and `Show crossings requiring clearance check`.
+- Reworked context/crossing marker treatment to muted diamond symbols and added labels including `Road Crossing — Critical clearance check required`, `Wall/Fence — Access constraint`, and `Stream — Environmental constraint`.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- Focused C4 span/context tests — 7 passed.
+- `pytest -v` — 300 passed.
+
+---
+
 ## 2026-05-01 — Phase C3 Stay Evidence at Angle Poles
 
 ### Changed

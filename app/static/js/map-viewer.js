@@ -5,8 +5,13 @@ const CONTEXT_FEATURE_CODES = new Set([
   'Fence', 'fence', 'FENCE',
   'Post', 'post', 'POST',
   'Gate', 'gate', 'GATE',
+  'Road', 'road', 'ROAD',
   'Track', 'track', 'TRACK',
   'Stream', 'stream', 'STREAM',
+  'BTxing', 'btxing', 'BTXING',
+  'LVxing', 'lvxing', 'LVXING',
+  'HVxing', 'hvxing', 'HVXING',
+  '11xing', '33xing',
 ]);
 
 class MapViewer {
@@ -165,7 +170,7 @@ class MapViewer {
         : '';
 
       const contextLine = isContext
-        ? '<div class="popup-row" style="color:#6b7280;font-size:0.85em;">Context record — height field hidden where not applicable</div>'
+        ? `<div class="popup-row" style="color:#6b7280;font-size:0.85em;">${this.escapeHtml(this.contextReviewLabel(props))}</div>`
         : '';
 
       const stayEvidenceLine = this.isAnglePole(props)
@@ -510,6 +515,12 @@ class MapViewer {
         && fd.props.stay_evidence_status === 'missing'
       ));
     }
+    if (value === 'span-anomalies') {
+      return this.featureData.filter(fd => this.hasSpanAnomaly(fd.props));
+    }
+    if (value === 'clearance-crossings') {
+      return this.featureData.filter(fd => this.isClearanceCrossing(fd.props));
+    }
     return this.featureData;
   }
 
@@ -529,6 +540,8 @@ class MapViewer {
       'context-crossings': 'Context / crossing',
       'missing-specification': 'Missing proposed specification',
       'angle-missing-stay': 'Angle pole missing stay evidence',
+      'span-anomalies': 'Span anomaly',
+      'clearance-crossings': 'Crossing requiring clearance check',
       'records-with-remarks': 'Record with remarks',
     };
     return labels[value] || value || mode;
@@ -541,6 +554,45 @@ class MapViewer {
   isContextRecord(props) {
     const role = String(props.record_role || '').toLowerCase();
     return role === 'context' || CONTEXT_FEATURE_CODES.has(props.structure_type || '');
+  }
+
+  hasSpanAnomaly(props) {
+    const allText = [
+      ...(props.issue_texts || []),
+      ...(props.warn_texts || []),
+    ].join(' ');
+    return (
+      allText.includes('Probable duplicate pole')
+      || allText.includes('Probable missing intermediate pole')
+      || allText.includes('Span very short')
+      || allText.includes('Span unusually short')
+      || allText.includes('Span borderline short')
+      || allText.includes('Span too long')
+    );
+  }
+
+  isClearanceCrossing(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    return (
+      st.includes('road')
+      || st.includes('track')
+      || st.includes('xing')
+      || st.includes('pline')
+    );
+  }
+
+  contextReviewLabel(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    if (st.includes('road') || st.includes('track') || st.includes('xing') || st.includes('pline')) {
+      return 'Road Crossing — Critical clearance check required';
+    }
+    if (st.includes('wall') || st.includes('fence') || st.includes('gate')) {
+      return 'Wall/Fence — Access constraint';
+    }
+    if (st.includes('stream')) {
+      return 'Stream — Environmental constraint';
+    }
+    return 'Access Constraint';
   }
 
   isExistingPole(props) {
@@ -636,7 +688,11 @@ class MapViewer {
         : '';
 
       const contextHtml = this.isContextRecord(p)
-        ? '<div style="color:#6b7280;font-size:0.75em;margin-top:1px;">Context record — height field hidden where not applicable</div>'
+        ? `<div style="color:#6b7280;font-size:0.75em;margin-top:1px;">${this.escapeHtml(this.contextReviewLabel(p))}</div>`
+        : '';
+
+      const spanAnomalyHtml = this.hasSpanAnomaly(p)
+        ? '<div style="color:#b91c1c;font-size:0.75em;margin-top:1px;font-weight:700;">Span anomaly</div>'
         : '';
 
       const stayEvidenceHtml = this.isAnglePole(p)
@@ -663,6 +719,7 @@ class MapViewer {
         ${missingSpecHtml}
         ${contextHtml}
         ${stayEvidenceHtml}
+        ${spanAnomalyHtml}
         ${replacementHtml}
         ${issueHtml}
         ${warnHtml}

@@ -349,7 +349,8 @@
     .asset-marker.asset-angle .asset-marker-shape { border-radius: 5px; transform: rotate(45deg); }
     .asset-marker.asset-angle .asset-marker-label { transform: rotate(-45deg); }
     .asset-marker.asset-anchor .asset-marker-shape { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 6px; }
-    .asset-marker.asset-context .asset-marker-shape { border-radius: 999px; font-size: 0.5rem; opacity: 0.88; }
+    .asset-marker.asset-context .asset-marker-shape { border-radius: 5px; font-size: 0.5rem; opacity: 0.76; transform: rotate(45deg); }
+    .asset-marker.asset-context .asset-marker-label { transform: rotate(-45deg); }
     .asset-marker.asset-other .asset-marker-shape { border-radius: 999px; }
     .asset-marker.lifecycle-recovered .asset-marker-shape { opacity: 0.48; position: relative; }
     .asset-marker.lifecycle-recovered .asset-marker-shape::after {
@@ -390,7 +391,8 @@
     .legend-symbol.angle { border-radius: 4px; transform: rotate(45deg); }
     .legend-symbol.angle span { transform: rotate(-45deg); }
     .legend-symbol.anchor { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 4px; }
-    .legend-symbol.context { border-radius: 999px; font-size: 0.42rem; }
+    .legend-symbol.context { border-radius: 4px; font-size: 0.42rem; transform: rotate(45deg); }
+    .legend-symbol.context span { transform: rotate(-45deg); }
 
     .meta-row {
       display: flex;
@@ -581,6 +583,8 @@
                 <button type="button" class="focus-filter-btn" data-focus="missing-height">Missing existing heights</button>
                 <button type="button" class="focus-filter-btn" data-focus="missing-specification">Missing specifications</button>
                 <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay">Show angle poles missing stay evidence</button>
+                <button type="button" class="focus-filter-btn" data-focus="span-anomalies">Show span anomalies</button>
+                <button type="button" class="focus-filter-btn" data-focus="clearance-crossings">Show crossings requiring clearance check</button>
                 <button type="button" class="focus-filter-btn" data-focus="records-with-remarks">Records with remarks</button>
               </div>
             </div>
@@ -626,7 +630,7 @@
                   <span>Stay / anchor</span>
                 </div>
                 <div class="map-legend-item">
-                  <span class="legend-symbol context">CTX</span>
+                  <span class="legend-symbol context"><span>CTX</span></span>
                   <span>Context / crossing record</span>
                 </div>
               </div>
@@ -879,6 +883,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=15"></script>
+  <script src="/static/js/map-viewer.js?v=16"></script>
 </body>
 </html>

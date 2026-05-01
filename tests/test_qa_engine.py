@@ -385,8 +385,8 @@ def test_span_distance_flags_poles_too_close() -> None:
     issues = run_qa_checks(df, rules)
 
     assert len(issues) == 1
-    assert "Span borderline short" in issues.iloc[0]["Issue"]
-    assert issues.iloc[0].get("Severity") == "WARN"
+    assert "Probable duplicate pole or GPS bounce" in issues.iloc[0]["Issue"]
+    assert issues.iloc[0].get("Severity") == "FAIL"
 
 
 def test_coord_consistency_skips_for_non_osgb_grid_crs() -> None:
@@ -534,7 +534,7 @@ def test_span_distance_context_feature_bridges_span_to_next_structural_record() 
 
     issues = run_qa_checks(df, rules)
 
-    span_long = [i for i in issues["Issue"].tolist() if "Span too long" in i]
+    span_long = [i for i in issues["Issue"].tolist() if "Probable missing intermediate pole" in i]
     assert len(span_long) == 1, f"Expected one span-too-long issue, got: {issues['Issue'].tolist()}"
 
 
@@ -842,10 +842,11 @@ def test_span_suppression_does_not_apply_to_pol_pol() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    # 3.3m sits in the 3–8m tier → "Span unusually short"
-    span_issues = [t for t in issue_texts if "Span unusually short" in t]
-    assert len(span_issues) == 1, f"Expected span WARN for Pol→Pol short span, got: {issue_texts}"
-    assert issues.iloc[0].get("Severity") == "WARN"
+    span_issues = [t for t in issue_texts if "Probable duplicate pole or GPS bounce" in t]
+    assert len(span_issues) == 1, (
+        f"Expected span anomaly for Pol→Pol short span, got: {issue_texts}"
+    )
+    assert issues.iloc[0].get("Severity") == "FAIL"
 
     warn_issues = [t for t in issue_texts if "Replacement pair" in t]
     assert len(warn_issues) == 0, f"Unexpected replacement pair WARN for Pol→Pol: {warn_issues}"
@@ -854,7 +855,7 @@ def test_span_suppression_does_not_apply_to_pol_pol() -> None:
 def test_span_distance_message_shows_one_decimal_precision() -> None:
     """Span issue text must show distances to 1 decimal place.
 
-    0.00003 deg lat ≈ 3.3m sits in the 3–8m tier → 'Span unusually short'.
+    0.00003 deg lat ≈ 3.3m sits in the probable duplicate/GPS-bounce tier.
     The distance value must contain a decimal point so the actual measured
     value is unambiguous to the designer.
     """
@@ -877,7 +878,7 @@ def test_span_distance_message_shows_one_decimal_precision() -> None:
 
     issues = run_qa_checks(df, rules)
 
-    span_issues = [i for i in issues["Issue"].tolist() if "Span unusually short" in i]
+    span_issues = [i for i in issues["Issue"].tolist() if "Probable duplicate pole" in i]
     assert len(span_issues) == 1
     # Message must contain a decimal point for the distance value
     assert "." in span_issues[0], (
@@ -1079,8 +1080,8 @@ def test_angle_stay_no_issue_for_pol_only_file() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_short_span_very_close_emits_warn_very_short_tier() -> None:
-    """Span < 3m must emit WARN with 'Span very short' message.
+def test_short_span_very_close_emits_fail_duplicate_gps_bounce_tier() -> None:
+    """Span <10m must emit FAIL with probable duplicate/GPS-bounce message.
 
     0.00002 deg lat ≈ 2.2m — in the sub-3m tier.
     """
@@ -1103,13 +1104,13 @@ def test_short_span_very_close_emits_warn_very_short_tier() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    very_short = [t for t in issue_texts if "Span very short" in t]
-    assert len(very_short) == 1, f"Expected 'Span very short' WARN, got: {issue_texts}"
-    assert issues.iloc[0].get("Severity") == "WARN"
+    very_short = [t for t in issue_texts if "Probable duplicate pole or GPS bounce" in t]
+    assert len(very_short) == 1, f"Expected duplicate/GPS-bounce span issue, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "FAIL"
 
 
-def test_short_span_unusual_tier_emits_warn() -> None:
-    """Span 3–8m must emit WARN with 'Span unusually short' message.
+def test_short_span_unusual_tier_emits_duplicate_gps_bounce_issue() -> None:
+    """Span 3–8m must emit duplicate/GPS-bounce issue.
 
     0.00005 deg lat ≈ 5.6m — in the 3–8m tier.
     """
@@ -1132,13 +1133,13 @@ def test_short_span_unusual_tier_emits_warn() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    unusual = [t for t in issue_texts if "Span unusually short" in t]
-    assert len(unusual) == 1, f"Expected 'Span unusually short' WARN, got: {issue_texts}"
-    assert issues.iloc[0].get("Severity") == "WARN"
+    unusual = [t for t in issue_texts if "Probable duplicate pole or GPS bounce" in t]
+    assert len(unusual) == 1, f"Expected duplicate/GPS-bounce issue, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "FAIL"
 
 
-def test_short_span_borderline_tier_emits_warn() -> None:
-    """Span 8–min_m must emit WARN with 'Span borderline short' message.
+def test_short_span_borderline_tier_emits_duplicate_gps_bounce_issue() -> None:
+    """Span 8–10m must emit duplicate/GPS-bounce issue.
 
     0.00008 deg lat ≈ 8.9m with min_m=10 — in the 8–10m borderline tier.
     """
@@ -1161,9 +1162,9 @@ def test_short_span_borderline_tier_emits_warn() -> None:
     issues = run_qa_checks(df, rules)
     issue_texts = issues["Issue"].tolist()
 
-    borderline = [t for t in issue_texts if "Span borderline short" in t]
-    assert len(borderline) == 1, f"Expected 'Span borderline short' WARN, got: {issue_texts}"
-    assert issues.iloc[0].get("Severity") == "WARN"
+    borderline = [t for t in issue_texts if "Probable duplicate pole or GPS bounce" in t]
+    assert len(borderline) == 1, f"Expected duplicate/GPS-bounce issue, got: {issue_texts}"
+    assert issues.iloc[0].get("Severity") == "FAIL"
 
 
 # ---------------------------------------------------------------------------
@@ -1300,7 +1301,7 @@ def test_lvxing_excluded_from_span_distance_bridges_to_next_structural() -> None
     """LVxing between two Pols must be skipped — span bridges directly to next Pol.
 
     Pol→LVxing is ~5m (skipped). LVxing→Pol is ~800m (bridged).
-    Pol-to-Pol span ≈ 805m > max_m=500 → must be flagged as 'Span too long'.
+    Pol-to-Pol span ≈ 805m > max_m=500 → must be flagged as missing intermediate pole.
     """
     df = pd.DataFrame(
         [
@@ -1321,18 +1322,14 @@ def test_lvxing_excluded_from_span_distance_bridges_to_next_structural() -> None
 
     issues = run_qa_checks(df, rules)
 
-    long_spans = [i for i in issues["Issue"].tolist() if "Span too long" in i]
+    long_spans = [i for i in issues["Issue"].tolist() if "Probable missing intermediate pole" in i]
     assert len(long_spans) == 1, (
-        f"Expected one 'Span too long' from bridged LVxing; got: {issues['Issue'].tolist()}"
+        f"Expected one long-span anomaly from bridged LVxing; got: {issues['Issue'].tolist()}"
     )
 
 
-def test_span_distance_7m_does_not_trigger_with_min_m_5() -> None:
-    """A 7m pole span must produce no issue when min_m=5.
-
-    Phase 3A reduced the threshold from 10m to 5m. A span of ~7m was previously
-    flagged as 'borderline short'; it must now pass cleanly.
-    """
+def test_span_distance_7m_triggers_duplicate_gps_bounce_even_with_min_m_5() -> None:
+    """A 7m pole span must still trigger the Phase C <10m anomaly rule."""
     # At lat≈54.5, 1 degree lat ≈ 111,320m → 7m ≈ 6.29e-5 degrees.
     df = pd.DataFrame(
         [
@@ -1352,17 +1349,13 @@ def test_span_distance_7m_does_not_trigger_with_min_m_5() -> None:
 
     issues = run_qa_checks(df, rules)
 
-    assert len(issues) == 0, (
-        f"7m span must not trigger with min_m=5; got: {issues.to_dict('records')}"
-    )
+    assert len(issues) == 1
+    assert "Probable duplicate pole or GPS bounce" in issues.iloc[0]["Issue"]
+    assert issues.iloc[0].get("Severity") == "FAIL"
 
 
-def test_span_distance_2m_still_triggers_very_short_with_min_m_5() -> None:
-    """A 2m pole span must still produce a 'Span very short' WARN when min_m=5.
-
-    The 'very short' tier fires for dist<3m regardless of min_m. Reducing the
-    outer gate to 5m must not suppress sub-3m spans.
-    """
+def test_span_distance_2m_still_triggers_duplicate_gps_bounce_with_min_m_5() -> None:
+    """A 2m pole span must still produce the Phase C <10m anomaly."""
     # At lat≈54.5, 2m ≈ 1.80e-5 degrees lat.
     df = pd.DataFrame(
         [
@@ -1382,7 +1375,7 @@ def test_span_distance_2m_still_triggers_very_short_with_min_m_5() -> None:
 
     issues = run_qa_checks(df, rules)
 
-    very_short = [i for i in issues["Issue"].tolist() if "Span very short" in i]
+    very_short = [i for i in issues["Issue"].tolist() if "Probable duplicate pole" in i]
     assert len(very_short) == 1, (
-        f"Expected 'Span very short' for 2m span; got: {issues['Issue'].tolist()}"
+        f"Expected duplicate/GPS-bounce issue for 2m span; got: {issues['Issue'].tolist()}"
     )

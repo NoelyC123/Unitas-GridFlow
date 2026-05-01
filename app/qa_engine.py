@@ -348,6 +348,7 @@ def run_qa_checks(df, rules):
             lon_field = rule.get("lon_field", "lon")
             min_m = rule.get("min_m", 10)
             max_m = rule.get("max_m", 500)
+            short_anomaly_m = max(float(min_m), 10.0)
 
             required_cols = [lat_field, lon_field]
             missing_cols = [c for c in required_cols if c not in qc.columns]
@@ -390,7 +391,7 @@ def run_qa_checks(df, rules):
 
                 if prev_e is not None:
                     dist = math.sqrt((e - prev_e) ** 2 + (n - prev_n) ** 2)
-                    if dist < min_m:
+                    if dist < short_anomaly_m:
                         if _is_replacement_pair(prev_st, curr_st):
                             issues.append(
                                 {
@@ -402,36 +403,26 @@ def run_qa_checks(df, rules):
                                 }
                             )
                         else:
-                            if dist < 3:
-                                msg = (
-                                    f"Span very short: {dist:.1f}m"
-                                    f" — likely duplicate or co-located pair, verify"
-                                )
-                            elif dist < 8:
-                                msg = (
-                                    f"Span unusually short: {dist:.1f}m (min {min_m}m)"
-                                    f" — verify no duplicate entry"
-                                )
-                            else:
-                                msg = (
-                                    f"Span borderline short: {dist:.1f}m (min {min_m}m)"
-                                    f" — verify no missing record"
-                                )
+                            msg = (
+                                f"Probable duplicate pole or GPS bounce: {dist:.1f}m span"
+                                " between consecutive poles"
+                            )
                             issues.append(
                                 {
                                     "Issue": msg,
                                     "Row": row.to_dict(),
-                                    "Severity": "WARN",
+                                    "Severity": "FAIL",
                                 }
                             )
                     elif dist > max_m:
                         issues.append(
                             {
                                 "Issue": (
-                                    f"Span too long: {dist:.1f}m between structural records "
-                                    f"(max {max_m}m) — possible GPS error or missing record"
+                                    f"Probable missing intermediate pole: {dist:.1f}m span"
+                                    f" between consecutive poles (max {max_m}m)"
                                 ),
                                 "Row": row.to_dict(),
+                                "Severity": "WARN",
                             }
                         )
                 prev_e, prev_n = e, n

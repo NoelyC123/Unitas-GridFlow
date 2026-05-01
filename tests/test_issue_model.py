@@ -53,15 +53,20 @@ def test_classify_issue_missing_field_generic_fallback() -> None:
     assert meta["category"] == "data_completeness"
 
 
-def test_classify_issue_span_very_short_tier() -> None:
-    meta = classify_issue("Span very short: 1.2m — likely duplicate or co-located pair, verify")
-    assert meta["issue_code"] == "SPAN_VERY_SHORT"
+def test_classify_issue_span_duplicate_gps_bounce_tier() -> None:
+    meta = classify_issue(
+        "Probable duplicate pole or GPS bounce: 1.2m span between consecutive poles"
+    )
+    assert meta["issue_code"] == "SPAN_DUPLICATE_OR_GPS_BOUNCE"
     assert meta["category"] == "span_geometry"
+    assert meta["severity"] == "critical"
 
 
-def test_classify_issue_span_unusually_short_tier() -> None:
-    meta = classify_issue("Span unusually short: 5.0m (min 10m) — verify no duplicate entry")
-    assert meta["issue_code"] == "SPAN_SHORT"
+def test_classify_issue_span_missing_intermediate_tier() -> None:
+    meta = classify_issue(
+        "Probable missing intermediate pole: 805.0m span between consecutive poles"
+    )
+    assert meta["issue_code"] == "SPAN_MISSING_INTERMEDIATE"
     assert meta["category"] == "span_geometry"
 
 
@@ -216,7 +221,7 @@ def test_enrich_issues_does_not_mutate_original() -> None:
 def test_enrich_issues_row_count_unchanged() -> None:
     issues_df = pd.DataFrame(
         [
-            {"Issue": "Span very short: 1.5m — likely duplicate", "Row": {}},
+            {"Issue": "Probable duplicate pole or GPS bounce: 1.5m span", "Row": {}},
             {"Issue": "⚠️ Angle pole — stay evidence not captured.", "Row": {}},
             {"Issue": "Missing required field: material", "Row": {}},
         ]
