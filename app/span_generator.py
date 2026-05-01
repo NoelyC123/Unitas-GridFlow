@@ -537,3 +537,6 @@ def attach_span_features_to_collection(
     meta["span_crossing_high_count"] = high
     meta["span_crossing_medium_count"] = med
     meta["span_crossing_low_count"] = low
+    # Map viewer: spans are derived from sequenced supports unless a future path sets
+    # ``survey_circuit`` from captured line/circuit survey features.
+    meta["span_layer_origin"] = meta.get("span_layer_origin") or "provisional_route"

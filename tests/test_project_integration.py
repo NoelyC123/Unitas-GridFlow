@@ -425,9 +425,9 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Span crossing context" in html
     assert "UG cable" in html
     assert "Crossings requiring clearance" in html
-    assert "Circuit spans" in html
+    assert "Provisional route spans" in html
     assert "Suggested Existing/Proposed Match" in html
-    assert "Suggested Replacement Links" in html
+    assert "Suggested replacement map links" in html
     assert "Asset Types (by shape)" in html
     assert "Existing pole (square)" in html
     assert "Proposed pole (circle)" in html

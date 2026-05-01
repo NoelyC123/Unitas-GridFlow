@@ -59,7 +59,7 @@ def test_map_data_endpoint_adds_span_features(tmp_path, monkeypatch) -> None:
     assert sf["properties"]["distance_m"] == 88
     assert sf["properties"].get("voltage_detail")
     assert "cable_features" in data
-    assert data["metadata"].get("cable_feature_count") == 0
+    assert data["metadata"].get("span_layer_origin") == "provisional_route"
     pa = next(p["properties"] for p in data["features"] if p["properties"].get("pole_id") == "PA")
     assert "voltage" not in pa
     assert "conductor_type" not in pa
@@ -78,5 +78,6 @@ def test_map_viewer_includes_span_label_mode_select() -> None:
     html = res.data.decode("utf-8")
     assert 'id="span-label-mode"' in html
     assert "Show on hover" in html
-    assert "Pin on anomaly spans only" in html
-    assert "map-viewer.css?v=7" in html
+    assert "map-viewer.css?v=8" in html
+    assert "Pin critical anomalies only" in html
+    assert "Pin crossing / context spans" in html

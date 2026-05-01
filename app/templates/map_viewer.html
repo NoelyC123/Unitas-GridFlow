@@ -14,7 +14,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/static/css/map-viewer.css?v=7" />
+  <link rel="stylesheet" href="/static/css/map-viewer.css?v=8" />
   <style>
     html, body {
       height: 100%;
@@ -812,9 +812,9 @@
                 <label class="layer-toggle" data-layer-key="stays"><input type="checkbox" data-layer="stays" checked> <span class="layer-toggle-caption">Stays/Anchors</span></label>
                 <label class="layer-toggle" data-layer-key="thirdparty"><input type="checkbox" data-layer="thirdparty" checked> <span class="layer-toggle-caption">Third-party infrastructure</span></label>
                 <label class="layer-toggle" data-layer-key="context"><input type="checkbox" data-layer="context"> <span class="layer-toggle-caption">Context/Crossings</span></label>
-                <label class="layer-toggle" data-layer-key="spans"><input type="checkbox" data-layer="spans" checked> <span class="layer-toggle-caption">Circuit spans (line)</span></label>
+                <label class="layer-toggle" data-layer-key="spans"><input type="checkbox" data-layer="spans" checked> <span class="layer-toggle-caption">Provisional route spans (line)</span></label>
                 <label class="layer-toggle" data-layer-key="cables"><input type="checkbox" data-layer="cables" checked> <span class="layer-toggle-caption">Underground cables (dashed)</span></label>
-                <label class="layer-toggle" data-layer-key="matches"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> <span class="layer-toggle-caption">Suggested Replacement Links</span></label>
+                <label class="layer-toggle" data-layer-key="matches"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> <span class="layer-toggle-caption">Suggested replacement map links</span></label>
               </div>
               <div class="span-label-mode-row" style="margin-top:10px;">
                 <label for="span-label-mode" style="display:block;font-size:0.76rem;color:#4b5563;margin-bottom:4px;">
@@ -823,11 +823,13 @@
                 <select id="span-label-mode" class="form-select form-select-sm" style="font-size:0.82rem;"
                         aria-description="Default hides pinned labels; hover a span line to see distance; click for full popup.">
                   <option value="hover">Show on hover (default)</option>
-                  <option value="anomalies">Pin on anomaly spans only</option>
-                  <option value="all">Pin on all spans</option>
+                  <option value="critical">Pin critical anomalies only</option>
+                  <option value="crossing">Pin crossing / context spans</option>
+                  <option value="review">Pin all review spans</option>
+                  <option value="all">Pin all spans</option>
                 </select>
                 <div style="font-size:0.72rem;color:#9ca3af;margin-top:4px;line-height:1.35;">
-                  Anomalies: crossing context, very short (&lt;12&nbsp;m) or long (&gt;280&nbsp;m) lengths, or designer flags.
+                  Critical: QA blockers, high crossing risk, or very short spans (&lt;8&nbsp;m). Review: adds length/crossing heuristics (&lt;12&nbsp;m / &gt;280&nbsp;m) and designer flags.
                 </div>
               </div>
             </div>
@@ -853,7 +855,7 @@
             </div>
 
             <div id="span-panel" style="display:none; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 8px;">
-              <div style="font-weight:700; font-size:0.85rem; color:#111827; margin-bottom:6px;">Circuit spans</div>
+              <div id="span-panel-heading" style="font-weight:700; font-size:0.85rem; color:#111827; margin-bottom:6px;">Provisional route spans</div>
               <div id="span-panel-meta" style="font-size:0.74rem; color:#6b7280; margin-bottom:6px; line-height:1.35;"></div>
               <div id="span-list" style="max-height:220px; overflow-y:auto;"></div>
               <div id="cable-panel-meta" style="display:none;font-size:0.74rem;color:#6b7280;margin-top:10px;line-height:1.35;"></div>
@@ -864,7 +866,7 @@
               <div class="map-legend-grid">
                 <div class="map-legend-item">
                   <span class="legend-line"></span>
-                  <span>Circuit spans — hover line for distance; click for details. Use “Span distance labels” to pin distances.</span>
+                  <span id="legend-span-line-caption">Provisional route spans (from sequenced supports) — hover line for distance; click for details. Use “Span distance labels” to pin distances.</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-line legend-ug-cable"></span>
@@ -1060,6 +1062,12 @@
               <div style="font-size: 0.85rem; color: #374151;">{{ circuit_summary.summary_text }}</div>
               {% if circuit_summary.structural_count is not none or circuit_summary.context_count is not none %}
               <div style="font-size: 0.78rem; color: #6b7280; margin-top: 3px;">structural: {{ circuit_summary.structural_count }}, context: {{ circuit_summary.context_count }}, anchor: {{ circuit_summary.anchor_count }}</div>
+              {% endif %}
+              {% if circuit_summary.anchor_count %}
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px; line-height: 1.4;">
+                <strong>Anchor vs stays:</strong> the summary anchor count includes survey control / base-anchor roles where captured.
+                The map layer <strong>Stays/Anchors</strong> is for mechanical stay and stay-anchor assets (feature-coded), not for GNSS or survey control points.
+              </div>
               {% endif %}
               {% if circuit_summary.existing_count or circuit_summary.proposed_count %}
               <div style="font-size: 0.78rem; color: #6b7280; margin-top: 2px;">{{ circuit_summary.existing_count }} existing{% if circuit_summary.proposed_count %}, {{ circuit_summary.proposed_count }} proposed{% endif %}</div>

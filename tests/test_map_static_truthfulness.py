@@ -32,8 +32,8 @@ def map_css_source() -> str:
     return MAP_CSS.read_text(encoding="utf-8")
 
 
-def test_map_view_links_map_viewer_css_v7(map_view_html: str) -> None:
-    assert 'href="/static/css/map-viewer.css?v=7"' in map_view_html
+def test_map_view_links_map_viewer_css_v8(map_view_html: str) -> None:
+    assert 'href="/static/css/map-viewer.css?v=8"' in map_view_html
 
 
 def test_map_view_layer_toggle_data_keys(map_view_html: str) -> None:
@@ -88,8 +88,8 @@ def test_map_view_lifecycle_match_toggle(map_view_html: str) -> None:
     assert 'id="lifecycle-match-toggle"' in map_view_html
 
 
-def test_map_js_applies_cable_layer_truthfulness(map_js_source: str) -> None:
-    assert "applyCableLayerTruthfulness" in map_js_source
+def test_map_js_zero_count_layer_truthfulness(map_js_source: str) -> None:
+    assert "applyZeroCountLayerTruthfulness" in map_js_source
     assert "cable_feature_count" in map_js_source
     assert "layer-toggle-disabled" in map_js_source
 
@@ -183,3 +183,103 @@ def test_map_js_span_list_anomaly_chip(map_js_source: str) -> None:
 
 def test_map_js_electrical_rows_default_includes_equipment(map_js_source: str) -> None:
     assert "includeEquipment !== false" in map_js_source
+
+
+def test_map_view_provisional_route_spans_caption(map_view_html: str) -> None:
+    assert "Provisional route spans (line)" in map_view_html
+
+
+def test_map_view_span_panel_heading_id(map_view_html: str) -> None:
+    assert 'id="span-panel-heading"' in map_view_html
+
+
+def test_map_view_legend_span_caption_id(map_view_html: str) -> None:
+    assert 'id="legend-span-line-caption"' in map_view_html
+
+
+def test_map_js_span_label_pin_modes(map_js_source: str) -> None:
+    assert "isSpanPinCritical" in map_js_source
+    assert "isSpanPinCrossing" in map_js_source
+    assert "isSpanPinReview" in map_js_source
+
+
+def test_map_js_replacement_drawable_line_count(map_js_source: str) -> None:
+    assert "_replacementDrawableLineCount" in map_js_source
+
+
+def test_map_js_short_span_cause_classifier(map_js_source: str) -> None:
+    assert "classifyShortLikelySpanCause" in map_js_source
+
+
+def test_map_js_filter_span_designer_actions(map_js_source: str) -> None:
+    assert "filterSpanDesignerActions" in map_js_source
+
+
+def test_map_js_condense_vacuous_popup_rows(map_js_source: str) -> None:
+    assert "condenseVacuousPopupRows" in map_js_source
+    assert "isVacuousPopupRowHtml" in map_js_source
+
+
+def test_map_js_span_layer_origin_sync(map_js_source: str) -> None:
+    assert "syncSpanPanelHeading" in map_js_source
+    assert "span_layer_origin" in map_js_source
+
+
+def test_span_generator_sets_span_layer_origin() -> None:
+    from app.span_generator import attach_span_features_to_collection
+
+    data: dict = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [-3.0, 54.5]},
+                "properties": {"pole_id": "A"},
+            },
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [-3.01, 54.51]},
+                "properties": {"pole_id": "B"},
+            },
+        ],
+        "metadata": {"rulepack_id": "SPEN_11kV"},
+    }
+    seq = {
+        "status": "ok",
+        "chain": [
+            {"point_id": "A", "lat": 54.5, "lon": -3.0, "span_to_next_m": 77},
+            {"point_id": "B", "lat": 54.51, "lon": -3.01},
+        ],
+    }
+    attach_span_features_to_collection(data, seq)
+    assert data["metadata"].get("span_layer_origin") == "provisional_route"
+
+
+def test_span_generator_preserves_explicit_survey_circuit_origin() -> None:
+    from app.span_generator import attach_span_features_to_collection
+
+    data: dict = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [-3.0, 54.5]},
+                "properties": {"pole_id": "A"},
+            },
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [-3.01, 54.51]},
+                "properties": {"pole_id": "B"},
+            },
+        ],
+        "metadata": {"rulepack_id": "SPEN_11kV", "span_layer_origin": "survey_circuit"},
+    }
+    seq = {
+        "status": "ok",
+        "chain": [
+            {"point_id": "A", "lat": 54.5, "lon": -3.0, "span_to_next_m": 50},
+            {"point_id": "B", "lat": 54.51, "lon": -3.01},
+        ],
+    }
+    attach_span_features_to_collection(data, seq)
+    assert data["metadata"].get("span_layer_origin") == "survey_circuit"

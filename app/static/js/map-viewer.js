@@ -66,12 +66,23 @@ class MapViewer {
     this._cableLineRefs = [];
     try {
       const v = localStorage.getItem('gridflow_map_span_label_mode');
-      this._spanLabelMode = v === 'anomalies' || v === 'all' || v === 'hover' ? v : 'hover';
+      const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
+      if (v === 'anomalies') {
+        this._spanLabelMode = 'review';
+      } else if (allowed.has(v)) {
+        this._spanLabelMode = v;
+      } else {
+        this._spanLabelMode = 'hover';
+      }
     } catch {
       this._spanLabelMode = 'hover';
     }
     this._spanLabelModeControlBound = false;
     this._mapMeta = {};
+    /** @type {'provisional_route'|'survey_circuit'} */
+    this._spanLayerOrigin = 'provisional_route';
+    this._usedDesignChainSpanFallback = false;
+    this._replacementDrawableLineCount = 0;
   }
 
   init() {
@@ -94,19 +105,25 @@ class MapViewer {
       if (!res.ok) throw new Error(`Failed to load map data: ${res.status}`);
 
       const data = await res.json();
-      this.renderSummary(data.metadata || {});
+      const meta = data.metadata || {};
+      this.renderSummary(meta);
+      this._spanLayerOrigin = meta.span_layer_origin === 'survey_circuit' ? 'survey_circuit' : 'provisional_route';
+      this._usedDesignChainSpanFallback = false;
       this.renderMarkers(data.features || []);
       this._fallbackDesignSpans = data.design_chain_spans || [];
       const spanFeatures = data.span_features || [];
       if (Array.isArray(spanFeatures) && spanFeatures.length > 0) {
         this.renderGeoJsonSpanFeatures(spanFeatures);
       } else {
+        this._usedDesignChainSpanFallback = true;
+        this._spanLayerOrigin = 'provisional_route';
         this.renderDesignChainSpans(this._fallbackDesignSpans);
       }
       const cableFeatures = data.cable_features || [];
       this.renderCableFeatures(Array.isArray(cableFeatures) ? cableFeatures : []);
-      this.applyCableLayerTruthfulness(data.metadata || {});
-      this.applyLayerAndFilterCounts(data.metadata || {});
+      this.applyZeroCountLayerTruthfulness(meta);
+      this.applyLayerAndFilterCounts(meta);
+      this.syncSpanPanelHeading();
     } catch (err) {
       console.error(err);
       if (this.issueNoteEl) {
@@ -191,30 +208,74 @@ class MapViewer {
     this._mapMeta = { ...meta };
   }
 
-  applyCableLayerTruthfulness(meta) {
-    const n = Number(meta.cable_feature_count ?? 0);
-    const input = document.querySelector('input[data-layer="cables"]');
+  _resetLayerToggle(layerKey, hasRecords, disabledTitle) {
+    const input = document.querySelector(`input[data-layer="${layerKey}"]`);
     const label = input ? input.closest('label') : null;
-    if (n < 1) {
-      this.layerState.cables = false;
-      if (input) {
-        input.checked = false;
-        input.disabled = true;
-      }
-      if (label) {
-        label.classList.add('layer-toggle-disabled');
-        label.title = 'No underground cable segments in survey data — UG layer disabled (cables are not inferred from pole records).';
-      }
-      if (this.cableLayer && this.map && this.map.hasLayer(this.cableLayer)) {
-        this.map.removeLayer(this.cableLayer);
-      }
-    } else if (input) {
-      input.disabled = false;
+    if (hasRecords) {
+      if (input) input.disabled = false;
       if (label) {
         label.classList.remove('layer-toggle-disabled');
         label.title = '';
       }
+      return;
     }
+    if (Object.prototype.hasOwnProperty.call(this.layerState, layerKey)) {
+      this.layerState[layerKey] = false;
+    }
+    if (input) {
+      input.checked = false;
+      input.disabled = true;
+    }
+    if (label) {
+      label.classList.add('layer-toggle-disabled');
+      label.title = disabledTitle;
+    }
+  }
+
+  _removeMapLayerIfPresent(layer) {
+    if (layer && this.map && this.map.hasLayer(layer)) {
+      this.map.removeLayer(layer);
+    }
+  }
+
+  /**
+   * Grey out and uncheck layers that have nothing to show (truthful toggles).
+   * Replacement links stay enabled when match *records* exist even if no line geometry.
+   */
+  applyZeroCountLayerTruthfulness(meta) {
+    const lc = {
+      existing: 0, proposed: 0, angle: 0, stays: 0, thirdparty: 0, context: 0,
+    };
+    for (const fd of this.featureData) {
+      const k = this.primaryLayerKey(fd.props);
+      if (k && Object.prototype.hasOwnProperty.call(lc, k)) lc[k] += 1;
+    }
+    const m = meta || this._mapMeta || {};
+    const spanN = Number(m.span_feature_count ?? this._spanFeatureList?.length ?? 0);
+    const cabN = Number(m.cable_feature_count ?? 0);
+    const matchRecN = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
+
+    this._resetLayerToggle('existing', lc.existing >= 1, 'No existing pole records in this job.');
+    this._resetLayerToggle('proposed', lc.proposed >= 1, 'No proposed pole records in this job.');
+    this._resetLayerToggle('angle', lc.angle >= 1, 'No angle pole records in this job.');
+    this._resetLayerToggle('stays', lc.stays >= 1, 'No stay or anchor structure records in this job.');
+    this._resetLayerToggle('thirdparty', lc.thirdparty >= 1, 'No third-party infrastructure records in this job.');
+    this._resetLayerToggle('context', lc.context >= 1, 'No context / crossing records in this job.');
+    this._resetLayerToggle('spans', spanN >= 1, 'No route span segments for this job.');
+    this._resetLayerToggle(
+      'cables',
+      cabN >= 1,
+      'No underground cable segments in survey data (not inferred from pole records).',
+    );
+    this._resetLayerToggle(
+      'matches',
+      matchRecN >= 1,
+      'No suggested replacement links in record data (no replacing references).',
+    );
+
+    if (cabN < 1) this._removeMapLayerIfPresent(this.cableLayer);
+    if (spanN < 1) this._removeMapLayerIfPresent(this.spanLayer);
+    if (matchRecN < 1) this._removeMapLayerIfPresent(this.lifecycleMatchLayer);
   }
 
   primaryLayerKey(props) {
@@ -245,7 +306,10 @@ class MapViewer {
       const raw = cap.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
       cap.textContent = raw;
       if (key === 'spans') {
-        cap.textContent = `${raw} (${spanN})`;
+        const base = this._spanLayerOrigin === 'survey_circuit'
+          ? 'Circuit spans (line)'
+          : 'Provisional route spans (line)';
+        cap.textContent = `${base} (${spanN})`;
         return;
       }
       if (key === 'cables') {
@@ -253,8 +317,14 @@ class MapViewer {
         return;
       }
       if (key === 'matches') {
-        const linkN = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
-        cap.textContent = `${raw} (${linkN})`;
+        const matchRec = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
+        const lines = this._replacementDrawableLineCount ?? 0;
+        cap.textContent = `${raw} (${matchRec} rec · ${lines} on map)`;
+        if (lab) {
+          lab.title = matchRec > 0 && lines === 0
+            ? 'EX/PR match records are present, but dashed link lines only appear when both supports exist on the map with a resolved pair.'
+            : '';
+        }
         return;
       }
       const c = lc[key];
@@ -294,25 +364,117 @@ class MapViewer {
     }
   }
 
+  _spanEndpointHasReplacementHint(fromId, toId) {
+    const ids = [String(fromId || ''), String(toId || '')].filter(Boolean);
+    if (!ids.length || !this.featureData.length) return false;
+    for (const fd of this.featureData) {
+      const pid = String(fd.props.pole_id || fd.props.id || '').trim();
+      if (!pid || !ids.includes(pid)) continue;
+      if (fd.props.relationship === 'replacement_pair' || this.hasValue(fd.props.replacing)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Likely explanation when distance_m is very short (< 12 m). */
+  classifyShortLikelySpanCause(props) {
+    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
+    if (Number.isNaN(dm) || dm >= 12) return null;
+    const txt = [...(props.issue_texts || []), ...(props.warn_texts || [])].join(' ').toLowerCase();
+    if (txt.includes('duplicate')) {
+      return { tag: 'Possible duplicate capture', detail: 'Multiple points may represent the same structure.' };
+    }
+    if (txt.includes('missing intermediate')) {
+      return { tag: 'Possible sequence issue', detail: 'Route order may skip an intermediate support.' };
+    }
+    if (this._spanEndpointHasReplacementHint(props.from_point_id, props.to_point_id)) {
+      return {
+        tag: 'Likely replacement / co-located pair',
+        detail: 'Supports show EX/PR or replacement linkage — short separation may be expected.',
+      };
+    }
+    if (dm >= 3) {
+      return {
+        tag: 'Possible genuine short span',
+        detail: 'Distance is short but may be valid — confirm against survey notes or design.',
+      };
+    }
+    return {
+      tag: 'Uncertain',
+      detail: 'Very short segment — verify point IDs, sequence, and field notes.',
+    };
+  }
+
+  /** Remove designer-action lines that only repeat review-signal wording. */
+  filterSpanDesignerActions(actions, causeStrings) {
+    const norm = (s) => String(s).toLowerCase().replace(/\s+/g, ' ').trim();
+    const causes = causeStrings.map(norm).filter(Boolean);
+    return actions.filter((raw) => {
+      const a = norm(raw);
+      if (!a) return false;
+      if (causes.some((c) => c.length >= 8 && (a.includes(c.slice(0, Math.min(40, c.length))) || c.includes(a.slice(0, Math.min(40, a.length)))))) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  condenseVacuousPopupRows(rows, summaryWhenAllEmpty) {
+    const kept = rows.filter((r) => r && !this.isVacuousPopupRowHtml(r));
+    if (kept.length === 0) {
+      return [this.popupRow('Summary', summaryWhenAllEmpty, 'info')];
+    }
+    return kept;
+  }
+
+  /**
+   * Rows where the value is only an empty placeholder and the row is not a blocker/warning status.
+   */
+  isVacuousPopupRowHtml(rowHtml) {
+    if (!rowHtml || typeof rowHtml !== 'string') return false;
+    if (rowHtml.includes('status-blocker') || rowHtml.includes('status-warning')) return false;
+    return /popup-field-value">(not captured|none recorded|not specified|not linked|not applicable yet|not yet specified|not inferred)(<\/div>)/i.test(rowHtml)
+      && !rowHtml.includes('popup-field-detail');
+  }
+
+  syncSpanPanelHeading() {
+    const el = document.getElementById('span-panel-heading');
+    if (el) {
+      el.textContent = this._spanLayerOrigin === 'survey_circuit' ? 'Circuit spans' : 'Provisional route spans';
+    }
+    const leg = document.getElementById('legend-span-line-caption');
+    if (leg) {
+      leg.textContent = this._spanLayerOrigin === 'survey_circuit'
+        ? 'Circuit spans — hover line for distance; click for details.'
+        : 'Provisional route spans (from sequenced supports) — hover for distance; click for details.';
+    }
+  }
+
   classifyRouteSpanAnomaly(props) {
     const causes = [];
+    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
+    const shortGuess = this.classifyShortLikelySpanCause(props);
+    if (shortGuess) {
+      causes.push(`Short span — ${shortGuess.tag}: ${shortGuess.detail}`);
+    } else if (!Number.isNaN(dm) && dm < 12) {
+      causes.push('Very short span — check IDs / sequence');
+    }
     const r = String(props.crossing_risk_level || 'none').toLowerCase();
     if (r && r !== 'none') causes.push(`Crossing / route context: ${r}`);
-    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
     if (!Number.isNaN(dm)) {
-      if (dm < 12) causes.push('Very short span — check IDs / sequence');
       if (dm > 280) causes.push('Long span — verify intermediate supports & conductor');
     }
     const acts = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
     acts.forEach((a) => {
       const s = String(a);
       if (/very short span|long span|voltage|conductor|phase|obstruction|spot-check/i.test(s)) {
-        if (!causes.some((c) => c.includes(s.slice(0, 20)))) causes.push(s);
+        if (!causes.some((c) => c.includes(s.slice(0, Math.min(20, s.length))))) causes.push(s);
       }
     });
     const allText = [...(props.issue_texts || []), ...(props.warn_texts || [])].join(' ');
     if (allText.includes('Span very short') || allText.includes('Span unusually short') || allText.includes('Span borderline short')) {
-      causes.push('QA: short-span anomaly flag on record');
+      if (!causes.some((c) => /short span/i.test(c))) causes.push('QA: short-span anomaly flag on record');
     }
     if (allText.includes('Span too long') || allText.includes('long span')) {
       causes.push('QA: long-span review');
@@ -493,6 +655,7 @@ class MapViewer {
   }
 
   renderLifecycleMatches() {
+    this._replacementDrawableLineCount = 0;
     if (!this.map || this.featureData.length === 0) return;
 
     if (this.lifecycleMatchLayer) {
@@ -548,6 +711,7 @@ class MapViewer {
         <div class="popup-row" style="color:#64748b;font-size:0.82em;margin-top:4px;">Suggested replacement link — unconfirmed. Review pairing page to confirm.</div>
       `);
       line.addTo(this.lifecycleMatchLayer);
+      this._replacementDrawableLineCount += 1;
     }
 
     const toggle = document.getElementById('lifecycle-match-toggle');
@@ -913,18 +1077,19 @@ class MapViewer {
       ...this.crossingHitRowsForSpan(props),
     ];
 
-    const actions = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
-    const actionSection = actions.length
+    const anomaly = this.classifyRouteSpanAnomaly(props);
+    const actionsRaw = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    const actionsUse = this.filterSpanDesignerActions(actionsRaw, anomaly.causes);
+    const actionSection = actionsUse.length
       ? [{
-        title: 'Designer actions (auto-suggested)',
-        rows: actions.map((text) => this.popupRow('Action', text, 'review')),
+        title: 'Designer actions (what to do next)',
+        rows: actionsUse.map((text) => this.popupRow('Action', text, 'review')),
       }]
       : [];
 
-    const anomaly = this.classifyRouteSpanAnomaly(props);
     const anomalySection = anomaly.causes.length
       ? [{
-        title: 'Route span — review signals',
+        title: 'Route span — review signals (what looks wrong)',
         rows: [
           this.popupRow('Summary', anomaly.short || 'Review this span', 'warning'),
           ...anomaly.causes.slice(0, 8).map((c) => this.popupRow('Signal', c, 'review')),
@@ -1022,7 +1187,7 @@ class MapViewer {
   }
 
   /**
-   * Spans that merit a pinned distance label when mode is "anomalies".
+   * Spans that merit a pinned distance label when mode is "review" or similar.
    * Aligns with span_generator crossing tiers and length heuristics (12 m / 280 m).
    */
   isSpanLabelAnomaly(props) {
@@ -1037,12 +1202,37 @@ class MapViewer {
     });
   }
 
+  isSpanPinCrossing(props) {
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    return Boolean(r && r !== 'none');
+  }
+
+  isSpanPinCritical(props) {
+    const tx = [...(props.issue_texts || []), ...(props.warn_texts || [])].join(' ');
+    if (/duplicate pole|missing intermediate|Span very short|borderline short|unusually short/i.test(tx)) {
+      return true;
+    }
+    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
+    if (!Number.isNaN(dm) && dm < 8) return true;
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'high') return true;
+    return false;
+  }
+
+  isSpanPinReview(props) {
+    return this.isSpanLabelAnomaly(props) || this.hasSpanAnomaly(props);
+  }
+
   bindSpanDistanceTooltip(line, props) {
     const label = this.spanDistanceLabel(props);
     if (!label) return;
     const mode = this._spanLabelMode || 'hover';
-    const anomaly = this.isSpanLabelAnomaly(props);
-    const permanent = mode === 'all' || (mode === 'anomalies' && anomaly);
+    let permanent = false;
+    if (mode === 'all') permanent = true;
+    else if (mode === 'hover') permanent = false;
+    else if (mode === 'critical') permanent = this.isSpanPinCritical(props);
+    else if (mode === 'crossing') permanent = this.isSpanPinCrossing(props);
+    else if (mode === 'review') permanent = this.isSpanPinReview(props);
     line.bindTooltip(label, {
       permanent,
       direction: 'center',
@@ -1071,7 +1261,8 @@ class MapViewer {
       this._spanLabelModeControlBound = true;
       sel.addEventListener('change', () => {
         const v = sel.value;
-        this._spanLabelMode = v === 'anomalies' || v === 'all' || v === 'hover' ? v : 'hover';
+        const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
+        this._spanLabelMode = allowed.has(v) ? v : 'hover';
         try {
           localStorage.setItem('gridflow_map_span_label_mode', this._spanLabelMode);
         } catch {
@@ -1458,11 +1649,26 @@ class MapViewer {
             : assetKind === 'angle'
               ? this.anglePopupSections(props, status, lat, lon)
               : this.existingPopupSections(props, status, lat, lon);
+    const emptySectionSummary = {
+      'Equipment & pole-top': 'No pole-mounted equipment captured or inferred.',
+      'Physical': 'Pole class, material, lean and foundation not fully specified in this export.',
+      'Mechanical': 'Stay / mechanical detail not captured where applicable.',
+      'Specification': 'Pole class, material and design height not fully specified.',
+      'Evidence': 'Surveyor, date and GNSS accuracy not captured in this export.',
+    };
+    const condenseable = new Set(Object.keys(emptySectionSummary));
+    const mapSection = (section) => {
+      let rows = section.rows;
+      if (condenseable.has(section.title)) {
+        rows = this.condenseVacuousPopupRows(rows, emptySectionSummary[section.title]);
+      }
+      return this.popupSection(section.title, rows);
+    };
     return `
       <div class="asset-popup asset-popup-${assetKind}">
         <div class="popup-title">${title}</div>
-        ${designSections.map(section => this.popupSection(section.title, section.rows)).join('')}
-        ${sections.map(section => this.popupSection(section.title, section.rows)).join('')}
+        ${designSections.map(mapSection).join('')}
+        ${sections.map(mapSection).join('')}
         ${this.rawTechnicalDetailsBlock(props)}
       </div>
     `;

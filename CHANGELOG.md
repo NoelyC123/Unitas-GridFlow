@@ -8,6 +8,29 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Map truthfulness F1–F8 (follow-up batch)
+
+### Changed
+
+- **F1:** `metadata.span_layer_origin` defaults to `provisional_route` in span pipeline; map uses **Provisional route spans** labels unless `survey_circuit`. Legend + side panel titles sync in JS.
+- **F2:** Replacement layer caption shows **`N` rec · `M` on map**; tooltip when `N>0` and `M=0`; base label **Suggested replacement map links**.
+- **F3:** Five span distance label modes: hover, critical, crossing, review, all; legacy `anomalies` → review in `localStorage`.
+- **F4:** Span popups split **review signals** vs **designer actions**; `filterSpanDesignerActions` drops duplicate wording.
+- **F5:** `classifyShortLikelySpanCause` for very short spans (replacement pair, duplicate, sequence, genuine, uncertain).
+- **F6:** Pole popups collapse all-“not captured” sections into short summaries (`condenseVacuousPopupRows`).
+- **F7:** Circuit summary note distinguishes **anchor-role / control** counts vs **mechanical stays** map layer.
+- **F8:** `applyZeroCountLayerTruthfulness` greys out toggles for **all** layers with zero records (including existing/proposed/angle); matches only when no `replacing` data.
+
+### Tests
+
+- **495** passing; `span_layer_origin` on map data + span generator tests; template/integration strings updated.
+
+### Assets
+
+- **`map-viewer.css` v8** (cache-bust).
+
+---
+
 ## 2026-05-01 — Map truthfulness P2–P8 (viewer UX)
 
 ### Changed
