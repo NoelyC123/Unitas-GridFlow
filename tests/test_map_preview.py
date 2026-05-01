@@ -79,4 +79,4 @@ def test_map_viewer_includes_span_label_mode_select() -> None:
     assert 'id="span-label-mode"' in html
     assert "Show on hover" in html
     assert "Pin on anomaly spans only" in html
-    assert "map-viewer.css?v=5" in html
+    assert "map-viewer.css?v=7" in html

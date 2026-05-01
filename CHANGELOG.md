@@ -8,6 +8,28 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Map truthfulness P2–P8 (viewer UX)
+
+### Changed
+
+- **P2 UG cables:** When `cable_feature_count` is 0, underground cable layer is disabled, unchecked, and tooltip states cables are not inferred from poles.
+- **P3 Layers / focus counts:** Layer and focus filter captions show live counts; `clearance-crossings` focus filters context records with statutory-style crossings or medium/high span-corridor tiers (fixes missing filter branch).
+- **P4 Span / UG popups:** Electrical blocks add scope copy; span and cable popups omit pole-top equipment rows (`Mounted Equipment` / `Equipment Rating`).
+- **P5 Span intelligence:** Route-span anomaly summary in popup and span list chips; `hasSpanAnomaly` aligned with `classifyRouteSpanAnomaly`.
+- **P6 Context hits:** Span popups distinguish crossing-weighted vs route-proximity context rows; context crossing details add span corridor link distances and correlation confidence copy.
+- **P7 Pole provenance:** `legacyDataWarningSections` expanded to provenance-specific “source cue” banners (legacy GIS, digitised, inferred, design proposal, unknown/low confidence).
+- **P8 Replacement links:** Match popups show audit confidence with tiered styling and cluster hint when multiple PR share one EX.
+
+### Tests
+
+- **`tests/test_map_static_truthfulness.py`** — template hooks + static JS/CSS assertions; suite **484** passing.
+
+### Assets
+
+- **`map-viewer.css` v7** (cache-bust).
+
+---
+
 ## 2026-05-03 — Map truthfulness P1: span label clutter
 
 ### Changed

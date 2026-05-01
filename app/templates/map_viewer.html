@@ -14,7 +14,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/static/css/map-viewer.css?v=5" />
+  <link rel="stylesheet" href="/static/css/map-viewer.css?v=7" />
   <style>
     html, body {
       height: 100%;
@@ -806,15 +806,15 @@
             <div class="map-control-section" aria-label="Map layer controls">
               <div class="review-focus-title">Map Layers</div>
               <div class="layer-toggle-grid">
-                <label class="layer-toggle"><input type="checkbox" data-layer="existing" checked> Existing pole records</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="proposed" checked> Proposed pole records</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="angle" checked> Angle pole records</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="stays" checked> Stays/Anchors</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="thirdparty" checked> Third-party infrastructure</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="context"> Context/Crossings</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="spans" checked> Circuit spans (line)</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="cables" checked> Underground cables (dashed)</label>
-                <label class="layer-toggle"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> Suggested Replacement Links</label>
+                <label class="layer-toggle" data-layer-key="existing"><input type="checkbox" data-layer="existing" checked> <span class="layer-toggle-caption">Existing pole records</span></label>
+                <label class="layer-toggle" data-layer-key="proposed"><input type="checkbox" data-layer="proposed" checked> <span class="layer-toggle-caption">Proposed pole records</span></label>
+                <label class="layer-toggle" data-layer-key="angle"><input type="checkbox" data-layer="angle" checked> <span class="layer-toggle-caption">Angle pole records</span></label>
+                <label class="layer-toggle" data-layer-key="stays"><input type="checkbox" data-layer="stays" checked> <span class="layer-toggle-caption">Stays/Anchors</span></label>
+                <label class="layer-toggle" data-layer-key="thirdparty"><input type="checkbox" data-layer="thirdparty" checked> <span class="layer-toggle-caption">Third-party infrastructure</span></label>
+                <label class="layer-toggle" data-layer-key="context"><input type="checkbox" data-layer="context"> <span class="layer-toggle-caption">Context/Crossings</span></label>
+                <label class="layer-toggle" data-layer-key="spans"><input type="checkbox" data-layer="spans" checked> <span class="layer-toggle-caption">Circuit spans (line)</span></label>
+                <label class="layer-toggle" data-layer-key="cables"><input type="checkbox" data-layer="cables" checked> <span class="layer-toggle-caption">Underground cables (dashed)</span></label>
+                <label class="layer-toggle" data-layer-key="matches"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> <span class="layer-toggle-caption">Suggested Replacement Links</span></label>
               </div>
               <div class="span-label-mode-row" style="margin-top:10px;">
                 <label for="span-label-mode" style="display:block;font-size:0.76rem;color:#4b5563;margin-bottom:4px;">
@@ -834,17 +834,17 @@
             <div class="review-focus" aria-label="Review focus filters">
               <div class="review-focus-title">Review Focus</div>
               <div class="review-focus-grid">
-                <button type="button" class="focus-filter-btn" data-focus="design-blockers">Design blockers</button>
-                <button type="button" class="focus-filter-btn" data-focus="review-required">Review required</button>
-                <button type="button" class="focus-filter-btn" data-focus="missing-height">Missing existing heights</button>
-                <button type="button" class="focus-filter-btn" data-focus="missing-specification">Missing specifications</button>
-                <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay">Missing stay evidence</button>
-                <button type="button" class="focus-filter-btn" data-focus="span-anomalies">Span anomalies</button>
-                <button type="button" class="focus-filter-btn" data-focus="span-crossing-risk">Span crossing context</button>
-                <button type="button" class="focus-filter-btn" data-focus="ug-cable-missing-spec">UG cable — incomplete spec</button>
-                <button type="button" class="focus-filter-btn" data-focus="clearance-crossings">Crossings requiring clearance</button>
-                <button type="button" class="focus-filter-btn" data-focus="replacement-proximity">EX/PR matches</button>
-                <button type="button" class="focus-filter-btn" data-focus="records-with-remarks">Records with remarks</button>
+                <button type="button" class="focus-filter-btn" data-focus="design-blockers"><span class="focus-filter-caption">Design blockers</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="review-required"><span class="focus-filter-caption">Review required</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="missing-height"><span class="focus-filter-caption">Missing existing heights</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="missing-specification"><span class="focus-filter-caption">Missing specifications</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay"><span class="focus-filter-caption">Missing stay evidence</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="span-anomalies"><span class="focus-filter-caption">Span anomalies</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="span-crossing-risk"><span class="focus-filter-caption">Span crossing context</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="ug-cable-missing-spec"><span class="focus-filter-caption">UG cable — incomplete spec</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="clearance-crossings"><span class="focus-filter-caption">Crossings requiring clearance</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="replacement-proximity"><span class="focus-filter-caption">EX/PR matches</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="records-with-remarks"><span class="focus-filter-caption">Records with remarks</span></button>
               </div>
             </div>
             <div id="record-panel" style="display:none; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 8px;">

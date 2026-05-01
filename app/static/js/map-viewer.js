@@ -71,6 +71,7 @@ class MapViewer {
       this._spanLabelMode = 'hover';
     }
     this._spanLabelModeControlBound = false;
+    this._mapMeta = {};
   }
 
   init() {
@@ -104,6 +105,8 @@ class MapViewer {
       }
       const cableFeatures = data.cable_features || [];
       this.renderCableFeatures(Array.isArray(cableFeatures) ? cableFeatures : []);
+      this.applyCableLayerTruthfulness(data.metadata || {});
+      this.applyLayerAndFilterCounts(data.metadata || {});
     } catch (err) {
       console.error(err);
       if (this.issueNoteEl) {
@@ -185,6 +188,139 @@ class MapViewer {
       roleEl.innerHTML = parts.join('<span style="margin:0 5px;color:#d1d5db;">·</span>');
       roleEl.style.display = parts.length > 0 ? 'block' : 'none';
     }
+    this._mapMeta = { ...meta };
+  }
+
+  applyCableLayerTruthfulness(meta) {
+    const n = Number(meta.cable_feature_count ?? 0);
+    const input = document.querySelector('input[data-layer="cables"]');
+    const label = input ? input.closest('label') : null;
+    if (n < 1) {
+      this.layerState.cables = false;
+      if (input) {
+        input.checked = false;
+        input.disabled = true;
+      }
+      if (label) {
+        label.classList.add('layer-toggle-disabled');
+        label.title = 'No underground cable segments in survey data — UG layer disabled (cables are not inferred from pole records).';
+      }
+      if (this.cableLayer && this.map && this.map.hasLayer(this.cableLayer)) {
+        this.map.removeLayer(this.cableLayer);
+      }
+    } else if (input) {
+      input.disabled = false;
+      if (label) {
+        label.classList.remove('layer-toggle-disabled');
+        label.title = '';
+      }
+    }
+  }
+
+  primaryLayerKey(props) {
+    if (this.isThirdPartyInfrastructure(props)) return 'thirdparty';
+    if (this.isContextRecord(props)) return 'context';
+    if (this.isStayOrAnchor(props)) return 'stays';
+    if (this.isAnglePole(props)) return 'angle';
+    if (this.isExistingPole(props)) return 'existing';
+    if (this.isProposedPole(props)) return 'proposed';
+    return null;
+  }
+
+  applyLayerAndFilterCounts(meta) {
+    const lc = {
+      existing: 0, proposed: 0, angle: 0, stays: 0, thirdparty: 0, context: 0,
+    };
+    for (const fd of this.featureData) {
+      const k = this.primaryLayerKey(fd.props);
+      if (k && Object.prototype.hasOwnProperty.call(lc, k)) lc[k] += 1;
+    }
+    const m = meta || this._mapMeta || {};
+    const spanN = Number(m.span_feature_count ?? this._spanFeatureList?.length ?? 0);
+    const cabN = Number(m.cable_feature_count ?? 0);
+    document.querySelectorAll('label.layer-toggle[data-layer-key]').forEach((lab) => {
+      const key = lab.dataset.layerKey;
+      const cap = lab.querySelector('.layer-toggle-caption');
+      if (!cap) return;
+      const raw = cap.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
+      cap.textContent = raw;
+      if (key === 'spans') {
+        cap.textContent = `${raw} (${spanN})`;
+        return;
+      }
+      if (key === 'cables') {
+        cap.textContent = `${raw} (${cabN})`;
+        return;
+      }
+      if (key === 'matches') {
+        const linkN = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
+        cap.textContent = `${raw} (${linkN})`;
+        return;
+      }
+      const c = lc[key];
+      if (c != null) cap.textContent = `${raw} (${c})`;
+    });
+
+    const focusDefs = [
+      ['design-blockers', () => this.filterFeatureData('focus', 'design-blockers').length],
+      ['review-required', () => this.filterFeatureData('focus', 'review-required').length],
+      ['missing-height', () => this.filterFeatureData('focus', 'missing-height').length],
+      ['missing-specification', () => this.filterFeatureData('focus', 'missing-specification').length],
+      ['angle-missing-stay', () => this.filterFeatureData('focus', 'angle-missing-stay').length],
+      ['span-anomalies', () => this.filterFeatureData('focus', 'span-anomalies').length],
+      ['span-crossing-risk', () => this._spanLineRefs.filter(({ props }) => {
+        const r = String(props.crossing_risk_level || 'none').toLowerCase();
+        return r !== 'none' && r !== '';
+      }).length],
+      ['ug-cable-missing-spec', () => this.filterFeatureData('focus', 'ug-cable-missing-spec').length],
+      ['clearance-crossings', () => this.filterFeatureData('focus', 'clearance-crossings').length],
+      ['replacement-proximity', () => this.filterFeatureData('focus', 'replacement-proximity').length],
+      ['records-with-remarks', () => this.filterFeatureData('focus', 'records-with-remarks').length],
+    ];
+    for (const [focus, fn] of focusDefs) {
+      const btn = document.querySelector(`.focus-filter-btn[data-focus="${focus}"]`);
+      if (!btn) continue;
+      const cap = btn.querySelector('.focus-filter-caption');
+      if (!cap) continue;
+      const raw = cap.textContent.replace(/\s*\(\d+\)\s*$/, '').trim();
+      let n = 0;
+      try {
+        n = fn();
+      } catch {
+        n = 0;
+      }
+      cap.textContent = `${raw} (${n})`;
+      btn.style.display = n > 0 ? '' : 'none';
+    }
+  }
+
+  classifyRouteSpanAnomaly(props) {
+    const causes = [];
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r && r !== 'none') causes.push(`Crossing / route context: ${r}`);
+    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
+    if (!Number.isNaN(dm)) {
+      if (dm < 12) causes.push('Very short span — check IDs / sequence');
+      if (dm > 280) causes.push('Long span — verify intermediate supports & conductor');
+    }
+    const acts = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    acts.forEach((a) => {
+      const s = String(a);
+      if (/very short span|long span|voltage|conductor|phase|obstruction|spot-check/i.test(s)) {
+        if (!causes.some((c) => c.includes(s.slice(0, 20)))) causes.push(s);
+      }
+    });
+    const allText = [...(props.issue_texts || []), ...(props.warn_texts || [])].join(' ');
+    if (allText.includes('Span very short') || allText.includes('Span unusually short') || allText.includes('Span borderline short')) {
+      causes.push('QA: short-span anomaly flag on record');
+    }
+    if (allText.includes('Span too long') || allText.includes('long span')) {
+      causes.push('QA: long-span review');
+    }
+    if (allText.includes('duplicate pole')) causes.push('QA: possible duplicate structure');
+    if (allText.includes('missing intermediate')) causes.push('QA: possible gap in route');
+    const short = causes.length ? causes[0].split(' —')[0].split(':')[0].trim().slice(0, 42) : '';
+    return { short: short || (causes.length ? 'Review span' : ''), causes };
   }
 
   renderMarkers(features) {
@@ -370,6 +506,13 @@ class MapViewer {
       if (this.hasValue(fd.props.pole_id)) byPoleId.set(String(fd.props.pole_id), fd);
     }
 
+    const prCountByExisting = new Map();
+    for (const fd of this.featureData) {
+      if (!this.hasValue(fd.props.replacing)) continue;
+      const ex = String(fd.props.replacing);
+      prCountByExisting.set(ex, (prCountByExisting.get(ex) || 0) + 1);
+    }
+
     for (const fd of this.featureData) {
       if (!this.hasValue(fd.props.replacing)) continue;
       const existing = byPoleId.get(String(fd.props.replacing));
@@ -385,11 +528,23 @@ class MapViewer {
       const offsetLine = fd.props.match_offset_m != null
         ? `<div class="popup-row"><strong>Offset:</strong> ${Number(fd.props.match_offset_m).toFixed(1)}m</div>`
         : '';
+      const clusterN = prCountByExisting.get(String(fd.props.replacing)) || 1;
+      const clusterHint = clusterN > 1
+        ? `<div class="popup-row lifecycle-cluster-hint"><strong>Cluster:</strong> ${clusterN} proposed points share existing <strong>${this.escapeHtml(String(fd.props.replacing))}</strong> — confirm the intended pair on the review page.</div>`
+        : '';
+      const audit = fd.props.replacement_pair_audit || {};
+      const pct = audit.confidence_pct != null ? Number(audit.confidence_pct) : null;
+      const pctClass = pct == null ? '' : pct >= 75 ? 'lifecycle-conf-high' : pct >= 50 ? 'lifecycle-conf-med' : 'lifecycle-conf-low';
+      const confBlock = pct != null
+        ? `<div class="popup-row"><strong>Match confidence:</strong> <span class="${pctClass}">${pct}%</span>${audit.match_type ? ` — ${this.escapeHtml(String(audit.match_type))}` : ''}</div>`
+        : '';
       line.bindPopup(`
         <div class="popup-title">Suggested Existing/Proposed Match</div>
         <div class="popup-row"><strong>Existing:</strong> Point ${this.escapeHtml(fd.props.replacing)}</div>
         <div class="popup-row"><strong>Proposed:</strong> Point ${this.escapeHtml(fd.props.pole_id || fd.props.id || 'Unknown')}</div>
+        ${confBlock}
         ${offsetLine}
+        ${clusterHint}
         <div class="popup-row" style="color:#64748b;font-size:0.82em;margin-top:4px;">Suggested replacement link — unconfirmed. Review pairing page to confirm.</div>
       `);
       line.addTo(this.lifecycleMatchLayer);
@@ -512,7 +667,11 @@ class MapViewer {
         ? `${Number(props.distance_m).toFixed(1)} m`
         : '';
       const fromTo = `${this.escapeHtml(props.from_point_id || '?')} → ${this.escapeHtml(props.to_point_id || '?')}`;
-      row.innerHTML = `<span class="span-list-seq">${this.escapeHtml(seq)}</span><span class="span-list-route">${fromTo}</span>${dist ? `<span class="span-list-dist">${dist}</span>` : ''}${r !== 'none' ? `<span class="span-list-risk">${r}</span>` : ''}`;
+      const anomaly = this.classifyRouteSpanAnomaly(props);
+      const anomalyChip = anomaly.causes.length
+        ? `<span class="span-list-anomaly" title="${this.escapeHtml(anomaly.causes.join(' · '))}">${this.escapeHtml(anomaly.short)}</span>`
+        : '';
+      row.innerHTML = `<span class="span-list-seq">${this.escapeHtml(seq)}</span><span class="span-list-route">${fromTo}</span>${dist ? `<span class="span-list-dist">${dist}</span>` : ''}${anomalyChip}${r !== 'none' ? `<span class="span-list-risk">${r}</span>` : ''}`;
       row.addEventListener('click', () => {
         if (!this.map || !line.getBounds) return;
         this.map.fitBounds(line.getBounds(), { padding: [48, 48], maxZoom: 17 });
@@ -633,12 +792,19 @@ class MapViewer {
     const actionSection = acts.length
       ? [{ title: 'Designer actions (auto-suggested)', rows: acts.map((t) => this.popupRow('Action', t, 'review')) }]
       : [];
+    const electricalNote = [
+      this.popupRow(
+        'Electrical scope',
+        'Values describe this underground cable trace (segment between supports), not pole-top equipment.',
+        'info',
+      ),
+    ];
     return [
       { title: 'Underground cable route', rows: routeRows },
       { title: 'Installation', rows: installRows },
       { title: 'Clearance & crossings', rows: clearanceRows },
       ...actionSection,
-      { title: 'Electrical', rows: this.electricalRows(props) },
+      { title: 'Electrical', rows: [...electricalNote, ...this.electricalRows(props, { includeEquipment: false })] },
     ];
   }
 
@@ -677,17 +843,25 @@ class MapViewer {
   crossingHitRowsForSpan(props) {
     const hits = props.crossing_hits_survey;
     if (!Array.isArray(hits) || !hits.length) {
-      return [this.popupRow('Context hits', 'No crossing/context records within correlation distance', 'info')];
+      return [this.popupRow(
+        'Context hits',
+        'No context records within span correlation distance.',
+        'info',
+        'Correlation uses surveyed coordinates — missing hits do not prove the span is clear.',
+      )];
     }
     return hits.slice(0, 8).map((h) => {
       const t = String(h.crossing_tier || 'low').toLowerCase();
+      const crossingWeighted = t === 'high' || t === 'medium';
       const st = this.escapeHtml(h.structure_type || 'context');
       const pid = h.point_id ? ` · ${this.escapeHtml(h.point_id)}` : '';
-      return this.popupRow(
-        `${st} · ${h.distance_m}m${pid}`,
-        `Tier: ${t}`,
-        t === 'high' ? 'blocker' : t === 'medium' ? 'warning' : 'info',
-      );
+      const dm = h.distance_m != null ? `${Number(h.distance_m).toFixed(1)} m` : 'distance n/a';
+      const label = crossingWeighted ? `Crossing-weighted context${pid}` : `Route proximity (general context)${pid}`;
+      const detail = crossingWeighted
+        ? `${st} · ${dm} from span corridor · tier ${t} — prioritise clearance / coordination review`
+        : `${st} · ${dm} from span corridor · tier ${t} — confirm relevance to electrical clearance`;
+      const status = t === 'high' ? 'blocker' : t === 'medium' ? 'warning' : 'info';
+      return this.popupRow(label, detail, status);
     });
   }
 
@@ -747,12 +921,32 @@ class MapViewer {
       }]
       : [];
 
+    const anomaly = this.classifyRouteSpanAnomaly(props);
+    const anomalySection = anomaly.causes.length
+      ? [{
+        title: 'Route span — review signals',
+        rows: [
+          this.popupRow('Summary', anomaly.short || 'Review this span', 'warning'),
+          ...anomaly.causes.slice(0, 8).map((c) => this.popupRow('Signal', c, 'review')),
+        ],
+      }]
+      : [];
+
+    const electricalIntro = [
+      this.popupRow(
+        'Electrical scope',
+        'Conductor / voltage attributes apply to this overhead span between supports (derived from adjacent structure records). Pole popups list equipment only when captured on that structure.',
+        'info',
+      ),
+    ];
+
     return [
       { title: 'Sequence', rows: seqRows },
       { title: 'Route span', rows: routeRows },
+      ...anomalySection,
       { title: 'Clearance & crossings', rows: clearanceRows },
       ...actionSection,
-      { title: 'Electrical', rows: this.electricalRows(props) },
+      { title: 'Electrical', rows: [...electricalIntro, ...this.electricalRows(props, { includeEquipment: false })] },
     ];
   }
 
@@ -911,6 +1105,10 @@ class MapViewer {
         this.layerState[layerName] = input.checked;
       }
       input.addEventListener('change', () => {
+        if (input.disabled) {
+          input.checked = false;
+          return;
+        }
         this.layerState[layerName] = input.checked;
         if (layerName === 'spans') {
           this.toggleLayer(this.spanLayer, input.checked);
@@ -1070,6 +1268,17 @@ class MapViewer {
     if (value === 'ug-cable-missing-spec') {
       return this.featureData.filter((fd) => this.hasUgCableIncompleteSpec(fd.props));
     }
+    if (value === 'clearance-crossings') {
+      return this.featureData.filter((fd) => {
+        if (!this.isContextRecord(fd.props)) return false;
+        if (this.isClearanceCrossing(fd.props)) return true;
+        const links = fd.props.span_crossing_links || [];
+        return links.some((l) => {
+          const t = String(l.crossing_tier || '').toLowerCase();
+          return t === 'high' || t === 'medium';
+        });
+      });
+    }
     return this.featureData;
   }
 
@@ -1133,6 +1342,7 @@ class MapViewer {
       'span-anomalies': 'Span anomaly',
       'span-crossing-risk': 'Span crossing context',
       'ug-cable-missing-spec': 'UG record — incomplete cable spec',
+      'clearance-crossings': 'Crossing requiring clearance review',
       'records-with-remarks': 'Record with remarks',
     };
     return labels[value] || value || mode;
@@ -1157,18 +1367,7 @@ class MapViewer {
   }
 
   hasSpanAnomaly(props) {
-    const allText = [
-      ...(props.issue_texts || []),
-      ...(props.warn_texts || []),
-    ].join(' ');
-    return (
-      allText.includes('Probable duplicate pole')
-      || allText.includes('Probable missing intermediate pole')
-      || allText.includes('Span very short')
-      || allText.includes('Span unusually short')
-      || allText.includes('Span borderline short')
-      || allText.includes('Span too long')
-    );
+    return this.classifyRouteSpanAnomaly(props).causes.length > 0;
   }
 
   hasUgCableIncompleteSpec(props) {
@@ -1374,20 +1573,64 @@ class MapViewer {
 
   legacyDataWarningSections(props) {
     const sourceConf = props.source_confidence_detail || {};
-    if (sourceConf.provenance !== 'legacy_map_data') return [];
-    return [
-      {
-        title: 'Legacy Map Data - Not Field Verified',
-        rows: [
-          this.popupRow(
-            'Designer Action',
-            'Field verification required before design or construction',
-            'warning',
-            'Geometry and attributes are from historical records and may be outdated.',
-          ),
-        ],
-      },
-    ];
+    const prov = sourceConf.provenance;
+    const conf = sourceConf.confidence || 'unknown';
+    const note = sourceConf.designer_note || '';
+    const geomHint = sourceConf.geometry_trust
+      ? `Geometry trust: ${this.formatGeometryTrust(sourceConf.geometry_trust)}.`
+      : '';
+    const banner = (title, action, detail, status = 'warning') => ({
+      title,
+      rows: [
+        this.popupRow('Designer note', action, status, [detail, note, geomHint].filter(Boolean).join(' ')),
+      ],
+    });
+
+    switch (prov) {
+      case 'legacy_map_data':
+        return [banner(
+          'Source cue — legacy map data',
+          'Field-verify geometry and attributes before relying on them for clearance or structure design.',
+          'Coordinates and labels may pre-date the surveyed job.',
+        )];
+      case 'dno_gis_import':
+        return [banner(
+          'Source cue — DNO GIS import',
+          'Treat as network reference geometry unless this point was tied to contemporaneous survey evidence.',
+          'GIS lineage can omit site-specific offsets.',
+          conf === 'high' ? 'info' : 'warning',
+        )];
+      case 'digitised_from_drawing':
+        return [banner(
+          'Source cue — digitised drawing / plan',
+          'Confirm scale, revision, and any offsets against GNSS survey before using for clearance.',
+          'Digitisation introduces plan-to-ground uncertainty.',
+        )];
+      case 'inferred':
+        return [banner(
+          'Source cue — inferred or calculated',
+          'Do not treat inferred attributes as surveyed fact without independent confirmation.',
+          'Includes connectivity or model-derived values.',
+        )];
+      case 'proposed_by_design':
+        return [banner(
+          'Source cue — design proposal',
+          'Design intent only — not evidence of as-built or surveyed field state.',
+          '',
+          'info',
+        )];
+      case 'unknown':
+        if (conf === 'low') {
+          return [banner(
+            'Source cue — unknown / low confidence',
+            'Establish provenance (field vs plan vs import) before high-stakes decisions.',
+            '',
+          )];
+        }
+        return [];
+      default:
+        return [];
+    }
   }
 
   heightEvidenceAlertSections(props) {
@@ -1608,7 +1851,8 @@ class MapViewer {
     ];
   }
 
-  electricalRows(props) {
+  electricalRows(props, opts = {}) {
+    const includeEquipment = opts.includeEquipment !== false;
     const rows = [];
     const isUg = props.is_underground === true;
     const voltageLabel =
@@ -1687,23 +1931,25 @@ class MapViewer {
       );
     }
 
-    const equipment = Array.isArray(props.equipment) && props.equipment.length > 0
-      ? props.equipment.join(', ')
-      : props.equipment;
-    rows.push(
-      this.popupRow(
-        'Mounted Equipment',
-        equipment || 'none recorded',
-        equipment ? 'ok' : 'info',
-      ),
-    );
-    rows.push(
-      this.popupRow(
-        'Equipment Rating',
-        props.equipment_rating || 'not recorded',
-        props.equipment_rating ? 'ok' : 'info',
-      ),
-    );
+    if (includeEquipment) {
+      const equipment = Array.isArray(props.equipment) && props.equipment.length > 0
+        ? props.equipment.join(', ')
+        : props.equipment;
+      rows.push(
+        this.popupRow(
+          'Mounted Equipment',
+          equipment || 'none recorded',
+          equipment ? 'ok' : 'info',
+        ),
+      );
+      rows.push(
+        this.popupRow(
+          'Equipment Rating',
+          props.equipment_rating || 'not recorded',
+          props.equipment_rating ? 'ok' : 'info',
+        ),
+      );
+    }
     return rows;
   }
 
@@ -1882,7 +2128,41 @@ class MapViewer {
   }
 
   crossingRows(props) {
+    const links = Array.isArray(props.span_crossing_links) ? props.span_crossing_links : [];
+    const linkRows = [];
+    if (links.length) {
+      const dists = links.map((l) => Number(l.distance_m)).filter((n) => !Number.isNaN(n));
+      const minD = dists.length ? Math.min(...dists) : null;
+      const tiers = links.map((l) => String(l.crossing_tier || '').toLowerCase());
+      const hasHigh = tiers.some((t) => t === 'high');
+      const hasMed = tiers.some((t) => t === 'medium');
+      const spanBits = links.slice(0, 3).map((l) => {
+        const a = l.from_point_id || '?';
+        const b = l.to_point_id || '?';
+        return `${a}→${b}`;
+      });
+      const more = links.length > 3 ? ` (+${links.length - 3} more)` : '';
+      linkRows.push(this.popupRow(
+        'Span corridor links (survey)',
+        `${links.length} span segment(s) within correlation: ${spanBits.join(', ')}${more}`,
+        'info',
+      ));
+      if (minD != null) {
+        linkRows.push(this.popupRow(
+          'Closest corridor distance',
+          `${minD.toFixed(1)} m (plan) from this point to a matched span`,
+          'info',
+        ));
+      }
+      const confText = hasHigh
+        ? 'Higher — at least one linked hit used a high crossing tier (treat as clearance-sensitive).'
+        : hasMed
+          ? 'Moderate — medium-tier context may need coordination.'
+          : 'General proximity — low tier; confirm whether this record constrains the line design.';
+      linkRows.push(this.popupRow('Correlation confidence', confText, hasHigh ? 'warning' : 'info'));
+    }
     return [
+      ...linkRows,
       this.popupRow('Priority', this.isClearanceCrossing(props) ? 'HIGH' : 'Review', this.isClearanceCrossing(props) ? 'warning' : 'info'),
       this.popupRow('Label', this.contextReviewLabel(props), this.isClearanceCrossing(props) ? 'warning' : 'info'),
       this.popupRow('Clearance Measured', props.clearance_measured || 'No', props.clearance_measured ? 'ok' : 'warning'),
