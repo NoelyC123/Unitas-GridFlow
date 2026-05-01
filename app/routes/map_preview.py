@@ -12,11 +12,11 @@ from app.context_crossing import enrich_context_crossing_records
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
     merge_equipment_fields_into_props,
-    strip_electrical_fields_from_point_props,
+    strip_network_electrical_from_point_props,
 )
 from app.field_ownership import (
     finalize_field_ownership_metadata,
-    point_enriched_electrical_leaks,
+    point_map_electrical_violations,
     validate_map_feature_collection_field_ownership,
 )
 from app.pole_field_schema import enrich_pole_support_props
@@ -213,7 +213,12 @@ def _enrich_popup_data_model(data: dict) -> dict:
         return data
     point_leak_total = 0
     for feature in data.get("features") or []:
-        props = feature.get("properties") if isinstance(feature, dict) else None
+        if not isinstance(feature, dict) or feature.get("type") != "Feature":
+            continue
+        geom = feature.get("geometry")
+        if not isinstance(geom, dict) or geom.get("type") != "Point":
+            continue
+        props = feature.get("properties")
         if not isinstance(props, dict):
             continue
         for field, default in POPUP_DATA_FIELDS.items():
@@ -239,8 +244,8 @@ def _enrich_popup_data_model(data: dict) -> dict:
             props["source_confidence_detail"] = classify_source_confidence(props)
         if not props.get("attachments_detail"):
             props["attachments_detail"] = parse_attachments(props)
-        point_leak_total += len(point_enriched_electrical_leaks(props))
-        strip_electrical_fields_from_point_props(props)
+        point_leak_total += len(point_map_electrical_violations(props))
+        strip_network_electrical_from_point_props(props)
         merge_equipment_fields_into_props(props)
         merge_connectivity_into_props(props)
         merge_survey_metadata_into_props(props)

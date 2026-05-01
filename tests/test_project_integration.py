@@ -532,7 +532,8 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
     props = response.get_json()["features"][0]["properties"]
     assert props["pole_class"] is None
     assert props["condition"] is None
-    assert props["voltage"] == "11kV"
+    assert props.get("voltage") is None
+    assert "voltage" not in props
     assert props["photo_links"] == []
     assert props["source_confidence"] == "legacy map data"
     assert props["source_confidence_detail"]["provenance"] == "legacy_map_data"

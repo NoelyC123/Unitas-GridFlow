@@ -1,13 +1,10 @@
-"""Phase 3D — electrical *display* field ownership for map FeatureCollections.
+"""Phase 3D — electrical field ownership for map FeatureCollections.
 
-Enriched D2-A electrical presentation (voltage_detail, conductor_detail, etc.)
-belongs on **span** and **underground cable** LineStrings, not on pole Points.
+Survey **Points** (poles, stays, context, third-party) must not carry line network
+electrical attributes in the map API response. Those values are coalesced onto
+**span_features** and **cable_features** LineStrings only.
 
-Raw CSV echoes (``voltage``, ``conductor_type``, …) may remain on points for
-coalescing into spans / cables; those are not stripped here.
-
-See ``FIELD_OWNERSHIP_MATRIX`` for the machine-readable ownership contract
-enforced by ``validate_map_feature_collection_field_ownership``.
+See ``FIELD_OWNERSHIP_MATRIX`` and ``validate_map_feature_collection_field_ownership``.
 """
 
 from __future__ import annotations
@@ -15,51 +12,37 @@ from __future__ import annotations
 from typing import Any
 
 from app.electrical_schema import (
+    POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS,
     POINT_ELECTRICAL_POPUP_KEYS,
-    strip_electrical_fields_from_point_props,
-)
-
-# Phase 3D — canonical ownership (aligned with PHASE_3_MASTER_ROADMAP § field ownership).
-POINT_RAW_NETWORK_ECHO_FIELDS: frozenset[str] = frozenset(
-    {
-        "voltage",
-        "line_voltage",
-        "conductor_type",
-        "conductor",
-        "phase_count",
-        "phases",
-        "circuit_id",
-    }
+    strip_network_electrical_from_point_props,
 )
 
 FIELD_OWNERSHIP_MATRIX: dict[str, Any] = {
-    "policy_version": 1,
-    "policy_name": "enriched_electrical_display_on_spans_and_cables_only",
-    "point": {
+    "policy_version": 2,
+    "policy_name": "network_electrical_on_spans_and_cables_only",
+    "survey_point": {
         "geometry_types": frozenset({"Point"}),
-        "forbidden_enriched_electrical_keys": POINT_ELECTRICAL_POPUP_KEYS,
-        "allowed_raw_network_echo_fields": POINT_RAW_NETWORK_ECHO_FIELDS,
+        "roles": ("pole", "stay", "anchor", "context", "third_party", "other"),
+        "forbidden_electrical_keys": POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS,
         "notes": (
-            "Poles carry structure/survey/raw network echoes; "
-            "enriched electrical display is stripped before map response."
+            "No voltage/conductor/phase/cable enriched display on Points; "
+            "use span_features / cable_features for circuit electrical data."
         ),
     },
     "span_linestring": {
         "storage": "span_features[]",
         "geometry_types": frozenset({"LineString"}),
-        "owns_enriched_electrical_display": POINT_ELECTRICAL_POPUP_KEYS,
-        "notes": "Overhead span coalesces endpoint echoes into enriched props here.",
+        "owns_network_electrical": POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS,
     },
-    "underground_cable_linestring": {
+    "cable_linestring": {
         "storage": "cable_features[]",
         "geometry_types": frozenset({"LineString"}),
-        "owns_enriched_electrical_display": POINT_ELECTRICAL_POPUP_KEYS,
-        "notes": "UG cable segments carry routing + enriched electrical display.",
+        "owns_network_electrical": POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS,
     },
 }
 
 
-def _is_significant_enriched_value(value: Any) -> bool:
+def _is_significant_value(value: Any) -> bool:
     if value is None or value == "":
         return False
     if isinstance(value, dict) and len(value) == 0:
@@ -68,24 +51,30 @@ def _is_significant_enriched_value(value: Any) -> bool:
 
 
 def point_enriched_electrical_leaks(props: dict[str, Any]) -> list[str]:
-    """Return POINT keys that should not be on a pole after enrichment (pre-strip)."""
+    """Pre-strip: enriched-display keys that must move to spans/cables."""
     out: list[str] = []
     for k in POINT_ELECTRICAL_POPUP_KEYS:
-        if k in props and _is_significant_enriched_value(props.get(k)):
+        if k in props and _is_significant_value(props.get(k)):
+            out.append(k)
+    return out
+
+
+def point_map_electrical_violations(props: dict[str, Any]) -> list[str]:
+    """Any forbidden electrical key present with a significant value (pre- or post-strip check)."""
+    out: list[str] = []
+    for k in POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS:
+        if k in props and _is_significant_value(props.get(k)):
             out.append(k)
     return out
 
 
 def strip_enriched_electrical_from_point_props(props: dict[str, Any]) -> None:
-    """Remove enriched electrical display keys from a Point feature (alias)."""
-    strip_electrical_fields_from_point_props(props)
+    """Backward-compatible alias for tests; prefer ``strip_network_electrical_from_point_props``."""
+    strip_network_electrical_from_point_props(props)
 
 
 def validate_map_feature_collection_field_ownership(data: dict[str, Any]) -> list[str]:
-    """Return human-readable violations: Point features must not carry enriched electrical display.
-
-    Call **after** map enrichment (strip + span/cable merge). Empty list means Phase 3D clean.
-    """
+    """Validate Point features after enrichment: no forbidden electrical keys."""
     violations: list[str] = []
     feats = data.get("features") or []
     if not isinstance(feats, list):
@@ -100,8 +89,8 @@ def validate_map_feature_collection_field_ownership(data: dict[str, Any]) -> lis
         if not isinstance(props, dict):
             continue
         pid = props.get("pole_id") or props.get("point_id") or idx
-        for key in point_enriched_electrical_leaks(props):
-            violations.append(f"point pole_id={pid!r} has forbidden enriched key {key!r}")
+        for key in point_map_electrical_violations(props):
+            violations.append(f"point pole_id={pid!r} has forbidden electrical key {key!r}")
     return violations
 
 
@@ -132,9 +121,9 @@ def finalize_field_ownership_metadata(
     )
     viol = post_enrichment_violations if post_enrichment_violations is not None else []
     meta["field_ownership_3d"] = {
-        "policy_version": 1,
-        "policy": "enriched_electrical_display_on_spans_and_cables_only",
-        "point_enriched_electrical_keys_found_pre_strip": point_leak_total,
+        "policy_version": 2,
+        "policy": "network_electrical_on_spans_and_cables_only",
+        "point_electrical_keys_found_pre_strip": point_leak_total,
         "point_features": point_count,
         "span_features": span_n,
         "cable_features": cab_n,

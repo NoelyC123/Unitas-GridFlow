@@ -8,6 +8,20 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-02 — Phase 3D (strict): electrical field ownership cleanup
+
+### Changed
+
+- **`app/electrical_schema.py`:** `POINT_NETWORK_ELECTRICAL_RAW_KEYS`, `POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS`, `strip_network_electrical_from_point_props()` — removes raw `voltage` / `conductor_type` / `phase_count` (and enriched keys) from survey Points in map API output after spans/cables are built.
+- **`app/field_ownership.py`:** Policy v2 `network_electrical_on_spans_and_cables_only`; `FIELD_OWNERSHIP_MATRIX` for `survey_point` vs span/cable; `point_map_electrical_violations()`; metadata `point_electrical_keys_found_pre_strip`.
+- **`map_preview`:** Point-only enrichment loop; strip network electrical on Points; validation uses full forbidden set.
+
+### Tests
+
+- **Suite:** 417+ passing; map/project integration asserts Points omit network electrical; J12946 Points checked against `POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS`.
+
+---
+
 ## 2026-05-01 — Phase 3E–3H: Pole schema, context crossing, replacement audit, designer popups
 
 ### Phase 3E — Pole/support field redesign

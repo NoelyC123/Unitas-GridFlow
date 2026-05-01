@@ -633,8 +633,33 @@ POINT_ELECTRICAL_POPUP_KEYS: frozenset[str] = frozenset(
     }
 )
 
+# Phase 3D strict: raw line/cable attributes must not remain on survey Points in map API.
+# (Spans/cables coalesce these from endpoints during generation, then Points are stripped.)
+POINT_NETWORK_ELECTRICAL_RAW_KEYS: frozenset[str] = frozenset(
+    {
+        "voltage",
+        "line_voltage",
+        "network_voltage",
+        "conductor_type",
+        "conductor",
+        "phase_count",
+        "phases",
+    }
+)
+
+POINT_ALL_FORBIDDEN_ELECTRICAL_KEYS: frozenset[str] = (
+    POINT_ELECTRICAL_POPUP_KEYS | POINT_NETWORK_ELECTRICAL_RAW_KEYS
+)
+
 
 def strip_electrical_fields_from_point_props(props: dict[str, Any]) -> None:
     """Drop conductor/cable/voltage display fields from a pole (Point) feature."""
     for k in POINT_ELECTRICAL_POPUP_KEYS:
+        props.pop(k, None)
+
+
+def strip_network_electrical_from_point_props(props: dict[str, Any]) -> None:
+    """Drop enriched + raw network electrical fields from a survey Point (map response)."""
+    strip_electrical_fields_from_point_props(props)
+    for k in POINT_NETWORK_ELECTRICAL_RAW_KEYS:
         props.pop(k, None)
