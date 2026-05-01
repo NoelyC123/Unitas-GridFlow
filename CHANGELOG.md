@@ -8,6 +8,19 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-03 — Map truthfulness P1: span label clutter
+
+### Changed
+
+- **Span distance labels:** Default is hover-only (no pinned tooltips). Optional “Pin on anomaly spans only” (crossing risk, length &lt;12 m / &gt;280 m, key designer flags) or “Pin on all spans”. Control in map sidebar; preference in `localStorage`.
+- **Legend / asset copy** updated for hover + control.
+
+### Tests
+
+- `test_map_viewer_includes_span_label_mode_select` — HTML includes control and cache-busted CSS.
+
+---
+
 ## 2026-05-02 — Stage 4 proof-of-concept: structured field capture
 
 ### Added

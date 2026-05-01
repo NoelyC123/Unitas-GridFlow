@@ -64,6 +64,13 @@ class MapViewer {
     this._spanLineRefs = [];
     this._spanCrossingFilterOnly = false;
     this._cableLineRefs = [];
+    try {
+      const v = localStorage.getItem('gridflow_map_span_label_mode');
+      this._spanLabelMode = v === 'anomalies' || v === 'all' || v === 'hover' ? v : 'hover';
+    } catch {
+      this._spanLabelMode = 'hover';
+    }
+    this._spanLabelModeControlBound = false;
   }
 
   init() {
@@ -76,6 +83,7 @@ class MapViewer {
       maxZoom: 19,
     }).addTo(this.map);
 
+    this.bindSpanLabelModeControl();
     this.loadData();
   }
 
@@ -429,12 +437,7 @@ class MapViewer {
 
       const label = this.spanDistanceLabel(props);
       if (label) {
-        line.bindTooltip(label, {
-          permanent: true,
-          direction: 'center',
-          className: 'gridflow-span-distance-label',
-          opacity: 0.95,
-        });
+        this.bindSpanDistanceTooltip(line, props);
       }
 
       line.bindPopup(this.buildSpanPopupHtml(props));
@@ -807,14 +810,9 @@ class MapViewer {
         className: 'gridflow-span-line',
       });
 
-      const label = this.spanLabel(span);
+      const label = this.spanDistanceLabel(props);
       if (label) {
-        line.bindTooltip(label, {
-          permanent: true,
-          direction: 'center',
-          className: 'gridflow-span-distance-label',
-          opacity: 0.95,
-        });
+        this.bindSpanDistanceTooltip(line, props);
       }
 
       line.bindPopup(this.buildSpanPopupHtml(props));
@@ -829,9 +827,65 @@ class MapViewer {
     this.refreshSpanListPanel({ onlyCrossingRisk: this._spanCrossingFilterOnly });
   }
 
-  spanLabel(span) {
-    if (span.distance_m == null || Number.isNaN(Number(span.distance_m))) return '';
-    return `${Number(span.distance_m).toFixed(1)}m`;
+  /**
+   * Spans that merit a pinned distance label when mode is "anomalies".
+   * Aligns with span_generator crossing tiers and length heuristics (12 m / 280 m).
+   */
+  isSpanLabelAnomaly(props) {
+    const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r && r !== 'none') return true;
+    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
+    if (!Number.isNaN(dm) && (dm < 12 || dm > 280)) return true;
+    const acts = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    return acts.some((a) => {
+      const s = String(a);
+      return /very short span|long span|verify conductor choice|Review obstruction|Spot-check route context/i.test(s);
+    });
+  }
+
+  bindSpanDistanceTooltip(line, props) {
+    const label = this.spanDistanceLabel(props);
+    if (!label) return;
+    const mode = this._spanLabelMode || 'hover';
+    const anomaly = this.isSpanLabelAnomaly(props);
+    const permanent = mode === 'all' || (mode === 'anomalies' && anomaly);
+    line.bindTooltip(label, {
+      permanent,
+      direction: 'center',
+      className: 'gridflow-span-distance-label',
+      opacity: 0.95,
+      sticky: true,
+    });
+  }
+
+  applySpanLabelMode() {
+    if (!this._spanLineRefs || !this._spanLineRefs.length) return;
+    for (const { line, props } of this._spanLineRefs) {
+      line.unbindTooltip();
+      const label = this.spanDistanceLabel(props);
+      if (label) {
+        this.bindSpanDistanceTooltip(line, props);
+      }
+    }
+  }
+
+  bindSpanLabelModeControl() {
+    const sel = document.getElementById('span-label-mode');
+    if (!sel) return;
+    sel.value = this._spanLabelMode;
+    if (!this._spanLabelModeControlBound) {
+      this._spanLabelModeControlBound = true;
+      sel.addEventListener('change', () => {
+        const v = sel.value;
+        this._spanLabelMode = v === 'anomalies' || v === 'all' || v === 'hover' ? v : 'hover';
+        try {
+          localStorage.setItem('gridflow_map_span_label_mode', this._spanLabelMode);
+        } catch {
+          /* ignore */
+        }
+        this.applySpanLabelMode();
+      });
+    }
   }
 
   bindFilterButtons() {

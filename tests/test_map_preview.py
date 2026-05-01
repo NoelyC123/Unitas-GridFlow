@@ -68,3 +68,15 @@ def test_map_data_endpoint_adds_span_features(tmp_path, monkeypatch) -> None:
     assert "point_features" in fo
     assert fo.get("post_enrichment_clean") is True
     assert fo.get("post_enrichment_violation_count") == 0
+
+
+def test_map_viewer_includes_span_label_mode_select() -> None:
+    app = create_app()
+    client = app.test_client()
+    res = client.get("/map/view/J_ANY")
+    assert res.status_code == 200
+    html = res.data.decode("utf-8")
+    assert 'id="span-label-mode"' in html
+    assert "Show on hover" in html
+    assert "Pin on anomaly spans only" in html
+    assert "map-viewer.css?v=5" in html
