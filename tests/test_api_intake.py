@@ -21,6 +21,7 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
                 "asset_id": "P-1001",
                 "structure_type": "Wood Pole",
                 "height_m": 11.0,
+                "height_method": "measured_rtk",
                 "material": "Wood",
                 "pole_specification": "11m Medium Pole",
                 "grade": "Class 9 Medium",
@@ -67,6 +68,7 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
 
     assert normalized_df.loc[0, "pole_id"] == "P-1001"
     assert normalized_df.loc[0, "height"] == 11.0
+    assert normalized_df.loc[0, "height_source"] == "measured_rtk"
     assert normalized_df.loc[0, "material"] == "Wood"
     assert normalized_df.loc[0, "specification"] == "11m Medium Pole"
     assert normalized_df.loc[0, "pole_class"] == "Class 9 Medium"
@@ -272,6 +274,8 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
     assert props["photo_count"] == 2
     assert props["elevation"] == 127.3
     assert props["source_confidence"] == "raw survey export"
+    assert props["height_confidence"]["level"] == "medium-high"
+    assert props["height_confidence"]["status"] == "ok"
     assert props["year_installed"] == "1998"
     assert props["circuit_id"] == "CIR-11-04"
     assert props["stay_present"] == "yes"

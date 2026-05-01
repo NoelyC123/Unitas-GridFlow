@@ -40,6 +40,19 @@ def test_classify_issue_missing_height_has_recommended_action() -> None:
     assert "height" in meta["recommended_action"].lower()
 
 
+def test_classify_issue_height_source_not_recorded() -> None:
+    meta = classify_issue("Height source not recorded - verify measurement method")
+    assert meta["issue_code"] == "HEIGHT_SOURCE_NOT_RECORDED"
+    assert meta["severity"] == "warning"
+    assert meta["category"] == "evidence_quality"
+
+
+def test_classify_issue_missing_existing_height_is_critical() -> None:
+    meta = classify_issue("Measured height missing - clearance check impossible")
+    assert meta["issue_code"] == "MISSING_EXISTING_HEIGHT"
+    assert meta["severity"] == "critical"
+
+
 def test_classify_issue_missing_material_has_structural_evidence_category() -> None:
     meta = classify_issue("Missing required field: material")
     assert meta["issue_code"] == "MISS_MATERIAL"

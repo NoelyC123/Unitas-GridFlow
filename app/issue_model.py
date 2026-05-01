@@ -55,6 +55,42 @@ _ISSUE_PATTERNS: list[tuple[str, dict]] = [
             "recommended_action": "Confirm actual EXpole height from field notes or plan",
         },
     ),
+    (
+        "Measured height missing - clearance check impossible",
+        {
+            "issue_code": "MISSING_EXISTING_HEIGHT",
+            "severity": "critical",
+            "category": "data_completeness",
+            "scope": "structural",
+            "confidence": "high",
+            "is_observation": False,
+            "recommended_action": "Field measurement required before design",
+        },
+    ),
+    (
+        "Height source not recorded - verify measurement method",
+        {
+            "issue_code": "HEIGHT_SOURCE_NOT_RECORDED",
+            "severity": "warning",
+            "category": "evidence_quality",
+            "scope": "structural",
+            "confidence": "high",
+            "is_observation": False,
+            "recommended_action": ("Confirm height measurement method (RTK/tape/estimated/plan)"),
+        },
+    ),
+    (
+        "Height from",
+        {
+            "issue_code": "HEIGHT_NEEDS_VERIFICATION",
+            "severity": "warning",
+            "category": "evidence_quality",
+            "scope": "structural",
+            "confidence": "medium",
+            "is_observation": False,
+            "recommended_action": "Field measurement before clearance calculations",
+        },
+    ),
     # --- data completeness: specific fields first, then generic fallback ---
     (
         "Missing required field: height",

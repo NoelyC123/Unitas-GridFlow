@@ -8,6 +8,7 @@ BASE_RULES = [
     {"check": "unique", "field": "pole_id"},
     {"check": "required", "field": "pole_id"},
     {"check": "required", "field": "height", "structural_only": True},
+    {"check": "height_source_existing"},
     {"check": "required", "field": "material"},
     {"check": "required", "field": "location"},
     {"check": "required", "field": "structure_type"},

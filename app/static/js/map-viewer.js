@@ -753,6 +753,7 @@ class MapViewer {
 
   existingPopupSections(props, status, lat, lon) {
     return [
+      ...this.heightEvidenceAlertSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Existing Pole') },
       { title: 'Physical', rows: this.physicalRows(props, 'existing') },
       { title: 'Electrical', rows: this.electricalRows(props) },
@@ -761,6 +762,23 @@ class MapViewer {
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  heightEvidenceAlertSections(props) {
+    const heightConf = props.height_confidence || {};
+    if (!['warning', 'blocker', 'fail', 'review'].includes(heightConf.status)) {
+      return [];
+    }
+    return [
+      {
+        title: 'Height Evidence',
+        rows: [
+          this.popupRow('Measured Height', this.hasValue(props.height) ? `${props.height}m` : 'not captured', heightConf.status),
+          this.popupRow('Height Source', props.height_source || 'not captured', props.height_source ? 'info' : 'warning'),
+          this.popupRow('Height Confidence', this.formatHeightConfidence(heightConf.level), heightConf.status, heightConf.warning),
+        ],
+      },
     ];
   }
 
@@ -854,14 +872,32 @@ class MapViewer {
 
   physicalRows(props, mode) {
     const hasHeight = this.hasValue(props.height);
+    const heightConf = props.height_confidence || {};
     return [
       this.popupRow(
         mode === 'proposed' ? 'Proposed Height' : 'Measured Height',
         hasHeight ? `${props.height}m` : 'not captured',
-        hasHeight ? 'ok' : mode === 'existing' ? 'blocker' : 'info',
-        mode === 'existing' && !hasHeight ? 'Clearance check impossible without measured existing pole height.' : '',
+        heightConf.status || (hasHeight ? 'ok' : mode === 'existing' ? 'blocker' : 'info'),
+        heightConf.warning || (mode === 'existing' && !hasHeight ? 'Clearance check impossible without measured existing pole height.' : ''),
       ),
-      this.popupRow('Height Source', props.height_source || 'not captured', props.height_source ? 'ok' : 'review'),
+      this.popupRow(
+        'Height Source',
+        props.height_source || 'not captured',
+        props.height_source ? 'info' : 'warning',
+        props.height_source
+          ? this.explainHeightSource(props.height_source)
+          : 'Height measurement method not recorded - reliability unknown',
+      ),
+      hasHeight
+        ? this.popupRow(
+          'Height Confidence',
+          this.formatHeightConfidence(heightConf.level),
+          heightConf.status || 'info',
+          heightConf.level === 'high'
+            ? 'Suitable for clearance calculations'
+            : 'Verify before use in clearance calculations',
+        )
+        : null,
       this.popupRow('Pole Class', props.pole_class || 'not captured', props.pole_class ? 'ok' : 'review'),
       this.popupRow(
         'Material / Condition',
@@ -877,7 +913,35 @@ class MapViewer {
       ),
       this.popupRow('Defects', props.defect_type || 'not captured', props.defect_type ? 'warning' : 'info'),
       this.popupRow('Foundation', props.foundation_type || 'not captured', props.foundation_type ? 'ok' : 'info'),
-    ];
+    ].filter(Boolean);
+  }
+
+  explainHeightSource(source) {
+    const normalized = String(source || '').toLowerCase().replace(/\s+/g, '_');
+    const explanations = {
+      measured_rtk: 'Survey-grade RTK GNSS measurement',
+      measured_ppk: 'Post-processed kinematic GNSS measurement',
+      measured_gnss: 'Standalone GNSS measurement',
+      measured_tape: 'Tape/rangefinder ground measurement',
+      estimated_visual: 'Visual estimate from surveyor',
+      from_plan: 'Taken from existing plan/drawing',
+      legacy_data: 'Inherited from legacy records',
+      not_captured: 'Measurement method not recorded',
+    };
+    return explanations[normalized] || `Height source: ${source}`;
+  }
+
+  formatHeightConfidence(level) {
+    const labels = {
+      high: 'High confidence (survey-grade)',
+      'medium-high': 'Medium-high confidence',
+      medium: 'Medium confidence',
+      low: 'Low confidence',
+      missing: 'Missing',
+      not_applicable: 'N/A (proposed pole)',
+      unknown: 'Unknown',
+    };
+    return labels[level] || level || 'Unknown';
   }
 
   specificationRows(props) {

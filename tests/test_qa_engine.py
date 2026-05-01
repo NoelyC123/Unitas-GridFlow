@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.qa_engine import run_qa_checks
+from app.qa_engine import classify_height_confidence, run_qa_checks
 
 
 def test_required_treats_blank_string_as_missing() -> None:
@@ -1202,6 +1202,62 @@ def test_expole_height_below_min_emits_warn() -> None:
     assert len(issues) == 1, f"Expected exactly one issue, got: {issue_texts}"
     assert "Height likely estimated" in issue_texts[0], f"Unexpected message: {issue_texts[0]}"
     assert issues.iloc[0].get("Severity") == "WARN"
+
+
+def test_height_source_existing_warns_when_height_source_missing() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "height": 9.5,
+                "height_source": None,
+                "_record_role": "structural",
+            }
+        ]
+    )
+    rules = [{"check": "height_source_existing"}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert issues.iloc[0]["Issue"] == "Height source not recorded - verify measurement method"
+    assert issues.iloc[0]["Severity"] == "WARN"
+
+
+def test_height_source_existing_fails_when_existing_height_missing() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "EX-1",
+                "structure_type": "EXpole",
+                "height": None,
+                "height_source": None,
+                "_record_role": "structural",
+            }
+        ]
+    )
+    rules = [{"check": "height_source_existing"}]
+
+    issues = run_qa_checks(df, rules)
+
+    assert len(issues) == 1
+    assert issues.iloc[0]["Issue"] == "Measured height missing - clearance check impossible"
+    assert issues.iloc[0]["Severity"] == "FAIL"
+
+
+def test_classify_height_confidence_high_for_measured_rtk() -> None:
+    confidence = classify_height_confidence(
+        {
+            "structure_type": "EXpole",
+            "height": 10.5,
+            "height_source": "measured_rtk",
+        }
+    )
+
+    assert confidence["level"] == "high"
+    assert confidence["status"] == "ok"
+    assert confidence["warning"] == ""
 
 
 def test_expole_height_above_max_remains_range_fail() -> None:

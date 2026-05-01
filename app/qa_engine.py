@@ -151,6 +151,106 @@ def infer_display_network_fields(
     }
 
 
+def _text_value(row: "pd.Series | dict", field: str) -> str:
+    value = row.get(field) if hasattr(row, "get") else None
+    if _is_missing_scalar(value):
+        return ""
+    return str(value).strip()
+
+
+def _is_third_party_record(row: "pd.Series | dict") -> bool:
+    primary_type = _text_value(row, "primary_type").lower()
+    record_role = (
+        _text_value(row, "_record_role").lower() or _text_value(row, "record_role").lower()
+    )
+    asset_intent = _text_value(row, "asset_intent").lower()
+    return (
+        primary_type == "third_party_infrastructure"
+        or record_role == "third_party"
+        or asset_intent == "third_party_not_network"
+    )
+
+
+def _is_existing_pole_record(row: "pd.Series | dict") -> bool:
+    if _is_third_party_record(row):
+        return False
+    structure_type = _text_value(row, "structure_type").lower()
+    asset_intent = _text_value(row, "asset_intent").lower()
+    lifecycle_state = _text_value(row, "lifecycle_state").lower()
+    return (
+        "expole" in structure_type
+        or "existing" in asset_intent
+        or "existing pole" in lifecycle_state
+    )
+
+
+def classify_height_confidence(record: "pd.Series | dict") -> dict[str, str]:
+    """Describe whether a height value is reliable enough for design use."""
+
+    height = record.get("height") if hasattr(record, "get") else None
+    height_source = _text_value(record, "height_source").lower().replace(" ", "_")
+    source_confidence = _text_value(record, "source_confidence").lower()
+    is_existing = _is_existing_pole_record(record)
+
+    if _is_missing_scalar(height):
+        if is_existing:
+            return {
+                "level": "missing",
+                "status": "blocker",
+                "warning": "Measured height missing - clearance check impossible",
+            }
+        return {
+            "level": "not_applicable",
+            "status": "info",
+            "warning": "Proposed pole specification required (design decision)",
+        }
+
+    if not height_source or height_source == "not_captured":
+        if "legacy" in source_confidence or "drawing" in source_confidence:
+            warning = (
+                "Height from legacy data - field verification required before "
+                "clearance calculations"
+            )
+        else:
+            warning = (
+                "Height source not recorded - verify measurement method before relying on value"
+            )
+        return {"level": "low", "status": "warning", "warning": warning}
+
+    if any(token in height_source for token in ("rtk", "ppk", "survey_grade")):
+        return {"level": "high", "status": "ok", "warning": ""}
+
+    if "measured" in height_source and "gnss" in height_source:
+        return {
+            "level": "medium",
+            "status": "ok",
+            "warning": "Standalone GNSS measurement - adequate for design",
+        }
+
+    if any(token in height_source for token in ("measured", "tape", "rangefinder")):
+        return {"level": "medium-high", "status": "ok", "warning": ""}
+
+    if any(token in height_source for token in ("estimated", "visual")):
+        return {
+            "level": "low",
+            "status": "warning",
+            "warning": "Height estimated - field measurement required for clearance calculations",
+        }
+
+    if any(token in height_source for token in ("plan", "drawing", "legacy")):
+        return {
+            "level": "low",
+            "status": "warning",
+            "warning": "Height from plan/drawing - field verification required",
+        }
+
+    return {
+        "level": "unknown",
+        "status": "review",
+        "warning": "Height source unknown - verify before use in design",
+    }
+
+
 def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
     """Return True when this row represents a non-structural contextual feature."""
     if row.get("_record_role") in {"context", "third_party"}:
@@ -260,6 +360,51 @@ def run_qa_checks(df, rules):
                         {
                             "Issue": f"Missing required paired field(s): {', '.join(missing)}",
                             "Row": row.to_dict(),
+                        }
+                    )
+
+        elif check == "height_source_existing":
+            height_source_field = rule.get("height_source_field", "height_source")
+            height_field = rule.get("height_field", "height")
+
+            for _, row in qc.iterrows():
+                if not _is_existing_pole_record(row):
+                    continue
+                height = row.get(height_field)
+                height_source = row.get(height_source_field)
+
+                if _is_missing_scalar(height):
+                    issues.append(
+                        {
+                            "Issue": "Measured height missing - clearance check impossible",
+                            "Row": row.to_dict(),
+                            "Severity": "FAIL",
+                        }
+                    )
+                    continue
+
+                if (
+                    _is_missing_scalar(height_source)
+                    or _text_value(row, height_source_field).lower() == "not captured"
+                ):
+                    issues.append(
+                        {
+                            "Issue": "Height source not recorded - verify measurement method",
+                            "Row": row.to_dict(),
+                            "Severity": "WARN",
+                        }
+                    )
+                    continue
+
+                source_text = _text_value(row, height_source_field).lower()
+                if any(
+                    token in source_text for token in ("legacy", "plan", "drawing", "estimated")
+                ):
+                    issues.append(
+                        {
+                            "Issue": f"Height from {height_source} - field verification required",
+                            "Row": row.to_dict(),
+                            "Severity": "WARN",
                         }
                     )
 

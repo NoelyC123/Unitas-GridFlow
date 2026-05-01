@@ -24,7 +24,7 @@ from app.controller_intake import (
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
-from app.qa_engine import infer_display_network_fields, run_qa_checks
+from app.qa_engine import classify_height_confidence, infer_display_network_fields, run_qa_checks
 from app.review_manager import delete_review
 from app.route_sequencer import sequence_route
 
@@ -178,6 +178,17 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
             "pole_height_m",
             "pole_height",
             "ht_m",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
+        "height_source",
+        [
+            "height_source",
+            "height_method",
+            "measurement_method",
+            "height_measurement_method",
+            "height_capture_method",
         ],
     )
     normalized |= _copy_if_missing(
@@ -784,6 +795,14 @@ def _build_feature_collection(
         if is_third_party:
             asset_intent = "third_party_not_network"
             lifecycle_state = None
+        height_confidence = classify_height_confidence(
+            {
+                **row.to_dict(),
+                "asset_intent": asset_intent,
+                "lifecycle_state": lifecycle_state,
+                "primary_type": classification.get("primary_type"),
+            }
+        )
 
         feature = {
             "type": "Feature",
@@ -803,6 +822,7 @@ def _build_feature_collection(
                 "specification": _safe_value(row.get("specification")),
                 "height": _safe_value(row.get("height")),
                 "height_source": _display_value(row, "height_source"),
+                "height_confidence": height_confidence,
                 "pole_class": _display_value(row, "pole_class"),
                 "condition": _display_value(row, "condition"),
                 "lean_direction": _display_value(row, "lean_direction"),
