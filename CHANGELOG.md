@@ -8,6 +8,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase C1 Feature Filters and Blank Fields
+
+### Changed
+
+- Added the Phase C1 map focus filters for existing poles, proposed poles, angle poles, stays/anchors, context/crossings, missing existing heights, missing specifications, and records with remarks.
+- Applied the blank field framework so existing poles show `⚠️ Measured height missing — clearance check impossible`, proposed poles show `Proposed pole specification required (e.g., 11m Medium Pole)`, and context records hide pole-height treatment where not applicable.
+- Carried proposed-pole specification aliases into map feature properties for future design-readiness review.
+
+### Validated
+
+- `node --check app/static/js/map-viewer.js` — passed.
+- `pytest -v tests/test_api_intake.py tests/test_project_integration.py` — 35 passed.
+- `pytest -v` — 298 passed.
+
+---
+
 ## 2026-04-30 — P010 Pairing Review Card Layout
 
 ### Changed

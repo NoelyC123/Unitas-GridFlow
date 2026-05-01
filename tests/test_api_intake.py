@@ -22,6 +22,7 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
                 "structure_type": "Wood Pole",
                 "height_m": 11.0,
                 "material": "Wood",
+                "pole_specification": "11m Medium Pole",
                 "location_name": "Dalton Road Junction",
                 "easting": 352841,
                 "northing": 503122,
@@ -43,6 +44,7 @@ def test_normalize_dataframe_maps_representative_schema() -> None:
     assert normalized_df.loc[0, "pole_id"] == "P-1001"
     assert normalized_df.loc[0, "height"] == 11.0
     assert normalized_df.loc[0, "material"] == "Wood"
+    assert normalized_df.loc[0, "specification"] == "11m Medium Pole"
     assert normalized_df.loc[0, "location"] == "Dalton Road Junction"
     assert normalized_df.loc[0, "lat"] == 54.5210
     assert normalized_df.loc[0, "lon"] == -3.0140
@@ -397,6 +399,7 @@ def test_build_feature_collection_replacement_pair_non_expole_gets_proposed_supp
                 "structure_type": "Pol",
                 "height": None,
                 "material": None,
+                "specification": "11m Medium Pole",
                 "location": None,
                 "lat": 54.5200,
                 "lon": -3.0000,
@@ -421,6 +424,7 @@ def test_build_feature_collection_replacement_pair_non_expole_gets_proposed_supp
     props = fc["features"][0]["properties"]
     assert props["asset_intent"] == "Proposed support"
     assert props["relationship"] == "replacement_pair"
+    assert props["specification"] == "11m Medium Pole"
 
 
 def test_build_feature_collection_regular_pole_has_no_asset_intent() -> None:

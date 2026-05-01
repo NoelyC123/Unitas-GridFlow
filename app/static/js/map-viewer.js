@@ -142,18 +142,36 @@ class MapViewer {
         ? `<div class="popup-row" style="font-size:0.85em"><strong>E/N:</strong> ${this.escapeHtml(props.easting)}, ${this.escapeHtml(props.northing)}</div>`
         : `<div class="popup-row" style="font-size:0.85em"><strong>Lat/Lon:</strong> ${lat.toFixed(5)}, ${lon.toFixed(5)}</div>`;
 
-      const isContext = CONTEXT_FEATURE_CODES.has(props.structure_type || '');
+      const isContext = this.isContextRecord(props);
+      const isExisting = this.isExistingPole(props);
+      const isProposed = this.isProposedPole(props);
+      const hasHeight = this.hasValue(props.height);
+      const hasSpecification = this.hasValue(props.specification) || this.hasValue(props.material);
 
-      // For structural (non-context) features, show "not captured" when height is absent
-      // so a designer can immediately see gaps without opening the issues list.
-      const heightLine = !isContext
-        ? (props.height != null && props.height !== ''
-            ? `<div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height)}m</div>`
-            : `<div class="popup-row" style="color:#9ca3af;font-size:0.85em;"><strong>Height:</strong> not captured</div>`)
+      // Blank fields do not mean the same thing for every asset type. Existing
+      // poles need measured height; proposed poles need a design specification.
+      const heightLine = !isContext && hasHeight
+        ? `<div class="popup-row"><strong>Height:</strong> ${this.escapeHtml(props.height)}m</div>`
+        : '';
+
+      const missingExistingHeightLine = isExisting && !hasHeight
+        ? '<div class="popup-row" style="color:#b91c1c;font-weight:700;">⚠️ Measured height missing — clearance check impossible</div>'
+        : '';
+
+      const missingProposedSpecLine = isProposed && !hasSpecification
+        ? '<div class="popup-row" style="color:#92400e;font-weight:700;">Proposed pole specification required (e.g., 11m Medium Pole)</div>'
+        : '';
+
+      const contextLine = isContext
+        ? '<div class="popup-row" style="color:#6b7280;font-size:0.85em;">Context record — height field hidden where not applicable</div>'
         : '';
 
       const materialLine = props.material != null && props.material !== ''
         ? `<div class="popup-row"><strong>Material:</strong> ${this.escapeHtml(props.material)}</div>`
+        : '';
+
+      const specificationLine = props.specification != null && props.specification !== ''
+        ? `<div class="popup-row"><strong>Specification:</strong> ${this.escapeHtml(props.specification)}</div>`
         : '';
 
       const issueTexts = props.issue_texts || [];
@@ -191,6 +209,10 @@ class MapViewer {
         ${assetIntentLine}
         ${heightLine}
         ${materialLine}
+        ${specificationLine}
+        ${missingExistingHeightLine}
+        ${missingProposedSpecLine}
+        ${contextLine}
         ${locName ? `<div class="popup-row"><strong>Remarks:</strong> ${this.escapeHtml(locName)}</div>` : ''}
         ${coordLine}
         ${replacementLine}
@@ -369,11 +391,36 @@ class MapViewer {
       return this.featureData.filter(fd => fd.props.relationship === 'replacement_pair');
     }
     if (value === 'missing-height') {
-      return this.featureData.filter(fd => {
-        const role = String(fd.props.record_role || '').toLowerCase();
-        const isContext = role === 'context' || CONTEXT_FEATURE_CODES.has(fd.props.structure_type || '');
-        return !isContext && (fd.props.height == null || fd.props.height === '');
-      });
+      return this.featureData.filter(fd => this.isExistingPole(fd.props) && !this.hasValue(fd.props.height));
+    }
+    if (value === 'existing-poles') {
+      return this.featureData.filter(fd => this.isExistingPole(fd.props));
+    }
+    if (value === 'proposed-poles') {
+      return this.featureData.filter(fd => this.isProposedPole(fd.props));
+    }
+    if (value === 'angle-poles') {
+      return this.featureData.filter(fd => this.isAnglePole(fd.props));
+    }
+    if (value === 'stays-anchors') {
+      return this.featureData.filter(fd => this.isStayOrAnchor(fd.props));
+    }
+    if (value === 'context-crossings') {
+      return this.featureData.filter(fd => this.isContextRecord(fd.props));
+    }
+    if (value === 'missing-specification') {
+      return this.featureData.filter(fd => (
+        this.isProposedPole(fd.props)
+        && !this.hasValue(fd.props.specification)
+        && !this.hasValue(fd.props.material)
+      ));
+    }
+    if (value === 'records-with-remarks') {
+      return this.featureData.filter(fd => (
+        this.hasValue(fd.props.name)
+        && fd.props.name !== fd.props.id
+        && fd.props.name !== fd.props.pole_id
+      ));
     }
     return this.featureData;
   }
@@ -386,9 +433,48 @@ class MapViewer {
       'design-blockers': 'Design Blocker',
       'review-required': 'Review Required',
       'replacement-proximity': 'Existing/Proposed Match',
-      'missing-height': 'Missing Height',
+      'missing-height': 'Missing existing height',
+      'existing-poles': 'Existing pole',
+      'proposed-poles': 'Proposed pole',
+      'angle-poles': 'Angle pole',
+      'stays-anchors': 'Stay / anchor',
+      'context-crossings': 'Context / crossing',
+      'missing-specification': 'Missing proposed specification',
+      'records-with-remarks': 'Record with remarks',
     };
     return labels[value] || value || mode;
+  }
+
+  hasValue(value) {
+    return value != null && value !== '' && String(value).trim() !== '';
+  }
+
+  isContextRecord(props) {
+    const role = String(props.record_role || '').toLowerCase();
+    return role === 'context' || CONTEXT_FEATURE_CODES.has(props.structure_type || '');
+  }
+
+  isExistingPole(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    const intent = String(props.asset_intent || '').toLowerCase();
+    return st.includes('expole') || intent.includes('existing');
+  }
+
+  isProposedPole(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    const intent = String(props.asset_intent || '').toLowerCase();
+    return st.includes('prpole') || st === 'pol' || intent.includes('proposed');
+  }
+
+  isAnglePole(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    return st.includes('angle');
+  }
+
+  isStayOrAnchor(props) {
+    const st = String(props.structure_type || '').toLowerCase();
+    const role = String(props.record_role || '').toLowerCase();
+    return role === 'anchor' || st.includes('stay') || st.includes('anchor');
   }
 
   _showRecordPanel(items, title) {
@@ -432,8 +518,20 @@ class MapViewer {
         ? `<div style="color:#9ca3af;font-size:0.75em;margin-top:1px;font-style:italic;">${this.escapeHtml(p.asset_intent)}</div>`
         : '';
 
-      const missingHeightHtml = (p.record_role !== 'context' && (p.height == null || p.height === ''))
-        ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;">Height not captured</div>'
+      const missingHeightHtml = (this.isExistingPole(p) && !this.hasValue(p.height))
+        ? '<div style="color:#b91c1c;font-size:0.75em;margin-top:1px;font-weight:700;">⚠️ Measured height missing — clearance check impossible</div>'
+        : '';
+
+      const missingSpecHtml = (
+        this.isProposedPole(p)
+        && !this.hasValue(p.specification)
+        && !this.hasValue(p.material)
+      )
+        ? '<div style="color:#92400e;font-size:0.75em;margin-top:1px;font-weight:700;">Proposed pole specification required (e.g., 11m Medium Pole)</div>'
+        : '';
+
+      const contextHtml = this.isContextRecord(p)
+        ? '<div style="color:#6b7280;font-size:0.75em;margin-top:1px;">Context record — height field hidden where not applicable</div>'
         : '';
 
       const replacementHtml = p.relationship === 'replacement_pair'
@@ -453,6 +551,8 @@ class MapViewer {
         ${explainedTypeHtml}
         ${intentHtml}
         ${missingHeightHtml}
+        ${missingSpecHtml}
+        ${contextHtml}
         ${replacementHtml}
         ${issueHtml}
         ${warnHtml}

@@ -546,10 +546,17 @@
             <div class="review-focus" aria-label="Review focus filters">
               <div class="review-focus-title">Review Focus</div>
               <div class="review-focus-grid">
+                <button type="button" class="focus-filter-btn" data-focus="existing-poles">Existing poles</button>
+                <button type="button" class="focus-filter-btn" data-focus="proposed-poles">Proposed poles</button>
+                <button type="button" class="focus-filter-btn" data-focus="angle-poles">Angle poles</button>
+                <button type="button" class="focus-filter-btn" data-focus="stays-anchors">Stays/anchors</button>
+                <button type="button" class="focus-filter-btn" data-focus="context-crossings">Context/crossings</button>
                 <button type="button" class="focus-filter-btn" data-focus="design-blockers">Design blockers</button>
                 <button type="button" class="focus-filter-btn" data-focus="review-required">Review required</button>
                 <button type="button" class="focus-filter-btn" data-focus="replacement-proximity">Existing/proposed matches</button>
-                <button type="button" class="focus-filter-btn" data-focus="missing-height">Missing heights</button>
+                <button type="button" class="focus-filter-btn" data-focus="missing-height">Missing existing heights</button>
+                <button type="button" class="focus-filter-btn" data-focus="missing-specification">Missing specifications</button>
+                <button type="button" class="focus-filter-btn" data-focus="records-with-remarks">Records with remarks</button>
               </div>
             </div>
             <div id="record-panel" style="display:none; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 8px;">
@@ -826,6 +833,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=13"></script>
+  <script src="/static/js/map-viewer.js?v=14"></script>
 </body>
 </html>

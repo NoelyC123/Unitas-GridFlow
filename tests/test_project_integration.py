@@ -396,11 +396,19 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert response.status_code == 200
     html = response.data.decode("utf-8")
     assert "Review Focus" in html
+    assert 'data-focus="existing-poles"' in html
+    assert 'data-focus="proposed-poles"' in html
+    assert 'data-focus="angle-poles"' in html
+    assert 'data-focus="stays-anchors"' in html
+    assert 'data-focus="context-crossings"' in html
     assert 'data-focus="design-blockers"' in html
     assert 'data-focus="replacement-proximity"' in html
     assert 'data-focus="missing-height"' in html
+    assert 'data-focus="missing-specification"' in html
+    assert 'data-focus="records-with-remarks"' in html
     assert "Existing/proposed matches" in html
-    assert "Missing heights" in html
+    assert "Missing existing heights" in html
+    assert "Missing specifications" in html
     assert "Surveyed route sequence" in html
     assert "Feature Type" in html
     assert "Existing pole" in html

@@ -186,6 +186,18 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
     )
     normalized |= _copy_if_missing(
         df,
+        "specification",
+        [
+            "specification",
+            "pole_specification",
+            "pole_spec",
+            "design_specification",
+            "design_spec",
+            "proposed_specification",
+        ],
+    )
+    normalized |= _copy_if_missing(
+        df,
         "location",
         [
             "location_name",
@@ -406,6 +418,7 @@ def _build_feature_collection(
                 ),
                 "pole_id": _safe_value(row.get("pole_id")),
                 "material": _safe_value(row.get("material")),
+                "specification": _safe_value(row.get("specification")),
                 "height": _safe_value(row.get("height")),
                 "qa_status": qa_status,
                 "structure_type": _safe_value(row.get("structure_type")),
