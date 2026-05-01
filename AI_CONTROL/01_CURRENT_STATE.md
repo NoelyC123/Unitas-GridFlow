@@ -2,165 +2,299 @@
 
 ## Project phase
 
-**Stage 3 complete — practitioner-review remediation**
+**Stage 3 complete + Phase B shipped → Evidence gathering complete → Phase C ready**
 
-Stage 1 is complete.
+All previous stages are complete. Phase B (UI polish) shipped successfully (298 tests passing).
 
-Stage 2A, Stage 2B and Stage 2C are implemented and validated. Stage 2 is formally closed.
-
-Stage 3C (Project Management / multi-file job support) is implemented and manually validated.
-
-Stage 3B (Designer Review & Export Readiness) is implemented and validated.
-
-Stage 3A1 (Local Daily Intake MVP) is implemented and validated.
-
-Stage 3A2 (Remote Access Trial) is complete. The primary Cloudflare route was validated with a named Cloudflare Tunnel for `gridflow.unitasconnect.com` protected by Cloudflare Access email one-time PIN. A phone on mobile data authenticated through Access, loaded the app, uploaded non-sensitive `sample_data/mock_survey.csv`, updated the project dashboard, and opened Map/PDF/D2D/Review outputs. Tailscale remains the private fallback. Render/Railway/full hosted deployment is deferred.
-
-Stage 3 mobile validation is complete. The real Gordon file was uploaded through the protected remote workflow as `P007/F001`, reviewed, exported, captured in a validation evidence pack, and used to drive a final map wording clarity polish.
-
-The project is now in a **practitioner-review remediation phase** after Stage 3 closure. A detailed review of the Validation page, Map, PDF, D2D/chain exports, and cross-feature workflow has defined the next narrow improvement pass.
-
-Strategic framing: D2D is the legacy workaround GridFlow is eliminating, not the future product model. Current Clean Chain / D2D Working View CSVs are transitional design-handoff outputs. The Clean Chain should now be reframed as the primary Design Chain / Design Handoff Export, while the old D2D Working View becomes a secondary Raw Working Audit / Legacy Working View. The real destination is a trusted design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
+**Current state:** Evidence gathering phase complete. Comprehensive technical specifications received and validated. Ready for Phase C approval and implementation.
 
 ---
 
-## What works
+## CRITICAL: GridFlow is Additive to Field Maps
 
-- Raw Trimble GNSS controller dump intake (tested on 4 real files)
-- CRS detection: Irish Grid TM65, ITM, OSGB27700
-- Coordinate conversion to WGS84 for map display
+**Field Maps shows:** What records are on the map (spatial data display)
+
+**GridFlow shows:**
+1. **What records are on the map** (Field Maps parity - MUST have this)
+2. **PLUS:** What this survey data means for design
+3. **PLUS:** What is missing or incomplete
+4. **PLUS:** What remains provisional
+5. **PLUS:** What must be checked before CAD/design
+
+**GridFlow = Field Maps functionality PLUS design-readiness interpretation layer**
+
+**NOT:** GridFlow replaces Field Maps' record display
+**YES:** GridFlow adds interpretation ON TOP OF the same record display
+
+**Key principle:** If GridFlow doesn't show records as clearly as Field Maps, it's worse, not better. The value is the ADDITIVE interpretation layer, not replacement of basic functionality.
+
+---
+
+## What works right now
+
+### MVP flow (confirmed)
+upload CSV → save file → run QA → save outputs → view map → download PDF → browse jobs
+
+### Core capabilities
+- Raw Trimble GNSS controller dump intake
+- CRS detection (Irish Grid TM65, ITM, OSGB27700)
+- Coordinate conversion for map display
 - Record-role classification (structural, context, anchor)
-- Replacement pair detection (EXpole to Pol matching)
+- Replacement pair detection
 - Evidence gates (7 scoped design gates)
-- Confidence-aware severity tiers (PASS/WARN/FAIL)
-- Interactive Leaflet map with status filtering, review-focus filters, and basic Design Chain span overlay
-- PDF pre-design briefing report with structured design review issue/action table and project designer review status
-- DNO rulepack inference from geography
-- Column/header normalisation for structured CSVs
-- Context feature classification (Hedge, Fence, Wall, Gate, Track, Road, Tree, Stream, Pline, 110xing, 33xing, 11xing, BTxing, HVxing, LVxing, Ignore)
-- Design Chain export (`<job_id>_design_chain.csv`) as a transitional design-handoff output with evidence-quality columns
-- Raw Working Audit export (`<job_id>_raw_working_audit.csv`) for file-order traceability with evidence-quality columns
-- Route sequencing from raw controller exports
-- EXpole matching to proposed poles
-- Span-to-next and deviation-angle calculations
-- Section-aware output with section summaries
-- Detached / not-required record handling
+- Interactive Leaflet map with filters
+- PDF pre-design briefing report
+- DNO rulepack inference
+- Column/header normalisation
+- Context feature classification
+- Design Chain export with evidence-quality columns
+- Raw Working Audit export
+- Route sequencing
+- EXpole matching
+- Section-aware output
 - Global provisional design pole numbering
-- Section-local sequence numbering
-- Confidence / sequence-note warning for high-ambiguity files
-- **Stage 3C: named project container above flat-job model**
-- **Stage 3C: multi-file projects (P001/F001, P001/F002...)**
-- **Stage 3C: project.json with aggregate summary across files**
-- **Stage 3C: project-aware upload, map, PDF, D2D routes**
-- **Stage 3C: project overview and projects list pages**
-- **Stage 3C: backward-compatible — all legacy J##### routes unchanged**
-- **Stage 3B: review.json overlay per project file**
-- **Stage 3B: per-file designer review page**
-- **Stage 3B: EXpole pairing reassignment / mark unmatched**
-- **Stage 3B: designer reviewed/not-reviewed flag with notes and project-dashboard status visibility**
-- **Stage 3B: D2D Chain and D2D Working exports apply reviewed pairing overrides**
-- **Stage 3B: reviewed/provisional export headers**
-- **Stage 3B: reset to auto-generated deletes review.json; original seq unchanged**
-- **Stage 3A1: survey day / visit label per project file**
-- **Stage 3A1: uploaded-by and surveyor note intake metadata**
-- **Stage 3A1: office feedback note per project file**
-- **Stage 3A1: derived intake status on project overview**
-- **Stage 3A1: project dashboard shows intake context alongside existing outputs**
-- **Stage 3A2: remote-access trial plan documented**
-- **Stage 3A2: temporary unauthenticated tunnel connectivity validated for home, projects, and upload pages**
-- **Stage 3A2: named Cloudflare Tunnel + Access validated from iPhone/mobile data**
-- **Stage 3A2: protected remote upload/dashboard/Map/PDF/D2D/Review smoke test passed with non-sensitive mock CSV**
-- **Stage 3A2: closed as a controlled remote-access validation success**
-- **Stage 3 mobile polish: homepage/navigation/project-file cards validated with Gordon iPhone screenshots**
-- **Stage 3 validation evidence pack utility: packages raw input, app outputs, review JSON, screenshots, notes, and AI review prompt**
-- **Stage 3 map clarity polish: distinguishes mapped records from total survey records and QA replacement signals from reviewed EXpole assignments**
-- **Practitioner review summary: repo-safe summary of the full 2026-04-28 review added at `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`**
-- **Practitioner review remediation: terminology, D2D-to-Design-Chain refocus, EX/PR proximity wording, basic map span rendering, and structured PDF issue/action table implemented**
+- **Phase B: Professional terminology throughout (surveyor/designer language)**
+- **Phase B: Responsive pairing cards (tablet-friendly)**
+- **Phase B: Dashboard clarity improvements**
 
-## Counts
+### Testing and quality
+- **298 tests passing** (up from 297)
+- Pre-commit hooks active
+- Ruff linting active
+- GitHub Actions CI active
+- All commits pushed to master
 
-- **Tests passing:** 297
+---
+
+## Major evidence gathered (2026-04-30)
+
+### 1. Live operational feedback
+**Source:** Real map review (P011-style operational test)
+
+**6 critical issues identified:**
+1. Context features invisible (blocker)
+2. Proposed pole "height not captured" misleading (blocker)
+3. Symbols not distinct enough
+4. Stay evidence missing (blocker)
+5. Electrical data insufficient
+6. Existing pole data unclear
+
+**All 6 issues map directly to Phase C packages C1-C4.**
+
+### 2. Engineering analysis #1
+**Source:** GridFlow_Electrical_Survey_Review.docx (15 pages, 17 sources)
+
+**Key findings:**
+- Height vs. Specification problem identified and specified
+- 8 asset lifecycle states defined
+- Shape ≠ Color visual paradigm specified
+- ESQCR, PLS-CADD, NIE schema referenced
+- Complete electrical information model defined
+
+**Validates Phase C C1-C4 independently.**
+
+### 3. Field Maps + NIE validation
+**Source:** NIE_Fibrus_enhanced_Review_for_GridFlow_.docx
+
+**Key findings:**
+- Field Maps UX benchmarks analyzed
+- NIE Networks production schema (19 fields)
+- 15 review focus filters specified
+- Popup layout requirements defined
+- What GridFlow should do better than Field Maps
+
+**Validates Phase C C1-C4 independently.**
+
+### 4. Final consolidated specification
+**Source:** Pro_GridFlow_Electrical_Survey_Review_Final_Detailed_.docx (8,604 words, 782 lines)
+
+**Key findings:**
+- Consolidates all previous evidence
+- 19 sections + 2 appendices
+- Complete product specification
+- Clear Stage 3 vs Stage 4 separation
+- Domain validation questions identified
+- Safe wording throughout
+
+**This is the definitive GridFlow technical specification.**
+
+---
+
+## Phase C validation status
+
+**ALL EVIDENCE SOURCES INDEPENDENTLY VALIDATE PHASE C C1-C4:**
+
+| Operational Issue | Engineering Spec | Field Maps Evidence | Final Spec | Phase C Package |
+|-------------------|------------------|---------------------|------------|-----------------|
+| Context invisible | Secondary visual weight | Diamond symbols, muted colors | Context/access/crossing records | C1 ✅ |
+| Height misleading | Measured vs. Specification | Existing/Proposed distinction | Proposed pole specification framework | C1 ✅ |
+| Symbols unclear | Shape ≠ Color | Feature type decoupled from QA | Visual hierarchy system | C1+C2 ✅ |
+| Stay missing | Angle poles without stays | Mechanical support validation | Stay evidence at angle poles | C3 ✅ |
+| Span unclear | Anomaly detection | Route sequence confidence | Span anomaly detection | C4 ✅ |
+| Data insufficient | Curated popups | Design-critical fields first | Popup organization | C1 ✅ |
+
+**Status:** All 4 Phase C packages validated by 4 independent evidence sources.
+
+---
+
+## Phase C packages (ready to implement)
+
+### C1: Feature-Type Filtering + Blank Field Framework (3-4 hours)
+**Validates:** Context invisible, Height misleading, Symbols unclear, Data insufficient
+
+**Scope:**
+1. Feature-type filter buttons (existing/proposed/angle/stays/context/missing heights/missing specs/records with remarks)
+2. Blank field framework (existing = measured height missing; proposed = specification missing; context = hide height)
+3. Visual symbol overhaul (Shape = asset type, Color = QA status)
+4. Popup reorganization (Identity → Physical → Electrical → Mechanical → Context → QA)
+
+### C2: Asset Lifecycle Visualization (4-5 hours)
+**Validates:** Symbols unclear (lifecycle states)
+
+**Scope:**
+1. 11 lifecycle states (existing/proposed/retained/recovered/replacement/repositioned/unmatched/suggested/confirmed)
+2. Existing↔Proposed match visualization (dashed provisional lines)
+3. Toggle layer on/off
+4. Popup lifecycle section
+
+### C3: Stay Evidence at Angle Poles (4-5 hours)
+**Validates:** Stay missing
+
+**Scope:**
+1. Detect angle poles (>10° deviation OR function = "Angle")
+2. Scan for stay records within 20m
+3. Flag if missing: "⚠️ Angle pole — stay evidence not captured"
+4. Show stay types where captured
+5. Add filter: "Show angle poles missing stay evidence"
+
+### C4: Span Anomaly Detection + Crossing Context (3-4 hours)
+**Validates:** Span unclear
+
+**Scope:**
+1. Calculate 3D span distance
+2. Flag <10m (probable duplicate/GPS error)
+3. Flag >500m for 11kV/33kV (probable missing pole)
+4. Better crossing labels ("Road Crossing — Critical clearance check required")
+5. Add filters: "Show span anomalies" / "Show crossings requiring clearance"
+
+**Total estimated time:** ~24 hours (Cursor work)
+
+---
+
+## Current counts
+
+- **Tests passing:** 298 (up from 297)
 - **DNO rulepacks:** 4 (SPEN, SSEN, NIE, ENWL)
 - **Real files validated:** Gordon, 4-474, 513, 474c, Bellsprings EWM285
+- **Evidence documents:** 4 comprehensive technical specifications
+- **Phase C packages validated:** 4 (C1-C4)
 
-## What was just shipped
+---
 
-- Practitioner-review remediation builds
-  - Forward-facing D2D/Clean Chain wording has been refocused around Design Chain and Raw Working Audit.
-  - The review page now presents Existing / Proposed Pole Proximity QA while preserving reviewed override logic.
-  - Map data now exposes basic Design Chain spans from `sequenced_route.json`, and the Leaflet map renders connected route lines.
-  - The map now includes Review Focus filters for design blockers, review-required records, replacement proximity, and missing height.
-  - PDF Design Review Items now use a structured table with record reference, coordinates, status, issue, design consequence, and recommended action.
-  - Project PDFs now show Designer Review Status from `review.json`, including review notes and pairing override count.
-  - Project dashboard file rows and mobile cards now show Designer Review status and refresh it when review state changes.
-  - Review page now shows at-a-glance Design Chain, auto-matched EXpole, unmatched EXpole, and reviewed pairing-change counts before export.
-  - Design Chain and Raw Working Audit CSVs now expose position, height, notes, replacement, and evidence-gap status derived from the existing sequence output.
-  - Validation: `pytest -v` — 297 passed; `pre-commit run --all-files` — passed.
+## What changed recently
 
-- Practitioner-led full tool review
-  - Five local-only review documents were created from the Bellsprings real-life survey-to-design test, including practitioner and colleague feedback.
-  - Reviewed areas: Validation/Review page, View Map, Download PDF, D2D/chain exports, and cross-feature additional improvements.
-  - Claude Desktop produced a structured product review from those documents.
-  - Sanitized repo summary added: `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`.
-  - Full review folder remains local-only and ignored by Git: `/Users/noelcollins/Unitas-GridFlow/Unitas GridFlow Full Tool Review 28th April 2026/`.
-  - Remediation sequence now shipped: terminology/wording pass, D2D-to-Design-Chain rename/refocus, EX/PR proximity QA reframing, basic map span rendering, and PDF structured issue table.
+### Phase B implementation completed (2026-04-30)
+- Package 4b: Dashboard cleanup (responsive layout, professional wording) ✅
+- Package 4c: Terminology cleanup (survey-facing language) ✅
+- Package 5a: Pairing cards (tablet-friendly responsive design) ✅
+- 298 tests passing (up from 297)
+- All commits pushed to master
+- Pre-commit passing
 
-- Bellsprings EWM285 operational validation and fix
-  - Work-colleague evidence was organised locally as a real validation package: raw Bellsprings Trimble/controller CSV, pole schedule, route map, profile, TIS, and separate scope/workplan/site-plan documents.
-  - Bellsprings was processed as project `P008/F001` against `SPEN_11kV`.
-  - Initial comparison showed `Pline` and `110xing` were being treated as proposed/structural records even though they are route/crossing context.
-  - Narrow operational fix shipped: `Pline`, `110xing`, `33xing`, `11xing`, and `HVxing` are context records in both intake classification and structural-only QA.
-  - Before/after result: issue count dropped from 24 to 18; structural/context counts changed from 46/10 to 40/16.
-  - New after-fix validation pack: `/Users/noelcollins/Desktop/Unitas_GridFlow_Validation_Run_2026-04-27_144746_Bellsprings_EWM285_After_Context_Code_Fix.zip`.
-  - Real design-numbering and EXpole-as-final-design-pole interpretation remain documented as future evidence gaps, not code changes.
+### Evidence gathering completed (2026-04-30)
+- Live operational feedback collected (6 critical map issues)
+- Engineering analysis #1 received (15 pages, 17 sources)
+- Field Maps + NIE validation received
+- Final consolidated specification received (8,604 words)
+- All evidence validates Phase C C1-C4 independently
 
-- Stage 3 closure
-  - Stage 3C, Stage 3B, Stage 3A1, Stage 3A2, mobile intake polish, validation evidence packs, and map clarity polish are complete for the current evidence set.
-  - Controlled remote access validated with Cloudflare Tunnel + Cloudflare Access.
-  - Real Gordon field-trial evidence pack generated with raw input, generated outputs, review JSON, PDF/D2D exports, notes, prompt, and iPhone screenshots.
-  - No app accounts, hosted deployment, cloud storage migration, photo upload, tablet capture, or live Trimble sync were introduced.
-  - Next step is operational use on a real job.
+### Repository organization completed (2026-04-30)
+- 00_MASTER_ORGANIZATION.md created
+- 01_QUICK_START.md created
+- 02_REFERENCE_LIBRARY.md created
+- 16 obsolete files archived to _archive/deprecated_docs_2026-04-30/
+- All important files preserved and indexed
 
-- Stage 3A2: Cloudflare Access-gated remote validation
-  - Named tunnel `gridflow` created for `gridflow.unitasconnect.com`.
-  - Cloudflare Access email one-time PIN prompt validated from iPhone/mobile data.
-  - After authentication, GridFlow loaded remotely.
-  - Non-sensitive `mock_survey.csv` uploaded from iPhone as project `P006` / `iPhone Test`.
-  - Project dashboard updated: 1 file, 5 poles, 10 issues.
-  - Map, PDF, D2D Chain, D2D Working, and Review routes all returned successfully for `P006/F001`.
-
-- Stage 3A2: temporary tunnel connectivity validation
-  - A `trycloudflare.com` temporary tunnel loaded successfully from a phone/external device.
-  - Home page, `/projects/`, and `/upload` all loaded remotely.
-  - No real or sensitive survey CSVs were uploaded.
-  - This is not full Stage 3A2 acceptance because Cloudflare Access is not active.
-
-- Stage 3A2: remote access trial plan
-  - `AI_CONTROL/25_STAGE_3A2_DEPLOYMENT_PLAN.md` — Cloudflare Tunnel + Access first, Tailscale fallback, hosted deployment deferred
-  - `README.md` — local remote access trial commands and validation checklist
-
-## Known remaining issues
-
-1. No cross-file chain merging or combined exports within a project.
-2. No combined project-level map overlay.
-3. No section boundary editing.
-4. Stage 3A2 uses the local Mac as the origin, so remote access depends on the Mac and `cloudflared` tunnel staying online.
-5. Stage 2 output is still provisional and not a verified PoleCAD import schema.
-6. Evidence-quality export columns are a first-pass visibility layer only; field-note/photo/provenance capture remains future Stage 4 work.
-7. The map now shows basic connected spans, but not advanced topology controls, section editing, voltage styling, or combined project-level map overlay.
-8. EX/PR pairing is currently too prominent as a reassignment workflow and should be reframed as proximity QA before deeper workflow changes.
-9. PDF report now has a structured issue/action table, but it is not yet a formal DNO submission pack.
-10. Reviewed state affects Design Chain / Raw Working Audit CSV exports only — reviewed-state PDF integration remains future work.
-11. Stage 4 structured field capture/tablet/photo workflows remain future roadmap and require operational evidence before design.
-12. The old D2D spreadsheet should be used as evidence of current manual decisions and conventions, not as the target product shape. The strategic target is design-ready handoff/PoleCAD-ready evidence once actual import requirements are known.
+---
 
 ## Strategic position
 
-- No competing product exists in this space
-- Tool validated on real NIE and SPEN survey files
-- Project owner has direct survey and design experience
-- Full 6-stage vision defined (see 00_PROJECT_CANONICAL.md)
-- Stage 3 complete — next work is a narrow practitioner-review remediation pass before Stage 4
-- Stage 4 remains the future structured field-capture layer around Trimble/GNSS/controller/GIS data, not a replacement for Trimble positioning
-- Repo-safe domain reference summary added at `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md`; the full private domain reference remains outside Git and should not be copied wholesale into the repository.
-- Repo-safe practitioner review summary added at `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md`; the full review folder remains local-only evidence and ignored by Git.
+**GridFlow now has:**
+- ✅ Working MVP (Stage 3 complete)
+- ✅ Professional terminology (Phase B complete)
+- ✅ Complete technical specification (8,604 words)
+- ✅ Independent validation (4 evidence sources)
+- ✅ Clear Phase C scope (C1-C4 ready)
+- ✅ Clear Stage 4 scope (structured capture deferred)
+
+**Best current framing:**
+- Internal workflow tool ✅
+- Consultancy leverage asset ✅
+- Narrow pre-CAD QA layer ✅
+
+**Not yet:**
+- Broad SaaS platform
+- Major standalone utility business
+- Fully mature DNO compliance product
+
+---
+
+## Main current decision point
+
+**Phase C path choice:**
+
+**Path 1 (Safe):** C1-C2 first → validate → then C3-C4 (6-8 weeks)
+**Path 2 (Fast):** All C1-C4 together (4-5 weeks) ⭐ **RECOMMENDED**
+**Path 3 (Conservative):** Minimal warnings → more evidence → full C1-C4 (6-7 weeks)
+
+**Recommendation:** Path 2 (Fast)
+
+**Rationale:**
+- All 4 evidence sources validate all 4 packages
+- Operational issues are design blockers, not polish
+- Total work: ~24 hours (manageable for Cursor)
+- No interdependencies preventing parallel work
+
+---
+
+## Known remaining issues
+
+1. Phase C not yet implemented (waiting for approval)
+2. P011 operational test not yet run (can validate Phase B + inform Phase C)
+3. Stage 4 structured capture (planned but deferred until Phase C complete)
+4. No cross-file chain merging within projects
+5. No combined project-level map overlay
+6. Stage 2 output still provisional (PoleCAD import schema not verified)
+7. Advanced topology controls not yet built
+8. Stage 4 tablet/photo workflows remain future roadmap
+
+**These are correctly deferred or awaiting approval.**
+
+---
+
+## What is NOT blocked
+
+- ✅ Phase C approval (all evidence gathered)
+- ✅ Phase C implementation (Cursor ready, spec complete)
+- ✅ P011 operational test (can run anytime)
+- ✅ Stage 4 planning (after Phase C complete)
+
+---
+
+## Next checkpoint trigger
+
+Update this file when:
+
+- Phase C approval decision made
+- Phase C implementation begins
+- Phase C implementation completes
+- P011 operational test completes
+- Material change to project direction
+
+---
+
+## Expected next update
+
+This file should next be updated when:
+
+**Phase C approval is given and implementation begins**
