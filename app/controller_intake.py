@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 from pyproj import Transformer
 
+from app.asset_classifier import classify_asset_type
+
 # Detection ranges derived from official OSi/EPSG specs.
 # ITM (EPSG:2157): false E=600000 / N=750000 — Ireland practical extent
 # TM65 (EPSG:29900): false E=200000 / N=250000 — old Irish National Grid
@@ -137,7 +139,11 @@ _CONTEXT_CODES: frozenset[str] = frozenset(
 
 
 def _classify_role(row: "pd.Series") -> str:
-    """Return 'structural', 'context', or 'anchor' for a single survey row."""
+    """Return 'structural', 'context', 'third_party', or 'anchor' for a survey row."""
+    classification = classify_asset_type(row)
+    if classification.get("primary_type") == "third_party_infrastructure":
+        return "third_party"
+
     st = row.get("structure_type")
     if st is None or (isinstance(st, str) and st.strip() == ""):
         # No feature code: distinguish anchor reference points from uncoded survey rows.
@@ -156,7 +162,7 @@ def _classify_role(row: "pd.Series") -> str:
 
 
 def classify_record_roles(df: pd.DataFrame) -> pd.DataFrame:
-    """Add a _record_role column ('structural', 'context', 'anchor') to df.
+    """Add a _record_role column ('structural', 'context', 'third_party', 'anchor') to df.
 
     The column gates structural QA rules and powers the file composition
     summary shown in the map side panel and PDF report.
@@ -458,9 +464,11 @@ def build_completeness_summary(df: pd.DataFrame) -> dict:
         structural_count = int(role_counts.get("structural", 0))
         context_count = int(role_counts.get("context", 0))
         anchor_count = int(role_counts.get("anchor", 0))
+        third_party_count = int(role_counts.get("third_party", 0))
         result["structural_count"] = structural_count
         result["context_count"] = context_count
         result["anchor_count"] = anchor_count
+        result["third_party_count"] = third_party_count
 
         # Per-field coverage on structural records only — avoids context features
         # (Gate height 1.2m, Fence height 1.8m) polluting the structural stats.

@@ -391,6 +391,7 @@
     .asset-marker.asset-anchor .asset-marker-shape { background: #f3f4f6; color: #374151; clip-path: polygon(50% 0, 100% 100%, 0 100%); font-size: 0.28rem; height: 8px; padding-top: 2px; width: 8px; }
     .asset-marker.asset-context .asset-marker-shape { background: #f3f4f6 !important; border-color: #9ca3af !important; border-radius: 3px; color: #6b7280; font-size: 0.22rem; height: 6px; opacity: 0.62; transform: rotate(45deg); width: 6px; }
     .asset-marker.asset-context .asset-marker-label { transform: rotate(-45deg); }
+    .asset-marker.asset-thirdparty .asset-marker-shape { background: #fef3c7; border-color: #f59e0b !important; border-radius: 3px; color: #92400e; font-size: 0.28rem; height: 11px; width: 11px; }
     .asset-marker.asset-other .asset-marker-shape { border-radius: 999px; }
     .asset-marker.is-angle .asset-marker-shape { font-size: 0.36rem; height: 12px; position: relative; width: 12px; }
     .asset-marker-angle-badge {
@@ -466,6 +467,7 @@
     .legend-symbol.anchor { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 4px; }
     .legend-symbol.context { border-radius: 4px; font-size: 0.42rem; transform: rotate(45deg); }
     .legend-symbol.context span { transform: rotate(-45deg); }
+    .legend-symbol.thirdparty { background: #fef3c7; border-color: #f59e0b; border-radius: 3px; color: #92400e; }
 
     .meta-row {
       display: flex;
@@ -578,6 +580,26 @@
       border-bottom: 1px solid #e5e7eb;
       margin-bottom: 7px;
       padding-bottom: 5px;
+    }
+
+    .asset-popup-thirdparty {
+      background: #fffbeb;
+      border: 3px solid #f59e0b;
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    .asset-popup-thirdparty .popup-section:first-of-type {
+      background: #fef3c7;
+      border-left: 5px solid #d97706;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      padding: 10px;
+    }
+
+    .asset-popup-thirdparty .popup-section:first-of-type .popup-section-title {
+      border-bottom-color: #d97706;
+      color: #92400e;
     }
 
     .popup-section {
@@ -782,6 +804,7 @@
                 <label class="layer-toggle"><input type="checkbox" data-layer="proposed" checked> Proposed pole records</label>
                 <label class="layer-toggle"><input type="checkbox" data-layer="angle" checked> Angle pole records</label>
                 <label class="layer-toggle"><input type="checkbox" data-layer="stays" checked> Stays/Anchors</label>
+                <label class="layer-toggle"><input type="checkbox" data-layer="thirdparty" checked> Third-party infrastructure</label>
                 <label class="layer-toggle"><input type="checkbox" data-layer="context"> Context/Crossings</label>
                 <label class="layer-toggle"><input type="checkbox" data-layer="spans" checked> Design Chain Spans</label>
                 <label class="layer-toggle"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> Suggested Replacement Links</label>
@@ -839,6 +862,10 @@
                 <div class="map-legend-item">
                   <span class="legend-symbol context"><span>CTX</span></span>
                   <span>Context / crossing record</span>
+                </div>
+                <div class="map-legend-item">
+                  <span class="legend-symbol thirdparty">TP</span>
+                  <span>Third-party infrastructure</span>
                 </div>
               </div>
               <div class="map-legend-title" style="margin-top:8px;">QA Status (by stroke color)</div>
@@ -1090,6 +1117,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=20"></script>
+  <script src="/static/js/map-viewer.js?v=21"></script>
 </body>
 </html>

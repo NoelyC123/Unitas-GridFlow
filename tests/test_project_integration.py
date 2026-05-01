@@ -401,9 +401,11 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-layer="proposed"' in html
     assert 'data-layer="angle"' in html
     assert 'data-layer="stays"' in html
+    assert 'data-layer="thirdparty"' in html
     assert 'data-layer="context"' in html
     assert 'data-layer="spans"' in html
     assert "Context/Crossings" in html
+    assert "Third-party infrastructure" in html
     assert 'data-focus="design-blockers"' in html
     assert 'data-focus="replacement-proximity"' in html
     assert 'data-focus="missing-height"' in html
@@ -425,6 +427,7 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Existing pole (square)" in html
     assert "Proposed pole (circle)" in html
     assert "Angle function (A badge)" in html
+    assert "Third-party infrastructure" in html
     assert "QA Status (by stroke color)" in html
     assert "popup-section-title" in html
     assert "popup-field-label" in html
@@ -523,11 +526,50 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
     assert props["voltage"] == "11kV"
     assert props["photo_links"] == []
     assert props["source_confidence"] == "legacy map data"
+    assert props["primary_type"] == "electric_network"
+    assert props["popup_type_label"] == "Electric Network Structural Pole"
+    assert props["is_structural_pole"] is True
     assert props["year_installed"] is None
     assert props["circuit_id"] is None
     assert props["stay_bearing"] is None
     assert props["action_required"] is None
     assert props["distance_from_route_m"] is None
+
+
+def test_project_map_data_backfills_bt_expole_as_third_party(client_and_root):
+    client, projects_root = client_and_root
+
+    file_dir = _make_file_slot(projects_root, "P001", "F001", "survey.csv")
+    _write_json(
+        file_dir / "map_data.json",
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [-3.014, 54.521]},
+                    "properties": {
+                        "pole_id": "72",
+                        "structure_type": "EXpole",
+                        "name": "bt pole",
+                        "height": 6.5,
+                    },
+                }
+            ],
+            "metadata": {"job_id": "P001/F001", "rulepack_id": "SPEN_11kV"},
+        },
+    )
+
+    response = client.get("/map/data/project/P001/F001")
+
+    assert response.status_code == 200
+    props = response.get_json()["features"][0]["properties"]
+    assert props["record_role"] == "third_party"
+    assert props["asset_intent"] == "third_party_not_network"
+    assert props["primary_type"] == "third_party_infrastructure"
+    assert props["infrastructure_owner"] == "telecoms"
+    assert props["popup_type_label"] == "Third-Party Telecoms Pole (BT/Openreach)"
+    assert props["is_structural_pole"] is False
 
 
 def test_project_detail_includes_responsive_file_card_layout(client_and_root):

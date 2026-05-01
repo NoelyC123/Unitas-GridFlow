@@ -9,6 +9,7 @@ from typing import Any
 import pandas as pd
 from flask import Blueprint, jsonify, request
 
+from app.asset_classifier import classify_asset_type, get_popup_type_label
 from app.controller_intake import (
     build_circuit_summary,
     build_completeness_summary,
@@ -522,7 +523,7 @@ def _build_replacement_links(
         int(row.get("__row_index__"))
         for _, row in df.iterrows()
         if isinstance(row.get("__row_index__"), int)
-        and row.get("_record_role") not in ("context", "anchor")
+        and row.get("_record_role") not in ("context", "third_party", "anchor")
     )
     prev_of: dict[int, int] = {}
     for i in range(1, len(structural_indices)):
@@ -778,6 +779,11 @@ def _build_feature_collection(
         network_fields = infer_display_network_fields(row, rulepack_id)
         photo_fields = _photo_indicators(row)
         equipment_items = _split_display_list(network_fields.get("equipment"))
+        classification = classify_asset_type(row)
+        is_third_party = classification.get("primary_type") == "third_party_infrastructure"
+        if is_third_party:
+            asset_intent = "third_party_not_network"
+            lifecycle_state = None
 
         feature = {
             "type": "Feature",
@@ -812,6 +818,17 @@ def _build_feature_collection(
                 "survey_date": _display_value(row, "survey_date"),
                 "gnss_accuracy": _display_value(row, "gnss_accuracy"),
                 "source_confidence": _safe_value(network_fields.get("source_confidence")),
+                "primary_type": _safe_value(classification.get("primary_type")),
+                "infrastructure_owner": _safe_value(classification.get("infrastructure_owner")),
+                "asset_subtype": _safe_value(classification.get("subtype")),
+                "is_structural_pole": bool(classification.get("is_structural_pole")),
+                "is_electric_network": bool(classification.get("is_electric_network")),
+                "classification_confidence": _safe_value(
+                    classification.get("classification_confidence")
+                ),
+                "classification_warnings": classification.get("warnings", []),
+                "classification_basis": _safe_value(classification.get("classification_basis")),
+                "popup_type_label": get_popup_type_label(classification),
                 "elevation": _display_value(row, "elevation"),
                 "year_installed": _display_value(row, "year_installed"),
                 "circuit_id": _display_value(row, "circuit_id"),
@@ -1132,7 +1149,12 @@ def process_job(
             df, map_issues_df, job_id, requested_dno, file_type
         )
         feature_collection["metadata"]["auto_normalized"] = auto_normalized
-        for _rkey in ("structural_count", "context_count", "anchor_count"):
+        for _rkey in (
+            "structural_count",
+            "context_count",
+            "third_party_count",
+            "anchor_count",
+        ):
             if _rkey in completeness:
                 feature_collection["metadata"][_rkey] = completeness[_rkey]
 

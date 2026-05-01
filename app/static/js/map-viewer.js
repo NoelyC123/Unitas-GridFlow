@@ -20,6 +20,7 @@ const MARKER_SIZES = {
   angle: 12,
   anchor: 8,
   context: 6,
+  thirdparty: 11,
   other: 9,
 };
 
@@ -52,6 +53,7 @@ class MapViewer {
       proposed: true,
       angle: true,
       stays: true,
+      thirdparty: true,
       context: false,
       spans: true,
       matches: true,
@@ -127,6 +129,7 @@ class MapViewer {
       const parts = [];
       if (meta.structural_count != null) parts.push(`<span style="color:#2e8b57;">■ ${meta.structural_count} structural</span>`);
       if (meta.context_count != null && meta.context_count > 0) parts.push(`<span style="color:#9ca3af;">■ ${meta.context_count} context</span>`);
+      if (meta.third_party_count != null && meta.third_party_count > 0) parts.push(`<span style="color:#b45309;">■ ${meta.third_party_count} third-party</span>`);
       if (meta.anchor_count != null && meta.anchor_count > 0) parts.push(`<span style="color:#6b7280;">◇ ${meta.anchor_count} anchor</span>`);
       roleEl.innerHTML = parts.join('<span style="margin:0 5px;color:#d1d5db;">·</span>');
       roleEl.style.display = parts.length > 0 ? 'block' : 'none';
@@ -578,6 +581,7 @@ class MapViewer {
 
   passesLayerState(fd) {
     const props = fd.props || {};
+    if (this.isThirdPartyInfrastructure(props)) return this.layerState.thirdparty;
     if (this.isContextRecord(props)) return this.layerState.context;
     if (this.isStayOrAnchor(props)) return this.layerState.stays;
     if (this.isAnglePole(props) && !this.layerState.angle) return false;
@@ -627,6 +631,15 @@ class MapViewer {
     return role === 'context' || CONTEXT_FEATURE_CODES.has(props.structure_type || '');
   }
 
+  isThirdPartyInfrastructure(props) {
+    const primary = String(props.primary_type || '').toLowerCase();
+    const role = String(props.record_role || '').toLowerCase();
+    const intent = String(props.asset_intent || '').toLowerCase();
+    return primary === 'third_party_infrastructure'
+      || role === 'third_party'
+      || intent === 'third_party_not_network';
+  }
+
   hasSpanAnomaly(props) {
     const allText = [
       ...(props.issue_texts || []),
@@ -667,12 +680,14 @@ class MapViewer {
   }
 
   isExistingPole(props) {
+    if (this.isThirdPartyInfrastructure(props)) return false;
     const st = String(props.structure_type || '').toLowerCase();
     const intent = String(props.asset_intent || '').toLowerCase();
     return st.includes('expole') || intent.includes('existing');
   }
 
   isProposedPole(props) {
+    if (this.isThirdPartyInfrastructure(props)) return false;
     const st = String(props.structure_type || '').toLowerCase();
     const intent = String(props.asset_intent || '').toLowerCase();
     return st.includes('prpole') || st === 'pol' || st.includes('angle') || intent.includes('proposed');
@@ -708,15 +723,17 @@ class MapViewer {
   buildPopupHtml(props, status, lat, lon) {
     const assetKind = this.popupAssetKind(props);
     const title = this.escapeHtml(props.name || props.id || 'Record');
-    const sections = assetKind === 'context'
-      ? this.contextPopupSections(props, status, lat, lon)
-      : assetKind === 'stay'
-        ? this.stayPopupSections(props, status, lat, lon)
-        : assetKind === 'proposed'
-          ? this.proposedPopupSections(props, status, lat, lon)
-          : assetKind === 'angle'
-            ? this.anglePopupSections(props, status, lat, lon)
-            : this.existingPopupSections(props, status, lat, lon);
+    const sections = assetKind === 'thirdparty'
+      ? this.thirdPartyPopupSections(props, status, lat, lon)
+      : assetKind === 'context'
+        ? this.contextPopupSections(props, status, lat, lon)
+        : assetKind === 'stay'
+          ? this.stayPopupSections(props, status, lat, lon)
+          : assetKind === 'proposed'
+            ? this.proposedPopupSections(props, status, lat, lon)
+            : assetKind === 'angle'
+              ? this.anglePopupSections(props, status, lat, lon)
+              : this.existingPopupSections(props, status, lat, lon);
     return `
       <div class="asset-popup asset-popup-${assetKind}">
         <div class="popup-title">${title}</div>
@@ -726,6 +743,7 @@ class MapViewer {
   }
 
   popupAssetKind(props) {
+    if (this.isThirdPartyInfrastructure(props)) return 'thirdparty';
     if (this.isContextRecord(props)) return 'context';
     if (this.isStayOrAnchor(props)) return 'stay';
     if (this.isAnglePole(props)) return 'angle';
@@ -742,6 +760,36 @@ class MapViewer {
       { title: 'Location', rows: this.locationRows(props, lat, lon) },
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
+      { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  thirdPartyPopupSections(props, status, lat, lon) {
+    return [
+      {
+        title: 'Third-Party Infrastructure',
+        rows: [
+          this.popupRow('Type', props.popup_type_label || 'Third-Party Infrastructure', 'warning'),
+          this.popupRow('Owner', props.infrastructure_owner || 'unknown', 'warning'),
+          this.popupRow(
+            'Classification',
+            'NOT part of electric network',
+            'warning',
+            'This asset is owned or maintained by a third party, not the DNO.',
+          ),
+        ],
+      },
+      { title: 'Identity', rows: this.identityRows(props, status, props.popup_type_label || 'Third-Party Infrastructure') },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      {
+        title: 'Design Action',
+        rows: [
+          this.popupRow('Designer Action', 'EXCLUDE from electric network design', 'warning'),
+          this.popupRow('Construction Impact', 'Note proximity for access/construction planning only', 'info'),
+          this.popupRow('Wayleave / Coordination', 'May require third-party coordination if work nearby', 'info'),
+        ],
+      },
       { title: 'QA / Review', rows: this.qaRows(props) },
     ];
   }
@@ -794,7 +842,7 @@ class MapViewer {
   identityRows(props, status, fallbackType) {
     return [
       this.popupRow('Point', props.pole_id || props.id),
-      this.popupRow('Type', this.explainAssetType(props.structure_type) || fallbackType),
+      this.popupRow('Type', props.popup_type_label || this.explainAssetType(props.structure_type) || fallbackType),
       this.popupRow('Feature Code', props.structure_type),
       this.popupRow('Circuit ID', props.circuit_id || 'not captured', props.circuit_id ? 'ok' : 'info'),
       this.popupRow('Year Installed', props.year_installed || 'not captured', props.year_installed ? 'ok' : 'info'),
@@ -1135,6 +1183,9 @@ class MapViewer {
     const role = String(props.record_role || '').toLowerCase();
     const intent = String(props.asset_intent || '').toLowerCase();
 
+    if (this.isThirdPartyInfrastructure(props)) {
+      return { type: 'thirdparty', label: 'TP', title: 'Third-party infrastructure' };
+    }
     if (st.includes('expole') || intent.includes('existing')) {
       return { type: 'existing', label: 'EX', title: 'Existing pole' };
     }

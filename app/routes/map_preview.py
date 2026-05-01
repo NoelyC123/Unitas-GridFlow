@@ -6,6 +6,8 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, render_template
 
+from app.asset_classifier import classify_asset_type, get_popup_type_label
+
 map_preview_bp = Blueprint("map_preview", __name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -29,6 +31,15 @@ POPUP_DATA_FIELDS = {
     "survey_date": None,
     "gnss_accuracy": None,
     "source_confidence": "legacy map data",
+    "primary_type": None,
+    "infrastructure_owner": None,
+    "asset_subtype": None,
+    "is_structural_pole": None,
+    "is_electric_network": None,
+    "classification_confidence": None,
+    "classification_warnings": [],
+    "classification_basis": None,
+    "popup_type_label": None,
     "photo_links": [],
     "has_full_pole_photo": False,
     "has_pole_top_photo": False,
@@ -135,6 +146,20 @@ def _enrich_popup_data_model(data: dict) -> dict:
         for field, default in POPUP_DATA_FIELDS.items():
             if field not in props:
                 props[field] = list(default) if isinstance(default, list) else default
+        classification = classify_asset_type(props)
+        if not props.get("primary_type"):
+            props["primary_type"] = classification.get("primary_type")
+            props["infrastructure_owner"] = classification.get("infrastructure_owner")
+            props["asset_subtype"] = classification.get("subtype")
+            props["is_structural_pole"] = bool(classification.get("is_structural_pole"))
+            props["is_electric_network"] = bool(classification.get("is_electric_network"))
+            props["classification_confidence"] = classification.get("classification_confidence")
+            props["classification_warnings"] = classification.get("warnings", [])
+            props["classification_basis"] = classification.get("classification_basis")
+            props["popup_type_label"] = get_popup_type_label(classification)
+        if props.get("primary_type") == "third_party_infrastructure":
+            props["record_role"] = "third_party"
+            props["asset_intent"] = "third_party_not_network"
         if not props.get("voltage"):
             props["voltage"] = _infer_voltage(props, metadata)
         if props.get("photo_links") and not props.get("photo_count"):

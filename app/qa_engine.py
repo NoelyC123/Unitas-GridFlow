@@ -153,6 +153,8 @@ def infer_display_network_fields(
 
 def _is_context_row(row: "pd.Series", has_structure_type: bool) -> bool:
     """Return True when this row represents a non-structural contextual feature."""
+    if row.get("_record_role") in {"context", "third_party"}:
+        return True
     if not has_structure_type:
         return False
     st = row.get("structure_type")

@@ -522,6 +522,39 @@ def test_build_feature_collection_expole_gets_existing_asset_intent() -> None:
     assert props["asset_intent"] == "Existing asset"
 
 
+def test_build_feature_collection_bt_expole_gets_third_party_fields() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "pole_id": "72",
+                "structure_type": "EXpole",
+                "height": 6.5,
+                "material": "Wood",
+                "location": "bt pole",
+                "_record_role": "third_party",
+                "lat": 54.5200,
+                "lon": -3.0000,
+                "__row_index__": 0,
+            }
+        ]
+    )
+    issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    fc = _build_feature_collection(
+        df=df, issues_df=issues_df, job_id="J_TEST", rulepack_id="SPEN_11kV"
+    )
+
+    props = fc["features"][0]["properties"]
+    assert props["record_role"] == "third_party"
+    assert props["asset_intent"] == "third_party_not_network"
+    assert props["lifecycle_state"] is None
+    assert props["primary_type"] == "third_party_infrastructure"
+    assert props["infrastructure_owner"] == "telecoms"
+    assert props["popup_type_label"] == "Third-Party Telecoms Pole (BT/Openreach)"
+    assert props["is_structural_pole"] is False
+    assert props["is_electric_network"] is False
+
+
 def test_build_feature_collection_replacement_pair_non_expole_gets_proposed_support() -> None:
     """Non-EXpole with replacement-pair WARN must receive asset_intent='Proposed support'.
 

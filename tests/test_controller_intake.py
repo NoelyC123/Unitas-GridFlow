@@ -540,6 +540,25 @@ def test_classify_record_roles_road_and_ignore_are_context() -> None:
     assert result.loc[result["pole_id"] == "3", "_record_role"].iloc[0] == "structural"
 
 
+def test_classify_record_roles_bt_expole_is_third_party_not_structural() -> None:
+    df = pd.DataFrame(
+        [
+            {"pole_id": "72", "structure_type": "EXpole", "location": "bt pole"},
+            {"pole_id": "73", "structure_type": "EXpole", "location": "existing pole"},
+            {"pole_id": "74", "structure_type": "Pol", "location": "proposed pole"},
+        ]
+    )
+
+    result = classify_record_roles(df)
+    completeness = build_completeness_summary(result)
+
+    assert result.loc[result["pole_id"] == "72", "_record_role"].iloc[0] == "third_party"
+    assert result.loc[result["pole_id"] == "73", "_record_role"].iloc[0] == "structural"
+    assert result.loc[result["pole_id"] == "74", "_record_role"].iloc[0] == "structural"
+    assert completeness["structural_count"] == 2
+    assert completeness["third_party_count"] == 1
+
+
 def test_classify_record_roles_pline_and_voltage_crossings_are_context() -> None:
     """Bellsprings evidence: Pline/voltage crossings are route context, not poles."""
     df = pd.DataFrame(
