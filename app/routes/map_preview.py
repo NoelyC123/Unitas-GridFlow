@@ -10,8 +10,10 @@ from app.asset_classifier import classify_asset_type, get_popup_type_label
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
     merge_equipment_fields_into_props,
+    strip_electrical_fields_from_point_props,
 )
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
+from app.span_generator import attach_span_features_to_collection
 from app.survey_connectivity import merge_connectivity_into_props, merge_survey_metadata_into_props
 
 map_preview_bp = Blueprint("map_preview", __name__)
@@ -119,6 +121,7 @@ def _empty_feature_collection(job_id: str) -> dict:
         "type": "FeatureCollection",
         "features": [],
         "design_chain_spans": [],
+        "span_features": [],
         "metadata": {
             "job_id": job_id,
             "rulepack_id": "SPEN_11kV",
@@ -172,25 +175,10 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
     return spans
 
 
-def _infer_voltage(props: dict, metadata: dict) -> str | None:
-    st = str(props.get("structure_type") or "").lower()
-    rulepack = str(metadata.get("rulepack_id") or "")
-    if "11" in st:
-        return "11kV"
-    if "33" in st:
-        return "33kV"
-    if "lv" in st:
-        return "LV"
-    if "11kv" in rulepack.lower() or "11kv" in rulepack.replace("_", "").lower():
-        return "11kV"
-    return None
-
-
 def _enrich_popup_data_model(data: dict) -> dict:
     """Backfill C2-2 display fields for previously generated map_data.json files."""
     if not isinstance(data, dict):
         return data
-    metadata = data.get("metadata") if isinstance(data.get("metadata"), dict) else {}
     for feature in data.get("features") or []:
         props = feature.get("properties") if isinstance(feature, dict) else None
         if not isinstance(props, dict):
@@ -218,35 +206,44 @@ def _enrich_popup_data_model(data: dict) -> dict:
             props["source_confidence_detail"] = classify_source_confidence(props)
         if not props.get("attachments_detail"):
             props["attachments_detail"] = parse_attachments(props)
-        if not props.get("voltage"):
-            props["voltage"] = _infer_voltage(props, metadata)
-        merge_electrical_fields_into_props(props)
+        strip_electrical_fields_from_point_props(props)
         merge_equipment_fields_into_props(props)
         merge_connectivity_into_props(props)
         merge_survey_metadata_into_props(props)
         if props.get("photo_links") and not props.get("photo_count"):
             props["photo_count"] = len(props.get("photo_links") or [])
+    for span_feat in data.get("span_features") or []:
+        if not isinstance(span_feat, dict):
+            continue
+        sp = span_feat.get("properties")
+        if isinstance(sp, dict):
+            merge_electrical_fields_into_props(sp)
     return data
 
 
 def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
-    """Attach span overlay data without requiring old map_data.json files to be regenerated."""
+    """Attach span LineStrings and legacy design-chain overlay metadata."""
     if not isinstance(data, dict):
         return data
-    if "design_chain_spans" in data:
-        return _enrich_popup_data_model(data)
-    spans: list[dict] = []
+
+    seq_payload: dict = {}
     if seq_path.exists():
         try:
-            seq = json.loads(seq_path.read_text(encoding="utf-8"))
-            if seq.get("status") == "ok":
-                spans = _build_design_chain_spans(seq)
+            seq_payload = json.loads(seq_path.read_text(encoding="utf-8"))
         except Exception:
-            spans = []
-    data["design_chain_spans"] = spans
-    metadata = data.setdefault("metadata", {})
-    if isinstance(metadata, dict):
-        metadata["design_chain_span_count"] = len(spans)
+            seq_payload = {}
+
+    attach_span_features_to_collection(data, seq_payload)
+
+    if "design_chain_spans" not in data:
+        spans: list[dict] = []
+        if seq_payload.get("status") == "ok":
+            spans = _build_design_chain_spans(seq_payload)
+        data["design_chain_spans"] = spans
+        metadata = data.setdefault("metadata", {})
+        if isinstance(metadata, dict):
+            metadata["design_chain_span_count"] = len(spans)
+
     return _enrich_popup_data_model(data)
 
 

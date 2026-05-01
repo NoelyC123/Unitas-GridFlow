@@ -613,3 +613,28 @@ def gfmt(x: float) -> str:
     if float(x).is_integer():
         return str(int(x))
     return str(x)
+
+
+# Enriched electrical display belongs on span LineStrings; poles may keep raw CSV echoes.
+POINT_ELECTRICAL_POPUP_KEYS: frozenset[str] = frozenset(
+    {
+        "voltage_detail",
+        "is_overhead",
+        "is_underground",
+        "conductor_detail",
+        "conductor_type_normalized",
+        "conductor_size",
+        "conductor_size_description",
+        "phase_detail",
+        "cable_type",
+        "cable_detail",
+        "cable_size",
+        "cores_phases",
+    }
+)
+
+
+def strip_electrical_fields_from_point_props(props: dict[str, Any]) -> None:
+    """Drop conductor/cable/voltage display fields from a pole (Point) feature."""
+    for k in POINT_ELECTRICAL_POPUP_KEYS:
+        props.pop(k, None)

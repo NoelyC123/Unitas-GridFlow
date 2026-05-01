@@ -252,16 +252,50 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
                 "lat": 54.5210,
                 "lon": -3.0140,
                 "__row_index__": 0,
-            }
+            },
+            {
+                "pole_id": "P-1002",
+                "location": "Next pole",
+                "material": "Wood",
+                "height": 11.0,
+                "height_source": "measured",
+                "structure_type": "Pol",
+                "easting": 352900,
+                "northing": 503200,
+                "elevation": 127.0,
+                "lat": 54.5220,
+                "lon": -3.0130,
+                "__row_index__": 1,
+            },
         ]
     )
     issues_df = pd.DataFrame(columns=["Issue", "Row"])
+
+    sequence_payload = {
+        "status": "ok",
+        "chain": [
+            {
+                "point_id": "P-1001",
+                "lat": 54.5210,
+                "lon": -3.0140,
+                "span_to_next_m": 120.0,
+                "design_pole_number": 1,
+            },
+            {
+                "point_id": "P-1002",
+                "lat": 54.5220,
+                "lon": -3.0130,
+                "design_pole_number": 2,
+            },
+        ],
+    }
 
     feature_collection = _build_feature_collection(
         df=df,
         issues_df=issues_df,
         job_id="J_TEST",
         rulepack_id="SPEN_11kV",
+        sequence_payload=sequence_payload,
     )
 
     props = feature_collection["features"][0]["properties"]
@@ -299,6 +333,12 @@ def test_build_feature_collection_includes_c2_2_popup_display_fields() -> None:
     assert props["equipment_kva_label"] == "50 kVA"
     assert props["connectivity_parent_pole"] == "P-1001"
     assert props["gnss_accuracy_summary"]
+    assert len(feature_collection["span_features"]) == 1
+    spanp = feature_collection["span_features"][0]["properties"]
+    assert spanp["from_point_id"] == "P-1001"
+    assert spanp["to_point_id"] == "P-1002"
+    assert spanp.get("voltage_detail", {}).get("label")
+    assert "voltage_detail" not in props
 
 
 def test_build_feature_collection_adds_source_confidence_detail() -> None:

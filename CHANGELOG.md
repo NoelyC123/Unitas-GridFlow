@@ -8,6 +8,26 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-01 — Phase 3A Sprint 1: Span LineString model & electrical on spans
+
+### Added
+
+- **`app/span_generator.py`:** `span_features` GeoJSON LineStrings from points + sequenced chain; endpoint electrical coalescence; haversine length fallback.
+- **`app/static/css/map-viewer.css`:** Span line cursor and distance label tooltip styling.
+- **Tests:** `tests/test_span_generator.py`, `tests/test_map_preview.py`.
+
+### Changed
+
+- **`map_data.json` / map data API:** `span_features`, `metadata.span_feature_count`; enrichment rebuilds spans from `sequenced_route.json` + current point features.
+- **Poles:** Raw `voltage` / `conductor_type` / `phase_count` kept for span coalescing; enriched electrical display fields only on span properties; pole popups (existing/angle) drop Electrical section.
+- **Map viewer (`v=28`):** Renders GeoJSON spans when present; permanent distance labels; span popup includes Electrical; layer legend text updated.
+
+### Validated
+
+- `pytest` — 344 passed.
+
+---
+
 ## 2026-05-01 — Phase 2 D2-B–D2-D: Equipment, connectivity, survey metadata
 
 ### Added

@@ -420,7 +420,7 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Missing stay evidence" in html
     assert "Span anomalies" in html
     assert "Crossings requiring clearance" in html
-    assert "Surveyed route sequence" in html
+    assert "Circuit spans" in html
     assert "Suggested Existing/Proposed Match" in html
     assert "Suggested Replacement Links" in html
     assert "Asset Types (by shape)" in html
@@ -481,6 +481,8 @@ def test_project_map_data_includes_design_chain_spans(client_and_root):
     assert response.status_code == 200
     data = response.get_json()
     assert data["metadata"]["design_chain_span_count"] == 1
+    assert len(data.get("span_features") or []) == 1
+    assert data["span_features"][0]["geometry"]["type"] == "LineString"
     assert data["design_chain_spans"] == [
         {
             "from_point_id": "P-1001",
@@ -510,6 +512,7 @@ def test_project_map_data_backfills_c2_2_popup_display_fields(client_and_root):
                         "pole_id": "P-1001",
                         "structure_type": "EXpole",
                         "height": 9.2,
+                        "voltage": "11kV",
                         "third_party_attachments": "streetlight",
                     },
                 }

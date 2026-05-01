@@ -81,7 +81,13 @@ class MapViewer {
       const data = await res.json();
       this.renderSummary(data.metadata || {});
       this.renderMarkers(data.features || []);
-      this.renderDesignChainSpans(data.design_chain_spans || []);
+      this._fallbackDesignSpans = data.design_chain_spans || [];
+      const spanFeatures = data.span_features || [];
+      if (Array.isArray(spanFeatures) && spanFeatures.length > 0) {
+        this.renderGeoJsonSpanFeatures(spanFeatures);
+      } else {
+        this.renderDesignChainSpans(this._fallbackDesignSpans);
+      }
     } catch (err) {
       console.error(err);
       if (this.issueNoteEl) {
@@ -350,6 +356,90 @@ class MapViewer {
     }
   }
 
+  renderGeoJsonSpanFeatures(spanFeatures) {
+    if (!this.map || !Array.isArray(spanFeatures) || spanFeatures.length === 0) return;
+
+    if (this.spanLayer) {
+      this.spanLayer.clearLayers();
+      this.map.removeLayer(this.spanLayer);
+    }
+    this.spanLayer = L.layerGroup();
+
+    for (const feat of spanFeatures) {
+      if (!feat || feat.type !== 'Feature') continue;
+      const geom = feat.geometry || {};
+      if (geom.type !== 'LineString') continue;
+      const coords = geom.coordinates || [];
+      if (coords.length < 2) continue;
+      const latLngs = coords.map((c) => {
+        if (!Array.isArray(c) || c.length < 2) return null;
+        return [c[1], c[0]];
+      }).filter(Boolean);
+      if (latLngs.length < 2) continue;
+
+      const props = feat.properties || {};
+      const line = L.polyline(latLngs, {
+        color: '#1d4ed8',
+        weight: 5,
+        opacity: 0.88,
+        lineCap: 'round',
+        lineJoin: 'round',
+        className: 'gridflow-span-line',
+      });
+
+      const label = this.spanDistanceLabel(props);
+      if (label) {
+        line.bindTooltip(label, {
+          permanent: true,
+          direction: 'center',
+          className: 'gridflow-span-distance-label',
+          opacity: 0.95,
+        });
+      }
+
+      line.bindPopup(this.buildSpanPopupHtml(props));
+      line.addTo(this.spanLayer);
+    }
+
+    if (this.layerState.spans) {
+      this.spanLayer.addTo(this.map);
+    }
+  }
+
+  spanDistanceLabel(props) {
+    if (props.distance_m == null || Number.isNaN(Number(props.distance_m))) return '';
+    return `${Number(props.distance_m).toFixed(1)} m`;
+  }
+
+  spanPopupSections(props) {
+    return [
+      {
+        title: 'Circuit span',
+        rows: [
+          this.popupRow('From support', props.from_point_id || '—', props.from_point_id ? 'ok' : 'info'),
+          this.popupRow('To support', props.to_point_id || '—', props.to_point_id ? 'ok' : 'info'),
+          this.popupRow(
+            'Distance',
+            props.distance_m != null ? `${Number(props.distance_m).toFixed(1)} m` : '—',
+            props.distance_m != null ? 'ok' : 'info',
+          ),
+        ],
+      },
+      { title: 'Electrical', rows: this.electricalRows(props) },
+    ];
+  }
+
+  buildSpanPopupHtml(props) {
+    const title = `${this.escapeHtml(props.from_point_id || '?')} → ${this.escapeHtml(props.to_point_id || '?')}`;
+    const sections = this.spanPopupSections(props);
+    return `
+      <div class="asset-popup asset-popup-span">
+        <div class="popup-title">${title}</div>
+        ${sections.map((s) => this.popupSection(s.title, s.rows)).join('')}
+      </div>
+    `;
+  }
+
   renderDesignChainSpans(spans) {
     if (!this.map || !Array.isArray(spans) || spans.length === 0) return;
 
@@ -371,15 +461,16 @@ class MapViewer {
         opacity: 0.88,
         lineCap: 'round',
         lineJoin: 'round',
+        className: 'gridflow-span-line',
       });
 
       const label = this.spanLabel(span);
       if (label) {
         line.bindTooltip(label, {
-          permanent: false,
-          sticky: true,
-          className: 'span-distance-label',
-          opacity: 0.9,
+          permanent: true,
+          direction: 'center',
+          className: 'gridflow-span-distance-label',
+          opacity: 0.95,
         });
       }
 
@@ -758,7 +849,6 @@ class MapViewer {
       ...this.heightEvidenceAlertSections(props),
       { title: 'Identity', rows: this.identityRows(props, status, 'Existing Pole') },
       { title: 'Physical', rows: this.physicalRows(props, 'existing') },
-      { title: 'Electrical', rows: this.electricalRows(props) },
       { title: 'Equipment & pole-top', rows: this.equipmentDetailRows(props) },
       { title: 'Network links', rows: this.connectivityRows(props) },
       { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
@@ -863,7 +953,6 @@ class MapViewer {
       { title: 'Mechanical', rows: this.mechanicalRows(props, true) },
       { title: 'Third-Party Attachments', rows: this.attachmentsRows(props) },
       { title: 'Physical', rows: this.physicalRows(props, 'angle') },
-      { title: 'Electrical', rows: this.electricalRows(props) },
       { title: 'Equipment & pole-top', rows: this.equipmentDetailRows(props) },
       { title: 'Network links', rows: this.connectivityRows(props) },
       { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },

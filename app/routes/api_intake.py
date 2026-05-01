@@ -23,10 +23,7 @@ from app.controller_intake import (
     parse_raw_controller_dump,
 )
 from app.dno_rules import DNO_RULES, RULEPACKS, filter_rules_for_controller
-from app.electrical_schema import (
-    merge_electrical_fields_into_props,
-    merge_equipment_fields_into_props,
-)
+from app.electrical_schema import merge_equipment_fields_into_props
 from app.issue_model import build_evidence_gates, build_recommended_actions, enrich_issues
 from app.qa_engine import (
     classify_height_confidence,
@@ -37,6 +34,7 @@ from app.qa_engine import (
 )
 from app.review_manager import delete_review
 from app.route_sequencer import sequence_route
+from app.span_generator import attach_span_features_to_collection
 from app.survey_connectivity import merge_connectivity_into_props, merge_survey_metadata_into_props
 
 # Compiled once at module level for replacement-pair offset extraction.
@@ -842,6 +840,7 @@ def _build_feature_collection(
     job_id: str,
     rulepack_id: str,
     file_type: str = "structured",
+    sequence_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     per_row = _collect_per_row_issues(issues_df)
     replacement_links = _build_replacement_links(df, issues_df)
@@ -955,7 +954,6 @@ def _build_feature_collection(
         electrical_props["route_type"] = electrical_props.get("route_type") or network_fields.get(
             "route_type"
         )
-        merge_electrical_fields_into_props(electrical_props)
         merge_equipment_fields_into_props(electrical_props)
         merge_connectivity_into_props(electrical_props)
         merge_survey_metadata_into_props(electrical_props)
@@ -988,18 +986,6 @@ def _build_feature_collection(
                 "voltage": _safe_value(network_fields.get("voltage")),
                 "conductor_type": _safe_value(network_fields.get("conductor_type")),
                 "phase_count": _safe_value(network_fields.get("phase_count")),
-                "voltage_detail": electrical_props.get("voltage_detail") or {},
-                "is_overhead": bool(electrical_props.get("is_overhead", True)),
-                "is_underground": bool(electrical_props.get("is_underground", False)),
-                "conductor_detail": electrical_props.get("conductor_detail") or {},
-                "conductor_type_normalized": electrical_props.get("conductor_type_normalized"),
-                "conductor_size": _safe_value(electrical_props.get("conductor_size")),
-                "conductor_size_description": electrical_props.get("conductor_size_description"),
-                "phase_detail": electrical_props.get("phase_detail") or {},
-                "cable_type": _safe_value(electrical_props.get("cable_type")),
-                "cable_detail": electrical_props.get("cable_detail") or {},
-                "cable_size": _safe_value(electrical_props.get("cable_size")),
-                "cores_phases": _safe_value(electrical_props.get("cores_phases")),
                 "equipment": equipment_items,
                 "equipment_rating": _safe_value(network_fields.get("equipment_rating")),
                 "equipment_categories": electrical_props.get("equipment_categories") or [],
@@ -1100,13 +1086,14 @@ def _build_feature_collection(
         "issue_count": len(issues_df),
     }
 
-    return _sanitize_for_json(
-        {
-            "type": "FeatureCollection",
-            "features": features,
-            "metadata": metadata,
-        }
-    )
+    fc: dict[str, Any] = {
+        "type": "FeatureCollection",
+        "features": features,
+        "metadata": metadata,
+    }
+    if sequence_payload is not None:
+        attach_span_features_to_collection(fc, sequence_payload)
+    return _sanitize_for_json(fc)
 
 
 def _build_replacement_narratives(
@@ -1367,7 +1354,7 @@ def process_job(
         csv_issues_df.to_csv(issues_path, index=False)
 
         feature_collection = _build_feature_collection(
-            df, map_issues_df, job_id, requested_dno, file_type
+            df, map_issues_df, job_id, requested_dno, file_type, sequence_result
         )
         feature_collection["metadata"]["auto_normalized"] = auto_normalized
         for _rkey in (

@@ -16,10 +16,7 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
-  />
-
-  <style>
+  <link rel="stylesheet" href="/static/css/map-viewer.css?v=1" />
     html, body {
       height: 100%;
       margin: 0;
@@ -816,7 +813,7 @@
                 <label class="layer-toggle"><input type="checkbox" data-layer="stays" checked> Stays/Anchors</label>
                 <label class="layer-toggle"><input type="checkbox" data-layer="thirdparty" checked> Third-party infrastructure</label>
                 <label class="layer-toggle"><input type="checkbox" data-layer="context"> Context/Crossings</label>
-                <label class="layer-toggle"><input type="checkbox" data-layer="spans" checked> Design Chain Spans</label>
+                <label class="layer-toggle"><input type="checkbox" data-layer="spans" checked> Circuit spans (line)</label>
                 <label class="layer-toggle"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> Suggested Replacement Links</label>
               </div>
             </div>
@@ -844,7 +841,7 @@
               <div class="map-legend-grid">
                 <div class="map-legend-item">
                   <span class="legend-line"></span>
-                  <span>Surveyed route sequence</span>
+                  <span>Circuit spans — click line for distance & electrical</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-line suggested-match"></span>
@@ -1127,6 +1124,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="/static/js/map-viewer.js?v=27"></script>
+  <script src="/static/js/map-viewer.js?v=28"></script>
 </body>
 </html>
