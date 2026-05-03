@@ -7,6 +7,10 @@ from app.pole_field_schema import (
     enrich_pole_support_props,
     field_groups_for_role,
     infer_support_schema_role,
+    popup_priority_field_catalog,
+    popup_priority_fields_for_role,
+    popup_schema_contract,
+    popup_schema_contract_for_role,
     validate_support_field_coverage,
 )
 
@@ -107,3 +111,92 @@ def test_c2d_priority_inventory_declares_span_owned_electrical_fields() -> None:
     assert fields["conductor_cable_type"]["display_owner"] == "span_or_cable"
     assert "network_voltage" in fields["voltage_carried"]["display_fields"]
     assert "wayleave_notes" in fields["action_access_wayleave"]["display_fields"]
+
+
+def test_popup_priority_fields_for_existing_role_have_labels_and_groups() -> None:
+    fields = {item["field"]: item for item in popup_priority_fields_for_role("existing")}
+
+    assert fields["pole_class"]["display_label"] == "Pole class / strength"
+    assert fields["pole_class"]["popup_group"] == "Physical evidence"
+    assert fields["equipment_presence"]["popup_group"] == "Equipment & pole-top"
+    assert fields["action_access_wayleave"]["popup_group"] == "Design requirements"
+    assert "voltage_carried" not in fields
+
+
+def test_popup_priority_field_catalog_exposes_proposed_section_order() -> None:
+    catalog = popup_priority_field_catalog()
+    proposed = catalog["roles"]["proposed"]
+
+    assert proposed["section_order"] == [
+        "Specification",
+        "Design requirements",
+        "Equipment & pole-top",
+        "Survey metadata and evidence",
+    ]
+    assert any(
+        item["field"] == "measured_design_height" and item["popup_group"] == "Specification"
+        for item in proposed["fields"]
+    )
+
+
+def test_popup_priority_field_catalog_is_complete_for_existing_proposed_and_context() -> None:
+    catalog = popup_priority_field_catalog()
+
+    for role in ("existing", "proposed", "context"):
+        assert len(catalog["roles"][role]["fields"]) == len(C2D_PRIORITY_FIELD_INVENTORY)
+
+
+def test_popup_priority_field_catalog_marks_context_hidden_and_conditional_fields() -> None:
+    catalog = popup_priority_field_catalog()
+    context_fields = {item["field"]: item for item in catalog["roles"]["context"]["fields"]}
+
+    assert context_fields["pole_class"]["visibility"] == "hidden"
+    assert context_fields["pole_class"]["hidden_reason"] == "Hidden for context records."
+    assert context_fields["measured_design_height"]["visibility"] == "conditional"
+    assert context_fields["measured_design_height"]["popup_group"] == "Crossing details"
+    assert (
+        context_fields["measured_design_height"]["missing_value_text"]
+        == "not measured in current export"
+    )
+    assert context_fields["survey_metadata"]["visibility"] == "visible"
+
+
+def test_popup_priority_field_catalog_marks_span_owned_fields_hidden_on_proposed() -> None:
+    catalog = popup_priority_field_catalog()
+    proposed_fields = {item["field"]: item for item in catalog["roles"]["proposed"]["fields"]}
+
+    assert proposed_fields["voltage_carried"]["visibility"] == "hidden"
+    assert "field-ownership policy" in (proposed_fields["voltage_carried"]["hidden_reason"] or "")
+    assert proposed_fields["lean"]["visibility"] == "conditional"
+    assert proposed_fields["lean"]["missing_value_text"] == "not applicable yet"
+
+
+def test_popup_schema_contract_for_existing_assembles_sections_and_blank_states() -> None:
+    contract = popup_schema_contract_for_role("existing")
+    sections = {item["title"]: item for item in contract["sections"]}
+
+    assert contract["section_order"][0] == "Design focus banners"
+    assert sections["Physical evidence"]["kind"] == "condenseable"
+    assert sections["Physical evidence"]["blank_state_text"]
+    assert "pole_class" in sections["Physical evidence"]["priority_fields"]
+    assert "stay_present_evidence" in sections["Mechanical"]["priority_fields"]
+    assert "voltage_carried" in contract["hidden_priority_fields"]
+
+
+def test_popup_schema_contract_for_context_avoids_irrelevant_pole_sections() -> None:
+    contract = popup_schema_contract_for_role("context")
+    sections = {item["title"]: item for item in contract["sections"]}
+
+    assert "Physical evidence" not in sections
+    assert sections["Crossing details"]["kind"] == "condenseable"
+    assert "measured_design_height" in contract["conditional_priority_fields"]
+    assert "action_access_wayleave" in sections["Crossing details"]["priority_fields"]
+
+
+def test_popup_schema_contract_catalog_exposes_versions_and_roles() -> None:
+    contract = popup_schema_contract()
+
+    assert contract["version"]
+    assert "existing" in contract["roles"]
+    assert "proposed" in contract["roles"]
+    assert "context" in contract["roles"]
