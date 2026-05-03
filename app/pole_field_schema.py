@@ -17,6 +17,19 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_label": "Pole class / strength",
         "display_owner": "point",
         "source_status": "present_displayable_controller_alias",
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "not captured - confirm from field notes/asset records",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Specification",
+                "missing_value_text": "not specified - design decision required",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -28,6 +41,22 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_label": "Material",
         "display_owner": "point",
         "source_status": "present_displayable_controller_alias",
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "not captured - material unknown",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Specification",
+                "missing_value_text": "not specified - design specification required",
+            },
+            "context": {
+                "visibility": "hidden",
+                "hidden_reason": "Hidden for context records except free-text notes when present.",
+            },
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -39,6 +68,20 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_label": "Condition",
         "display_owner": "point",
         "source_status": "present_displayable_controller_alias",
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "not captured - condition not evidenced",
+            },
+            "proposed": {
+                "visibility": "conditional",
+                "popup_group": "Specification",
+                "missing_value_text": "not applicable yet",
+                "note": "Show only when a proposed record carries an explicit condition note.",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -51,6 +94,27 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_enriched_from_height",
         "display_fields": ("measured_height_m", "proposed_height_m"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "not captured - clearance check impossible",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Specification",
+                "missing_value_text": "not yet specified - design decision required",
+            },
+            "context": {
+                "visibility": "conditional",
+                "popup_group": "Crossing details",
+                "missing_value_text": "not measured in current export",
+                "note": (
+                    "Show only when the context record carries explicit clearance "
+                    "measurement evidence."
+                ),
+            },
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -63,6 +127,25 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_or_derived",
         "display_fields": ("height_source", "height_confidence"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "height source not recorded - reliability unknown",
+            },
+            "proposed": {
+                "visibility": "conditional",
+                "popup_group": "Specification",
+                "missing_value_text": "height source not recorded - reliability unknown",
+                "note": "Show only when a proposed height was imported into the record.",
+            },
+            "context": {
+                "visibility": "conditional",
+                "popup_group": "Crossing details",
+                "missing_value_text": "height source not recorded - reliability unknown",
+                "note": "Show only for explicit clearance measurement context records.",
+            },
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -75,6 +158,20 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_or_derived",
         "display_fields": ("stay_present", "stay_evidence_status"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Mechanical",
+                "missing_value_text": "not captured - check field notes/photos/plan evidence",
+            },
+            "proposed": {
+                "visibility": "conditional",
+                "popup_group": "Design requirements",
+                "missing_value_text": "not indicated by current data",
+                "note": "Show as a design requirement for proposed angle or terminal supports.",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Mechanical",
             "angle": "Mechanical",
@@ -87,6 +184,20 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_label": "Stay type",
         "display_owner": "point",
         "source_status": "present_displayable_controller_alias",
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Mechanical",
+                "missing_value_text": "not captured - stay configuration unknown",
+            },
+            "proposed": {
+                "visibility": "conditional",
+                "popup_group": "Design requirements",
+                "missing_value_text": "not captured - stay configuration unknown",
+                "note": "Show only when relevant to proposed angle or terminal design.",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Mechanical",
             "angle": "Mechanical",
@@ -100,6 +211,20 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_displayable_controller_alias",
         "display_fields": ("lean_direction", "lean_severity"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "not captured - lean not assessed in digital file",
+            },
+            "proposed": {
+                "visibility": "conditional",
+                "popup_group": "Specification",
+                "missing_value_text": "not applicable yet",
+                "note": "Show only when explicitly supplied on a proposed record.",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -111,6 +236,20 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_displayable_controller_alias",
         "display_fields": ("defect_type",),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Physical evidence",
+                "missing_value_text": "not captured - defect evidence not supplied",
+            },
+            "proposed": {
+                "visibility": "conditional",
+                "popup_group": "Specification",
+                "missing_value_text": "not applicable yet",
+                "note": "Show only when explicitly supplied on a proposed record.",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Physical evidence",
             "angle": "Physical evidence",
@@ -122,6 +261,24 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_or_safely_derived",
         "display_fields": ("equipment", "equipment_categories", "equipment_primary_category"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Equipment & pole-top",
+                "missing_value_text": "none inferred from current fields",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Equipment & pole-top",
+                "missing_value_text": "none inferred from current fields",
+            },
+            "context": {
+                "visibility": "hidden",
+                "hidden_reason": (
+                    "Hidden for context records unless a separate equipment role is introduced."
+                ),
+            },
+        },
         "popup_group_by_role": {
             "existing": "Equipment & pole-top",
             "angle": "Equipment & pole-top",
@@ -134,6 +291,19 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point",
         "source_status": "present_or_safely_derived",
         "display_fields": ("pole_top_arrangement", "insulator_type", "crossarm_configuration"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Equipment & pole-top",
+                "missing_value_text": "not recorded in digital file",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Equipment & pole-top",
+                "missing_value_text": "not recorded in digital file",
+            },
+            "context": {"visibility": "hidden", "hidden_reason": "Hidden for context records."},
+        },
         "popup_group_by_role": {
             "existing": "Equipment & pole-top",
             "angle": "Equipment & pole-top",
@@ -146,10 +316,33 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "span_or_cable",
         "source_status": "electrical_alias_supported_not_point_owned",
         "display_fields": ("voltage", "line_voltage", "network_voltage", "voltage_detail"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "hidden",
+                "hidden_reason": "Span/cable-owned under the current field-ownership policy.",
+            },
+            "proposed": {
+                "visibility": "hidden",
+                "hidden_reason": "Span/cable-owned under the current field-ownership policy.",
+            },
+            "context": {
+                "visibility": "hidden",
+                "hidden_reason": "Shown on span/cable popups, not context records.",
+            },
+            "span": {
+                "visibility": "visible",
+                "popup_group": "Electrical",
+                "missing_value_text": "not recorded - circuit voltage not supplied",
+            },
+            "cable": {
+                "visibility": "visible",
+                "popup_group": "Electrical",
+                "missing_value_text": "not recorded - circuit voltage not supplied",
+            },
+        },
         "popup_group_by_role": {
             "span": "Electrical",
             "cable": "Electrical",
-            "context": "Crossing details",
         },
     },
     {
@@ -164,6 +357,30 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
             "conductor_size",
             "cable_size",
         ),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "hidden",
+                "hidden_reason": "Span/cable-owned under the current field-ownership policy.",
+            },
+            "proposed": {
+                "visibility": "hidden",
+                "hidden_reason": "Span/cable-owned under the current field-ownership policy.",
+            },
+            "context": {
+                "visibility": "hidden",
+                "hidden_reason": "Shown on span/cable popups, not context records.",
+            },
+            "span": {
+                "visibility": "visible",
+                "popup_group": "Electrical",
+                "missing_value_text": "not recorded - conductor/cable specification not supplied",
+            },
+            "cable": {
+                "visibility": "visible",
+                "popup_group": "Electrical",
+                "missing_value_text": "not recorded - conductor/cable specification not supplied",
+            },
+        },
         "popup_group_by_role": {
             "span": "Electrical",
             "cable": "Electrical",
@@ -175,6 +392,23 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point_span_or_cable",
         "source_status": "present_or_derived",
         "display_fields": ("surveyor", "survey_date", "gnss_accuracy", "gnss_accuracy_summary"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Survey metadata and evidence",
+                "missing_value_text": "not recorded in export",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Survey metadata and evidence",
+                "missing_value_text": "not recorded in export",
+            },
+            "context": {
+                "visibility": "visible",
+                "popup_group": "Survey metadata and evidence",
+                "missing_value_text": "not recorded in export",
+            },
+        },
         "popup_group_by_role": {
             "existing": "Survey metadata and evidence",
             "angle": "Survey metadata and evidence",
@@ -192,6 +426,23 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point_span_or_cable",
         "source_status": "present_displayable",
         "display_fields": ("photo_links", "photo_count"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Survey metadata and evidence",
+                "missing_value_text": "no linked photo references in current export",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Survey metadata and evidence",
+                "missing_value_text": "no linked photo references in current export",
+            },
+            "context": {
+                "visibility": "visible",
+                "popup_group": "Survey metadata and evidence",
+                "missing_value_text": "no linked photo references in current export",
+            },
+        },
         "popup_group_by_role": {
             "existing": "Survey metadata and evidence",
             "angle": "Survey metadata and evidence",
@@ -209,6 +460,23 @@ C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
         "display_owner": "point_span_or_cable",
         "source_status": "present_displayable_controller_alias",
         "display_fields": ("action_required", "access_constraint", "wayleave_notes"),
+        "popup_behavior_by_role": {
+            "existing": {
+                "visibility": "visible",
+                "popup_group": "Design requirements",
+                "missing_value_text": "not captured - check field notes/plans",
+            },
+            "proposed": {
+                "visibility": "visible",
+                "popup_group": "Design requirements",
+                "missing_value_text": "not specified yet",
+            },
+            "context": {
+                "visibility": "visible",
+                "popup_group": "Crossing details",
+                "missing_value_text": "not captured - check field notes/plans",
+            },
+        },
         "popup_group_by_role": {
             "existing": "Design requirements",
             "angle": "Design requirements",
@@ -392,23 +660,34 @@ def field_groups_for_role(role: str) -> list[frozenset[str]]:
     return [u, EXISTING_POLE_FIELDS]
 
 
+def _popup_priority_field_record(item: dict[str, Any], role: str) -> dict[str, Any]:
+    behavior = (item.get("popup_behavior_by_role") or {}).get(role, {})
+    group = behavior.get("popup_group") or (item.get("popup_group_by_role") or {}).get(role)
+    visibility = behavior.get("visibility")
+    if not visibility:
+        visibility = "visible" if group else "hidden"
+    return {
+        "field": item["field"],
+        "display_label": item["display_label"],
+        "display_owner": item["display_owner"],
+        "source_status": item["source_status"],
+        "display_fields": list(item.get("display_fields") or []),
+        "visibility": visibility,
+        "popup_group": group,
+        "missing_value_text": behavior.get("missing_value_text"),
+        "note": behavior.get("note"),
+        "hidden_reason": behavior.get("hidden_reason"),
+    }
+
+
 def popup_priority_fields_for_role(role: str) -> list[dict[str, Any]]:
     """Return C2/D popup field metadata visible for the given asset role."""
     fields: list[dict[str, Any]] = []
     for item in C2D_PRIORITY_FIELD_INVENTORY:
-        group = (item.get("popup_group_by_role") or {}).get(role)
-        if not group:
+        record = _popup_priority_field_record(item, role)
+        if record["visibility"] == "hidden" or not record["popup_group"]:
             continue
-        fields.append(
-            {
-                "field": item["field"],
-                "display_label": item["display_label"],
-                "popup_group": group,
-                "display_owner": item["display_owner"],
-                "source_status": item["source_status"],
-                "display_fields": list(item.get("display_fields") or []),
-            }
-        )
+        fields.append(record)
     section_order = POPUP_SECTION_ORDER_BY_ROLE.get(role, ())
     order_index = {name: idx for idx, name in enumerate(section_order)}
     return sorted(
@@ -423,7 +702,10 @@ def popup_priority_field_catalog() -> dict[str, Any]:
         "roles": {
             role: {
                 "section_order": list(POPUP_SECTION_ORDER_BY_ROLE.get(role, ())),
-                "fields": popup_priority_fields_for_role(role),
+                "fields": [
+                    _popup_priority_field_record(item, role)
+                    for item in C2D_PRIORITY_FIELD_INVENTORY
+                ],
             }
             for role in roles
         }

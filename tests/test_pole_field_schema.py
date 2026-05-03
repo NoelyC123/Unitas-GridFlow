@@ -135,3 +135,35 @@ def test_popup_priority_field_catalog_exposes_proposed_section_order() -> None:
         item["field"] == "measured_design_height" and item["popup_group"] == "Specification"
         for item in proposed["fields"]
     )
+
+
+def test_popup_priority_field_catalog_is_complete_for_existing_proposed_and_context() -> None:
+    catalog = popup_priority_field_catalog()
+
+    for role in ("existing", "proposed", "context"):
+        assert len(catalog["roles"][role]["fields"]) == len(C2D_PRIORITY_FIELD_INVENTORY)
+
+
+def test_popup_priority_field_catalog_marks_context_hidden_and_conditional_fields() -> None:
+    catalog = popup_priority_field_catalog()
+    context_fields = {item["field"]: item for item in catalog["roles"]["context"]["fields"]}
+
+    assert context_fields["pole_class"]["visibility"] == "hidden"
+    assert context_fields["pole_class"]["hidden_reason"] == "Hidden for context records."
+    assert context_fields["measured_design_height"]["visibility"] == "conditional"
+    assert context_fields["measured_design_height"]["popup_group"] == "Crossing details"
+    assert (
+        context_fields["measured_design_height"]["missing_value_text"]
+        == "not measured in current export"
+    )
+    assert context_fields["survey_metadata"]["visibility"] == "visible"
+
+
+def test_popup_priority_field_catalog_marks_span_owned_fields_hidden_on_proposed() -> None:
+    catalog = popup_priority_field_catalog()
+    proposed_fields = {item["field"]: item for item in catalog["roles"]["proposed"]["fields"]}
+
+    assert proposed_fields["voltage_carried"]["visibility"] == "hidden"
+    assert "field-ownership policy" in (proposed_fields["voltage_carried"]["hidden_reason"] or "")
+    assert proposed_fields["lean"]["visibility"] == "conditional"
+    assert proposed_fields["lean"]["missing_value_text"] == "not applicable yet"

@@ -106,6 +106,11 @@ def test_map_data_endpoint_backfills_c2d_popup_fields(tmp_path, monkeypatch) -> 
         item["field"] == "stay_present_evidence" and item["popup_group"] == "Mechanical"
         for item in angle["fields"]
     )
+    proposed = catalog["roles"]["proposed"]
+    assert any(
+        item["field"] == "voltage_carried" and item["visibility"] == "hidden"
+        for item in proposed["fields"]
+    )
 
 
 def test_map_viewer_includes_span_label_mode_select() -> None:
