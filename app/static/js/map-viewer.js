@@ -434,7 +434,7 @@ class MapViewer {
   isVacuousPopupRowHtml(rowHtml) {
     if (!rowHtml || typeof rowHtml !== 'string') return false;
     if (rowHtml.includes('status-blocker') || rowHtml.includes('status-warning')) return false;
-    return /popup-field-value">(not captured|none recorded|not specified|not linked|not applicable yet|not yet specified|not inferred)(<\/div>)/i.test(rowHtml)
+    return /popup-field-value">(?:—|not captured|none recorded|not specified|not linked|not applicable yet|not yet specified|not inferred|none inferred|not parsed|no linked photos)(<\/div>)/i.test(rowHtml)
       && !rowHtml.includes('popup-field-detail');
   }
 
@@ -1638,17 +1638,15 @@ class MapViewer {
     const assetKind = this.popupAssetKind(props);
     const title = this.escapeHtml(props.name || props.id || 'Record');
     const designSections = this.buildDesignDecisionSections(props, status, lat, lon);
-    const sections = assetKind === 'thirdparty'
-      ? this.thirdPartyPopupSections(props, status, lat, lon)
-      : assetKind === 'context'
-        ? this.contextPopupSections(props, status, lat, lon)
-        : assetKind === 'stay'
-          ? this.stayPopupSections(props, status, lat, lon)
-          : assetKind === 'proposed'
-            ? this.proposedPopupSections(props, status, lat, lon)
-            : assetKind === 'angle'
-              ? this.anglePopupSections(props, status, lat, lon)
-              : this.existingPopupSections(props, status, lat, lon);
+    const popupContract = this.popupSchemaContractRole(assetKind);
+    if (popupContract) {
+      return this.buildContractPopupHtml(props, status, lat, lon, assetKind, title, designSections, popupContract);
+    }
+    const sections = this.legacyPointPopupSections(assetKind, props, status, lat, lon);
+    return this.buildLegacyPointPopupHtml(assetKind, title, designSections, sections, props);
+  }
+
+  buildLegacyPointPopupHtml(assetKind, title, designSections, sections, props) {
     const emptySectionSummary = {
       'Equipment & pole-top': 'No pole-mounted equipment captured or inferred.',
       'Physical': 'Pole class, material, lean and foundation not fully specified in this export.',
@@ -1672,6 +1670,103 @@ class MapViewer {
         ${this.rawTechnicalDetailsBlock(props)}
       </div>
     `;
+  }
+
+  legacyPointPopupSections(assetKind, props, status, lat, lon) {
+    return assetKind === 'thirdparty'
+      ? this.thirdPartyPopupSections(props, status, lat, lon)
+      : assetKind === 'context'
+        ? this.contextPopupSections(props, status, lat, lon)
+        : assetKind === 'stay'
+          ? this.stayPopupSections(props, status, lat, lon)
+          : assetKind === 'proposed'
+            ? this.proposedPopupSections(props, status, lat, lon)
+            : assetKind === 'angle'
+              ? this.anglePopupSections(props, status, lat, lon)
+              : this.existingPopupSections(props, status, lat, lon);
+  }
+
+  popupSchemaContractRole(assetKind) {
+    const roles = this._mapMeta?.popup_schema_contract?.roles;
+    if (!roles || typeof roles !== 'object') return null;
+    const roleKey = assetKind === 'thirdparty' ? 'third_party' : assetKind;
+    const roleContract = roles[roleKey];
+    if (!roleContract || !Array.isArray(roleContract.sections)) return null;
+    return roleContract;
+  }
+
+  buildContractPopupHtml(props, status, lat, lon, assetKind, title, designSections, contract) {
+    const rendered = [];
+    for (const section of contract.sections || []) {
+      if (section.kind === 'banner') {
+        if (designSections.length > 0) {
+          rendered.push(...designSections.map((designSection) => this.popupSection(designSection.title, designSection.rows)));
+        }
+        continue;
+      }
+      if (section.kind === 'collapsed' && section.id === 'raw_technical') {
+        const rawBlock = this.rawTechnicalDetailsBlock(props);
+        if (rawBlock) rendered.push(rawBlock);
+        continue;
+      }
+      let rows = this.contractSectionRows(section, props, status, lat, lon, assetKind);
+      if (section.kind === 'condenseable') {
+        rows = this.condenseVacuousPopupRows(rows, section.blank_state_text || 'No popup fields available.');
+      }
+      if (!rows || rows.filter(Boolean).length === 0) continue;
+      rendered.push(this.popupSection(section.title, rows));
+    }
+    return `
+      <div class="asset-popup asset-popup-${assetKind}">
+        <div class="popup-title">${title}</div>
+        ${rendered.join('')}
+      </div>
+    `;
+  }
+
+  contractSectionRows(section, props, status, lat, lon, assetKind) {
+    const role = assetKind === 'thirdparty' ? 'third_party' : assetKind;
+    switch (section.id) {
+      case 'identity':
+        return this.identityRows(props, status, this.contractFallbackType(role, props));
+      case 'physical_evidence':
+        return this.physicalRows(props, role === 'proposed' ? 'proposed' : role === 'angle' ? 'angle' : 'existing');
+      case 'mechanical':
+        return this.mechanicalRows(props, role === 'angle');
+      case 'equipment_pole_top':
+        return this.equipmentDetailRows(props);
+      case 'network_links':
+        return this.connectivityRows(props);
+      case 'survey_metadata_evidence':
+        return this.surveyMetadataEvidenceRows(props);
+      case 'location':
+        return this.locationRows(props, lat, lon);
+      case 'source_confidence':
+        return this.sourceConfidenceRows(props);
+      case 'lifecycle_design':
+        return this.lifecycleRows(props);
+      case 'qa_review':
+        return this.qaRows(props);
+      case 'specification':
+        return this.specificationRows(props);
+      case 'design_requirements':
+        return this.designRequirementRows(props);
+      case 'crossing_details':
+        return this.crossingRows(props);
+      case 'stay_details':
+        return this.stayDetailRows(props);
+      default:
+        return [];
+    }
+  }
+
+  contractFallbackType(role, props) {
+    if (role === 'proposed') return 'Proposed Pole';
+    if (role === 'angle') return 'Angle Pole';
+    if (role === 'stay') return 'Stay / Anchor';
+    if (role === 'context') return 'Context / Crossing';
+    if (role === 'third_party') return props.popup_type_label || 'Third-Party Infrastructure';
+    return 'Existing Pole';
   }
 
   buildDesignDecisionSections(props, status, lat, lon) {
@@ -2280,6 +2375,20 @@ class MapViewer {
         'Survey limitations',
         props.survey_limitations || 'none recorded',
         props.survey_limitations ? 'warning' : 'info',
+      ),
+    );
+    return rows;
+  }
+
+  surveyMetadataEvidenceRows(props) {
+    const rows = [...this.surveyMetadataRows(props)];
+    const photos = this.photoEvidenceText(props);
+    rows.push(this.popupRow('Photo Evidence', photos, photos === 'no linked photos' ? 'info' : 'ok'));
+    rows.push(
+      this.popupRow(
+        'Remarks',
+        props.name && props.name !== props.id ? props.name : 'not captured',
+        props.name && props.name !== props.id ? 'ok' : 'info',
       ),
     );
     return rows;
