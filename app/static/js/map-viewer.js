@@ -620,7 +620,12 @@ class MapViewer {
         ${issueBlock}
       `;
 
-      marker.bindPopup(this.buildPopupHtml(props, status, lat, lon));
+      marker.bindPopup(this.buildPopupHtml(props, status, lat, lon), {
+        autoPanPadding: [24, 24],
+        className: 'gridflow-asset-popup',
+        keepInView: true,
+        maxWidth: 476,
+      });
       this.featureData.push({ marker, status, lat, lon, props });
     }
 
@@ -759,7 +764,12 @@ class MapViewer {
         this.bindSpanDistanceTooltip(line, props);
       }
 
-      line.bindPopup(this.buildSpanPopupHtml(props));
+      line.bindPopup(this.buildSpanPopupHtml(props), {
+        autoPanPadding: [24, 24],
+        className: 'gridflow-asset-popup',
+        keepInView: true,
+        maxWidth: 476,
+      });
       line.addTo(this.spanLayer);
       this._spanLineRefs.push({ line, props, index: si });
     });
@@ -912,7 +922,12 @@ class MapViewer {
         className: 'gridflow-cable-tooltip',
         sticky: true,
       });
-      line.bindPopup(this.buildCablePopupHtml(props));
+      line.bindPopup(this.buildCablePopupHtml(props), {
+        autoPanPadding: [24, 24],
+        className: 'gridflow-asset-popup',
+        keepInView: true,
+        maxWidth: 476,
+      });
       line.addTo(this.cableLayer);
       this._cableLineRefs.push({ line, props, index: ci });
     });
@@ -1174,7 +1189,12 @@ class MapViewer {
         this.bindSpanDistanceTooltip(line, props);
       }
 
-      line.bindPopup(this.buildSpanPopupHtml(props));
+      line.bindPopup(this.buildSpanPopupHtml(props), {
+        autoPanPadding: [24, 24],
+        className: 'gridflow-asset-popup',
+        keepInView: true,
+        maxWidth: 476,
+      });
       line.addTo(this.spanLayer);
       this._spanLineRefs.push({ line, props, index: si });
     });
@@ -1380,7 +1400,7 @@ class MapViewer {
           return r !== 'none' && r !== '';
         });
         if (this.filterNoteEl) {
-          this.filterNoteEl.textContent = `${crossing.length} span(s) with crossing/route context — list filtered; click again to reset`;
+          this.filterNoteEl.textContent = `${crossing.length} span(s) with crossing or route context review cues — list filtered for QA scan; click again to reset`;
         }
         this._hideRecordPanel();
         this.refreshSpanListPanel({ onlyCrossingRisk: true });
@@ -1392,10 +1412,10 @@ class MapViewer {
         const count = filtered.length;
         const recordWord = count !== 1 ? 'records' : 'record';
         const contextNote = value === 'replacement-proximity'
-          ? ' (map records, not reviewed pairing count)'
+          ? ' (map evidence signals, not reviewed pairing count)'
           : '';
         if (this.filterNoteEl) {
-          this.filterNoteEl.textContent = `Showing ${count} ${label} ${recordWord}${contextNote} — click again to reset`;
+          this.filterNoteEl.textContent = `Showing ${count} ${label} ${recordWord}${contextNote} for review scan — click again to reset`;
         }
         this._showRecordPanel(filtered, `${label} (${count})`);
       }
@@ -1521,20 +1541,20 @@ class MapViewer {
       FAIL: 'Design Blocker',
       'design-blockers': 'Design Blocker',
       'review-required': 'Review Required',
-      'replacement-proximity': 'Existing/Proposed Match',
-      'missing-height': 'Missing existing height',
+      'replacement-proximity': 'Replacement pairing signal',
+      'missing-height': 'Existing pole missing measured height',
       'existing-poles': 'Existing pole',
       'proposed-poles': 'Proposed pole',
       'angle-poles': 'Angle pole',
       'stays-anchors': 'Stay / anchor',
       'context-crossings': 'Context / crossing',
-      'missing-specification': 'Missing proposed specification',
+      'missing-specification': 'Proposed pole missing specification',
       'angle-missing-stay': 'Angle pole missing stay evidence',
       'span-anomalies': 'Span anomaly',
-      'span-crossing-risk': 'Span crossing context',
-      'ug-cable-missing-spec': 'UG record — incomplete cable spec',
-      'clearance-crossings': 'Crossing requiring clearance review',
-      'records-with-remarks': 'Record with remarks',
+      'span-crossing-risk': 'Span crossing / context review',
+      'ug-cable-missing-spec': 'UG cable record missing specification',
+      'clearance-crossings': 'Crossing needing clearance review',
+      'records-with-remarks': 'Record with survey remarks',
     };
     return labels[value] || value || mode;
   }
@@ -2649,9 +2669,17 @@ class MapViewer {
 
   popupSection(title, rows) {
     const renderedRows = rows.filter(Boolean).map(row => row).join('');
+    const meta = this.popupSectionMeta(rows);
+    const chipText = meta.blank ? 'Blank state' : this.popupSectionChipText(meta.status);
+    const chipHtml = chipText
+      ? `<span class="popup-section-chip status-${this.escapeHtml(meta.status)}">${this.escapeHtml(chipText)}</span>`
+      : '';
     return `
-      <div class="popup-section">
-        <div class="popup-section-title">${this.escapeHtml(title)}</div>
+      <div class="popup-section popup-section-${this.escapeHtml(meta.status)}${meta.blank ? ' popup-section-blank' : ''}" data-popup-section-status="${this.escapeHtml(meta.status)}">
+        <div class="popup-section-header">
+          <div class="popup-section-title">${this.escapeHtml(title)}</div>
+          ${chipHtml}
+        </div>
         ${renderedRows}
       </div>
     `;
@@ -2659,14 +2687,78 @@ class MapViewer {
 
   popupRow(label, value, status = 'info', detail = '') {
     const display = this.displayValue(value);
+    const isSummary = label === 'Summary';
+    const emptyValue = this.isEmptyPopupDisplay(display);
+    const rowClasses = [
+      'popup-field',
+      `status-${this.escapeHtml(status)}`,
+      isSummary ? 'popup-field-summary' : '',
+      emptyValue ? 'popup-field-empty' : '',
+    ].filter(Boolean).join(' ');
     const detailHtml = detail ? `<div class="popup-field-detail">${this.escapeHtml(detail)}</div>` : '';
+    const statusChip = this.popupFieldStatusChip(status, label, display);
+    const statusChipHtml = statusChip ? `<span class="popup-field-status">${this.escapeHtml(statusChip)}</span>` : '';
     return `
-      <div class="popup-field status-${this.escapeHtml(status)}">
-        <div class="popup-field-label">${this.escapeHtml(label)}</div>
+      <div class="${rowClasses}" data-popup-label="${this.escapeHtml(label)}" data-popup-status="${this.escapeHtml(status)}">
+        <div class="popup-field-topline">
+          <div class="popup-field-label">${this.escapeHtml(label)}</div>
+          ${statusChipHtml}
+        </div>
         <div class="popup-field-value">${this.escapeHtml(display)}</div>
         ${detailHtml}
       </div>
     `;
+  }
+
+  popupSectionMeta(rows) {
+    const statuses = ['blocker', 'fail', 'warning', 'review', 'info', 'ok'];
+    const combined = (rows || []).filter(Boolean).join(' ');
+    const match = statuses.find((status) => combined.includes(`status-${status}`)) || 'info';
+    const blank = (rows || []).filter(Boolean).length === 1 && combined.includes('data-popup-label="Summary"');
+    return { status: match === 'fail' ? 'blocker' : match, blank };
+  }
+
+  popupSectionChipText(status) {
+    const labels = {
+      blocker: 'Blocker',
+      warning: 'Action',
+      review: 'Review',
+      info: 'Info',
+      ok: 'Ready',
+    };
+    return labels[status] || '';
+  }
+
+  popupFieldStatusChip(status, label, display) {
+    if (label === 'Summary') return 'Summary';
+    if (this.isEmptyPopupDisplay(display) && (status === 'info' || status === 'review')) return 'Missing';
+    const labels = {
+      blocker: 'Blocker',
+      fail: 'Blocker',
+      warning: 'Action',
+      review: 'Review',
+      info: 'Info',
+      ok: 'Ready',
+    };
+    return labels[status] || '';
+  }
+
+  isEmptyPopupDisplay(display) {
+    const value = String(display || '').trim().toLowerCase();
+    return new Set([
+      '—',
+      'not captured',
+      'none recorded',
+      'not specified',
+      'not linked',
+      'not applicable',
+      'not applicable yet',
+      'not yet specified',
+      'not inferred',
+      'none inferred',
+      'not parsed',
+      'no linked photos',
+    ]).has(value);
   }
 
   displayValue(value) {
@@ -2723,6 +2815,7 @@ class MapViewer {
       const typeText = p.structure_type ? this.escapeHtml(p.structure_type) : '—';
       const explainedType = p.structure_type ? this.explainAssetType(p.structure_type) : null;
       const statusColor = this.getMarkerColor(fd.status);
+      const reviewStatus = this.statusText(fd.status);
 
       const detailParts = [];
       if (p.height != null && p.height !== '') detailParts.push(`H: ${p.height}m`);
@@ -2781,7 +2874,7 @@ class MapViewer {
       item.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;">
           <span style="font-weight:600;font-size:0.82rem;">${idText}</span>
-          <span style="font-size:0.75rem;font-weight:700;color:${statusColor};">${fd.status}</span>
+          <span style="font-size:0.75rem;font-weight:700;color:${statusColor};">${this.escapeHtml(reviewStatus)}</span>
         </div>
         <div style="color:#6b7280;font-size:0.78rem;">${typeText}${detailText ? ' · ' + detailText : ''}</div>
         ${explainedTypeHtml}

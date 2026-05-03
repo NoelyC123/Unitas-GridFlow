@@ -417,16 +417,16 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert 'data-focus="ug-cable-missing-spec"' in html
     assert 'data-focus="clearance-crossings"' in html
     assert 'data-focus="records-with-remarks"' in html
-    assert "EX/PR matches" in html
+    assert "Replacement pairing signals" in html
     assert "Missing existing heights" in html
-    assert "Missing specifications" in html
-    assert "Missing stay evidence" in html
+    assert "Proposed poles missing spec" in html
+    assert "Angle poles missing stay evidence" in html
     assert "Span anomalies" in html
-    assert "Span crossing context" in html
-    assert "UG cable" in html
-    assert "Crossings requiring clearance" in html
+    assert "Span crossing / context review" in html
+    assert "UG cable records missing spec" in html
+    assert "Crossings needing clearance review" in html
     assert "Provisional route spans" in html
-    assert "Suggested Existing/Proposed Match" in html
+    assert "Suggested Existing/Proposed Match (map evidence only)" in html
     assert "Suggested replacement map links" in html
     assert "Asset Types (by shape)" in html
     assert "Existing pole (square)" in html

@@ -569,14 +569,25 @@
       color: #111827;
     }
 
+    .gridflow-asset-popup .leaflet-popup-content {
+      margin: 12px 14px;
+    }
+
+    .gridflow-asset-popup .leaflet-popup-content-wrapper {
+      border-radius: 10px;
+    }
+
     .asset-popup {
       max-width: 460px;
+      color: #0f172a;
     }
 
     .asset-popup .popup-title {
       border-bottom: 1px solid #e5e7eb;
-      margin-bottom: 7px;
-      padding-bottom: 5px;
+      font-size: 0.95rem;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      padding-bottom: 7px;
     }
 
     .asset-popup-thirdparty {
@@ -610,8 +621,8 @@
 
     .popup-section {
       border-bottom: 1px solid #e5e7eb;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
     }
 
     .popup-section:last-child {
@@ -619,43 +630,153 @@
       margin-bottom: 0;
     }
 
+    .popup-section.popup-section-blocker,
+    .popup-section.popup-section-warning,
+    .popup-section.popup-section-review {
+      border-left: 3px solid transparent;
+      padding-left: 10px;
+    }
+
+    .popup-section.popup-section-blocker {
+      border-left-color: #dc2626;
+    }
+
+    .popup-section.popup-section-warning {
+      border-left-color: #d97706;
+    }
+
+    .popup-section.popup-section-review {
+      border-left-color: #2563eb;
+    }
+
+    .popup-section-header {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
     .popup-section-title {
       border-bottom: 2px solid #3b82f6;
       color: #1f2937;
       font-size: 0.9rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
+      letter-spacing: 0;
+      line-height: 1.25;
+      margin-bottom: 0;
+      overflow-wrap: anywhere;
       padding-bottom: 4px;
-      text-transform: uppercase;
+      text-transform: none;
+    }
+
+    .popup-section-chip {
+      border-radius: 999px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      padding: 3px 7px;
+      white-space: nowrap;
+    }
+
+    .popup-section-chip.status-ok,
+    .popup-section-chip.status-info {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .popup-section-chip.status-review {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .popup-section-chip.status-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .popup-section-chip.status-blocker,
+    .popup-section-chip.status-fail {
+      background: #fee2e2;
+      color: #b91c1c;
     }
 
     .popup-field {
+      border: 1px solid #e5e7eb;
       background-color: #ffffff;
-      border-radius: 3px;
-      margin-bottom: 6px;
-      padding: 4px 8px;
+      border-radius: 6px;
+      margin-bottom: 7px;
+      overflow-wrap: anywhere;
+      padding: 7px 9px;
+      box-shadow: 0 1px 1px rgba(15, 23, 42, 0.02);
+    }
+
+    .popup-field-topline {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .popup-field.popup-field-summary,
+    .popup-field.popup-field-empty {
+      background: #f8fafc;
     }
 
     .popup-field-label {
       color: #6b7280;
       font-size: 0.75rem;
       font-weight: 600;
-      margin-bottom: 2px;
+      margin-bottom: 0;
+    }
+
+    .popup-field-status {
+      border-radius: 999px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      text-transform: uppercase;
+    }
+
+    .popup-field.status-ok .popup-field-status {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .popup-field.status-info .popup-field-status {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .popup-field.status-review .popup-field-status {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .popup-field.status-warning .popup-field-status {
+      background: #fde68a;
+      color: #92400e;
+    }
+
+    .popup-field.status-blocker .popup-field-status,
+    .popup-field.status-fail .popup-field-status {
+      background: #fecaca;
+      color: #b91c1c;
     }
 
     .popup-field-value {
       color: #1f2937;
       font-size: 0.85rem;
       font-weight: 500;
+      line-height: 1.35;
     }
 
     .popup-field-detail {
       color: #6b7280;
       font-size: 0.72rem;
-      font-style: italic;
       line-height: 1.3;
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
     .popup-field.status-ok {
@@ -698,6 +819,7 @@
     .popup-row {
       font-size: 0.92rem;
       margin: 2px 0;
+      overflow-wrap: anywhere;
     }
 
     .badge-soft {
@@ -839,14 +961,14 @@
                 <button type="button" class="focus-filter-btn" data-focus="design-blockers"><span class="focus-filter-caption">Design blockers</span></button>
                 <button type="button" class="focus-filter-btn" data-focus="review-required"><span class="focus-filter-caption">Review required</span></button>
                 <button type="button" class="focus-filter-btn" data-focus="missing-height"><span class="focus-filter-caption">Missing existing heights</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="missing-specification"><span class="focus-filter-caption">Missing specifications</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay"><span class="focus-filter-caption">Missing stay evidence</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="missing-specification"><span class="focus-filter-caption">Proposed poles missing spec</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay"><span class="focus-filter-caption">Angle poles missing stay evidence</span></button>
                 <button type="button" class="focus-filter-btn" data-focus="span-anomalies"><span class="focus-filter-caption">Span anomalies</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="span-crossing-risk"><span class="focus-filter-caption">Span crossing context</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="ug-cable-missing-spec"><span class="focus-filter-caption">UG cable — incomplete spec</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="clearance-crossings"><span class="focus-filter-caption">Crossings requiring clearance</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="replacement-proximity"><span class="focus-filter-caption">EX/PR matches</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="records-with-remarks"><span class="focus-filter-caption">Records with remarks</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="span-crossing-risk"><span class="focus-filter-caption">Span crossing / context review</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="ug-cable-missing-spec"><span class="focus-filter-caption">UG cable records missing spec</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="clearance-crossings"><span class="focus-filter-caption">Crossings needing clearance review</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="replacement-proximity"><span class="focus-filter-caption">Replacement pairing signals</span></button>
+                <button type="button" class="focus-filter-btn" data-focus="records-with-remarks"><span class="focus-filter-caption">Records with survey remarks</span></button>
               </div>
             </div>
             <div id="record-panel" style="display:none; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 8px;">
@@ -866,15 +988,15 @@
               <div class="map-legend-grid">
                 <div class="map-legend-item">
                   <span class="legend-line"></span>
-                  <span id="legend-span-line-caption">Provisional route spans (from sequenced supports) — hover line for distance; click for details. Use “Span distance labels” to pin distances.</span>
+                  <span id="legend-span-line-caption">Provisional route spans (from sequenced supports) — hover for distance, click for span review detail, or pin labels for QA scanning.</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-line legend-ug-cable"></span>
-                  <span>Underground cables — dashed; click for routing &amp; installation</span>
+                  <span>Underground cables — dashed route trace; click for routing, installation, and crossing review cues</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-line suggested-match"></span>
-                  <span>Suggested Existing/Proposed Match</span>
+                  <span>Suggested Existing/Proposed Match (map evidence only)</span>
                 </div>
               </div>
               <div class="map-legend-title" style="margin-top:8px;">Asset Types (by shape)</div>
@@ -908,15 +1030,15 @@
               <div class="map-legend-grid">
                 <div class="map-legend-item">
                   <span class="legend-dot legend-pass"></span>
-                  <span>Pass</span>
+                  <span>Pass — no open review findings on this record</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-dot legend-warn"></span>
-                  <span>Review required</span>
+                  <span>Review required — evidence gap or design check remains</span>
                 </div>
                 <div class="map-legend-item">
                   <span class="legend-dot legend-fail"></span>
-                  <span>Design blocker</span>
+                  <span>Design blocker — issue prevents design-readiness</span>
                 </div>
               </div>
               <div class="map-legend-title" style="margin-top:8px;">Asset Lifecycle</div>
