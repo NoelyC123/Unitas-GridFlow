@@ -9,6 +9,8 @@ from app.pole_field_schema import (
     infer_support_schema_role,
     popup_priority_field_catalog,
     popup_priority_fields_for_role,
+    popup_schema_contract,
+    popup_schema_contract_for_role,
     validate_support_field_coverage,
 )
 
@@ -167,3 +169,34 @@ def test_popup_priority_field_catalog_marks_span_owned_fields_hidden_on_proposed
     assert "field-ownership policy" in (proposed_fields["voltage_carried"]["hidden_reason"] or "")
     assert proposed_fields["lean"]["visibility"] == "conditional"
     assert proposed_fields["lean"]["missing_value_text"] == "not applicable yet"
+
+
+def test_popup_schema_contract_for_existing_assembles_sections_and_blank_states() -> None:
+    contract = popup_schema_contract_for_role("existing")
+    sections = {item["title"]: item for item in contract["sections"]}
+
+    assert contract["section_order"][0] == "Design focus banners"
+    assert sections["Physical evidence"]["kind"] == "condenseable"
+    assert sections["Physical evidence"]["blank_state_text"]
+    assert "pole_class" in sections["Physical evidence"]["priority_fields"]
+    assert "stay_present_evidence" in sections["Mechanical"]["priority_fields"]
+    assert "voltage_carried" in contract["hidden_priority_fields"]
+
+
+def test_popup_schema_contract_for_context_avoids_irrelevant_pole_sections() -> None:
+    contract = popup_schema_contract_for_role("context")
+    sections = {item["title"]: item for item in contract["sections"]}
+
+    assert "Physical evidence" not in sections
+    assert sections["Crossing details"]["kind"] == "condenseable"
+    assert "measured_design_height" in contract["conditional_priority_fields"]
+    assert "action_access_wayleave" in sections["Crossing details"]["priority_fields"]
+
+
+def test_popup_schema_contract_catalog_exposes_versions_and_roles() -> None:
+    contract = popup_schema_contract()
+
+    assert contract["version"]
+    assert "existing" in contract["roles"]
+    assert "proposed" in contract["roles"]
+    assert "context" in contract["roles"]

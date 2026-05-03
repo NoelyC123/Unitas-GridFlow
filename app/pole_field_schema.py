@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
+POPUP_SCHEMA_CONTRACT_VERSION = "c2d-professional-v1"
+
 # Phase C2/D priority fields: explicit source/status decisions for intake and display.
 # This is an inventory, not a capture-model expansion.
 C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
@@ -518,6 +520,249 @@ POPUP_SECTION_ORDER_BY_ROLE: dict[str, tuple[str, ...]] = {
     "cable": ("Electrical", "Crossing details", "Survey metadata and evidence"),
 }
 
+POPUP_ASSEMBLY_BY_ROLE: dict[str, tuple[dict[str, Any], ...]] = {
+    "existing": (
+        {"id": "design_focus", "title": "Design focus banners", "kind": "banner"},
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "physical_evidence",
+            "title": "Physical evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Measured height and structural evidence are not fully specified in this export."
+            ),
+        },
+        {
+            "id": "mechanical",
+            "title": "Mechanical",
+            "kind": "condenseable",
+            "blank_state_text": "Stay and mechanical detail were not captured where applicable.",
+        },
+        {
+            "id": "equipment_pole_top",
+            "title": "Equipment & pole-top",
+            "kind": "condenseable",
+            "blank_state_text": "No pole-mounted equipment captured or inferred.",
+        },
+        {"id": "network_links", "title": "Network links", "kind": "standard"},
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "source_confidence", "title": "Source & Confidence", "kind": "standard"},
+        {"id": "lifecycle_design", "title": "Lifecycle / Design", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+        {"id": "raw_technical", "title": "Raw / technical fields", "kind": "collapsed"},
+    ),
+    "proposed": (
+        {"id": "design_focus", "title": "Design focus banners", "kind": "banner"},
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "specification",
+            "title": "Specification",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Pole class, material and design height are not yet fully specified."
+            ),
+        },
+        {
+            "id": "design_requirements",
+            "title": "Design requirements",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Design actions, access constraints and unresolved requirements "
+                "are not yet fully specified."
+            ),
+        },
+        {
+            "id": "equipment_pole_top",
+            "title": "Equipment & pole-top",
+            "kind": "condenseable",
+            "blank_state_text": "No proposed pole-mounted equipment is captured or inferred.",
+        },
+        {"id": "network_links", "title": "Network links", "kind": "standard"},
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "lifecycle_design", "title": "Lifecycle / Design", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+        {"id": "raw_technical", "title": "Raw / technical fields", "kind": "collapsed"},
+    ),
+    "context": (
+        {"id": "design_focus", "title": "Design focus", "kind": "banner"},
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "crossing_details",
+            "title": "Crossing details",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Crossing measurements and required actions are not fully "
+                "recorded in the current export."
+            ),
+        },
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "source_confidence", "title": "Source & Confidence", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+        {"id": "raw_technical", "title": "Raw / technical fields", "kind": "collapsed"},
+    ),
+    "angle": (
+        {"id": "design_focus", "title": "Design focus banners", "kind": "banner"},
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "physical_evidence",
+            "title": "Physical evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Measured height and structural evidence are not fully specified in this export."
+            ),
+        },
+        {
+            "id": "mechanical",
+            "title": "Mechanical",
+            "kind": "condenseable",
+            "blank_state_text": "Stay and mechanical detail were not captured where applicable.",
+        },
+        {
+            "id": "equipment_pole_top",
+            "title": "Equipment & pole-top",
+            "kind": "condenseable",
+            "blank_state_text": "No pole-mounted equipment captured or inferred.",
+        },
+        {"id": "network_links", "title": "Network links", "kind": "standard"},
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "source_confidence", "title": "Source & Confidence", "kind": "standard"},
+        {"id": "lifecycle_design", "title": "Lifecycle / Design", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+        {"id": "raw_technical", "title": "Raw / technical fields", "kind": "collapsed"},
+    ),
+    "stay": (
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "stay_details",
+            "title": "Stay details",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Parent linkage and stay geometry are not fully recorded in this export."
+            ),
+        },
+        {"id": "network_links", "title": "Network links", "kind": "standard"},
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+        {"id": "raw_technical", "title": "Raw / technical fields", "kind": "collapsed"},
+    ),
+    "third_party": (
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+        {"id": "raw_technical", "title": "Raw / technical fields", "kind": "collapsed"},
+    ),
+    "span": (
+        {"id": "design_focus", "title": "Design focus", "kind": "banner"},
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "crossing_details",
+            "title": "Crossing details",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Crossing and route-corridor review evidence are not fully recorded in this export."
+            ),
+        },
+        {
+            "id": "electrical",
+            "title": "Electrical",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Electrical conductor and voltage detail are not fully supplied for this span."
+            ),
+        },
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "source_confidence", "title": "Source & Confidence", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+    ),
+    "cable": (
+        {"id": "design_focus", "title": "Design focus", "kind": "banner"},
+        {"id": "identity", "title": "Identity", "kind": "standard"},
+        {
+            "id": "crossing_details",
+            "title": "Crossing details",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Crossing and route-corridor review evidence are not fully recorded in this export."
+            ),
+        },
+        {
+            "id": "electrical",
+            "title": "Electrical",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Electrical cable and voltage detail are not fully supplied for this trace."
+            ),
+        },
+        {
+            "id": "survey_metadata_evidence",
+            "title": "Survey metadata and evidence",
+            "kind": "condenseable",
+            "blank_state_text": (
+                "Survey provenance and photo evidence are not fully recorded in this export."
+            ),
+        },
+        {"id": "location", "title": "Location", "kind": "standard"},
+        {"id": "source_confidence", "title": "Source & Confidence", "kind": "standard"},
+        {"id": "qa_review", "title": "QA / Review", "kind": "standard"},
+    ),
+}
+
 # Universal map-point fields (identity, capture, QA) — documentation / validation sets.
 UNIVERSAL_POINT_FIELDS: frozenset[str] = frozenset(
     {
@@ -680,6 +925,48 @@ def _popup_priority_field_record(item: dict[str, Any], role: str) -> dict[str, A
     }
 
 
+def popup_schema_contract_for_role(role: str) -> dict[str, Any]:
+    """Return the assembled popup contract for one asset role."""
+    section_specs = POPUP_ASSEMBLY_BY_ROLE.get(role, ())
+    visible_fields = popup_priority_fields_for_role(role)
+    visible_by_group: dict[str, list[dict[str, Any]]] = {}
+    for field in visible_fields:
+        visible_by_group.setdefault(field["popup_group"], []).append(field)
+
+    sections: list[dict[str, Any]] = []
+    for spec in section_specs:
+        title = spec["title"]
+        grouped_fields = visible_by_group.get(title, [])
+        sections.append(
+            {
+                "id": spec["id"],
+                "title": title,
+                "kind": spec["kind"],
+                "blank_state_text": spec.get("blank_state_text"),
+                "priority_fields": [field["field"] for field in grouped_fields],
+                "priority_field_count": len(grouped_fields),
+            }
+        )
+
+    hidden_fields = []
+    conditional_fields = []
+    for item in C2D_PRIORITY_FIELD_INVENTORY:
+        record = _popup_priority_field_record(item, role)
+        if record["visibility"] == "hidden":
+            hidden_fields.append(record["field"])
+        elif record["visibility"] == "conditional":
+            conditional_fields.append(record["field"])
+
+    return {
+        "role": role,
+        "section_order": [spec["title"] for spec in section_specs],
+        "sections": sections,
+        "visible_priority_fields": visible_fields,
+        "hidden_priority_fields": hidden_fields,
+        "conditional_priority_fields": conditional_fields,
+    }
+
+
 def popup_priority_fields_for_role(role: str) -> list[dict[str, Any]]:
     """Return C2/D popup field metadata visible for the given asset role."""
     fields: list[dict[str, Any]] = []
@@ -699,6 +986,7 @@ def popup_priority_field_catalog() -> dict[str, Any]:
     """Return backend popup labels/grouping metadata for C2/D priority fields."""
     roles = tuple(POPUP_SECTION_ORDER_BY_ROLE.keys())
     return {
+        "version": POPUP_SCHEMA_CONTRACT_VERSION,
         "roles": {
             role: {
                 "section_order": list(POPUP_SECTION_ORDER_BY_ROLE.get(role, ())),
@@ -708,7 +996,16 @@ def popup_priority_field_catalog() -> dict[str, Any]:
                 ],
             }
             for role in roles
-        }
+        },
+    }
+
+
+def popup_schema_contract() -> dict[str, Any]:
+    """Return the backend popup schema/contract for professional C2/D display."""
+    roles = tuple(POPUP_ASSEMBLY_BY_ROLE.keys())
+    return {
+        "version": POPUP_SCHEMA_CONTRACT_VERSION,
+        "roles": {role: popup_schema_contract_for_role(role) for role in roles},
     }
 
 

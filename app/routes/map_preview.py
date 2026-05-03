@@ -19,7 +19,11 @@ from app.field_ownership import (
     point_map_electrical_violations,
     validate_map_feature_collection_field_ownership,
 )
-from app.pole_field_schema import enrich_pole_support_props, popup_priority_field_catalog
+from app.pole_field_schema import (
+    enrich_pole_support_props,
+    popup_priority_field_catalog,
+    popup_schema_contract,
+)
 from app.qa_engine import classify_height_confidence, classify_source_confidence, parse_attachments
 from app.replacement_pairs import enrich_replacement_pair_intelligence
 from app.span_generator import attach_span_features_to_collection
@@ -215,8 +219,11 @@ def _enrich_popup_data_model(data: dict) -> dict:
     if not isinstance(data, dict):
         return data
     metadata = data.setdefault("metadata", {})
-    if isinstance(metadata, dict) and "popup_priority_field_catalog" not in metadata:
-        metadata["popup_priority_field_catalog"] = popup_priority_field_catalog()
+    if isinstance(metadata, dict):
+        if "popup_priority_field_catalog" not in metadata:
+            metadata["popup_priority_field_catalog"] = popup_priority_field_catalog()
+        if "popup_schema_contract" not in metadata:
+            metadata["popup_schema_contract"] = popup_schema_contract()
     point_leak_total = 0
     for feature in data.get("features") or []:
         if not isinstance(feature, dict) or feature.get("type") != "Feature":

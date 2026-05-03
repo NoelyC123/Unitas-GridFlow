@@ -111,6 +111,16 @@ def test_map_data_endpoint_backfills_c2d_popup_fields(tmp_path, monkeypatch) -> 
         item["field"] == "voltage_carried" and item["visibility"] == "hidden"
         for item in proposed["fields"]
     )
+    contract = res.get_json()["metadata"]["popup_schema_contract"]
+    assert contract["version"]
+    existing = contract["roles"]["existing"]
+    assert existing["section_order"][0] == "Design focus banners"
+    assert any(
+        section["title"] == "Physical evidence"
+        and "pole_class" in section["priority_fields"]
+        and section["blank_state_text"]
+        for section in existing["sections"]
+    )
 
 
 def test_map_viewer_includes_span_label_mode_select() -> None:
