@@ -1,175 +1,108 @@
 # Current Task
 
-## Domain Accuracy & Electrical Data Model Implementation
+## Status
 
-**Status:** PHASE 2 COMPLETE (D2-A through D2-D) — Phase 3 awaits approval
-**Timeline:** Phase 1 (5-7 days) ✅ → Phase 2 (10-14 days) — started → Phase 3 (5-7 days)
-**Total:** 4-5 weeks / 130-160 hours
+**Strategic decision pending.**
 
----
+This file has been aligned with the May 2026 source-of-truth references:
 
-## Current Priority
+- `AI_CONTROL/reference/GridFlow_Project-Control_Review_May_2026.txt`
+- `AI_CONTROL/reference/Complete_Knowledge_GridFlow_May_2026.txt`
 
-**PHASE 1: Emergency Domain Fixes — SHIPPED**
-
-**Packages:**
-1. ✅ D1-A: Asset Classification Fix (BT pole → third-party) — `b6dbc7c`
-2. ✅ D1-B: Height Source Validation — `e618590`
-3. ✅ D1-C: Source Confidence & Legacy Data Warnings — `f30ef46`
-4. ✅ D1-D: Third-Party Infrastructure & Attachments — `6349ebd`
-
-**Next:** Phase 3 integration & validation after review (see `PHASE_2_3_ROADMAP.md`).
+Do not use older Phase C-pending, Phase 1 emergency-fix, Phase 2, or Phase 3 task wording as current direction.
 
 ---
 
-## Critical Problems Being Fixed
+## Current project framing
 
-### Problem 1: BT Pole Misclassification
-**Current:** Point 72 "bt pole" classified as "EXpole being replaced"
-**Impact:** Designer thinks it's part of electric network to replace
-**Fix:** Classify as third-party telecoms infrastructure
+GridFlow is a validation-led survey-to-design intelligence and design-readiness tool for electricity network handoffs.
 
-### Problem 2: Height Source Missing
-**Current:** "Measured Height: 6.5m" but "Height Source: not captured"
-**Impact:** Can't trust height for clearance calculations
-**Fix:** Enforce height_source field (measured RTK/tape/estimated/plan)
+It is currently strongest around UK OHL / 11kV / real controller survey workflows.
 
-### Problem 3: Legacy Data Not Flagged
-**Current:** "Source Confidence: legacy map data" shown as regular field
-**Impact:** Designer doesn't know geometry is unverified
-**Fix:** Add ⚠️ LEGACY MAP DATA — NOT FIELD VERIFIED warning banner
-
-### Problem 4: Third-Party Attachments Invisible
-**Current:** No tracking of BT/streetlight/customer attachments on poles
-**Impact:** Construction planning misses coordination requirements
-**Fix:** Parse and display third-party attachments with owner/impact
+It is not currently a full CAD replacement, GIS platform, DNO compliance engine, Field Maps replacement, or full survey platform.
 
 ---
 
-## Evidence Base
+## Current decision gate
 
-**Research Documents (2 weeks of work):**
-- UK Electrical Grid Survey Data Capture Report (4,544 words)
-- UK Electrical Grid Survey Capture Model and GridFlow Gap Analysis
-- Real operational evidence (BT pole Point 72, missing conductor data)
+The next development decision is whether to proceed with the lower-risk **Phase C2/D professional QA + display refinement** path before any **Stage 4/full survey-platform** expansion.
 
-**All specifications validated against:**
-- ESQCR requirements
-- ENA G81 standards
-- ENWL underground record guidance
-- Ofgem CNAIM condition assessment
-- Esri Field Maps best practice
+This is a product and scope decision, not just a technical sequencing decision.
 
 ---
 
-## Phase 1 Deliverables
+## Option A — Phase C2/D professional QA + display refinement
 
-**After Phase 1 complete:**
+The May 2026 references describe this as the lower-risk next path.
 
-✅ **Asset Classification:**
-- BT/Openreach poles → third-party telecoms infrastructure
-- Streetlights → local authority infrastructure
-- Customer poles → customer-owned
-- Electric network poles → DNO structural
+Scope framing:
 
-✅ **Height Source Validation:**
-- Height source required for existing poles
-- Confidence levels: survey-grade/mapping-grade/unverified
-- Legacy/estimated heights flagged for field verification
+- Keep GridFlow as an enhanced pre-CAD QA/design-readiness workspace
+- Improve professional survey display and map UX
+- Add a limited set of 10-15 priority survey fields
+- Improve popup organisation and asset-specific display
+- Validate immediately on the existing real job corpus
 
-✅ **Source Confidence Framework:**
-- Provenance types: field_observed_rtk/gnss, dno_gis, legacy, drawing, inferred
-- Geometry trust: survey-grade/mapping-grade/unverified/indicative
-- Legacy data warning banner in popups
+Approximate scale in the May 2026 references: 2-4 weeks.
 
-✅ **Third-Party Attachments:**
-- Telecoms, streetlight, customer service, signage, CCTV detection
-- Owner and coordination impact visible
-- Construction planning flags
+This path preserves scope discipline and does not require full commercial validation before starting.
 
 ---
 
-## Files Created/Modified This Session
+## Option B — Stage 4/full electrical survey platform
 
-**Specifications:**
-- ✅ `CURSOR_DOMAIN_ACCURACY_COMPLETE_IMPLEMENTATION.md` — Complete Phase 1 implementation (15,000+ words)
-- ✅ `PHASE_1_EMERGENCY_DOMAIN_FIXES.md` — Phase 1 execution guide
-- ✅ `PHASE_2_3_ROADMAP.md` — Phases 2-3 summary roadmap
-- ✅ `AI_CONTROL/02_CURRENT_TASK.md` — This file (updated)
+The May 2026 references describe this as a much larger product expansion.
 
-**Implementation Files (will be created by Cursor in Phase 1):**
-- `app/asset_classifier.py` (new)
-- `app/routes/map_preview.py` (modified)
-- `app/qa_engine.py` (modified)
-- `app/static/js/map-viewer.js` (modified)
-- `app/static/style.css` (modified)
+Scope framing:
 
----
+- Full 50-field electrical survey data model
+- Tablet/mobile field capture
+- Evidence/photo management
+- Offline workflows
+- Asset relationships
+- GIS parity/integration
+- Field Maps replacement or near-replacement capability
+- Commercial platform features
 
-## Execution Protocol
+Approximate scale in the May 2026 references: 6-12 months.
 
-### Phase 1 Execution — COMPLETE
+**Stage 4 must not begin without customer/commercial validation.**
 
-All four packages implemented, tested (`pytest` full suite green), committed, and pushed.
+Required validation before Stage 4:
 
-### Phase 2 Execution — COMPLETE
-
-**Delivered:** Full electrical data model packages D2-A–D2-D (schema, equipment, connectivity QA, survey metadata).
-
-Packages:
-- ✅ D2-A: Conductor/Cable Electrical Schema (`app/electrical_schema.py`, intake/map merge, `conductor_hv_overhead` QA WARN, popup electrical rows)
-- ✅ D2-B: Equipment & Pole-Top Configuration (equipment taxonomy, ratings/kVA parsing, pole-top/earthing/plate, Equipment & pole-top popup section)
-- ✅ D2-C: Network Connectivity & Relationships (from/to support IDs, stay parent, cable endpoints, linkage QA; Network links popup section)
-- ✅ D2-D: Survey Metadata & Provenance (GNSS/capture enrichment, survey job ref, limitations; Survey metadata popup section; INFO-level advisory QA)
-
-### Phase 3 Execution (After Phase 2 validates)
-
-**NOT STARTED YET** — Waiting for Phase 2 completion
-
-Packages:
-- D3-A: Backend Data Model Integration
-- D3-B: Frontend Display & Forms
-- D3-C: Validation Rules & QA Engine
-- D3-D: Export & Handoff Quality
+- Customer conversations with likely DNO/contractor/survey-team users
+- Evidence of willingness to pay or beta-test
+- Clear must-have vs. nice-to-have feature priorities
+- A business case that justifies the scope expansion
 
 ---
 
-## What NOT to Do
+## Recommended framing from May 2026 references
 
-- ❌ Do NOT skip testing after each package
-- ❌ Do NOT proceed to next package without approval
-- ❌ Do NOT start Phase 3 before Phase 2 scope is agreed
-- ❌ Do NOT add features outside Phase 1 scope
-- ❌ Do NOT modify files not listed in package spec
+The recommended path is hybrid:
 
----
+1. Prove/refine the professional QA + display model through Phase C2/D.
+2. Use real operational/customer feedback to validate demand.
+3. Decide later whether Stage 4/full survey-platform scope is justified.
 
-## Success Criteria
-
-**Phase 1 complete when:**
-- ✅ All 4 packages implemented (D1-A, D1-B, D1-C, D1-D)
-- ✅ All 300+ tests passing
-- ✅ Manual validation on Gordon, Bellsprings, P010, P011 successful
-- ✅ Screenshots confirm all acceptance criteria met
-- ✅ All packages committed and pushed to GitHub
-- ✅ BT pole correctly classified
-- ✅ Height source enforced
-- ✅ Legacy data clearly flagged
-- ✅ Third-party attachments visible
+No Stage 4 implementation should begin from assumption or enthusiasm alone.
 
 ---
 
-## Next Checkpoint
+## What not to do from this task file
 
-Update this file when:
-- Package D1-A completes
-- Package D1-B completes
-- Package D1-C completes
-- Package D1-D completes
-- Phase 1 completes
-- Phase 2 approved to begin
-- Material change to priorities
+- Do not start Stage 4 without customer/commercial validation.
+- Do not treat GridFlow as a full CAD, GIS, DNO compliance, or survey-capture platform.
+- Do not expand from Phase C2/D into a 50-field data model without a decision gate.
+- Do not use `_archive/` or superseded strategic reviews as current project truth.
+- Do not use stale task wording that conflicts with the May 2026 references.
 
 ---
 
-**Expected next update:** Phase 3 approval or operational validation on Phase 2 popups and QA
+## Next checkpoint
+
+Update this file when Noel confirms the next strategic path:
+
+- Phase C2/D professional QA + display refinement
+- Stage 4 exploration after customer/commercial validation
+- Another explicitly chosen direction
