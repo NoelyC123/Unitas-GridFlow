@@ -169,6 +169,20 @@ def test_map_js_popup_contract_renderer_and_fallback(map_js_source: str) -> None
     assert "popup_schema_contract" in map_js_source
     assert "buildContractPopupHtml" in map_js_source
     assert "legacyPointPopupSections" in map_js_source
+    assert "buildLegacyPointPopupHtml" in map_js_source
+
+
+def test_map_js_popup_review_polish_hooks(map_js_source: str) -> None:
+    assert "gridflow-asset-popup" in map_js_source
+    assert "popup-section-chip" in map_js_source
+    assert 'data-popup-label="${this.escapeHtml(label)}"' in map_js_source
+    assert "keepInView: true" in map_js_source
+
+
+def test_map_js_popup_blank_state_detection(map_js_source: str) -> None:
+    assert "popupSectionMeta(rows)" in map_js_source
+    assert 'data-popup-label="Summary"' in map_js_source
+    assert "isEmptyPopupDisplay(display)" in map_js_source
 
 
 def test_map_js_primary_layer_key(map_js_source: str) -> None:
@@ -201,6 +215,18 @@ def test_map_view_span_panel_heading_id(map_view_html: str) -> None:
 
 def test_map_view_legend_span_caption_id(map_view_html: str) -> None:
     assert 'id="legend-span-line-caption"' in map_view_html
+
+
+def test_map_view_review_focus_polish_labels(map_view_html: str) -> None:
+    assert "Replacement pairing signals" in map_view_html
+    assert "Span crossing / context review" in map_view_html
+    assert "UG cable records missing spec" in map_view_html
+
+
+def test_map_view_legend_truthful_review_wording(map_view_html: str) -> None:
+    assert "Suggested Existing/Proposed Match (map evidence only)" in map_view_html
+    assert "Design blocker — issue prevents design-readiness" in map_view_html
+    assert "click for span review detail, or pin labels for QA scanning" in map_view_html
 
 
 def test_map_js_span_label_pin_modes(map_js_source: str) -> None:
