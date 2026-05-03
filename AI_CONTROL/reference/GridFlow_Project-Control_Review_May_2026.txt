@@ -1,0 +1,821 @@
+
+
+GridFlow Project-Control Review (May 2026 Edition)
+Review Date: 2026-05-03 Project Phase: Phase C Complete (C1-C4), Strategic Scope Decision Pending Test Status: 300+ tests passing Validation Status: Real operational feedback integrated (P011, Gordon, Bellsprings)
+
+Executive Summary
+GridFlow is at a critical strategic inflection point.
+The project has successfully evolved from experimental MVP to operational survey-to-design intelligence platform. Phase C (C1-C4) delivered feature-type filtering, asset lifecycle visualization, stay evidence detection, and span anomaly analysis — all validated against real operational jobs. The technical foundation is solid: 300+ passing tests, stable CI/CD, disciplined control layer, and proven intake/processing pipeline.
+However, the project now faces a fundamental scope decision:
+Option A: Professional QA + Display Platform (Phase C2/D)
+	•	Timeline: 2-4 weeks
+	•	Scope: Add 10-15 key survey fields, refine map UX, improve popup organization
+	•	Identity: Enhanced pre-CAD QA gatekeeper with professional display capabilities
+	•	Risk: Low — builds on proven foundation
+	•	Investment: Modest — incremental refinement
+	•	Validation: Immediate — test on existing job corpus
+Option B: Full Electrical Survey Platform (Stage 4+)
+	•	Timeline: 6-12 months
+	•	Scope: Complete 50-field data model, evidence management, asset relationships, GIS parity
+	•	Identity: Professional electrical survey-to-design platform
+	•	Risk: High — 4-5x scope expansion, needs commercial validation
+	•	Investment: Substantial — fundamental product pivot
+	•	Validation: Delayed — requires customer/market proof before full build
+The review document from which this is updated was written during Phase 2 (pre-Phase C). That earlier document correctly described GridFlow as a "narrow pre-CAD QA gatekeeper" — which was accurate then. But the project has evolved substantially since that review was written.
+Key evidence supporting this assessment:
+	•	Survey Data Capture Research (4,544 words) — comprehensive electrical survey specification covering 50+ fields across 6 asset families
+	•	Phase C Map Review (3,924 words) — operational analysis identifying UX gaps and professional display requirements
+	•	Current vs. Required State Analysis (8,604 words) — quantifies 4-5x gap between current 8-12 popup fields and professional 35-50 field requirement
+	•	P011 Operational Feedback — real designer use identifies 6 critical blockers, all resolved in Phase C
+	•	Phase C Implementation — C1 through C4 complete, 300+ tests passing, real validation complete
+This review provides:
+	•	Honest assessment of current technical state
+	•	Clear framing of the scope decision
+	•	Risk/benefit analysis for both paths
+	•	Recommended decision framework
+	•	Updated control layer requirements
+	•	Precise next-step guidance
+
+Project Identity Evolution
+Historical Identity (Phase 1-2, Correct Then)
+What GridFlow Was:
+"A narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs. Purpose: validate incoming survey data before design/CAD; catch real-world data issues early; act as a structured QA gate between survey and design."
+Best framing then:
+	•	Internal workflow tool
+	•	Consultancy leverage asset
+	•	Narrow productivity and QA layer
+This was the right identity for Phases 1-2. The project was proving it could ingest controller exports, apply meaningful validation, and surface issues before design.
+
+Current Identity (Phase C Complete, Decision Pending)
+What GridFlow Is Now:
+GridFlow is a survey-to-design intelligence and engineering workspace platform that:
+Core Capabilities Proven:
+	•	Ingests raw Trimble/controller CSV exports (multiple coordinate systems: OSGB, Irish Grid, WGS84)
+	•	Applies electrical schema parsing (poles, spans, stays, cables, context features)
+	•	Normalizes survey connectivity (EX↔PR replacement logic, span sequencing, route chains)
+	•	Detects design blockers (missing heights, absent stay evidence, span anomalies, clearance risks)
+	•	Visualizes asset lifecycle states (existing, proposed, retained, recovered, replacement, repositioned)
+	•	Provides map-based engineering workspace (15 filter types, symbol hierarchy, lifecycle overlays)
+	•	Generates design-readiness reports (meta.json, issues.csv, sequenced_route.json, map_data.json)
+	•	Produces PDF QA handoff packs
+What Makes This More Than "Narrow QA":
+	•	Asset Intelligence — Not just coordinate validation, but lifecycle understanding, replacement logic, stay evidence requirements
+	•	Engineering Context — Span distance analysis, crossing priorities, angle pole detection, mechanical support validation
+	•	Design Workspace — Interactive map with filter/layer controls, popup organization, visual review tools
+	•	Evidence Quality — Distinguishes measured vs. inferred vs. missing, flags review requirements
+	•	Operational Validation — Real designer feedback integrated, professional terminology adopted
+This is no longer a simple "pass/fail validator." It's a professional survey interpretation and design preparation platform.
+
+Future Identity Options (Decision Required)
+Path A: Enhanced QA + Professional Display
+Identity: Survey-to-design QA platform with professional engineering workspace
+Framing:
+	•	Pre-CAD intelligence layer
+	•	Completeness and design-readiness assessor
+	•	Survey interpretation and provenance tool
+	•	Internal/niche commercial product
+Distinguishing characteristics:
+	•	Focuses on what's missing or unclear in survey data
+	•	Provides context and interpretation for design decisions
+	•	Does NOT attempt to be Field Maps — complements it
+	•	Pragmatic 25-field popup model (not overwhelming 50-field dump)
+Commercial positioning:
+	•	Internal DNO/contractor workflow tool
+	•	Consultancy leverage asset
+	•	Niche productivity layer for survey-heavy teams
+
+Path B: Full Electrical Survey Platform
+Identity: Professional electrical survey capture, management, and design preparation platform
+Framing:
+	•	Survey-to-design end-to-end platform
+	•	Field Maps parity or replacement
+	•	Complete asset data model (50+ fields)
+	•	Evidence management (photos, sketches, attachments)
+	•	Commercial product for electrical survey/design market
+Distinguishing characteristics:
+	•	Captures complete survey data (physical, electrical, mechanical, environmental, evidence)
+	•	Manages asset relationships (parent poles, span connections, stay anchors)
+	•	Handles offline workflows and photo evidence
+	•	Generates DNO-grade records
+	•	Replaces or significantly reduces Field Maps dependency
+Commercial positioning:
+	•	Standalone commercial product
+	•	DNO/contractor procurement target
+	•	Professional survey platform market
+	•	12-24 month development roadmap
+
+Current Technical State
+What Works (Phase C Achievements)
+Core Processing Pipeline: ✅ CSV intake with multi-format support (Trimble, controller dumps, structured exports) ✅ Column normalization (handles capitalized, spaced, abbreviated field names) ✅ Coordinate system support (OSGB36, Irish Grid TM65, WGS84) ✅ Electrical schema parsing (6 asset families: poles, spans, stays, cables, context, equipment) ✅ Survey connectivity normalization (EX↔PR matching, span sequencing, route chains) ✅ QA validation engine (10 check types across 4 DNO rulepacks)
+Phase C Map Intelligence (C1-C4): ✅ C1: Feature-type filtering + blank field framework
+	•	15 filter buttons (existing, proposed, angle, stays, context, missing heights, etc.)
+	•	Conditional blank field display (existing poles vs. proposed poles vs. context records)
+	•	Symbol hierarchy (shape = asset type, color = QA status)
+	•	Popup section organization (8 sections: Identity, Physical, Electrical, Mechanical, Location, Context, QA/Review, Lifecycle)
+✅ C2: Asset lifecycle visualization
+	•	11 lifecycle states (existing, proposed, retained, recovered, replacement, repositioned, unmatched, suggested, confirmed, context)
+	•	EX↔PR linking lines (dashed = suggested, solid = confirmed)
+	•	Lifecycle toggle layer
+	•	Match distance/status display
+✅ C3: Stay evidence at angle poles
+	•	Angle pole detection (>10° deviation OR function="Angle")
+	•	Stay record scanning (20m radius)
+	•	Missing stay warnings at angle poles (mechanical design blocker)
+	•	Stay type classification (angle, terminal, tee-off, tandem)
+✅ C4: Span anomaly detection + crossing context
+	•	3D span distance calculation (includes elevation where available)
+	•	Span anomaly classification (<10m = probable duplicate, >500m = probable missing pole)
+	•	Crossing context enrichment (road, BT, 11kV, 33kV, 110kV crossings with priority/action)
+	•	Span lines + distance labels on map
+Quality Assurance: ✅ 300+ passing tests (up from 38 in Phase 2A) ✅ GitHub Actions CI (pytest + pre-commit on push/PR) ✅ Ruff linting active ✅ Pre-commit hooks enforced
+Operational Validation: ✅ P011 operational feedback — 6 blockers identified, all resolved in Phase C ✅ Gordon validation (NIE Networks, Irish Grid) ✅ Bellsprings validation (SPEN, OSGB) ✅ Real designer use cases integrated
+
+What's Changed Since Previous Review
+The previous review document (undated, likely Phase 2 era) described:
+	•	Test count: 38 tests
+	•	Phase status: "Phase 1 complete + Phase 2A complete"
+	•	Main weakness: "lack of real-world validation"
+	•	Next step: "validation-led product improvement"
+Since then:
+Metric
+Previous Review
+Current State
+Change
+Test Count
+38
+300+
++762%
+Phase Status
+Phase 2A
+Phase C (C1-C4) complete
++3 phases
+Validation
+Hypothetical
+Real operational (P011, Gordon, Bellsprings)
+Proven
+Map Features
+Basic points
+15 filters, lifecycle viz, span analysis, stay detection
+Mature
+Popup Fields
+~5 basic
+8 sections, conditional display, lifecycle/mechanical
+Professional
+Strategic Clarity
+"Narrow QA gatekeeper"
+Decision point: QA+Display vs. Full Platform
+Scope fork
+The project has fundamentally evolved.
+
+Technical Architecture
+Stack (unchanged, still appropriate):
+	•	Python 3.13
+	•	Flask (app factory pattern, blueprint-based routing)
+	•	pandas, geopandas, shapely, pyproj (GIS/data processing)
+	•	ReportLab (PDF generation)
+	•	Leaflet.js, Bootstrap 5 (map viewer, UI)
+Module Status:
+Module
+Lines
+Status
+Risk Level
+map-viewer.js
+~2,809
+Functional, feature-rich
+HIGH — treat as sensitive
+qa_engine.py
+~1,095
+Stable, well-tested
+MEDIUM — refactor only with coverage
+controller_intake.py
+~816
+Working, format-flexible
+MEDIUM — intake changes need validation
+route_sequencer.py
+~691
+Proven on real jobs
+LOW — core logic solid
+span_generator.py
+~542
+New in Phase C, tested
+LOW — narrow scope
+electrical_schema.py
+~420
+Phase 2 addition, stable
+LOW — taxonomy layer
+survey_connectivity.py
+~380
+Phase 2 addition, stable
+LOW — EX/PR matching
+Architectural Strengths:
+	•	Blueprint-based routing keeps concerns separated
+	•	Test coverage supports confident changes
+	•	CI/CD pipeline catches regressions early
+	•	Control layer provides clear decision authority
+Architectural Weaknesses (carried forward from previous review):
+	•	Some runtime enrichment happens in map routes (not fully persisted in JSON)
+	•	Large JavaScript module (map-viewer.js) is fragile for AI-driven edits
+	•	Dependency mismatch: pyproject.toml under-declares vs. requirements.txt
+	•	No authentication layer (internal/dev use only)
+These weaknesses are manageable for current scope, but would need addressing for commercial deployment.
+
+Data Model Status
+Current Popup Data Model (Phase C):
+Existing pole popup shows ~12 primary fields across 8 sections:
+	•	Identity: Point ID, type, function, status
+	•	Physical: Height (measured), material, condition
+	•	Electrical: (mostly blank in current data)
+	•	Mechanical: Stay evidence status
+	•	Location: E/N coordinates, elevation, grid system
+	•	Context: Remarks, access notes
+	•	QA/Review: Issue flags, missing evidence warnings
+	•	Lifecycle: Replacement status, matched pole, review status
+Conditional Field Display (Phase C1):
+	•	Existing poles: "Height: not captured (review required)" ⚠️
+	•	Proposed poles: "Height: not yet specified (design decision)" ℹ️
+	•	Context records: Height field hidden entirely
+This is professional and truthful — not overwhelming, not misleading.
+
+Required Data Model (Survey Research Specification):
+Professional electrical survey requires 35-50 fields per pole:
+Physical Structure (12 fields):
+	•	Measured height / specification
+	•	Pole class/strength
+	•	Material
+	•	Condition (good/fair/poor/unsafe)
+	•	Decay/rot evidence
+	•	Pole-top condition
+	•	Lean direction/severity
+	•	Birthmark details
+	•	Defect type (rot/split/burn/impact)
+	•	Foundation/ground condition
+	•	Action required
+Electrical/Network (8 fields):
+	•	Voltage carried
+	•	Circuit type
+	•	Number of phases
+	•	Conductor type
+	•	Pole-top arrangement
+	•	Crossarm type
+	•	Insulator type
+	•	Transformer/switch/fuse/recloser presence
+	•	Equipment ratings
+	•	Asset plate information
+	•	Earthing
+Mechanical Support (7 fields):
+	•	Stay required (yes/no)
+	•	Stay existing (yes/no)
+	•	Stay type
+	•	Anchor location/bearing/direction
+	•	Stay condition
+	•	Stay insulator
+	•	Strut present
+Attachments/Third-Party (3 fields):
+	•	Telecoms attachment
+	•	Streetlight
+	•	Customer service/other utility
+Access/Environment (5 fields):
+	•	Access route
+	•	Gate/fence issue
+	•	Landowner/wayleave issue
+	•	Vegetation/tree proximity
+	•	Ground condition/traffic management
+Evidence (6 fields):
+	•	Full pole photo (linked)
+	•	Pole-top photo (linked)
+	•	Defect photo (linked)
+	•	Stay/anchor photo (linked)
+	•	Asset plate photo (linked)
+	•	Surveyor/date
+	•	GNSS accuracy
+	•	Remarks/notes
+Design Notes/QA (variable):
+	•	Missing measured height
+	•	Missing specification
+	•	Missing material/condition
+	•	Missing stay evidence
+	•	Unconfirmed match
+	•	Clearance concerns
+	•	Access constraints
+
+The Gap:
+Aspect
+Current (Phase C)
+Required (Survey Spec)
+Gap
+Total Fields
+~12
+35-50
+3-4x
+Physical
+2-3
+12
+4x
+Electrical
+0-1
+8
+8x
+Mechanical
+1
+7
+7x
+Evidence
+1
+6
+6x
+This is not a minor polish. This is a data model expansion that changes the product from "QA gatekeeper with professional display" to "full electrical survey platform."
+
+Evidence Inventory and Validation Corpus
+Real Operational Validation (New Since Previous Review)
+P011 Operational Feedback:
+	•	Source: Real designer use on live 11kV refurbishment job
+	•	Date: April 2026
+	•	Findings: 6 operational blockers identified:
+	•	Context features completely invisible (filter defaulted off)
+	•	Proposed pole "Height: not captured" misleading (should be "not yet specified")
+	•	Symbols not distinct enough at map zoom
+	•	Stay evidence missing at angle poles (mechanical design blocker)
+	•	Span distance unclear (can't validate route logic)
+	•	Insufficient data in popups for design decisions
+All 6 blockers resolved in Phase C (C1-C4).
+Gordon Validation (NIE Networks):
+	•	Coordinate System: Irish Grid (TM65)
+	•	Records: 161 survey records (155 mapped after metadata rows)
+	•	Issues Found: 39 (REPL_PAIR, ANGLE_NO_STAY, span anomalies)
+	•	Validation: Proves Irish Grid support, controller dump intake, EX/PR matching
+	•	Split-file test: PR1 + PR2 splits both processed successfully (proves PoleCAD prep compatibility)
+Bellsprings Validation (SPEN):
+	•	Job Code: EWM285
+	•	Coordinate System: OSGB36
+	•	Validation: Proves SPEN rulepack, OSGB handling, multi-DNO support
+	•	Evidence: Real 11kV OHL refurbishment survey data
+
+Processed Evidence Corpus
+Job Families:
+	•	2814_474 family (multiple variants)
+	•	2814_513 family (controller dump format)
+	•	Gordon_Pt1 family (NIE, split-file tests)
+	•	P010, P011 (operational jobs)
+	•	D1 test series (development validation)
+Total Corpus:
+	•	45+ job folders
+	•	10+ project folders
+	•	Multiple coordinate systems validated
+	•	Multiple DNO rulepacks tested
+	•	Multiple intake formats proven
+Cross-Cutting Issue Patterns (Consistent Across Jobs):
+	•	REPL_PAIR (EX/PR replacement logic)
+	•	SPAN_VERY_SHORT (<10m probable duplicates)
+	•	ANGLE_NO_STAY (mechanical design blocker)
+	•	EXPOLE_HEIGHT_EST (estimated vs. measured)
+	•	HEIGHT_RANGE (plausibility concerns)
+This pattern consistency proves GridFlow is discovering real engineering uncertainties, not random noise.
+
+Visual Evidence and Review Documentation
+Key Review Documents (New Since Previous Review):
+	•	Phase C Map Review (3,924 words) — operational UX analysis
+	•	Survey Data Capture Research (4,544 words) — complete electrical survey specification
+	•	Current vs. Required State Analysis (8,604 words) — gap quantification
+	•	P011 Operational Feedback — real designer blockers
+	•	Domain Reference Summary — evidence quality, feature codes, practitioner terminology
+	•	Practitioner Review Summary — professional language requirements
+Screenshot Evidence:
+	•	Map viewer before/after Phase C improvements
+	•	Popup organization evolution
+	•	Filter/layer panel development
+	•	PDF report samples
+	•	Review page layouts
+
+Strategic Analysis: The Scope Decision
+Why This Decision Matters Now
+The project has reached a natural inflection point:
+Technical Readiness: Phase C proves GridFlow can handle complex map intelligence, lifecycle visualization, and professional display. The foundation is solid.
+Validation Evidence: Real operational use (P011, Gordon, Bellsprings) confirms the tool provides value. Designer feedback is positive and integrated.
+Data Model Gap: Current 12-field popup vs. required 35-50 field professional survey model is a 4-5x expansion, not incremental polish.
+Strategic Clarity: Two comprehensive specifications exist (Phase C Map Review + Survey Data Capture Research) that describe different products at different scope levels.
+Investment Question: The next phase requires either:
+	•	2-4 weeks (modest expansion, professional QA+Display)
+	•	6-12 months (full platform build, 4-5x data model expansion)
+This is not a technical decision. This is a product and business decision.
+
+Option A: Professional QA + Display Platform (Phase C2/D)
+Scope:
+	•	Implement Phase C Map Review recommendations (UX polish)
+	•	Add 10-15 key survey fields (from 12 → 25 fields)
+	•	Improve popup organization and visual hierarchy
+	•	Enhance map clarity (marker size, symbol refinement, layer panel split)
+	•	Stay as "enhanced pre-CAD QA gatekeeper with professional display"
+Timeline: 2-4 weeks
+Fields to Add (Priority Selection from Survey Research):
+	•	Pole class/strength
+	•	Material (expand current placeholder)
+	•	Condition (good/fair/poor/unsafe)
+	•	Voltage carried
+	•	Conductor type
+	•	Stay present (yes/no)
+	•	Stay type (if yes)
+	•	Lean (direction/severity)
+	•	Defects (rot/split/burn)
+	•	Equipment presence (transformer/switch/fuse)
+	•	Photo indicators (linked, not uploaded)
+	•	Surveyor/date
+	•	GNSS accuracy
+	•	Action required
+	•	Wayleave/access notes
+Result: 25-field professional popup (not overwhelming, design-focused)
+Value Proposition:
+	•	Professional display of survey data
+	•	Clear evidence quality indicators
+	•	Design-blocker identification
+	•	Completeness assessment
+	•	Does NOT attempt to capture surveys — interprets existing survey exports
+Commercial Positioning:
+	•	Internal DNO/contractor workflow tool
+	•	Consultancy leverage asset ("I can make your survey data design-ready faster")
+	•	Niche productivity layer
+	•	Low-risk investment
+Pros: ✅ Builds on proven foundation ✅ Low risk — 2-4 week timeline ✅ Immediate validation on existing job corpus ✅ Preserves "narrow QA" strategic focus ✅ No need for customer/market validation before build ✅ Keeps scope manageable for solo/small-team development
+Cons: ❌ Doesn't fully leverage survey research work ❌ Remains internal/niche commercial potential ❌ Won't replace Field Maps or compete with survey platforms ❌ Limits revenue/scale potential
+Risk Level: LOW
+Recommended If:
+	•	You want to stay focused on consultancy leverage
+	•	You prefer low-risk incremental improvement
+	•	You're not ready for 6-12 month product build
+	•	You want to prove professional display works before expanding scope
+
+Option B: Full Electrical Survey Platform (Stage 4+)
+Scope:
+	•	Implement complete 50-field data model (all categories from Survey Research)
+	•	Build evidence management (photo upload, linking, sketches, attachments)
+	•	Add asset relationship model (parent poles, span connections, stay anchors)
+	•	Create structured field capture interface (tablet/mobile forms)
+	•	Build offline workflow support
+	•	Achieve Field Maps parity or replacement capability
+	•	Add PoleCAD-ready export formats
+	•	Build DNO submission layers
+	•	Become a professional electrical survey-to-design platform
+Timeline: 6-12 months (minimum)
+Stage Breakdown:
+	•	Stage 4 (Months 1-3): Full popup data model, evidence management foundations
+	•	Stage 5 (Months 4-6): Mobile capture, photo workflows, offline sync
+	•	Stage 6 (Months 7-9): GIS integration, DNO rulepacks expansion, PoleCAD export
+	•	Stage 7+ (Months 10-12): Commercial packaging, deployment, scaling
+Value Proposition:
+	•	Complete survey platform from field capture → design handoff
+	•	Evidence management (photos, sketches, notes)
+	•	Asset lifecycle management
+	•	Design-ready exports (PoleCAD, D2D, GIS)
+	•	Field Maps replacement or significant reduction
+Commercial Positioning:
+	•	Standalone commercial product
+	•	DNO/contractor procurement target
+	•	Professional survey platform market entry
+	•	SaaS or licensed deployment model
+	•	Significant revenue potential
+Pros: ✅ Fully leverages survey research work ✅ Creates commercial product with real market potential ✅ Positions GridFlow as professional platform vs. internal tool ✅ Opens DNO procurement opportunities ✅ Higher revenue/scale ceiling
+Cons: ❌ 6-12 month minimum timeline ❌ High risk — 4-5x scope expansion ❌ Needs commercial validation BEFORE full build ❌ Requires customer development, market research ❌ Solo/small-team development becomes challenging ❌ Significant investment without guaranteed return ❌ Must compete with established survey platforms
+Risk Level: HIGH
+Recommended If:
+	•	You have 6-12 months to invest in product build
+	•	You're willing to pursue commercial validation (talk to potential customers)
+	•	You want to build a standalone commercial product
+	•	You're prepared for significant scope expansion
+	•	You have evidence that DNOs/contractors would buy this platform
+
+Decision Framework
+Question 1: What is your primary goal for GridFlow?
+A) Consultancy leverage / internal productivity tool → Choose Phase C2/D (Professional QA + Display)
+B) Commercial product / business venture → Choose Stage 4 (Full Survey Platform) → BUT ONLY AFTER commercial validation (talk to 5-10 potential customers first)
+
+Question 2: How much time can you invest in the next phase?
+A) 2-4 weeks of focused development → Choose Phase C2/D
+B) 6-12 months of sustained product development → Consider Stage 4 → BUT validate market demand first
+
+Question 3: What evidence do you have for commercial viability?
+A) None yet / hypothetical interest / personal need → Choose Phase C2/D first → Use it in real consultancy work → Gather customer feedback → Then decide Stage 4 based on evidence
+B) Real customer conversations / DNO interest / contractor demand → Consider Stage 4 → But create business case first (revenue model, pricing, deployment cost)
+
+Question 4: What is your risk tolerance?
+A) Low — prefer incremental, proven improvements → Choose Phase C2/D
+B) High — willing to bet on bigger commercial opportunity → Consider Stage 4 → But validate first (don't build 6-12 months without customer proof)
+
+Recommended Path: Hybrid Approach
+My strong recommendation:
+Phase 1: Do Phase C2/D First (2-4 weeks)
+	•	Implement Phase C Map Review UX improvements
+	•	Add 10-15 priority fields (12 → 25 field popup)
+	•	Prove professional display model works on real jobs
+	•	Use GridFlow in real consultancy work for 2-3 months
+	•	Collect designer/customer feedback
+	•	Track what questions designers ask / what data they need
+Phase 2: Commercial Validation (Months 2-3)
+	•	Talk to 5-10 potential customers (DNOs, contractors, survey teams)
+	•	Ask: "Would you pay for this? How much? What's missing?"
+	•	Validate: Do they need full 50-field capture, or is 25-field interpretation enough?
+	•	Determine: Are they happy with Field Maps + GridFlow QA, or do they want GridFlow to replace Field Maps?
+	•	Gather real evidence before committing to 6-12 month build
+Phase 3: Decision Point (Month 4) If customer validation shows strong demand: → Build Stage 4 roadmap with customer input → Create business case (revenue model, pricing, costs) → Commit to 6-12 month product development → Build survey platform properly
+If customer validation shows modest interest: → Stay with Phase C2/D professional QA model → Continue incremental improvements based on real use → Use as consultancy leverage / internal tool → Don't expand to full platform without stronger evidence
+
+Why This Hybrid Approach?
+✅ Low risk — 2-4 weeks proves professional display works ✅ Real evidence — customer conversations before 6-12 month commitment ✅ Preserves optionality — can go either direction based on validation ✅ No wasted work — Phase C2/D fields are subset of Stage 4 anyway ✅ Efficient — don't build survey platform without customer proof
+The biggest mistake would be: ❌ Building Stage 4 (6-12 months) without customer validation ❌ Staying narrow forever when real commercial opportunity exists ❌ Letting survey research work sit unused because of fear of scope expansion
+The safe path: ✅ Prove professional display (Phase C2/D, 2-4 weeks) ✅ Validate market demand (customer conversations, 2-3 months) ✅ Then decide Stage 4 based on real evidence
+
+Updated Control Layer Requirements
+Source of Truth Hierarchy (Current)
+For Immediate Next Steps:
+	•	This Document (GridFlow_Project-Control_Review_May_2026.md) — current state + decision framework
+	•	CRITICAL_ANALYSIS_PHASE_C_VS_SURVEY_PLATFORM_2026-05-01.md — scope decision analysis
+	•	CURRENT_APP_VS_REQUIRED_STATE_ANALYSIS.md — gap quantification
+	•	Phase C Map Review (GridFlow_Phase_C_Map_Review_Detailed_Report_2026-05-01.docx) — UX improvements
+	•	Survey Data Capture Research (UK_Electrical_Grid_Survey_Data_Capture_Report.docx) — full platform spec
+For Project Identity: 6. AI_CONTROL/00_PROJECT_CANONICAL.md — NEEDS UPDATE (still says "narrow pre-CAD QA only") 7. PROJECT_DEEP_CONTEXT.md — historical context, still valid
+For Implementation: 8. CURSOR_BRIEF_PHASE_C.md — Phase C specification (COMPLETE) 9. AI_CONTROL/02_CURRENT_TASK.md — NEEDS UPDATE (still references Phase 1) 10. GRIDFLOW_ROADMAP.md — NEEDS UPDATE (written before scope decision point)
+For History: 11. CHANGELOG.md — accurate record of what shipped 12. AI_CONTROL/04_SESSION_HANDOFF.md — session-to-session context
+
+Control Files Requiring Immediate Update
+HIGH PRIORITY — Update Before Next Development Phase:
+1. AI_CONTROL/00_PROJECT_CANONICAL.md
+Current (WRONG):
+"Unitas GridFlow is a narrow pre-CAD QA and compliance tool for UK electricity network survey-to-design handoffs."
+Should Say:
+"Unitas GridFlow is a survey-to-design intelligence and engineering workspace platform for UK electrical OHL work. It transforms raw controller/GNSS survey exports into design-ready artefacts through intelligent parsing, lifecycle visualization, completeness assessment, and evidence-quality tracking.
+Current Status: Phase C complete (300+ tests passing). At strategic decision point between:
+	•	Path A: Professional QA + Display Platform (2-4 weeks, 10-15 field expansion)
+	•	Path B: Full Electrical Survey Platform (6-12 months, 50-field data model)
+Decision pending commercial validation and strategic direction confirmation."
+
+2. AI_CONTROL/01_CURRENT_STATE.md
+Current (OUTDATED):
+"Working MVP + Phase 1 complete + Phase 2A complete + next: validation-led product improvement"
+Should Say:
+"Phase C Complete (C1-C4), 300+ tests passing, real operational validation complete (P011, Gordon, Bellsprings).
+Current Capabilities:
+	•	Feature-type filtering (15 filter types)
+	•	Asset lifecycle visualization (11 states, EX↔PR linking)
+	•	Stay evidence detection at angle poles
+	•	Span anomaly analysis (duplicate detection, missing pole gaps)
+	•	Professional popup organization (8 sections, conditional display)
+Strategic Status: At scope decision point. Two paths forward:
+	•	Phase C2/D (2-4 weeks): Professional display refinement
+	•	Stage 4 (6-12 months): Full survey platform build
+Next Step: Decision required — see GridFlow_Project-Control_Review_May_2026.md"
+
+3. AI_CONTROL/02_CURRENT_TASK.md
+Current (SEVERELY OUTDATED): Still references Phase 1 work
+Should Say:
+"Current Task: STRATEGIC DECISION PENDING
+Phase C (C1-C4) is COMPLETE. All implementation done, 300+ tests passing, operational validation successful.
+Decision Required: Choose development path:
+Option A: Phase C2/D (Professional QA + Display)
+	•	Timeline: 2-4 weeks
+	•	Add 10-15 key survey fields (12 → 25 field popup)
+	•	Implement Phase C Map Review UX improvements
+	•	Stay as enhanced pre-CAD QA gatekeeper
+	•	See: GridFlow_Phase_C_Map_Review_Detailed_Report_2026-05-01.docx
+Option B: Stage 4 (Full Survey Platform)
+	•	Timeline: 6-12 months
+	•	Complete 50-field data model implementation
+	•	Evidence management, asset relationships, mobile capture
+	•	Becomes professional electrical survey platform
+	•	REQUIRES commercial validation BEFORE build
+	•	See: UK_Electrical_Grid_Survey_Data_Capture_Report.docx
+Recommended: Phase C2/D first (2-4 weeks) → Customer validation (2-3 months) → Then decide Stage 4
+No implementation work should begin until strategic direction is confirmed."
+
+MEDIUM PRIORITY — Update After Decision:
+4. GRIDFLOW_ROADMAP.md
+	•	Currently describes 10-task expansion roadmap
+	•	Needs rewrite based on chosen path (Phase C2/D vs. Stage 4)
+	•	Should align with strategic decision outcome
+5. README.md
+	•	Update product description to reflect Phase C capabilities
+	•	Add section on strategic direction / current decision point
+	•	Update "What works" section with Phase C features
+6. CHANGELOG.md
+	•	Add Phase C (C1-C4) completion entry
+	•	Document 300+ test milestone
+	•	Record operational validation (P011, Gordon, Bellsprings)
+
+AI Operating Model (Reinforced)
+The previous review's AI operating model remains CORRECT:
+Cost-Control Rules:
+	•	Never give any worker more than one task ID at a time
+	•	Never include _archive/, bulk uploads, or all review docs in normal coding prompts
+	•	Use curated context bundles, not full-repo free-for-all prompts
+	•	Reuse single task brief and acceptance checklist across tools
+	•	Require diffs, not narrative promises
+	•	Require tests before merge
+	•	Use ChatGPT review before every merge
+	•	Keep Codex/Claude off master
+	•	Treat map-viewer.js as sensitive file
+	•	Refresh control docs after each completed phase
+Worker Division of Labor:
+	•	ChatGPT (You): Strategic decisions, scope control, validation evidence assessment
+	•	Claude Desktop (Me): Deep analysis, specification review, domain alignment checking
+	•	Cursor: Code implementation only — no strategic decisions
+	•	Claude Code: Terminal/shell implementation work
+Branch Discipline:
+	•	All development on feature branches
+	•	No direct commits to master
+	•	PR review before merge
+	•	CI must pass before merge
+Test Discipline:
+	•	Tests added/updated for every change
+	•	Full suite (pytest -q) must pass
+	•	Visual validation on real jobs (P005/F001, J12946, Gordon)
+	•	No merge without green tests
+
+Risk Assessment
+Technical Risks (LOW)
+Current technical foundation is solid: ✅ 300+ passing tests ✅ CI/CD pipeline working ✅ Multi-format intake proven ✅ Multi-coordinate-system support validated ✅ Real job corpus tested
+Manageable technical debt:
+	•	Large JavaScript module (map-viewer.js ~2,809 lines) — treat as sensitive, make narrow changes only
+	•	Runtime enrichment vs. stored JSON — acceptable for current scope, needs documentation
+	•	Dependency declaration mismatch — fix in next control refresh
+No technical blockers for either path (Phase C2/D or Stage 4).
+
+Product/Market Risks (VARIABLE)
+Phase C2/D (Professional QA + Display):
+	•	Risk Level: LOW
+	•	Why: Builds on proven foundation, 2-4 week timeline, immediate validation possible
+	•	Mitigation: Test on real jobs, gather designer feedback, iterate based on use
+Stage 4 (Full Survey Platform):
+	•	Risk Level: HIGH without commercial validation
+	•	Why: 6-12 month build, 4-5x scope expansion, unproven market demand
+	•	Mitigation: Customer development BEFORE build — talk to 5-10 potential customers, validate willingness to pay, understand must-have vs. nice-to-have features
+The biggest product risk is building Stage 4 without commercial validation.
+
+Scope/Control Risks (MEDIUM)
+Scope Creep:
+	•	Survey research work is comprehensive (4,544 words, 50+ fields)
+	•	Temptation to "just add a few more fields" until Phase C2/D becomes de facto Stage 4
+	•	Mitigation: Strict 10-15 field limit for Phase C2/D, explicit decision gate before Stage 4
+Source of Truth Drift:
+	•	Current control files (00_CANONICAL, 01_STATE, 02_TASK) are outdated
+	•	Multiple specification documents (Phase C review, Survey research, gap analysis) not reconciled
+	•	Mitigation: Update control layer immediately after strategic decision
+AI Worker Confusion:
+	•	Without clear control layer, workers may work from stale instructions
+	•	Risk of implementing wrong scope or outdated priorities
+	•	Mitigation: No implementation work until control files updated post-decision
+
+Investment/Opportunity Cost Risks (HIGH)
+Phase C2/D Opportunity Cost:
+	•	If real commercial opportunity exists for survey platform, staying narrow may miss market window
+	•	Mitigation: Customer validation in parallel with Phase C2/D use
+Stage 4 Investment Risk:
+	•	6-12 months of development without customer validation
+	•	Could build product nobody wants to buy
+	•	Mitigation: DO NOT start Stage 4 without customer proof
+Solo/Small Team Capacity:
+	•	Stage 4 is 6-12 month sustained effort
+	•	Requires focus, resources, time
+	•	May be challenging for solo developer or small consultancy team
+	•	Mitigation: Validate customer demand justifies investment before committing
+
+Recommended Next Steps (Precise)
+Immediate (This Week)
+1. Strategic Decision (You)
+Answer these questions:
+	•	What is your primary goal? (consultancy leverage vs. commercial product)
+	•	How much time can you invest? (2-4 weeks vs. 6-12 months)
+	•	What customer evidence do you have? (hypothetical vs. real conversations)
+	•	What is your risk tolerance? (low vs. high)
+Choose path:
+	•	Phase C2/D (Professional QA + Display, 2-4 weeks)
+	•	Stage 4 (Full Survey Platform, 6-12 months, validate first)
+	•	Hybrid (Phase C2/D → customer validation → then decide Stage 4)
+Record decision in: AI_CONTROL/07_STRATEGIC_DECISION_MAY_2026.md
+
+2. Control Layer Refresh (Me + You)
+Update these files based on your decision:
+	•	AI_CONTROL/00_PROJECT_CANONICAL.md — product identity
+	•	AI_CONTROL/01_CURRENT_STATE.md — Phase C complete status
+	•	AI_CONTROL/02_CURRENT_TASK.md — chosen path + next implementation spec
+	•	GRIDFLOW_ROADMAP.md — align with strategic direction
+	•	README.md — update product description
+	•	CHANGELOG.md — record Phase C completion
+Create new file:
+	•	AI_CONTROL/07_STRATEGIC_DECISION_MAY_2026.md — document decision rationale, chosen path, validation plan
+
+If Phase C2/D Chosen (Next 2-4 Weeks)
+Week 1: Specification
+Create: PHASE_C2D_SPECIFICATION.md
+Contents:
+	•	10-15 priority fields to add (from survey research)
+	•	Map UX improvements (from Phase C review)
+	•	Popup reorganization details
+	•	Asset-specific layouts (existing vs. proposed vs. context)
+	•	Test requirements
+	•	Visual acceptance criteria
+Approval gate: Review spec, confirm scope, approve for implementation
+
+Week 2-3: Implementation (Cursor)
+Tasks:
+	•	Map UX improvements (marker size, symbol refinement, layer panel split)
+	•	Add priority survey fields (class, material, condition, voltage, conductor, stay presence, etc.)
+	•	Implement asset-specific popup layouts
+	•	Update tests (target: 320-340 passing)
+	•	Visual validation on P005/F001, J12946, Gordon
+Branch: phase-c2d-professional-display
+Review gates: Test after each task, visual validation before merge
+
+Week 4: Validation & Documentation
+Validation:
+	•	Test on full job corpus (45+ jobs)
+	•	Real designer use on live job (if available)
+	•	Collect feedback on 25-field popup model
+	•	Document gaps/issues
+Documentation:
+	•	Update CHANGELOG
+	•	Screenshot evidence
+	•	User guide improvements
+	•	Control layer alignment check
+Decision: Is professional display model sufficient, or proceed to customer validation for Stage 4?
+
+If Stage 4 Chosen (Next 6-12 Months)
+DO NOT BEGIN IMPLEMENTATION WITHOUT COMMERCIAL VALIDATION
+Months 1-2: Customer Development
+Goal: Validate market demand before 6-12 month build
+Activities:
+	•	Identify 10-15 potential customers (DNOs, contractors, survey teams)
+	•	Conduct customer interviews:
+	•	What survey tools do you use now?
+	•	What problems do you face?
+	•	Would you pay for GridFlow? How much?
+	•	What features are must-have vs. nice-to-have?
+	•	Would you beta test?
+	•	Create business case:
+	•	Revenue model (SaaS, license, custom deployment?)
+	•	Pricing tiers
+	•	Development cost estimate
+	•	Break-even analysis
+	•	Validate technical requirements:
+	•	Do customers need full 50-field model, or is 25 enough?
+	•	Photo upload essential, or linking sufficient?
+	•	Mobile/tablet capture required, or desktop-only acceptable?
+	•	Offline workflow critical, or online-only fine?
+Deliverables:
+	•	Customer interview summary (10+ conversations)
+	•	Business case document (revenue model, pricing, costs)
+	•	Validated feature priority list
+	•	Beta customer commitments (3-5 customers)
+Decision Gate: Proceed to Stage 4 build ONLY if:
+	•	3+ customers commit to beta testing
+	•	Pricing model validated (customers say they'd pay)
+	•	Business case shows path to profitability
+	•	Feature requirements confirmed
+
+Months 3-12: Stage 4 Build (Only If Validation Successful)
+Stage 4 Roadmap (Conditional):
+Months 3-5: Foundation
+	•	Complete 50-field data model
+	•	Evidence management (photo linking)
+	•	Asset relationship model (parent poles, spans, stay anchors)
+	•	Enhanced popup layouts
+Months 6-8: Capture & Workflow
+	•	Structured field capture interface (tablet forms)
+	•	Mobile optimization
+	•	Offline workflow support
+	•	Photo upload/attachment
+Months 9-10: Integration & Export
+	•	PoleCAD-ready export
+	•	D2D enhanced export
+	•	GIS system connectors
+	•	DNO submission formats
+Months 11-12: Commercial Packaging
+	•	Deployment infrastructure
+	•	Authentication/security
+	•	Multi-user support
+	•	Customer onboarding
+	•	Documentation
+Beta testing throughout — real customer validation at each stage
+
+Bottom Line
+GridFlow has successfully evolved from experimental MVP to operational survey-to-design intelligence platform.
+Phase C (C1-C4) proves the technical foundation is solid:
+	•	300+ tests passing
+	•	Real operational validation (P011, Gordon, Bellsprings)
+	•	Professional map intelligence (15 filters, lifecycle viz, span analysis, stay detection)
+	•	Proven on multiple DNOs, coordinate systems, file formats
+The project now faces a fundamental scope decision:
+Path A (Professional QA + Display):
+	•	2-4 weeks, low risk, builds on proven foundation
+	•	Enhanced pre-CAD QA gatekeeper with 25-field professional display
+	•	Consultancy leverage / internal tool positioning
+	•	Recommended if: focus on low-risk incremental value
+Path B (Full Survey Platform):
+	•	6-12 months, high risk, 4-5x scope expansion
+	•	Complete electrical survey platform, 50-field data model
+	•	Commercial product positioning, Field Maps replacement potential
+	•	Recommended ONLY AFTER commercial validation (customer conversations, business case)
+My strong recommendation: Hybrid approach
+	•	Phase C2/D first (2-4 weeks) — prove professional display works
+	•	Customer validation (2-3 months) — talk to potential customers, validate demand
+	•	Then decide Stage 4 — based on real evidence, not speculation
+The previous review document was correct for its time (Phase 2). But the project has fundamentally evolved since then. This updated review reflects where GridFlow actually is now — and provides a clear decision framework for where it should go next.
+No implementation work should begin until the strategic decision is made and control layer is refreshed.
+
+END OF REVIEW

@@ -1,0 +1,2290 @@
+
+
+
+GridFlow Master Project Briefing
+Complete Knowledge
+Document Purpose: Comprehensive briefing covering GridFlow's complete history, technical implementation, current state, strategic vision, and future roadmap. This document provides everything needed to understand the project from inception to future completion.
+Last Updated: 2026-05-03 Project Phase: Phase C Complete, Strategic Scope Decision Pending Repository: https://github.com/NoelyC123/Unitas-GridFlow Local Path: /Users/noelcollins/Unitas-GridFlow
+
+PART 1: PROJECT ORIGIN AND VISION
+1.1 Why GridFlow Exists
+The Problem GridFlow Solves
+GridFlow was born from direct exposure to real-world friction in UK electrical distribution overhead line (OHL) survey-to-design workflows.
+The problem is NOT:
+	•	Bad field surveying
+	•	Lack of GIS tools
+	•	Poor CAD software
+	•	Inadequate mobile apps
+The problem IS: Survey data arrives at design teams in a weak, fragmented, unauditable form that wastes office time on clarification, interpretation, and evidence-hunting instead of actual engineering design work.
+Real-World Manifestation
+What happens without GridFlow:
+	•	Surveyor captures data in Field Maps, Trimble controller, or notebook
+	•	Raw export arrives weeks later as CSV dump (coordinates, feature codes, sparse attributes)
+	•	Designer opens file and discovers:
+	•	Heights missing or estimated
+	•	Material/condition not captured
+	•	Stay evidence absent at angle poles
+	•	EX/PR replacement relationships unclear
+	•	Span distances questionable
+	•	Clearance data missing
+	•	No provenance (who measured what, when, how accurate)
+	•	Designer must:
+	•	Cross-reference field notes (if they exist)
+	•	Find marked-up plans (if they exist)
+	•	Chase photos (if they were taken)
+	•	Call surveyor (if they remember the job)
+	•	Make educated guesses
+	•	Flag for site revisit (costly, slow)
+	•	Result: Design delayed, costs rise, office time wasted on survey archaeology
+The key insight:
+"The biggest inefficiency sits in the survey-to-design HANDOFF, not in the engineering design itself."
+What GridFlow Does About It
+GridFlow acts as the intelligent gate between survey and design.
+It:
+	•	Ingests raw survey exports (multiple formats, coordinate systems)
+	•	Parses electrical asset schema (poles, spans, stays, cables, context, equipment)
+	•	Normalizes survey connectivity (EX↔PR replacement logic, route sequencing)
+	•	Assesses completeness and design-readiness
+	•	Flags missing/questionable evidence
+	•	Visualizes asset lifecycle states
+	•	Surfaces design blockers BEFORE design time is wasted
+	•	Produces design-ready artefacts (sequenced routes, QA reports, review workspaces)
+The value is trust and interpretation, not just parsing:
+	•	"This pole exists, height measured 9.2m by surveyor J.Smith on 2024-03-15, GNSS accuracy ±0.15m"
+	•	vs. "This pole exists, height unknown — field notes required before design"
+	•	vs. "This proposed pole does not exist yet — specification is a design decision"
+GridFlow tells designers exactly:
+	•	What IS present in the digital file
+	•	What is MISSING from the digital file
+	•	What that PREVENTS (design blockers)
+	•	Where to look for missing evidence (field notes, photos, plans)
+
+1.2 Project Vision: What GridFlow Will Be When Fully Developed
+Vision Statement
+GridFlow will be the professional electrical survey-to-design platform trusted by UK DNOs, contractors, and consultancies to transform raw OHL survey data into design-ready engineering intelligence.
+The Fully Realized Product (Long-term Vision)
+When fully developed, GridFlow will:
+1. Capture Complete Survey Data (Stage 4+)
+Field Capture Module:
+	•	Tablet/mobile interface for structured data capture
+	•	Offline-capable workflow (sync when connected)
+	•	Photo capture with automatic asset linking
+	•	Sketch/markup tools for complex situations
+	•	Voice notes for rapid field observations
+	•	GNSS integration with real-time accuracy display
+	•	Multi-surveyor coordination (team workflows)
+Asset Data Model (50+ fields per pole):
+Physical Structure:
+	•	Measured height (existing) / Specification (proposed)
+	•	Pole class/strength rating
+	•	Material (wood, concrete, steel, composite)
+	•	Condition (good/fair/poor/unsafe)
+	•	Decay/rot evidence
+	•	Pole-top condition
+	•	Lean direction/severity
+	•	Birthmark/asset plate details
+	•	Defect type (rot/split/burn/impact/woodpecker)
+	•	Foundation/ground condition
+	•	Action required (repair/replace/monitor)
+Electrical/Network:
+	•	Voltage carried (11kV, 33kV, 132kV)
+	•	Circuit identifier
+	•	Number of phases (1ph, 2ph, 3ph)
+	•	Conductor type/size
+	•	Pole-top arrangement
+	•	Crossarm type
+	•	Insulator type
+	•	Equipment (transformer/switch/fuse/recloser/sectionalizer)
+	•	Equipment ratings
+	•	Asset plate information
+	•	Earthing configuration
+Mechanical Support:
+	•	Stay required (yes/no, calculated from angle/loading)
+	•	Stay existing (yes/no, field-verified)
+	•	Stay type (angle/terminal/tee-off/tandem)
+	•	Anchor location (GPS + bearing)
+	•	Anchor type (screw/block/deadman/rock)
+	•	Stay condition
+	•	Stay insulator presence
+	•	Strut/brace presence
+Attachments/Third-Party:
+	•	Telecoms attachment (BT/Virgin/other)
+	•	Streetlight
+	•	CCTV/traffic equipment
+	•	Customer service connections
+	•	Other utility crossings
+Access/Environment/Safety:
+	•	Access route description
+	•	Gate/fence/wayleave constraints
+	•	Landowner contact
+	•	Vegetation/tree proximity
+	•	Ground condition (stable/soft/flooded/steep)
+	•	Traffic management requirements
+	•	Protected species/environmental constraints
+	•	Crossing clearances (road/rail/river/canal)
+Evidence/Provenance:
+	•	Full pole photo (linked, GPS-tagged)
+	•	Pole-top photo
+	•	Defect closeup photos
+	•	Stay/anchor photos
+	•	Asset plate photo
+	•	Field sketches/markups
+	•	Surveyor name
+	•	Survey date/time
+	•	GNSS accuracy (horizontal/vertical)
+	•	Equipment used (controller model)
+	•	Weather conditions
+	•	Field notes/remarks
+2. Manage Asset Relationships (Stage 5)
+Connectivity Model:
+	•	Parent/child poles (tee-offs, spurs)
+	•	Span connections (from-pole → to-pole)
+	•	Stay anchor associations (pole ← stay → anchor)
+	•	Cable/conductor runs (continuous circuits)
+	•	Crossing context (pole proximity to roads/lines/rivers)
+	•	Transformer/equipment serving areas
+Route Intelligence:
+	•	Auto-sequencing (start → end chain)
+	•	Branch detection (main circuit + tee-offs)
+	•	Loop identification (ring mains)
+	•	Split-route handling (PoleCAD sections)
+	•	Design chain optimization
+Replacement Logic:
+	•	EX↔PR pairing (proximity + designer confirmation)
+	•	Retained pole identification
+	•	Recovered/demolished pole tracking
+	•	Repositioned pole detection (<5m offset)
+	•	Upgrade-in-place recognition (same location, new spec)
+3. Provide Professional Engineering Workspace (Stage 4-5)
+Map Viewer (Enhanced from Phase C):
+	•	Multi-layer control (structural/electrical/mechanical/context/environment)
+	•	Review filters (design blockers, missing evidence, QA flags)
+	•	Symbol hierarchy (shape = asset type, color = condition/status)
+	•	Lifecycle visualization (11 states with linking lines)
+	•	Span analysis (distance, sag, clearance estimates)
+	•	Context awareness (crossings, constraints, access)
+	•	Evidence indicators (photo count, note presence, accuracy)
+	•	Design action prompts (what to check, where to look)
+Review Workspace:
+	•	Issue prioritization (blocker/warning/info)
+	•	Missing evidence tracking
+	•	Designer decision recording (confirm/reject pairings, override flags)
+	•	Annotation/markup tools
+	•	Team collaboration (comments, assignments)
+	•	Approval workflow (surveyor → reviewer → designer → approver)
+Design Handoff:
+	•	Sequenced route export (design-ready chain)
+	•	PoleCAD-compatible format
+	•	D2D (Design-to-Design) structured export
+	•	GIS integration (upload to DNO spatial systems)
+	•	PDF engineering pack (formal handover document)
+	•	Issue register (what's missing, what's uncertain, what requires field revisit)
+4. Integrate with DNO Systems (Stage 6)
+GIS Connectors:
+	•	ArcGIS integration
+	•	QGIS export
+	•	DNO-specific spatial databases
+	•	Field Maps round-trip (capture → GridFlow → validation → back to Field Maps)
+Asset Management Systems:
+	•	DNO asset register updates
+	•	Work order integration
+	•	Inspection/maintenance scheduling
+	•	Historical record linkage
+PoleCAD/Design Tools:
+	•	Direct PoleCAD import (ready to design)
+	•	Design feedback loop (as-built updates)
+	•	Material optimization suggestions
+	•	Loading/sag calculations pre-populated
+5. Apply DNO-Grade Compliance (Stage 6+)
+Rulepack Expansion:
+	•	Current: SPEN, SSEN, NIE, ENWL (basic 11kV)
+	•	Future: All 14 UK DNOs
+	•	Voltage-specific rules (11kV, 33kV, 132kV)
+	•	Regional variations (Scottish hills, coastal exposure, urban congestion)
+	•	Seasonal adjustments (ice/wind loading zones)
+Engineering Standards:
+	•	ENA G39 compliance (connection of microgeneration)
+	•	ENA TS 43-8 (overhead line design)
+	•	Clearance validation (EA TS 43-8, statutory minimums)
+	•	Loading calculations (conductor sag, ice/wind)
+	•	Stay design validation (angle, loading, anchor capacity)
+Safety Gates:
+	•	Unsafe structure detection (severe lean, rot, damage)
+	•	Clearance violations (road/rail/building proximity)
+	•	Voltage separation (HV crossing conflicts)
+	•	Access constraints (traffic management requirements)
+	•	Environmental flags (protected species, flood zones)
+6. Support Multi-User Deployment (Stage 7)
+Authentication/Authorization:
+	•	User accounts (surveyor/reviewer/designer/approver roles)
+	•	Team/project-based access control
+	•	DNO/contractor organization separation
+	•	Audit logging (who changed what, when)
+Collaboration:
+	•	Multi-user projects
+	•	Review/approval workflow
+	•	Comment threads
+	•	Assignment system
+	•	Notification/alerting
+Deployment Models:
+	•	SaaS (hosted by Unitas/partner)
+	•	On-premise (DNO-hosted)
+	•	Hybrid (field capture SaaS, design review on-premise)
+
+The Fully Realized User Experience
+Surveyor (Field):
+	•	Opens GridFlow mobile app on tablet
+	•	Selects project/circuit
+	•	Walks route, capturing poles with structured form:
+	•	Tap pole location on map (GPS auto-captured)
+	•	Select type (existing/proposed/angle/terminal)
+	•	Measure height (laser rangefinder → auto-populate)
+	•	Photo: full pole (auto-tagged, GPS-linked)
+	•	Photo: pole-top (auto-tagged)
+	•	Select material (dropdown: wood/concrete/steel)
+	•	Rate condition (good/fair/poor/unsafe)
+	•	If angle: capture stay direction, photo anchor
+	•	Add remarks (voice note or text)
+	•	Submit → syncs when online
+	•	Continues route, GridFlow auto-sequences
+	•	At end of day: reviews completeness, flags uncertainties, submits for review
+Reviewer (Office, Day 1):
+	•	Opens GridFlow web interface
+	•	Selects submitted survey
+	•	Reviews map: auto-sequenced route, lifecycle visualization, QA flags
+	•	Clicks pole with warning: "Height estimated, not measured"
+	•	Checks photo: can't clearly see pole-top
+	•	Adds comment: "Surveyor: please revisit, measure height with rangefinder"
+	•	Assigns back to surveyor
+	•	Reviews angle pole: "Stay evidence not captured"
+	•	Checks field notes: no mention of stay
+	•	Checks photos: no anchor visible
+	•	Flags: "Site revisit required - stay configuration unknown"
+	•	Reviews EX↔PR pairings: 15 suggested matches
+	•	Confirms 12 (proximity + logic clear)
+	•	Rejects 2 (wrong poles paired)
+	•	Leaves 1 uncertain (designer decision)
+	•	Approves survey for design (with flagged items)
+Designer (Office, Day 2-5):
+	•	Opens GridFlow design workspace
+	•	Imports survey (sequenced route auto-loaded)
+	•	Reviews issue register:
+	•	3 poles require site revisit (heights/stays missing)
+	•	5 poles need specification (proposed poles)
+	•	2 span clearances need verification (road crossings)
+	•	Filters map: "Design blockers only"
+	•	Sees 3 critical issues
+	•	Adds to site visit request
+	•	Begins design on ready sections:
+	•	Pole specifications (uses measured heights, conditions, loadings)
+	•	Conductor selection (uses voltage, span distances, clearance requirements)
+	•	Stay design (uses captured angles, existing stay evidence)
+	•	Material optimization (uses condition ratings, replacement priorities)
+	•	Exports to PoleCAD: ready to design (no survey archaeology needed)
+	•	Completes design in 60% less time (no clarification delays)
+DNO Approver (Office, Day 6):
+	•	Reviews completed design
+	•	Checks GridFlow evidence pack:
+	•	Survey completeness: 95% (5% flagged for revisit)
+	•	Design-readiness: READY (all blockers resolved)
+	•	QA status: 2 warnings (acceptable), 0 failures
+	•	Evidence quality: HIGH (measured data, photos, GNSS <0.2m)
+	•	Approves design for construction
+	•	GridFlow updates asset register (as-designed records)
+Construction Team (Site, Weeks 1-4):
+	•	Accesses GridFlow mobile (construction mode)
+	•	Views design route on map
+	•	At each pole:
+	•	Sees design specification
+	•	Compares to as-found (GridFlow survey data visible)
+	•	Records as-built (actual installed spec)
+	•	Photos installed pole
+	•	Submits as-built records
+	•	GridFlow updates asset register (final as-built)
+
+The Business Vision
+GridFlow will generate revenue through:
+1. SaaS Subscriptions:
+	•	Surveyor tier: £50-100/user/month (field capture, basic QA)
+	•	Designer tier: £150-250/user/month (full workspace, design handoff)
+	•	Enterprise tier: £500-1000/user/month (DNO deployment, API access, custom rulepacks)
+2. Professional Services:
+	•	Survey data cleanup/migration (£2,000-10,000/project)
+	•	Custom rulepack development (£5,000-20,000/DNO)
+	•	Training/onboarding (£1,000-5,000/team)
+	•	Consultancy (survey process optimization, workflow design)
+3. Integration/Deployment:
+	•	On-premise deployment (£50,000-200,000 one-time + £10,000-50,000/year support)
+	•	GIS/asset system integration (£20,000-100,000/connector)
+	•	Custom feature development (£50,000-500,000 depending on scope)
+Target Market:
+	•	14 UK DNOs (electricity distribution network operators)
+	•	50+ major electrical contractors
+	•	200+ electrical engineering consultancies
+	•	International expansion: Ireland, Australia, New Zealand, North America
+Market Size (UK):
+	•	14 DNOs × £100,000/year avg = £1.4M/year (conservative)
+	•	50 contractors × £20,000/year avg = £1M/year
+	•	200 consultancies × £5,000/year avg = £1M/year
+	•	Total addressable: £3.4M/year in UK alone
+5-Year Vision:
+	•	Year 1: Prove value with 2-3 DNOs, 5-10 contractors (£200K revenue)
+	•	Year 2: Scale to 6-8 DNOs, 20 contractors (£800K revenue)
+	•	Year 3: 10+ DNOs, 40+ contractors, international pilot (£2M revenue)
+	•	Year 4: Market leader position, international expansion (£5M revenue)
+	•	Year 5: Platform maturity, API ecosystem, acquisition target (£10M+ revenue)
+
+1.3 Current Reality vs. Vision
+Where GridFlow is NOW (May 2026):
+Product Status: Phase C complete — professional QA + basic lifecycle intelligence
+	•	12-field popup data model (not 50-field)
+	•	Map intelligence (filters, lifecycle viz, span analysis, stay detection)
+	•	Design-readiness assessment (not field capture)
+	•	PDF QA reports (not design handoff packs)
+	•	Internal/consultancy tool (not commercial SaaS)
+What's Built: ✅ Multi-format intake (Trimble, controller, structured CSV) ✅ Multi-coordinate system (OSGB, Irish Grid, WGS84) ✅ Electrical schema parsing (6 asset families) ✅ Survey connectivity (EX↔PR, sequencing) ✅ QA validation (10 check types, 4 DNO rulepacks) ✅ Map viewer (15 filters, lifecycle viz, span analysis) ✅ Design-readiness reports ✅ 300+ passing tests ✅ Real operational validation (P011, Gordon, Bellsprings)
+What's NOT Built Yet: ❌ Field capture (mobile/tablet interface) ❌ 50-field data model (only 12 fields currently) ❌ Photo upload/management ❌ Offline workflows ❌ Asset relationship model (parent/child, connectivity) ❌ Multi-user collaboration ❌ GIS integration ❌ PoleCAD export ❌ Commercial deployment infrastructure ❌ Authentication/authorization ❌ API for third-party integration
+The Gap:
+	•	Vision: Professional electrical survey platform (6-12 months development)
+	•	Current: Enhanced pre-CAD QA gatekeeper (operational, proven)
+	•	Decision Point: Phase C2/D (2-4 weeks, modest expansion) vs. Stage 4 (6-12 months, full vision)
+
+PART 2: TECHNICAL IMPLEMENTATION HISTORY
+2.1 Technology Stack
+Core Runtime
+Backend:
+	•	Python 3.13 (current, tested on 3.11+)
+	•	Flask (web framework, app factory pattern)
+	•	pandas (tabular data processing)
+	•	geopandas (spatial data handling)
+	•	shapely (geometry operations)
+	•	pyproj (coordinate system transformations)
+	•	ReportLab (PDF generation)
+Frontend:
+	•	Leaflet.js (map rendering, marker controls)
+	•	Bootstrap 5 (UI framework, responsive layout)
+	•	Vanilla JavaScript (no heavy frameworks, ES6+)
+Quality/Testing:
+	•	pytest (test framework, 300+ tests)
+	•	pytest-cov (coverage reporting)
+	•	Ruff (linting, formatting)
+	•	pre-commit (hooks for quality gates)
+	•	GitHub Actions (CI/CD pipeline)
+Development Environment:
+	•	macOS (primary development machine)
+	•	VS Code / Cursor (code editing)
+	•	Git (version control)
+	•	Virtual environment (.venv312)
+
+Architecture Overview
+Flask App Structure:
+app/
+├── __init__.py              # App factory, blueprint registration
+├── routes/
+│   ├── api_upload.py        # File upload endpoint
+│   ├── api_intake.py        # CSV parsing, QA processing
+│   ├── map_preview.py       # Map viewer routes, runtime enrichment
+│   ├── pdf_reports.py       # PDF generation
+│   ├── pages.py             # Static pages (home, about, help)
+│   ├── jobs.py              # Job browser, job detail
+│   ├── projects.py          # Project management
+│   ├── review.py            # Review workspace
+│   ├── field_capture.py     # Stage 4 proof-of-concept (not production)
+│   └── d2d_export.py        # Design-to-Design export
+├── services/
+│   ├── qa_engine.py         # QA validation engine (~1,095 lines)
+│   ├── controller_intake.py # Controller dump parsing (~816 lines)
+│   ├── route_sequencer.py   # Route auto-sequencing (~691 lines)
+│   ├── span_generator.py    # Span distance/anomaly detection (~542 lines)
+│   ├── electrical_schema.py # Asset taxonomy (~420 lines)
+│   ├── survey_connectivity.py # EX↔PR matching (~380 lines)
+│   ├── cable_generator.py   # Cable/UG asset handling
+│   ├── asset_classifier.py  # Asset type classification
+│   ├── context_crossing.py  # Crossing enrichment
+│   └── field_ownership.py   # Field presence/completeness tracking
+├── static/
+│   ├── js/
+│   │   └── map-viewer.js    # Map intelligence (~2,809 lines) ⚠️ SENSITIVE
+│   └── css/
+│       └── map-viewer.css
+├── templates/
+│   ├── map_viewer.html      # Map viewer UI
+│   ├── review_page.html     # Review workspace UI
+│   ├── job_detail.html
+│   └── ...
+└── dno_rules.py             # DNO-specific rulepacks
+Data Flow:
+1. Upload CSV → api_upload.py (save file)
+2. Import/Process → api_intake.py:
+   - controller_intake.py (parse CSV, normalize columns)
+   - electrical_schema.py (classify assets)
+   - survey_connectivity.py (EX↔PR matching)
+   - route_sequencer.py (auto-sequence route)
+   - span_generator.py (span distance, anomaly detection)
+   - qa_engine.py (run validation checks)
+   - Generate outputs:
+     * meta.json (summary, completeness, design-readiness)
+     * issues.csv (QA flags, warnings, blockers)
+     * map_data.json (point features, basic attributes)
+     * sequenced_route.json (design chain)
+3. View Map → map_preview.py:
+   - Load map_data.json, sequenced_route.json
+   - Runtime enrichment (lifecycle states, popup data, span features)
+   - Render map_viewer.html
+   - map-viewer.js handles UI (filters, popups, lifecycle viz)
+4. Download PDF → pdf_reports.py (ReportLab generation)
+5. Browse Jobs → jobs.py (list all processed jobs)
+
+Coordinate System Handling
+Supported Systems:
+	•	OSGB36 (British National Grid, EPSG:27700)
+	•	England, Scotland, Wales
+	•	Easting/Northing in meters
+	•	Origin: Ordnance Survey datum
+	•	Irish Grid TM65 (EPSG:29902)
+	•	Northern Ireland, Republic of Ireland
+	•	Easting/Northing in meters
+	•	Origin: Geodetic Survey of Ireland
+	•	WGS84 (GPS, EPSG:4326)
+	•	Global latitude/longitude
+	•	Converted on intake to regional grid
+Conversion Pipeline:
+python
+# pyproj handles all transformations
+from pyproj import Transformer
+
+# Example: Irish Grid → WGS84 for Leaflet display
+transformer = Transformer.from_crs("EPSG:29902", "EPSG:4326", always_xy=True)
+lat, lng = transformer.transform(easting, northing)
+Detection Logic:
+	•	Easting 0-700000, Northing 0-1300000 → OSGB
+	•	Easting 0-500000, Northing 0-500000 → Irish Grid
+	•	Lat/Lng → WGS84
+
+Data Model (Current - Phase C)
+Job Outputs (per processed job):
+1. meta.json (summary)
+json
+{
+  "job_id": "J12946",
+  "filename": "2814_474c_raw_trimble_export.csv",
+  "processed_at": "2026-04-15T14:32:01",
+  "total_records": 91,
+  "mapped_features": 91,
+  "coordinate_system": "OSGB36",
+  "design_readiness": "PARTIALLY READY",
+  "readiness_reasons": [
+    "Height coverage: 19/91 poles (21%)",
+    "Material data: 0/91 poles (0%)",
+    "Stay/clearance data incomplete"
+  ],
+  "circuit_summary": {
+    "total_poles": 67,
+    "existing_poles": 45,
+    "proposed_poles": 22,
+    "angle_poles": 12,
+    "stays": 8,
+    "context_features": 24
+  },
+  "completeness": {
+    "height": "21%",
+    "material": "0%",
+    "location": "12%",
+    "condition": "0%"
+  },
+  "sequence_summary": {
+    "sequenced_items": 64,
+    "confidence_high": 32,
+    "confidence_medium": 32,
+    "confidence_low": 0,
+    "detached_items": 3
+  }
+}
+2. issues.csv (QA flags)
+csv
+issue_id,point_id,severity,code,category,message,recommendation
+1,47,WARNING,EXPOLE_HEIGHT_EST,completeness,"Existing pole height estimated (not measured)","Verify height from field notes or plan evidence"
+2,52,BLOCKER,ANGLE_NO_STAY,mechanical,"Angle pole with no stay evidence captured","Check field notes/photos for stay configuration"
+3,159-160,INFO,SPAN_VERY_SHORT,sequencing,"Very short span (4.6m) - possible duplicate or repositioned pole","Review coordinates and field notes"
+...
+3. map_data.json (point features)
+json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4194, 37.7749]  // lng, lat (WGS84)
+      },
+      "properties": {
+        "point_id": "47",
+        "record_type": "EXpole",
+        "function": "Angle",
+        "height": 9.2,
+        "material": null,
+        "condition": null,
+        "easting": 365377.835,
+        "northing": 643824.697,
+        "elevation": 127.3,
+        "coordinate_system": "OSGB36",
+        "remarks": "ex pole",
+        "qa_status": "WARN",
+        "lifecycle_state": "existing",  // Phase C addition
+        "has_stay_evidence": false,     // Phase C addition
+        "is_angle_pole": true            // Phase C addition
+      }
+    },
+    // ... more features
+  ]
+}
+4. sequenced_route.json (design chain)
+json
+{
+  "sequence_id": "SEQ_J12946",
+  "total_items": 64,
+  "chain": [
+    {
+      "position": 1,
+      "point_id": "1",
+      "record_type": "EXpole",
+      "confidence": "HIGH",
+      "distance_to_next": 45.2,
+      "bearing_to_next": 87.3
+    },
+    {
+      "position": 2,
+      "point_id": "2",
+      "record_type": "EXpole",
+      "confidence": "HIGH",
+      "distance_to_next": 52.8,
+      "bearing_to_next": 89.1
+    },
+    // ...
+  ],
+  "detached_items": [
+    {"point_id": "999", "reason": "Isolated context feature"}
+  ],
+  "matches": [
+    {
+      "ex_pole": "47",
+      "pr_pole": "48",
+      "distance": 15.2,
+      "status": "suggested",
+      "reviewed": false
+    }
+  ]
+}
+
+2.2 Phase Development History
+Phase 0: Pre-Project (2023-2024)
+Real-world observations:
+	•	Working on UK OHL refurbishment projects
+	•	Seeing survey-to-design handoff friction repeatedly
+	•	Designers spending 40-60% of time on "survey archaeology"
+	•	Missing heights, stays, materials forcing site revisits
+	•	Weak controller exports requiring manual interpretation
+	•	No structured gate between survey and design
+Key insight: The problem is not individual tools (Field Maps works, PoleCAD works), but the handoff gap between them.
+
+Phase 1: MVP Build (Early 2025)
+Goal: Prove basic intake → QA → output flow works
+Delivered:
+	•	Flask app structure (blueprint-based routes)
+	•	CSV upload endpoint
+	•	Basic controller parsing (Trimble format)
+	•	Placeholder QA rules (coordinate bounds, duplicate IDs)
+	•	Map viewer (Leaflet, basic point display)
+	•	PDF report generation (ReportLab)
+	•	Job storage (filesystem-based)
+Test Count: ~15-20 tests
+Validation: Synthetic test files only
+Key Learning: Basic flow works, but rules are too generic, intake is brittle, no real validation
+
+Phase 2: Domain Intelligence (Spring 2025)
+Goal: Move from placeholder rules to domain-aware validation
+Phase 2A: Input Schema Normalization
+Problem: Real Trimble/controller exports have:
+	•	Capitalized headers ("Easting" vs. "easting")
+	•	Spaced headers ("Point Number" vs. "point_number")
+	•	Abbreviated names ("Ht" vs. "height")
+	•	OSGB-specific aliases ("Northing" vs. "Y")
+Solution:
+	•	Added column name normalization in api_intake.py:
+	•	Strip whitespace
+	•	Lowercase
+	•	Replace spaces with underscores
+	•	Apply alias mapping (e.g., "ht" → "height", "northing" → "y")
+	•	Expanded alias coverage for all core fields
+Test Count: 35 → 38 tests
+Validation: Real Gordon/Bellsprings files (first time)
+Key Learning: Real files are messier than expected, normalization essential
+
+Phase 2B: Electrical Schema + Connectivity (Spring 2025)
+Problem: Generic "pole" classification misses engineering context
+Solution Created:
+	•	electrical_schema.py (~420 lines)
+	•	6 asset families: poles, spans, stays, cables, context, equipment
+	•	Equipment taxonomy: transformers, switches, fuses, reclosers, sectionalizers
+	•	Connectivity types: overhead_line, underground_cable, aerial_bundled_conductor
+	•	survey_connectivity.py (~380 lines)
+	•	EX↔PR replacement logic (proximity-based matching)
+	•	Span sequencing (route chain detection)
+	•	Stay/anchor associations
+Test Count: 38 → 150+ tests
+Validation: 2814_474, 2814_513, Gordon families
+Key Learning: Domain taxonomy is critical — feature codes alone insufficient
+
+Phase 2C: Route Sequencing (Spring 2025)
+Problem: Survey points are unordered — designers need design chains
+Solution:
+	•	route_sequencer.py (~691 lines)
+	•	Auto-sequencing algorithm (nearest-neighbor with bearing constraints)
+	•	Confidence levels (high/medium/low)
+	•	Branch detection (tee-offs)
+	•	Detached item identification
+Output: sequenced_route.json
+Test Count: 150+ → 200+ tests
+Validation: Gordon split-file testing (PR1 + PR2)
+Key Learning: Auto-sequencing works well for simple routes, struggles with complex tee-offs
+
+Phase 2D: QA Engine Enhancement (Spring 2025)
+Problem: Placeholder rules don't catch real design blockers
+Solution:
+	•	qa_engine.py expanded (~1,095 lines)
+	•	10 check types:
+	•	Coordinate consistency (bounds, plausibility)
+	•	Duplicate coordinate pairs (GPS error detection)
+	•	Height validation (range, missing, estimated)
+	•	Span distance logic (short/long/missing poles)
+	•	Angle pole stay evidence
+	•	Material/condition completeness
+	•	EX/PR replacement clarity
+	•	Clearance proximity (context features)
+	•	Feature code validity
+	•	Sequence confidence
+	•	4 DNO rulepacks:
+	•	SPEN_11kV (Scottish Power)
+	•	SSEN_11kV (Scottish & Southern)
+	•	NIE_11kV (Northern Ireland Electricity)
+	•	ENWL_11kV (Electricity North West)
+Test Count: 200+ → 280+ tests
+Validation: Real jobs (J12946, P005/F001, Gordon, Bellsprings)
+Key Learning: Real issues (REPL_PAIR, ANGLE_NO_STAY, SPAN_VERY_SHORT) emerge consistently across jobs
+
+Phase 3: Operational Validation (April 2026)
+Goal: Test on real designer use, collect operational feedback
+P011 Operational Feedback:
+	•	Real 11kV refurbishment job
+	•	Designer (real user, not test) used GridFlow
+	•	6 operational blockers identified:
+	•	Context features invisible (filter defaulted off)
+	•	"Height: not captured" misleading for proposed poles
+	•	Symbols not distinct at map zoom
+	•	Stay evidence missing at angle poles
+	•	Span distance unclear
+	•	Popups insufficient for design decisions
+Key Learning: Tool works, but UX/trust issues prevent designer confidence
+
+Phase C: Map Intelligence (April-May 2026)
+Goal: Resolve 6 operational blockers, make tool design-ready
+Phase C1: Feature-Type Filtering + Blank Field Framework
+Delivered:
+	•	15 filter buttons (existing, proposed, angle, stays, context, missing heights, etc.)
+	•	Conditional blank field display:
+	•	Existing pole: "Height: not captured (review required)" ⚠️
+	•	Proposed pole: "Height: not yet specified (design decision)" ℹ️
+	•	Context record: Height field hidden entirely
+	•	Symbol hierarchy (shape = asset type, color = QA status)
+	•	Popup section organization (8 sections: Identity, Physical, Electrical, Mechanical, Location, Context, QA/Review, Lifecycle)
+Test Count: 280+ → 290+ tests
+Validation: P011 visual acceptance testing
+Blocker Resolved: #1 (context invisible), #2 (misleading height wording), #6 (insufficient popups)
+
+Phase C2: Asset Lifecycle Visualization
+Delivered:
+	•	11 lifecycle states:
+	•	existing, proposed, retained, recovered, replacement, repositioned
+	•	unmatched_ex, unmatched_pr, suggested, confirmed, context
+	•	EX↔PR linking lines:
+	•	Dashed = suggested match (proximity-based, not reviewed)
+	•	Solid = confirmed match (designer-verified)
+	•	Distance label on line
+	•	Lifecycle toggle layer (on/off control)
+	•	Lifecycle section in popups
+Test Count: 290+ → 295+ tests
+Validation: P011, Gordon EX/PR pairing scenarios
+Blocker Resolved: #3 (symbol clarity — lifecycle states now visually distinct)
+
+Phase C3: Stay Evidence at Angle Poles
+Delivered:
+	•	Angle pole detection:
+	•	Function="Angle" OR bearing deviation >10°
+	•	Stay record scanning (20m radius)
+	•	Stay type classification (angle/terminal/tee-off/tandem)
+	•	Missing stay warnings:
+	•	"⚠️ Angle pole — stay evidence not captured. Check field notes, photos or plan evidence."
+	•	Found stay display:
+	•	"✓ Stay Evidence: Angle Stay @ 12.4m, bearing 215°"
+	•	Filter: "Angle Poles Missing Stays" (design blocker focus)
+Test Count: 295+ → 298+ tests
+Validation: Gordon, Bellsprings (real angle poles)
+Blocker Resolved: #4 (stay evidence missing — now detected and flagged)
+
+Phase C4: Span Anomaly Detection + Crossing Context
+Delivered:
+	•	3D span distance calculation (includes elevation)
+	•	Span anomaly classification:
+	•	<10m: Probable duplicate (GPS error)
+	•	100-300m (11kV): Extended span (verify sag)
+	•	500m (11kV): Critical gap (probable missing pole)
+	•	Span lines + distance labels on map
+	•	Crossing context enrichment:
+	•	Road Crossing: "Critical clearance check required" (HIGH priority)
+	•	11kV Crossing: "Voltage separation required" (HIGH)
+	•	33kV Crossing: "Critical voltage clearance" (CRITICAL)
+	•	110kV Crossing: "Specialist review required" (CRITICAL)
+	•	Filters: "Show Span Anomalies", "Show Crossings Requiring Clearance"
+Test Count: 298+ → 300+ tests
+Validation: P011 (span distance visible), Gordon (crossing priorities)
+Blocker Resolved: #5 (span unclear — now visible with distance labels + anomaly flags)
+
+Phase C Summary:
+	•	Duration: April-May 2026
+	•	Test Growth: 280 → 300+ tests (+7%)
+	•	Blockers Resolved: 6/6 from P011 operational feedback
+	•	New Capabilities: 15 filters, 11 lifecycle states, stay detection, span analysis
+	•	Status: COMPLETE ✅
+
+Phase D/Stage 4: NOT STARTED (Future Work)
+What comes next depends on strategic decision:
+If Phase C2/D (Professional QA + Display):
+	•	Map UX refinement (marker size, symbol polish, layer panel split)
+	•	Add 10-15 key survey fields (12 → 25 field popup)
+	•	Asset-specific popup layouts
+	•	Timeline: 2-4 weeks
+If Stage 4 (Full Survey Platform):
+	•	Complete 50-field data model
+	•	Evidence management (photo upload/linking)
+	•	Mobile/tablet capture interface
+	•	Asset relationship model
+	•	Timeline: 6-12 months
+	•	Requires customer validation FIRST
+
+2.3 Key Technical Decisions and Trade-offs
+Decision 1: Filesystem Storage vs. Database
+Chosen: Filesystem-based job storage
+Why:
+	•	Simple deployment (no DB setup)
+	•	Easy backup/migration (copy folder)
+	•	Direct file access (no ORM complexity)
+	•	Human-readable outputs (JSON, CSV)
+	•	Sufficient for current scale (100s of jobs, not 1000s)
+Trade-off:
+	•	Harder to query/search across all jobs
+	•	No ACID transactions
+	•	Scaling ceiling at ~10,000 jobs
+Future: Will need database for multi-user Stage 6+ (PostgreSQL/PostGIS likely)
+
+Decision 2: Runtime Enrichment vs. Full Persistence
+Chosen: Hybrid — basic attributes in map_data.json, enrichment in map route
+Why:
+	•	Lighter stored JSON (smaller files, faster upload)
+	•	Flexibility (can change enrichment logic without re-processing)
+	•	Separation of concerns (intake vs. display)
+Trade-off:
+	•	Map route is "source of truth" for lifecycle/popup data (not stored JSON)
+	•	Downstream tools can't rely on stored JSON alone
+	•	Requires understanding of enrichment pipeline
+Future: Stage 4+ will need full persistence (API access, offline use)
+
+Decision 3: Coordinate System Auto-detection vs. User Selection
+Chosen: Auto-detection based on coordinate ranges
+Why:
+	•	Better UX (no manual selection)
+	•	Works for 95% of files (OSGB, Irish Grid ranges don't overlap)
+	•	Fallback to WGS84 if ambiguous
+Trade-off:
+	•	Can misdetect if coordinates are edge-of-range
+	•	No override mechanism (yet)
+Future: Stage 4 will add manual override + validation warning
+
+Decision 4: Monolithic map-viewer.js vs. Modular Components
+Chosen: Monolithic (~2,809 lines)
+Why:
+	•	Faster initial development (no build tooling)
+	•	Vanilla JS (no framework lock-in)
+	•	All logic in one place (easier to understand)
+Trade-off:
+	•	Large file (hard to navigate)
+	•	Risky for AI-driven edits (fragile)
+	•	No component reuse
+Future: Stage 5 will need refactor (Vue/React components, build tooling)
+
+Decision 5: Pytest vs. Other Test Frameworks
+Chosen: pytest
+Why:
+	•	Python standard (widely used)
+	•	Simple syntax (no boilerplate)
+	•	Good fixtures/parametrization
+	•	Coverage integration
+Trade-off:
+	•	No browser automation (Playwright/Selenium separate)
+	•	Backend-focused (frontend tests manual)
+Future: Stage 5 will add Playwright for UI testing
+
+PART 3: DOMAIN KNOWLEDGE
+3.1 UK Electrical Distribution Context
+DNO Landscape
+14 UK DNOs (Distribution Network Operators):
+Scotland:
+	•	SPEN (Scottish Power Energy Networks)
+	•	SSEN (Scottish & Southern Energy Networks — North)
+England:
+	•	SSEN (South)
+	•	UKPN (UK Power Networks) — London, South East, East
+	•	NPG (Northern Powergrid) — North East, Yorkshire
+	•	ENWL (Electricity North West)
+	•	WPD/National Grid (Western Power Distribution) — Midlands, South West, Wales
+Northern Ireland:
+	•	NIE Networks (Northern Ireland Electricity)
+Voltage Levels:
+	•	11kV (distribution, most common OHL)
+	•	33kV (primary distribution, higher capacity)
+	•	132kV (transmission/distribution boundary)
+	•	400kV (transmission, National Grid, not DNO)
+GridFlow Focus: 11kV distribution OHL (most surveyed, most design work)
+
+Asset Types (Electrical Schema)
+1. Poles/Support Structures
+Types:
+	•	Existing (EX) — currently in field, may be retained/replaced/recovered
+	•	Proposed (PR/Pol) — new pole to be installed
+	•	Angle — route deviation >10°, requires stays
+	•	Terminal — end of line, requires terminal stay
+	•	Intermediate — straight-through, no angle
+	•	Tee-off — branch point, requires tee-off stay
+Materials:
+	•	Wood (most common, older networks)
+	•	Concrete (modern standard)
+	•	Steel (high-load, special applications)
+	•	Composite (modern, lightweight)
+Condition:
+	•	Good (no defects, full service life remaining)
+	•	Fair (minor defects, serviceable, monitor)
+	•	Poor (significant defects, near end-of-life, plan replacement)
+	•	Unsafe (structural failure risk, immediate action required)
+Heights:
+	•	7-12m typical for 11kV distribution
+	•	Measured vs. estimated (measured = better)
+	•	Missing height = design blocker (can't calculate clearances)
+
+2. Spans (Overhead Line Connections)
+Typical Lengths:
+	•	11kV: 40-100m normal, 100-300m extended, >300m rare (probable missing pole)
+	•	33kV: 60-200m normal, >500m rare
+	•	132kV: 100-400m normal
+Anomalies:
+	•	<10m: Probable GPS error or duplicate capture
+	•	500m (11kV): Probable missing intermediate pole
+	•	Inconsistent bearing: Route deviation, check for angle pole
+Design Factors:
+	•	Conductor sag (longer span = more sag)
+	•	Clearance (ground, road, buildings, trees)
+	•	Loading (ice, wind, tension)
+
+3. Stays/Anchors (Mechanical Support)
+When Required:
+	•	Angle poles (>10° deviation)
+	•	Terminal poles (end of line)
+	•	Tee-offs (branch points)
+	•	High-load poles (transformers, heavy conductors)
+Types:
+	•	Angle stay — opposes line tension change at angle
+	•	Terminal stay — opposes line tension at end
+	•	Tee-off stay — opposes branch tension
+	•	Tandem stay — multiple stays in line for extra support
+Anchor Types:
+	•	Screw anchor (most common, augers into ground)
+	•	Block anchor (concrete block buried)
+	•	Deadman anchor (timber beam buried)
+	•	Rock anchor (drilled into rock)
+Stay Insulators:
+	•	Required to break electrical path to ground
+	•	Missing insulator = electrical hazard
+Missing Stay Evidence = Design Blocker:
+	•	Can't design pole without knowing stay configuration
+	•	Can't calculate loading without stay support
+	•	Site revisit required if no field evidence (notes/photos)
+
+4. Cables (Underground/Aerial)
+Types:
+	•	Underground cable (UG, buried)
+	•	Aerial bundled conductor (ABC, overhead, insulated)
+	•	Service drops (pole to customer)
+Relevance to GridFlow:
+	•	Often captured as context features
+	•	Less design-critical than poles/spans
+	•	Future Stage 4+ feature (cable-pole transitions)
+
+5. Context Features (Non-Electrical Assets)
+Types:
+	•	Roads (crossing clearance critical)
+	•	Railways (DNO/Network Rail coordination required)
+	•	Rivers/canals (crossing permits)
+	•	Fences/gates (access constraints)
+	•	Buildings (clearance, wayleaves)
+	•	Trees (vegetation management)
+	•	Other utilities (BT, gas, water, telecoms)
+Crossing Priorities:
+	•	CRITICAL: 110kV/132kV power lines, railways, motorways
+	•	HIGH: Roads, 33kV lines, rivers
+	•	MEDIUM: BT/telecoms, 11kV lines, minor roads
+	•	LOW: Fences, gates, field boundaries
+Why Context Matters:
+	•	Clearance requirements (statutory minimums)
+	•	Access planning (how to reach poles)
+	•	Wayleave permissions (landowner consent)
+	•	Construction constraints (traffic management, permits)
+
+6. Equipment (Transformers, Switchgear)
+Types:
+	•	Transformer (voltage conversion, 11kV → 400V)
+	•	Switch (circuit isolation, reconfiguration)
+	•	Fuse (overcurrent protection)
+	•	Recloser (automatic fault clearing)
+	•	Sectionalizer (fault location)
+Relevance to GridFlow:
+	•	Equipment presence increases pole loading
+	•	Requires larger pole, additional stays
+	•	Access requirements (maintenance)
+	•	Currently captured sparsely (future enhancement)
+
+3.2 Survey Workflows (Real-World)
+Traditional Survey Workflow (Without GridFlow)
+Week 1: Field Survey
+	•	Surveyor walks route with GNSS controller (Trimble/Leica)
+	•	Captures pole positions (GPS, feature code)
+	•	Estimates heights visually (no laser rangefinder)
+	•	Records minimal attributes (often just coordinates + code)
+	•	Takes some photos (maybe, if remembered)
+	•	Makes field notes in notebook (variable quality)
+	•	Marks up plan with red pen (poles, angles, issues)
+Week 2: Office Processing
+	•	Surveyor downloads controller to CSV
+	•	Emails CSV to design team (no QA, no review)
+	•	CSV format varies (Trimble vs. Leica vs. manual)
+	•	Headers inconsistent (capitalized, spaced, abbreviated)
+	•	No completeness check
+	•	No design-readiness assessment
+Week 3: Design Starts
+	•	Designer opens CSV in Excel
+	•	Discovers:
+	•	Heights missing or estimated (80% of poles)
+	•	Material/condition not captured
+	•	Stay evidence absent at angle poles
+	•	Duplicate coordinates (GPS errors)
+	•	Unclear EX/PR relationships
+	•	Span distances questionable
+	•	Designer emails surveyor: "Can you check heights for poles 15-24?"
+	•	Surveyor: "That job was 3 weeks ago, I don't remember, I'll check field notes"
+	•	Field notes: "Pole 15 approx 10m, pole 16 similar, pole 17 broken top"
+	•	Designer: "I need measured heights, not estimates"
+	•	Surveyor: "I'll have to revisit site"
+Week 4: Site Revisit (£500-2000 cost)
+	•	Surveyor returns to site
+	•	Measures heights properly (laser rangefinder)
+	•	Checks stay configurations
+	•	Takes proper photos
+	•	Returns to office, updates CSV manually
+Week 5: Design Continues
+	•	Designer imports updated CSV
+	•	Still missing material/condition for many poles
+	•	Proceeds with design, makes assumptions
+	•	Flags uncertainties for construction team
+Week 6-8: Design Completion
+	•	Design finalized with caveats
+	•	As-found vs. as-designed discrepancies noted
+	•	Construction team will verify on site
+Total Timeline: 6-8 weeks, survey-to-design (with revisit) Total Cost: Survey £2K + revisit £1K + design delays £3K = £6K+ project overhead
+
+Improved Workflow (With GridFlow)
+Week 1: Field Survey (Same)
+	•	Surveyor captures data (as before)
+	•	Returns to office, downloads CSV
+Week 1 (Day 5): GridFlow Processing (30 minutes)
+	•	Surveyor uploads CSV to GridFlow
+	•	GridFlow processes:
+	•	Parses format (Trimble/Leica/manual)
+	•	Normalizes columns
+	•	Classifies assets
+	•	Sequences route
+	•	Runs QA checks
+	•	Generates completeness report
+	•	Surveyor reviews map:
+	•	Sees 45 poles, 12 angle, 8 context features
+	•	Filters: "Missing Heights" → 36 poles flagged
+	•	Filters: "Angle Poles Missing Stays" → 9 poles flagged
+	•	Reviews issues: 18 warnings, 3 blockers
+	•	Surveyor decision:
+	•	Minor: proceed to design (document gaps)
+	•	Major: site revisit this week (while memory fresh)
+Week 1 (Day 6): Targeted Revisit (If Needed)
+	•	Surveyor returns to site with focused list:
+	•	9 angle poles (measure heights, photograph stays)
+	•	3 unclear EX/PR pairs (verify coordinates)
+	•	2 road crossings (measure clearances)
+	•	Captures missing data
+	•	Updates survey
+	•	Re-processes in GridFlow
+	•	Issues resolved: 18 → 3 warnings, 0 blockers
+Week 2: Design Starts (Immediately)
+	•	Designer receives GridFlow package:
+	•	Sequenced route (design chain ready)
+	•	Completeness report (knows what's missing)
+	•	Issue register (3 warnings documented)
+	•	Map workspace (visual review)
+	•	Designer reviews map:
+	•	Heights: 80% measured, 20% documented as estimated
+	•	Angles: all have stay evidence or flagged for review
+	•	EX/PR pairs: 12 suggested, 10 confirmed, 2 require field decision
+	•	Spans: all reasonable, no duplicates
+	•	Designer proceeds with confidence:
+	•	Uses measured data
+	•	Documents assumptions for estimated data
+	•	Flags 3 warnings for construction verification
+	•	No delays, no uncertainty paralysis
+Week 3-4: Design Completion
+	•	Design completed 40% faster (no survey archaeology)
+	•	Higher confidence (measured data, documented gaps)
+	•	Fewer as-found discrepancies (better survey quality)
+Total Timeline: 3-4 weeks, survey-to-design (no revisit) Total Cost: Survey £2K + GridFlow £200 = £2.2K Savings: £3.8K per job (60% reduction)
+
+3.3 Feature Codes (Trimble/Controller Conventions)
+Common Feature Codes:
+Poles:
+	•	EXpole — existing pole
+	•	Pol / PR / PRpole — proposed pole
+	•	Angle — angle pole
+	•	Term / Terminal — terminal pole
+	•	Tee — tee-off pole
+Stays/Anchors:
+	•	Stay — stay (generic)
+	•	Anchor / Anc — anchor
+	•	StayAngle — angle stay
+	•	StayTerm — terminal stay
+Context:
+	•	Road — road crossing
+	•	Gate — gate/fence
+	•	BT / Telecom — telecoms crossing
+	•	11xing — 11kV line crossing
+	•	33xing — 33kV line crossing
+	•	110xing / HVxing — high voltage crossing
+	•	Tree — tree/vegetation
+	•	Wall / Fence — boundary
+Equipment:
+	•	TX / Transformer — transformer
+	•	Switch / SW — switch
+	•	Fuse — fuse
+Cables:
+	•	UG / Cable — underground cable
+	•	ABC — aerial bundled conductor
+Special:
+	•	Base / PRS — base station (survey control, NOT pole)
+	•	CP / CheckPoint — check point (survey QA)
+Note: Feature codes are hints, not final truth — GridFlow classifies based on code + context
+
+PART 4: CURRENT STATE DEEP DIVE
+4.1 What Works Right Now (Phase C Complete)
+Core Processing Pipeline
+1. Multi-Format CSV Intake
+Supported Formats:
+	•	Trimble GNSS controller export
+	•	Leica controller export
+	•	Structured CSV (PoleCAD-style)
+	•	Raw controller dump (job header + base station + variable-length records)
+Column Normalization:
+python
+# Example: controller_intake.py
+def _normalize_dataframe(df):
+    """
+    Normalize column names:
+    - Strip whitespace
+    - Lowercase
+    - Replace spaces with underscores
+    - Apply alias mapping
+    """
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+
+    alias_map = {
+        'point_number': 'point_id',
+        'pt_no': 'point_id',
+        'ht': 'height',
+        'northing': 'y',
+        'easting': 'x',
+        'feature': 'feature_code',
+        # ... 50+ aliases
+    }
+
+    df.rename(columns=alias_map, inplace=True)
+    return df
+Coordinate System Detection:
+python
+def detect_coordinate_system(df):
+    """
+    Auto-detect based on coordinate ranges:
+    - OSGB: E: 0-700K, N: 0-1.3M
+    - Irish Grid: E: 0-500K, N: 0-500K
+    - WGS84: Lat: -90 to 90, Lng: -180 to 180
+    """
+    if 'easting' in df.columns:
+        e_min, e_max = df['easting'].min(), df['easting'].max()
+        n_min, n_max = df['northing'].min(), df['northing'].max()
+
+        if e_max < 500000 and n_max < 500000:
+            return 'Irish_Grid_TM65'
+        elif e_max < 700000 and n_max < 1300000:
+            return 'OSGB36'
+
+    return 'WGS84'
+
+2. Electrical Schema Classification
+Asset Families (6):
+python
+# electrical_schema.py
+ASSET_FAMILIES = {
+    'pole_support': ['EXpole', 'Pol', 'PR', 'PRpole', 'Angle', 'Terminal', 'Tee'],
+    'span_connection': ['Span', 'Conductor', 'OHL'],
+    'stay_anchor': ['Stay', 'Anchor', 'StayAngle', 'StayTerm'],
+    'cable_ug': ['UG', 'Cable', 'ABC'],
+    'context_feature': ['Road', 'Gate', 'BT', '11xing', '33xing', 'Tree', 'Fence'],
+    'equipment': ['TX', 'Transformer', 'Switch', 'Fuse', 'Recloser']
+}
+
+def classify_record(row):
+    """
+    Classify based on feature_code + function + remarks.
+    Returns primary_type, secondary_type, confidence.
+    """
+    code = row.get('feature_code', '').lower()
+    function = row.get('function', '').lower()
+    remarks = row.get('remarks', '').lower()
+
+    # Check each family
+    for family, codes in ASSET_FAMILIES.items():
+        if any(c.lower() in code or c.lower() in function for c in codes):
+            return {
+                'primary_type': family,
+                'record_type': code,
+                'confidence': 'HIGH'
+            }
+
+    # Fallback to context
+    return {
+        'primary_type': 'context_feature',
+        'record_type': 'unknown',
+        'confidence': 'LOW'
+    }
+
+3. Survey Connectivity Normalization
+EX↔PR Replacement Matching:
+python
+# survey_connectivity.py
+def detect_ex_pr_pairs(records, max_distance=50):
+    """
+    Find probable EX↔PR replacement pairs.
+    Returns list of matches with distance, status.
+    """
+    ex_poles = [r for r in records if 'ex' in r['record_type'].lower()]
+    pr_poles = [r for r in records if 'pr' in r['record_type'].lower() or 'pol' in r['record_type'].lower()]
+
+    matches = []
+    for ex in ex_poles:
+        for pr in pr_poles:
+            dist = calculate_distance(ex, pr)
+
+            if dist < max_distance:
+                matches.append({
+                    'ex_pole': ex['point_id'],
+                    'pr_pole': pr['point_id'],
+                    'distance': dist,
+                    'status': 'suggested' if dist < 50 else 'uncertain',
+                    'reviewed': False
+                })
+
+    return matches
+Route Sequencing:
+python
+# route_sequencer.py
+def sequence_route(poles):
+    """
+    Auto-sequence poles into design chain.
+    Algorithm: nearest-neighbor with bearing constraints.
+    """
+    if not poles:
+        return []
+
+    # Start at lowest point_id or explicit start marker
+    chain = [poles[0]]
+    remaining = poles[1:]
+
+    while remaining:
+        current = chain[-1]
+
+        # Find nearest pole within bearing tolerance
+        candidates = []
+        for pole in remaining:
+            dist = calculate_distance(current, pole)
+            bearing = calculate_bearing(current, pole)
+
+            # Check bearing consistency (if not first span)
+            if len(chain) > 1:
+                prev_bearing = calculate_bearing(chain[-2], current)
+                bearing_diff = abs(bearing - prev_bearing)
+                if bearing_diff > 180:
+                    bearing_diff = 360 - bearing_diff
+
+                # Prefer bearing consistency (<30° deviation)
+                confidence = 'HIGH' if bearing_diff < 30 else 'MEDIUM'
+            else:
+                confidence = 'HIGH'
+
+            candidates.append({
+                'pole': pole,
+                'distance': dist,
+                'bearing': bearing,
+                'confidence': confidence
+            })
+
+        # Sort by distance, pick nearest
+        candidates.sort(key=lambda x: x['distance'])
+        next_pole = candidates[0]
+
+        chain.append({
+            **next_pole['pole'],
+            'sequence_position': len(chain) + 1,
+            'distance_from_prev': next_pole['distance'],
+            'bearing_from_prev': next_pole['bearing'],
+            'confidence': next_pole['confidence']
+        })
+
+        remaining.remove(next_pole['pole'])
+
+    return chain
+
+4. QA Validation Engine
+10 Check Types:
+python
+# qa_engine.py
+class QAEngine:
+    def __init__(self, rulepack='SPEN_11kV'):
+        self.rulepack = load_rulepack(rulepack)
+        self.checks = [
+            self.check_coordinate_bounds,
+            self.check_duplicate_coordinates,
+            self.check_height_validity,
+            self.check_span_distances,
+            self.check_angle_stay_evidence,
+            self.check_material_completeness,
+            self.check_ex_pr_clarity,
+            self.check_clearance_proximity,
+            self.check_feature_code_validity,
+            self.check_sequence_confidence
+        ]
+
+    def run_all_checks(self, records):
+        """
+        Run all QA checks on records.
+        Returns issues list.
+        """
+        issues = []
+
+        for check in self.checks:
+            check_issues = check(records)
+            issues.extend(check_issues)
+
+        return issues
+
+    def check_angle_stay_evidence(self, records):
+        """
+        Example check: angle poles should have stay evidence.
+        """
+        issues = []
+
+        angle_poles = [r for r in records if 'angle' in r.get('function', '').lower()]
+
+        for pole in angle_poles:
+            # Find stay records within 20m
+            nearby_stays = self._find_nearby_stays(pole, records, radius=20)
+
+            if not nearby_stays:
+                issues.append({
+                    'point_id': pole['point_id'],
+                    'severity': 'BLOCKER',
+                    'code': 'ANGLE_NO_STAY',
+                    'category': 'mechanical',
+                    'message': f"Angle pole {pole['point_id']} has no stay evidence captured",
+                    'recommendation': "Check field notes/photos for stay configuration. Site revisit may be required."
+                })
+
+        return issues
+DNO Rulepacks:
+python
+# dno_rules.py
+RULEPACKS = {
+    'SPEN_11kV': {
+        'voltage': 11000,
+        'max_span_normal': 100,
+        'max_span_extended': 300,
+        'max_span_critical': 500,
+        'min_clearance_road': 5.8,
+        'min_clearance_ground': 5.2,
+        'stay_required_angle': 10,  # degrees
+        # ... 50+ rule parameters
+    },
+    'SSEN_11kV': {
+        'voltage': 11000,
+        'max_span_normal': 100,
+        'max_span_extended': 300,
+        # ... variations from SPEN
+    },
+    'NIE_11kV': {
+        'voltage': 11000,
+        'coordinate_system': 'Irish_Grid_TM65',
+        # ... NIE-specific rules
+    },
+    'ENWL_11kV': {
+        'voltage': 11000,
+        # ... ENWL-specific rules
+    }
+}
+
+5. Phase C Map Intelligence
+Feature-Type Filtering (C1):
+javascript
+// map-viewer.js
+const FILTER_BUTTONS = [
+    { id: 'existing', label: 'Existing Poles', icon: '○', defaultOn: true },
+    { id: 'proposed', label: 'Proposed Poles', icon: '□', defaultOn: true },
+    { id: 'angle', label: 'Angle Poles', icon: '◇', defaultOn: true },
+    { id: 'stays', label: 'Stays/Anchors', icon: '△', defaultOn: true },
+    { id: 'context', label: 'Context/Crossings', icon: '◊', defaultOn: false },  // OFF by default
+    { id: 'missingHeight', label: 'Missing Heights', icon: '⚠', defaultOn: false },
+    { id: 'missingSpec', label: 'Missing Spec', icon: '⚠', defaultOn: false },
+    { id: 'withRemarks', label: 'Has Remarks', icon: '📝', defaultOn: false },
+    { id: 'angleNoStay', label: 'Angle Poles Missing Stays', icon: '⚠️', defaultOn: false },
+    { id: 'spanAnomalies', label: 'Span Anomalies', icon: '⚠️', defaultOn: false },
+    { id: 'criticalCrossings', label: 'Critical Crossings', icon: '🚦', defaultOn: false }
+];
+
+function applyFilters() {
+    const activeFilters = FILTER_BUTTONS.filter(f => f.active);
+
+    markers.forEach(marker => {
+        const feature = marker.feature;
+        let show = false;
+
+        for (const filter of activeFilters) {
+            if (matchesFilter(feature, filter)) {
+                show = true;
+                break;
+            }
+        }
+
+        marker.setOpacity(show ? 1 : 0);
+    });
+}
+Blank Field Framework (C1):
+javascript
+// map-viewer.js
+function formatFieldForPopup(recordType, fieldName, value) {
+    if (fieldName === 'height') {
+        if (recordType === 'context') {
+            return null;  // Hide height field for context records
+        }
+
+        if (value === null || value === '') {
+            if (recordType.includes('ex')) {
+                return {
+                    label: 'Height',
+                    value: 'not captured',
+                    status: 'review',
+                    icon: '⚠️',
+                    tooltip: 'Existing pole height should have been measured. Check field notes or plan evidence.'
+                };
+            } else if (recordType.includes('pr') || recordType.includes('pol')) {
+                return {
+                    label: 'Height',
+                    value: 'not yet specified',
+                    status: 'info',
+                    icon: 'ℹ️',
+                    tooltip: 'Proposed pole specification is a design decision.'
+                };
+            }
+        } else {
+            return {
+                label: 'Height',
+                value: `${value}m`,
+                status: 'ok',
+                icon: '✓'
+            };
+        }
+    }
+
+    // ... similar logic for material, condition, etc.
+}
+Lifecycle Visualization (C2):
+javascript
+// map-viewer.js
+function classifyLifecycleState(record, nearbyRecords) {
+    const recordType = record.record_type.toLowerCase();
+    const remarks = record.remarks?.toLowerCase() || '';
+
+    // Context records
+    if (recordType === 'context') return 'context';
+
+    // Existing poles
+    if (recordType.includes('ex')) {
+        if (remarks.includes('retain') || remarks.includes('keep')) {
+            return 'retained';
+        }
+        if (remarks.includes('recover') || remarks.includes('remove')) {
+            return 'recovered';
+        }
+
+        // Check for nearby proposed
+        const nearbyProposed = nearbyRecords.filter(r =>
+            r.record_type.toLowerCase().includes('pr') ||
+            r.record_type.toLowerCase().includes('pol')
+        );
+
+        if (nearbyProposed.length > 0) {
+            const closest = findClosest(record, nearbyProposed);
+            const dist = distance(record, closest);
+
+            if (dist < 5) return 'repositioned';
+            if (dist < 50) return 'replacement';  // or 'suggested'/'confirmed'
+            return 'unmatched_ex';
+        }
+
+        return 'existing';
+    }
+
+    // Proposed poles
+    if (recordType.includes('pr') || recordType.includes('pol')) {
+        const nearbyExisting = nearbyRecords.filter(r =>
+            r.record_type.toLowerCase().includes('ex')
+        );
+
+        if (nearbyExisting.length > 0) {
+            const closest = findClosest(record, nearbyExisting);
+            const dist = distance(record, closest);
+
+            if (dist < 50) return 'replacement';
+            return 'unmatched_pr';
+        }
+
+        return 'proposed';
+    }
+
+    return 'existing';  // default
+}
+
+function renderLifecycleLayer(features) {
+    features.forEach(feature => {
+        const state = feature.properties.lifecycle_state;
+        const marker = createMarker(feature, state);
+
+        // Add to map
+        lifecycleLayer.addLayer(marker);
+    });
+
+    // Add EX↔PR linking lines
+    const pairs = detectMatchedPairs(features);
+    pairs.forEach(pair => {
+        const line = L.polyline(
+            [[pair.ex.lat, pair.ex.lng], [pair.pr.lat, pair.pr.lng]],
+            {
+                color: pair.status === 'confirmed' ? '#3b82f6' : '#94a3b8',
+                weight: pair.status === 'confirmed' ? 2 : 1,
+                dashArray: pair.status === 'confirmed' ? null : '5, 5'
+            }
+        );
+
+        lifecycleLayer.addLayer(line);
+    });
+}
+Stay Evidence Detection (C3):
+python
+# qa_engine.py (backend)
+def detect_angle_poles(records):
+    """
+    Identify poles requiring stay evidence.
+    """
+    angle_poles = []
+
+    for i, record in enumerate(records):
+        is_angle = False
+        deviation = None
+
+        # Check explicit function
+        if 'angle' in record.get('function', '').lower():
+            is_angle = True
+
+        # Check route deviation (bearing change)
+        if i > 0 and i < len(records) - 1:
+            prev_bearing = calculate_bearing(records[i-1], record)
+            next_bearing = calculate_bearing(record, records[i+1])
+            deviation = abs(next_bearing - prev_bearing)
+
+            if deviation > 180:
+                deviation = 360 - deviation
+
+            if deviation > 10:  # >10° = angle pole
+                is_angle = True
+
+        if is_angle:
+            angle_poles.append({
+                'point_id': record['point_id'],
+                'deviation': deviation,
+                'explicit': 'angle' in record.get('function', '').lower()
+            })
+
+    return angle_poles
+
+def scan_for_stays(angle_pole, all_records, radius=20):
+    """
+    Find stay records near angle pole.
+    """
+    nearby_stays = []
+
+    for record in all_records:
+        record_type = record.get('record_type', '').lower()
+
+        if 'stay' in record_type or 'anchor' in record_type:
+            dist = distance(angle_pole, record)
+
+            if dist <= radius:
+                nearby_stays.append({
+                    'point_id': record['point_id'],
+                    'type': classify_stay_type(record),
+                    'distance': dist,
+                    'bearing': record.get('bearing')
+                })
+
+    return {
+        'angle_pole_id': angle_pole['point_id'],
+        'stays_found': len(nearby_stays),
+        'stay_details': nearby_stays,
+        'has_stay_evidence': len(nearby_stays) > 0
+    }
+Span Anomaly Detection (C4):
+python
+# span_generator.py
+def calculate_span_distance(pole1, pole2):
+    """
+    Calculate 3D distance including elevation.
+    """
+    # Horizontal distance
+    dx = pole2['easting'] - pole1['easting']
+    dy = pole2['northing'] - pole1['northing']
+    horizontal = math.sqrt(dx**2 + dy**2)
+
+    # Vertical distance
+    if 'elevation' in pole1 and 'elevation' in pole2:
+        dz = pole2['elevation'] - pole1['elevation']
+        return math.sqrt(horizontal**2 + dz**2)
+
+    return horizontal
+
+def classify_span_status(distance, voltage=11000):
+    """
+    Classify span based on distance and voltage.
+    """
+    if distance < 10:
+        return {
+            'class': 'duplicate',
+            'severity': 'WARNING',
+            'message': '⚠️ Probable duplicate pole or GPS error',
+            'action': 'Review coordinates and field notes'
+        }
+
+    if voltage == 11000:  # 11kV
+        if distance > 500:
+            return {
+                'class': 'critical_gap',
+                'severity': 'BLOCKER',
+                'message': '🚨 Probable missing intermediate pole',
+                'action': 'Verify route and check for missing records'
+            }
+        elif distance > 300:
+            return {
+                'class': 'very_long',
+                'severity': 'WARNING',
+                'message': '⚠️ Very long span — verify no missing pole',
+                'action': 'Check field notes and survey evidence'
+            }
+        elif distance > 100:
+            return {
+                'class': 'extended',
+                'severity': 'INFO',
+                'message': 'ℹ️ Long span — verify conductor sag compliance',
+                'action': 'Check clearance calculations'
+            }
+
+    return {
+        'class': 'normal',
+        'severity': 'PASS',
+        'message': '✓ Typical span'
+    }
+Crossing Context Enrichment (C4):
+python
+# context_crossing.py
+CROSSING_TYPES = {
+    'road': {
+        'label': 'Road Crossing',
+        'priority': 'HIGH',
+        'message': 'Critical clearance check required',
+        'action': 'Measure statutory clearance to road surface'
+    },
+    '11xing': {
+        'label': '11kV Line Crossing',
+        'priority': 'HIGH',
+        'message': 'Voltage separation required',
+        'action': 'Ensure adequate vertical/horizontal clearance'
+    },
+    '33xing': {
+        'label': '33kV Line Crossing',
+        'priority': 'CRITICAL',
+        'message': 'Critical voltage clearance',
+        'action': 'Engineering review required before design'
+    },
+    '110xing': {
+        'label': '110kV Line Crossing',
+        'priority': 'CRITICAL',
+        'message': 'Specialist review required',
+        'action': 'DNO/ENWL approval needed, specialist design'
+    },
+    'bt': {
+        'label': 'BT/Telecoms Crossing',
+        'priority': 'MEDIUM',
+        'message': 'Proximity coordination required',
+        'action': 'Verify separation distance'
+    }
+}
+
+def enrich_crossing_context(crossing_record):
+    """
+    Add priority and action guidance to crossing records.
+    """
+    feature_code = crossing_record.get('feature_code', '').lower()
+
+    for key, crossing_type in CROSSING_TYPES.items():
+        if key in feature_code:
+            return {
+                **crossing_record,
+                'crossing_label': crossing_type['label'],
+                'priority': crossing_type['priority'],
+                'clearance_message': crossing_type['message'],
+                'action': crossing_type['action']
+            }
+
+    return {
+        **crossing_record,
+        'crossing_label': 'Crossing/Context Feature',
+        'priority': 'REVIEW',
+        'clearance_message': 'Review for potential constraints'
+    }
+
+Job Outputs (Per Processed Job)
+Output Files:
+uploads/jobs/<job_id>/
+├── meta.json              # Summary, completeness, design-readiness
+├── <original>.csv         # Original uploaded CSV
+├── issues.csv             # QA flags (blocker/warning/info)
+├── map_data.json          # GeoJSON point features
+└── sequenced_route.json   # Design chain, EX/PR matches
+Example meta.json:
+json
+{
+  "job_id": "J12946",
+  "filename": "2814_474c_raw_trimble_export.csv",
+  "processed_at": "2026-04-15T14:32:01Z",
+  "total_records": 91,
+  "mapped_features": 91,
+  "coordinate_system": "OSGB36",
+  "bounds": {
+    "easting_min": 365200,
+    "easting_max": 366800,
+    "northing_min": 643500,
+    "northing_max": 644500
+  },
+  "design_readiness": "PARTIALLY READY",
+  "readiness_reasons": [
+    "Height coverage: 19/91 poles (21%) - many heights missing or estimated",
+    "Material data: 0/91 poles (0%) - material not captured",
+    "Stay/clearance/electrical data incomplete or absent"
+  ],
+  "circuit_summary": {
+    "total_poles": 67,
+    "existing_poles": 45,
+    "proposed_poles": 22,
+    "angle_poles": 12,
+    "terminal_poles": 2,
+    "intermediate_poles": 53,
+    "stays_anchors": 8,
+    "context_features": 24
+  },
+  "completeness": {
+    "height": "21%",
+    "material": "0%",
+    "condition": "0%",
+    "location": "12%",
+    "remarks": "45%"
+  },
+  "sequence_summary": {
+    "total_sequenced": 64,
+    "confidence_high": 32,
+    "confidence_medium": 32,
+    "confidence_low": 0,
+    "detached_items": 3,
+    "ex_pr_matches": 11
+  },
+  "qa_summary": {
+    "total_issues": 28,
+    "blockers": 0,
+    "warnings": 18,
+    "info": 10,
+    "pass": 63
+  }
+}
+
+Real Validation Corpus
+Jobs Processed (45+):
+	•	2814_474 family (multiple variants: 474c, 474_raw, etc.)
+	•	2814_513 family (controller dump format)
+	•	Gordon family (NIE Networks, Irish Grid, split PR1/PR2)
+	•	P010, P011 (operational jobs, real designer use)
+	•	J12946 (SPEN, OSGB)
+	•	Bellsprings/EWM285 (SPEN, real 11kV refurb)
+	•	D1 test series (development validation)
+Coordinate Systems Validated:
+	•	OSGB36 (British National Grid) ✅
+	•	Irish Grid TM65 (Northern Ireland) ✅
+	•	WGS84 (GPS, converted on intake) ✅
+DNO Rulepacks Validated:
+	•	SPEN_11kV ✅
+	•	SSEN_11kV ✅
+	•	NIE_11kV ✅
+	•	ENWL_11kV ✅
+Issue Patterns (Consistent Across Jobs):
+	•	REPL_PAIR (EX↔PR replacement relationships)
+	•	SPAN_VERY_SHORT (<10m probable duplicates)
+	•	ANGLE_NO_STAY (angle poles missing stay evidence)
+	•	EXPOLE_HEIGHT_EST (existing pole heights estimated, not measured)
+	•	HEIGHT_RANGE (heights outside plausible range)
+These patterns prove GridFlow discovers real engineering uncertainties, not random noise.
+
+4.2 What Doesn't Work Yet (Future Work)
+Stage 4: Field Capture + Evidence Management
+NOT BUILT:
+	•	Mobile/tablet capture interface
+	•	Photo upload/management
+	•	Offline workflow support
+	•	Voice note capture
+	•	Sketch/markup tools
+	•	Multi-surveyor coordination
+Current Workaround:
+	•	Surveyors use Field Maps, export CSV, upload to GridFlow
+	•	Photos stored separately (not linked in GridFlow)
+	•	Field notes in notebook (not digital)
+
+Stage 5: Complete Data Model
+NOT BUILT:
+	•	50-field popup model (only 12 fields currently)
+	•	Pole class/strength (not captured)
+	•	Detailed condition ratings (not captured)
+	•	Equipment presence/ratings (sparse)
+	•	Earthing configuration (not captured)
+	•	Defect details (not captured)
+	•	Wayleave/landowner info (not captured)
+	•	Surveyor/date/GNSS accuracy (not fully surfaced)
+Current State:
+	•	Basic popups (identity, height, lifecycle, stay evidence, QA)
+	•	Design-ready for simple jobs
+	•	Not comprehensive enough for complex jobs
+
+Stage 6: GIS Integration + DNO Systems
+NOT BUILT:
+	•	ArcGIS connector
+	•	QGIS export
+	•	DNO asset register integration
+	•	Field Maps round-trip
+	•	PoleCAD direct import
+	•	Work order integration
+Current Workaround:
+	•	Manual CSV export
+	•	Designer imports to PoleCAD manually
+	•	No automated DNO system updates
+
+Stage 7: Multi-User Deployment
+NOT BUILT:
+	•	User accounts/authentication
+	•	Role-based access control (surveyor/reviewer/designer/approver)
+	•	Team collaboration (comments, assignments)
+	•	Approval workflow
+	•	Audit logging
+	•	Multi-project management
+Current State:
+	•	Single-user desktop app
+	•	No authentication (local use only)
+	•	No collaboration features
+
+PART 5: STRATEGIC DECISION POINT
+5.1 The Fork in the Road
+GridFlow is at a critical decision point.
+Two paths forward, fundamentally different products:
+Path A: Phase C2/D (Professional QA + Display)
+Product Identity:
+"Enhanced pre-CAD QA gatekeeper with professional engineering workspace"
+Timeline: 2-4 weeks
+Scope:
+	•	Add 10-15 key survey fields (12 → 25 field popup)
+	•	Map UX refinement (marker size, symbol polish, layer panel split)
+	•	Asset-specific popup layouts (existing vs. proposed vs. context)
+	•	Professional display of survey data
+	•	Stay as internal/consultancy tool
+Investment: Modest (2-4 weeks focused development)
+Risk: Low (builds on proven Phase C foundation)
+Commercial Potential: Internal tool, consultancy leverage, niche productivity layer
+Fields to Add (10-15 priority picks):
+	•	Pole class/strength
+	•	Material (expand current)
+	•	Condition (good/fair/poor/unsafe)
+	•	Voltage carried
+	•	Conductor type
+	•	Stay present (yes/no)
+	•	Stay type (if yes)
+	•	Lean (direction/severity)
+	•	Defects (rot/split/burn)
+	•	Equipment presence (transformer/switch)
+	•	Photo indicators (linked, not uploaded)
+	•	Surveyor/date
+	•	GNSS accuracy
+	•	Action required
+	•	Wayleave/access notes
+Result: 25-field professional popup (not overwhelming, design-focused)
+
+Path B: Stage 4 (Full Electrical Survey Platform)
+Product Identity:
+"Professional electrical survey-to-design platform — Field Maps replacement or complement"
+Timeline: 6-12 months
+Scope:
+	•	Complete 50-field data model
+	•	Mobile/tablet field capture
+	•	Photo upload/management
+	•	Evidence workflows
+	•	Asset relationships (parent/child, connectivity)
+	•	Multi-user collaboration
+	•	GIS integration
+	•	PoleCAD export
+	•	DNO system connectors
+	•	Commercial deployment infrastructure
+Investment: Substantial (6-12 months sustained development)
+Risk: High (4-5x scope expansion, unproven market demand)
+Commercial Potential: Standalone commercial product, DNO procurement target, SaaS revenue
+CRITICAL REQUIREMENT: Customer validation BEFORE build
+	•	Talk to 5-10 potential customers (DNOs, contractors)
+	•	Validate willingness to pay
+	•	Understand must-have vs. nice-to-have features
+	•	Secure 3-5 beta customer commitments
+	•	Create business case (revenue model, pricing, costs)
+DO NOT build Stage 4 without customer proof.
+
+5.2 Decision Framework
+Question 1: What is your primary goal for GridFlow?
+A) Consultancy leverage / internal productivity tool → Choose Phase C2/D
+	•	2-4 weeks
+	•	Low risk
+	•	Proven foundation
+	•	Immediate value
+B) Commercial product / business venture → Consider Stage 4 → BUT ONLY AFTER customer validation
+	•	6-12 months
+	•	High risk
+	•	Needs market proof
+	•	Customer conversations FIRST
+
+Question 2: How much time can you invest?
+A) 2-4 weeks of focused development → Choose Phase C2/D
+B) 6-12 months of sustained product development → Consider Stage 4 → But validate demand first
+
+Question 3: What customer evidence do you have?
+A) None / hypothetical interest / personal need → Choose Phase C2/D first → Use in real consultancy work → Gather customer feedback → Then decide Stage 4 based on evidence
+B) Real customer conversations / DNO interest / contractor demand → Consider Stage 4 → But create business case first → Revenue model, pricing, deployment cost
+
+Question 4: What is your risk tolerance?
+A) Low — prefer incremental, proven improvements → Choose Phase C2/D
+B) High — willing to bet on bigger commercial opportunity → Consider Stage 4 → But validate first
+
+5.3 Recommended Path: Hybrid Approach
+My strong recommendation:
+Phase 1: Do Phase C2/D First (2-4 weeks)
+Why:
+	•	Builds on proven Phase C foundation
+	•	Low risk (2-4 week timeline)
+	•	Immediate validation on existing job corpus
+	•	Adds 10-15 fields (professional without overwhelming)
+	•	Proves professional display model works
+	•	Use GridFlow in real consultancy work for 2-3 months
+Deliverables:
+	•	25-field professional popup
+	•	Map UX improvements (markers, symbols, layers)
+	•	Asset-specific layouts
+	•	Real job validation (P011, Gordon, Bellsprings +new jobs)
+
+Phase 2: Customer Validation (Months 2-3)
+While using Phase C2/D in real work:
+Talk to 5-10 potential customers:
+	•	DNOs (SPEN, SSEN, NIE, ENWL, UKPN, NPG, etc.)
+	•	Contractors (major electrical contractors)
+	•	Consultancies (survey/design firms)
+Ask:
+	•	"Would you pay for this platform? How much?"
+	•	"What features are must-have vs. nice-to-have?"
+	•	"Would you prefer SaaS or on-premise deployment?"
+	•	"Would you beta test?"
+	•	"What's missing from current tools (Field Maps, PoleCAD, etc.)?"
+Create business case:
+	•	Revenue model (SaaS, license, custom deployment?)
+	•	Pricing tiers (surveyor/designer/enterprise)
+	•	Development cost estimate (6-12 months, £50K-200K?)
+	•	Break-even analysis
+	•	Market size (14 DNOs, 50+ contractors, 200+ consultancies)
+Validate technical requirements:
+	•	Do customers need full 50-field model, or is 25 enough?
+	•	Photo upload essential, or linking sufficient?
+	•	Mobile/tablet capture required, or desktop-only acceptable?
+	•	Offline workflow critical, or online-only fine?
+	•	GIS integration must-have, or nice-to-have?
+
+Phase 3: Decision Point (Month 4)
+Review customer validation evidence:
+If validation shows strong demand:
+	•	3+ customers commit to beta testing
+	•	Pricing validated (customers say they'd pay)
+	•	Business case shows path to profitability
+	•	Feature requirements confirmed
+→ Build Stage 4 roadmap with customer input → Commit to 6-12 month product development → Build survey platform properly
+If validation shows modest interest:
+	•	Customers like Phase C2/D but not willing to pay for full platform
+	•	Feature requests don't justify 6-12 month build
+	•	Market not ready for Field Maps replacement
+→ Stay with Phase C2/D professional QA model → Continue incremental improvements based on real use → Use as consultancy leverage / internal tool → Don't expand to full platform without stronger evidence
+
+Why This Hybrid Approach is Best:
+✅ Low risk — 2-4 weeks proves professional display works ✅ Real evidence — customer conversations before 6-12 month commitment ✅ Preserves optionality — can go either direction based on validation ✅ No wasted work — Phase C2/D fields are subset of Stage 4 anyway ✅ Efficient — don't build survey platform without customer proof
+The biggest mistake would be: ❌ Building Stage 4 (6-12 months) without customer validation ❌ Staying narrow forever when real commercial opportunity exists ❌ Letting survey research work sit unused because of fear of scope expansion
+The safe path: ✅ Prove professional display (Phase C2/D, 2-4 weeks) ✅ Validate market demand (customer conversations, 2-3 months) ✅ Then decide Stage 4 based on real evidence
+
+PART 6: FILE MANIFEST FOR NEW  DESKTOP PROJECT
+6.1 Essential Files (Tier 1 — Must Have)
+These 15 files provide complete project understanding:
+Current State & Decision Context (5 files)
+	•	GridFlow_Project-Control_Review_May_2026.md (THIS DOCUMENT)
+	•	Path: /Users/noelcollins/Unitas-GridFlow/
+	•	Why: Single comprehensive source of truth
+	•	What: Complete history, current state, future vision, decision framework
+	•	Size: ~80,000 words
+	•	READ FIRST
+	•	CRITICAL_ANALYSIS_PHASE_C_VS_SURVEY_PLATFORM_2026-05-01.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/
+	•	Why: Defines scope decision point
+	•	What: Phase C2/D vs. Stage 4 analysis, 4-5x gap quantification
+	•	Size: ~8,600 words
+	•	CURRENT_APP_VS_REQUIRED_STATE_ANALYSIS.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/
+	•	Why: Current vs. required data model comparison
+	•	What: 12 fields → 50 fields gap analysis
+	•	Size: ~4,200 words
+	•	WORKFLOW_SYSTEM.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/
+	•	Why: Operating model across all tools
+	•	What: ChatGPT orchestrates, Cursor executes,  reviews
+	•	Size: ~2,500 words
+	•	CHANGELOG.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/
+	•	Why: Actual history of what shipped
+	•	What: Phase milestones, test count progression, commit record
+
+Project Identity (3 files)
+	•	AI_CONTROL/00_PROJECT_CANONICAL.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/AI_CONTROL/
+	•	Why: Official project identity
+	•	What: Product definition, repo structure, tech stack
+	•	Status: Outdated — needs update post-decision
+	•	AI_CONTROL/01_CURRENT_STATE.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/AI_CONTROL/
+	•	Why: What works, what's weak
+	•	What: Phase completion status, capabilities, weaknesses
+	•	Status: Outdated — still says "Phase 2A complete"
+	•	AI_CONTROL/02_CURRENT_TASK.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/AI_CONTROL/
+	•	Why: What should be worked on next
+	•	What: Current development focus
+	•	Status: Severely outdated — references Phase 1
+
+Phase C Evidence (2 files)
+	•	CURSOR_BRIEF_PHASE_C.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/
+	•	Why: Complete Phase C specification (C1-C4)
+	•	What: Feature filtering, lifecycle viz, stay detection, span analysis
+	•	Status: COMPLETE — 300+ tests passing
+	•	Size: ~12,000 words
+	•	AI_CONTROL/03_WORKING_RULES.md
+	•	Path: /Users/noelcollins/Unitas-GridFlow/AI_CONTROL/
+	•	Why: AI tool operating constraints
+	•	What: Token efficiency, narrow tasks, cost control
+
+Future Specifications (2 files — ONE OR BOTH depending on decision)
+	•	GridFlow_Phase_C_Map_Review_Detailed_Report_2026-05-01.docx (if Phase C2/D)
+	•	Path: /Users/noelcollins/Unitas-GridFlow/ (or validation evidence folder)
+	•	Why: Phase C2/D UX improvement requirements
+	•	What: Map polish, symbol refinement, popup improvements
+	•	Size: 3,924 words
+	•	Format: DOCX — extract text for
+	•	UK_Electrical_Grid_Survey_Data_Capture_Report.docx (if Stage 4)
+	•	Path: /Users/noelcollins/Unitas-GridFlow/ (or validation evidence folder)
+	•	Why: Complete survey platform specification
+	•	What: 50-field data model, evidence management, GIS parity
+	•	Size: 4,544 words
+	•	Format: DOCX — extract text for
+
+Domain Context (3 files)
+	•	AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md (if exists)
+	•	Path: /Users/noelcollins/Unitas-GridFlow/AI_CONTROL/
+	•	Why: Electrical engineering domain knowledge
+	•	What: Feature codes, evidence quality, practitioner terminology
+	•	AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md (if exists)
+	•	Path: /Users/noelcollins/Unitas-GridFlow/AI_CONTROL/
+	•	Why: Professional language requirements
+	•	What: Designer-facing terminology, review standards
+	•	P011_OPERATIONAL_FEEDBACK_2026-04-30.md (if exists)
+	•	Path: /Users/noelcollins/Unitas-GridFlow/ (or validation evidence folder)
+	•	Why: Real designer use, operational blockers
+	•	What: 6 blockers identified, all resolved in Phase C
+
+6.2 Optional Reference Files (Tier 2 — As Needed)
+Technical Implementation (read if discussing code)
+	•	app/electrical_schema.py
+	•	Asset taxonomy (6 families, equipment types)
+	•	~420 lines
+	•	app/survey_connectivity.py
+	•	EX↔PR matching, connectivity normalization
+	•	~380 lines
+	•	app/qa_engine.py
+	•	Validation rules, issue generation
+	•	~1,095 lines
+	•	app/route_sequencer.py
+	•	Auto-sequencing, confidence levels
+	•	~691 lines
+	•	app/static/js/map-viewer.js
+	•	Map intelligence, filters, popups
+	•	~2,809 lines
+	•	SENSITIVE — treat as fragile
+
+Validation Evidence (read if discussing specific jobs)
+	•	uploads/projects/P005/files/F001/meta.json
+	•	P005/F001 job summary (157 records, partially ready)
+	•	uploads/jobs/J12946/meta.json
+	•	J12946 job summary (91 records, 2814_474c family)
+	•	validation_data/gordon_pt1/ (selective files)
+	•	Gordon raw survey + PR1/PR2 splits
+	•	NIE Networks, Irish Grid validation
+	•	validation_data/2814_513/ (selective files)
+	•	Raw controller dump format
+	•	Completeness reporting focus
+
+DNO Rules & Regional Context
+	•	app/dno_rules.py
+	•	DNO rulepack definitions (SPEN, SSEN, NIE, ENWL)
+	•	Voltage-specific parameters
+	•	~200 lines
+
+6.3 DO NOT Include in Project
+These will cause confusion or waste tokens:
+❌ _archive/ directory — historical only, outdated ❌ Full uploads/ tree — too large, unnecessary ❌ All validation evidence — selective examples only ❌ .venv312/ or .env — local environment, not project truth ❌ All test files — reference only when needed ❌ Old strategic reviews — pre-Phase C, superseded ❌ Previous control review (undated) — replaced by May 2026 edition
+
+6.4 Custom Instructions for  Desktop Project
+Add these as project knowledge or custom instructions:
+PROJECT CONTEXT:
+You are the orchestrator for Unitas-GridFlow, a survey-to-design intelligence
+platform for UK electrical overhead line (OHL) work.
+
+CURRENT STATUS (May 2026):
+- Phase C complete (C1-C4): 300+ tests passing
+- Feature filtering, lifecycle viz, stay detection, span analysis operational
+- Real validation: P011, Gordon, Bellsprings (DNO jobs)
+- Strategic decision pending: Phase C2/D vs. Stage 4
+
+CRITICAL DECISION POINT:
+GridFlow is choosing between two fundamentally different products:
+
+Path A (Phase C2/D): Professional QA + Display Platform
+- Timeline: 2-4 weeks
+- Scope: Add 10-15 key fields (12 → 25 field popup), map UX refinement
+- Identity: Enhanced pre-CAD QA gatekeeper
+- Risk: LOW, builds on proven foundation
+
+Path B (Stage 4): Full Electrical Survey Platform
+- Timeline: 6-12 months
+- Scope: 50-field data model, mobile capture, evidence management, GIS integration
+- Identity: Professional survey platform, Field Maps replacement potential
+- Risk: HIGH, needs customer validation FIRST
+
+DECISION PENDING: No implementation work until strategic direction confirmed.
+
+YOUR ROLE:
+- Strategic planning and decision analysis
+- Specification review and domain alignment
+- Control layer maintenance
+- Customer validation guidance
+
+YOU DO NOT:
+- Write implementation code (Cursor does that)
+- Execute in terminal ( Code does that)
+- Make final strategic decisions (Noel does that)
+
+KEY PRINCIPLES:
+- Validation-led development (real operational use only)
+- Scope discipline (Phase C2/D ≠ Stage 4)
+- Token efficiency (read minimum necessary files)
+- Real evidence gates all decisions
+
+DOMAIN CONTEXT:
+- UK electrical distribution (11kV, 33kV, 132kV OHL)
+- 4 DNOs validated: NIE, SPEN, SSEN, ENWL
+- 3 coordinate systems: OSGB36, Irish Grid TM65, WGS84
+- 6 asset families: poles, spans, stays, cables, context, equipment
+- 11 lifecycle states: existing, proposed, retained, recovered, replacement, etc.
+
+CURRENT DATA MODEL:
+- Existing: ~12 fields across 8 popup sections
+- Required (professional): 25-35 fields (Phase C2/D)
+- Required (full platform): 50+ fields (Stage 4)
+- Gap: 2-4x expansion depending on path chosen
+
+VALIDATION CORPUS:
+- P011 (operational feedback, 6 blockers resolved)
+- Gordon (NIE, Irish Grid, split-file testing)
+- Bellsprings/EWM285 (SPEN, real 11kV refurb)
+- 2814_474/513 families (regression baselines)
+- 45+ processed jobs total
+
+CONTROL LAYER PRIORITY:
+1. GridFlow_Project-Control_Review_May_2026.md (THIS IS TRUTH)
+2. CRITICAL_ANALYSIS documents (decision framework)
+3. CURSOR_BRIEF_PHASE_C.md (Phase C complete)
+4. AI_CONTROL files (need update post-decision)
+5. CHANGELOG.md (actual shipped history)
+
+FILE SENSITIVITY:
+- map-viewer.js (~2,809 lines): FRAGILE, narrow changes only
+- qa_engine.py (~1,095 lines): stable, well-tested
+- Control files: update after major milestones only
+
+RECOMMENDED NEXT STEP:
+1. Read GridFlow_Project-Control_Review_May_2026.md (complete context)
+2. Read CRITICAL_ANALYSIS (decision framework)
+3. Help Noel decide: Phase C2/D or Stage 4?
+4. If Phase C2/D: create specification from Map Review doc
+5. If Stage 4: guide customer validation process BEFORE build
+
+PART 7: SUMMARY & NEXT ACTIONS
+7.1 What You Now Have
+This document provides:
+✅ Complete project history — from inception → Phase C complete ✅ Technical implementation details — stack, architecture, data model, code structure ✅ Domain knowledge — UK electrical OHL, DNOs, asset types, survey workflows ✅ Current state — what works (Phase C), what doesn't (Stage 4+) ✅ Future vision — what GridFlow will be when fully developed ✅ Strategic decision framework — Phase C2/D vs. Stage 4, customer validation ✅ File manifest — 15 essential files + optional references for new  Project ✅ Custom instructions — project context, principles, domain, control layer
+Everything a new  Desktop Project needs to understand GridFlow completely.
+
+7.2 Immediate Next Actions
+For You (Noel)
+1. Strategic Decision (This Week)
+Choose path:
+	•	Phase C2/D (2-4 weeks, professional QA+display)
+	•	Stage 4 (6-12 months, full platform, validate first)
+	•	Hybrid (Phase C2/D → customer validation → then decide Stage 4)
+Record decision:
+	•	Create AI_CONTROL/07_STRATEGIC_DECISION_MAY_2026.md
+	•	Document rationale, chosen path, timeline
+
+2. Control Layer Refresh (Next Week)
+Update these files based on decision:
+	•	AI_CONTROL/00_PROJECT_CANONICAL.md (product identity)
+	•	AI_CONTROL/01_CURRENT_STATE.md (Phase C complete status)
+	•	AI_CONTROL/02_CURRENT_TASK.md (chosen path, next spec)
+	•	README.md (product description)
+	•	CHANGELOG.md (Phase C completion entry)
+
+3. New  Desktop Project Setup (When Ready)
+Create project folder:
+	•	Include 15 essential files (Tier 1)
+	•	Add custom instructions (project context)
+	•	Test: can  answer the 10 key questions?
+Validate understanding:
+	•	"What is GridFlow?"
+	•	"What phase is it in?"
+	•	"What's the current decision point?"
+	•	"What are the two path options?"
+	•	"What validation is required for Stage 4?"
+
+For  Desktop (Me)
+If Phase C2/D Chosen:
+1. Review Map Review Document
+	•	Extract UX improvement requirements
+	•	Identify 10-15 priority fields to add
+	•	Create asset-specific popup layouts
+2. Create Phase C2/D Specification
+	•	Map UX refinements (marker size, symbols, layers)
+	•	Field additions (12 → 25 fields)
+	•	Popup organization (existing/proposed/context layouts)
+	•	Test requirements
+	•	Visual acceptance criteria
+3. Support Implementation
+	•	Review Cursor output for domain alignment
+	•	Check terminology (practitioner-facing language)
+	•	Validate against operational evidence (P011, Gordon)
+
+If Stage 4 Chosen:
+1. Guide Customer Validation Process
+	•	Create customer interview template
+	•	Identify target customers (DNOs, contractors, consultancies)
+	•	Develop business case framework
+	•	Define feature priority questions
+2. Review Survey Research Document
+	•	Extract 50-field data model requirements
+	•	Identify must-have vs. nice-to-have features
+	•	Create Stage 4 roadmap outline
+3. Support Commercial Analysis
+	•	Review market size estimates
+	•	Validate pricing model assumptions
+	•	Assess competitive landscape
+BUT: Do NOT create Stage 4 specification until customer validation complete.
+
+7.3 Success Criteria
+New  Desktop Project is successful if it can:
+✅ Understand project history — MVP → Phase C evolution ✅ Explain current state — 300+ tests, Phase C complete, decision pending ✅ Describe future vision — full survey platform (Stage 4+) ✅ Articulate decision point — Phase C2/D vs. Stage 4, validation requirements ✅ Provide domain context — UK OHL, DNOs, asset types, workflows ✅ Guide strategic decisions — customer validation, business case, risk assessment ✅ Review specifications — domain alignment, practitioner terminology ✅ Maintain control layer — update canonical files after milestones
+It should NOT: ❌ Write implementation code (Cursor's job) ❌ Execute terminal commands ( Code's job) ❌ Make final strategic decisions (Noel's authority) ❌ Recommend Stage 4 without customer validation ❌ Conflate Phase C2/D scope with Stage 4 scope
+
+7.4 Final Note
+GridFlow is a real, valuable product with a clear path forward.
+Phase C proved the technical foundation is solid:
+	•	300+ tests passing
+	•	Real operational validation
+	•	Professional map intelligence
+	•	Design-ready outputs
+The next phase is not a technical question — it's a strategic decision:
+Phase C2/D: Low-risk professional enhancement (2-4 weeks) Stage 4: High-reward commercial platform (6-12 months, validate first)
+Both are valid. Both can succeed. The choice depends on your goals, timeline, and customer evidence.
+This document gives you — and any new  Desktop Project — everything needed to make that decision with full context.
+
+END OF MASTER PROJECT BRIEFING
