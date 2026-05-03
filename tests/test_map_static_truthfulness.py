@@ -165,6 +165,12 @@ def test_map_js_map_meta_copy(map_js_source: str) -> None:
     assert "_mapMeta" in map_js_source
 
 
+def test_map_js_popup_contract_renderer_and_fallback(map_js_source: str) -> None:
+    assert "popup_schema_contract" in map_js_source
+    assert "buildContractPopupHtml" in map_js_source
+    assert "legacyPointPopupSections" in map_js_source
+
+
 def test_map_js_primary_layer_key(map_js_source: str) -> None:
     assert "primaryLayerKey" in map_js_source
 
