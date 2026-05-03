@@ -141,12 +141,22 @@ class MapViewer {
     if (this.issueCountEl) this.issueCountEl.textContent = meta.issue_count ?? 0;
     if (this.rulepackBadgeEl) this.rulepackBadgeEl.textContent = meta.rulepack_id || 'Unknown';
     if (this.autoNormalizedEl) this.autoNormalizedEl.textContent = meta.auto_normalized ? 'Yes' : 'No';
+    const workspaceBlockersEl = document.getElementById('workspace-blocker-count');
+    if (workspaceBlockersEl) workspaceBlockersEl.textContent = meta.fail_count ?? 0;
+    const workspaceWarningsEl = document.getElementById('workspace-warning-count');
+    if (workspaceWarningsEl) workspaceWarningsEl.textContent = meta.warn_count ?? 0;
 
     if (this.issueNoteEl) {
-      if ((meta.issue_count ?? 0) > 0) {
-        this.issueNoteEl.textContent = 'This job contains flagged issues. Click markers to inspect record details, then use the PDF for the full issue list.';
+      this.issueNoteEl.classList.remove('issue-note-fail', 'issue-note-warn', 'issue-note-ok');
+      if ((meta.fail_count ?? 0) > 0) {
+        this.issueNoteEl.textContent = 'Design blockers are present. Start with blocker tiles or focused filters, then confirm the evidence in the popup and PDF review workspace.';
+        this.issueNoteEl.classList.add('issue-note-fail');
+      } else if ((meta.warn_count ?? 0) > 0) {
+        this.issueNoteEl.textContent = 'Review-needed records are present. Use the focus groups to work through missing evidence, route checks, and lifecycle signals before sign-off.';
+        this.issueNoteEl.classList.add('issue-note-warn');
       } else {
-        this.issueNoteEl.textContent = 'No issues recorded for this job.';
+        this.issueNoteEl.textContent = 'No open blockers or review-required records are currently surfaced in this workspace.';
+        this.issueNoteEl.classList.add('issue-note-ok');
       }
     }
 
@@ -156,9 +166,9 @@ class MapViewer {
       const totalSignals = (meta.warn_count ?? 0) + (meta.fail_count ?? 0);
       if (totalSignals > 0) {
         const parts = [];
-        if ((meta.warn_count ?? 0) > 0) parts.push(`${meta.warn_count} warn`);
-        if ((meta.fail_count ?? 0) > 0) parts.push(`${meta.fail_count} fail`);
-        frameSummaryEl.textContent = `${totalSignals} review signal${totalSignals !== 1 ? 's' : ''}: ${parts.join(', ')}`;
+        if ((meta.warn_count ?? 0) > 0) parts.push(`${meta.warn_count} review-needed`);
+        if ((meta.fail_count ?? 0) > 0) parts.push(`${meta.fail_count} blocker`);
+        frameSummaryEl.textContent = `${totalSignals} active review signal${totalSignals !== 1 ? 's' : ''}: ${parts.join(', ')}`;
         frameSummaryEl.style.display = 'block';
       } else {
         frameSummaryEl.style.display = 'none';

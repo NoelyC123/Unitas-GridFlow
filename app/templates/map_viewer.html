@@ -190,6 +190,19 @@
       padding-top: 10px;
     }
 
+    .review-focus-group + .review-focus-group {
+      margin-top: 8px;
+    }
+
+    .review-focus-subtitle {
+      color: #64748b;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
     .map-control-section {
       border-top: 1px solid #e5e7eb;
       margin-top: 10px;
@@ -488,6 +501,92 @@
       background: #f8fafc;
       font-size: 0.9rem;
       color: #475569;
+    }
+
+    .issue-note.issue-note-fail {
+      background: #fff1f2;
+      color: #9f1239;
+      border: 1px solid #fecdd3;
+    }
+
+    .issue-note.issue-note-warn {
+      background: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .issue-note.issue-note-ok {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .workspace-panel {
+      border-top: 1px solid #e5e7eb;
+      margin-top: 12px;
+      padding-top: 10px;
+    }
+
+    .workspace-panel-title {
+      color: #111827;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .workspace-panel-note {
+      color: #6b7280;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .workspace-kpi-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .workspace-kpi {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 9px;
+    }
+
+    .workspace-kpi-label {
+      color: #64748b;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .workspace-kpi-value {
+      color: #111827;
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .workspace-kpi-value.status-fail {
+      color: #b91c1c;
+    }
+
+    .workspace-kpi-value.status-warn {
+      color: #b45309;
+    }
+
+    .workspace-kpi-value.status-ok {
+      color: #166534;
+    }
+
+    .workspace-kpi-detail {
+      color: #6b7280;
+      font-size: 0.72rem;
+      line-height: 1.3;
+      margin-top: 3px;
     }
 
     .readiness-mini {
@@ -925,6 +1024,40 @@
             </div>
             <div id="filter-note" style="font-size:0.82rem;color:#6b7280;text-align:center;margin-top:6px;min-height:1.2em;"></div>
             <div id="frame-summary" style="display:none;font-size:0.78rem;color:#6b7280;text-align:center;margin-top:2px;"></div>
+            <div class="workspace-panel" aria-label="Review workspace summary">
+              <div class="workspace-panel-title">Review workspace</div>
+              <div class="workspace-panel-note">Use blockers, review-needed counts, evidence gates, and lifecycle signals together before relying on route or popup detail.</div>
+              <div class="workspace-kpi-grid">
+                <div class="workspace-kpi">
+                  <div class="workspace-kpi-label">Design blockers</div>
+                  <div id="workspace-blocker-count" class="workspace-kpi-value status-fail">0</div>
+                  <div class="workspace-kpi-detail">Records that currently prevent design-readiness.</div>
+                </div>
+                <div class="workspace-kpi">
+                  <div class="workspace-kpi-label">Review needed</div>
+                  <div id="workspace-warning-count" class="workspace-kpi-value status-warn">0</div>
+                  <div class="workspace-kpi-detail">Evidence gaps or checks still requiring practitioner review.</div>
+                </div>
+                {% set gate_ns = namespace(needs_action=0) %}
+                {% for gate in evidence_gates or [] %}
+                  {% if gate.status in ['Partial', 'Weak', 'Blocked'] %}
+                    {% set gate_ns.needs_action = gate_ns.needs_action + 1 %}
+                  {% endif %}
+                {% endfor %}
+                <div class="workspace-kpi">
+                  <div class="workspace-kpi-label">Evidence gates</div>
+                  <div class="workspace-kpi-value {% if gate_ns.needs_action %}status-warn{% else %}status-ok{% endif %}">{{ gate_ns.needs_action }}</div>
+                  <div class="workspace-kpi-detail">C2/D evidence gates still needing follow-up.</div>
+                </div>
+                <div class="workspace-kpi">
+                  <div class="workspace-kpi-label">Readiness verdict</div>
+                  <div class="workspace-kpi-value {% if design_readiness and design_readiness.verdict == 'LIKELY READY' %}status-ok{% elif design_readiness and design_readiness.verdict == 'NOT READY' %}status-fail{% else %}status-warn{% endif %}">
+                    {{ design_readiness.verdict if design_readiness and design_readiness.verdict else 'Pending review' }}
+                  </div>
+                  <div class="workspace-kpi-detail">Overall workspace signal from current survey evidence and issues.</div>
+                </div>
+              </div>
+            </div>
             <div class="map-control-section" aria-label="Map layer controls">
               <div class="review-focus-title">Map Layers</div>
               <div class="layer-toggle-grid">
@@ -957,18 +1090,36 @@
             </div>
             <div class="review-focus" aria-label="Review focus filters">
               <div class="review-focus-title">Review Focus</div>
-              <div class="review-focus-grid">
-                <button type="button" class="focus-filter-btn" data-focus="design-blockers"><span class="focus-filter-caption">Design blockers</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="review-required"><span class="focus-filter-caption">Review required</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="missing-height"><span class="focus-filter-caption">Missing existing heights</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="missing-specification"><span class="focus-filter-caption">Proposed poles missing spec</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay"><span class="focus-filter-caption">Angle poles missing stay evidence</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="span-anomalies"><span class="focus-filter-caption">Span anomalies</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="span-crossing-risk"><span class="focus-filter-caption">Span crossing / context review</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="ug-cable-missing-spec"><span class="focus-filter-caption">UG cable records missing spec</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="clearance-crossings"><span class="focus-filter-caption">Crossings needing clearance review</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="replacement-proximity"><span class="focus-filter-caption">Replacement pairing signals</span></button>
-                <button type="button" class="focus-filter-btn" data-focus="records-with-remarks"><span class="focus-filter-caption">Records with survey remarks</span></button>
+              <div class="review-focus-group">
+                <div class="review-focus-subtitle">Evidence gaps</div>
+                <div class="review-focus-grid">
+                  <button type="button" class="focus-filter-btn" data-focus="design-blockers"><span class="focus-filter-caption">Design blockers</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="review-required"><span class="focus-filter-caption">Review required</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="missing-height"><span class="focus-filter-caption">Missing existing heights</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="missing-specification"><span class="focus-filter-caption">Proposed poles missing spec</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="angle-missing-stay"><span class="focus-filter-caption">Angle poles missing stay evidence</span></button>
+                </div>
+              </div>
+              <div class="review-focus-group">
+                <div class="review-focus-subtitle">Route and span review</div>
+                <div class="review-focus-grid">
+                  <button type="button" class="focus-filter-btn" data-focus="span-anomalies"><span class="focus-filter-caption">Span anomalies</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="ug-cable-missing-spec"><span class="focus-filter-caption">UG cable records missing spec</span></button>
+                </div>
+              </div>
+              <div class="review-focus-group">
+                <div class="review-focus-subtitle">Context and clearance review</div>
+                <div class="review-focus-grid">
+                  <button type="button" class="focus-filter-btn" data-focus="span-crossing-risk"><span class="focus-filter-caption">Span crossing / context review</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="clearance-crossings"><span class="focus-filter-caption">Crossings needing clearance review</span></button>
+                </div>
+              </div>
+              <div class="review-focus-group">
+                <div class="review-focus-subtitle">Lifecycle and remarks</div>
+                <div class="review-focus-grid">
+                  <button type="button" class="focus-filter-btn" data-focus="replacement-proximity"><span class="focus-filter-caption">Replacement pairing signals</span></button>
+                  <button type="button" class="focus-filter-btn" data-focus="records-with-remarks"><span class="focus-filter-caption">Records with survey remarks</span></button>
+                </div>
               </div>
             </div>
             <div id="record-panel" style="display:none; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 8px;">
@@ -1102,10 +1253,10 @@
             </div>
 
             <div id="issue-note" class="issue-note">
-              This job contains flagged issues. Click markers to inspect record details, then use the PDF for the full issue list.
+              This job contains review findings. Use the blocker/review tiles, popup evidence, and PDF workspace report together before design sign-off.
             </div>
             <div style="font-size:0.74rem; color:#6b7280; margin-top:6px; line-height:1.35;">
-              This map is for route and record inspection. Detailed readiness, evidence, and completeness notes are collapsed under Report details; use the PDF for the full issue list.
+              This map is for route and record inspection. Detailed readiness, evidence, and completeness notes are collapsed under Review workspace notes; use the PDF for the full issue list.
             </div>
 
             {% if design_readiness and design_readiness.verdict %}
@@ -1117,7 +1268,7 @@
 
             {% if (design_readiness and design_readiness.verdict) or evidence_gates or (circuit_summary and circuit_summary.summary_text) or top_design_risks or recommended_actions or (completeness and completeness.total_records) or replacement_narratives %}
             <details class="map-report-details">
-              <summary>Report details: readiness, evidence and completeness</summary>
+              <summary>Review workspace notes: readiness, evidence and completeness</summary>
               <div class="map-report-body">
             {% if design_readiness and design_readiness.verdict %}
             <div>
@@ -1145,7 +1296,7 @@
               {% endif %}
               {% if design_readiness.what_this_supports %}
               <div style="margin-top: 8px;">
-                <div style="font-weight: 600; font-size: 0.82rem; color: #374151; margin-bottom: 4px;">This file supports:</div>
+                <div style="font-weight: 600; font-size: 0.82rem; color: #374151; margin-bottom: 4px;">This evidence currently supports:</div>
                 <ul style="margin: 0; padding-left: 16px; font-size: 0.8rem; color: #2e8b57;">
                   {% for item in design_readiness.what_this_supports %}
                   <li>{{ item }}</li>
@@ -1161,7 +1312,7 @@
 
             {% if evidence_gates %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 12px;">
-              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Design readiness checks</div>
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">C2/D evidence gates</div>
               {% for gate in evidence_gates %}
               <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; margin-bottom: 2px;">
                 <span style="color: #374151;">{{ gate.label }}</span>
@@ -1199,7 +1350,7 @@
 
             {% if top_design_risks %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
-              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Top Design Risks</div>
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Priority review risks</div>
               {% for risk in top_design_risks[:3] %}
               <div style="margin-bottom: 7px; padding: 6px 9px; border-radius: 7px; background: {% if risk.severity == 'FAIL' %}#fff5f5{% else %}#fffbeb{% endif %}; border-left: 3px solid {% if risk.severity == 'FAIL' %}#d94141{% else %}#d39e00{% endif %}; font-size: 0.82rem;">
                 <div style="font-weight: 600; color: #111827;">{{ risk.title }} <span style="color: #6b7280; font-weight: 400;">({{ risk.count }})</span></div>
@@ -1211,7 +1362,7 @@
 
             {% if recommended_actions %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
-              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Recommended Actions</div>
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 8px;">Suggested next checks</div>
               {% for item in recommended_actions %}
               <div style="margin-bottom: 6px; padding: 5px 9px; border-radius: 7px; background: {% if item.severity == 'critical' %}#fff5f5{% else %}#fffbeb{% endif %}; border-left: 3px solid {% if item.severity == 'critical' %}#d94141{% else %}#d39e00{% endif %}; font-size: 0.82rem; color: #374151;">
                 {{ item.action }}
@@ -1261,7 +1412,7 @@
 
             {% if replacement_narratives %}
             <div style="border-top: 1px solid #e5e7eb; margin-top: 14px; padding-top: 10px;">
-              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Probable Replacement Signals</div>
+              <div style="font-weight: 700; font-size: 0.9rem; color: #111827; margin-bottom: 6px;">Replacement pairing signals</div>
               <div style="font-size: 0.76rem; color: #6b7280; margin-bottom: 6px; line-height: 1.35;">Map narratives are evidence prompts, not the final reviewed existing pole assignment list.</div>
               {% for narrative in replacement_narratives[:5] %}
               <div style="font-size: 0.82rem; color: #374151; margin-bottom: 4px; padding-left: 4px; border-left: 2px solid #d39e00;">{{ narrative }}</div>

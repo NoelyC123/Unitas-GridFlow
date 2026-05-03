@@ -441,7 +441,14 @@ def test_project_map_route_includes_review_focus_filters(client_and_root):
     assert "Proposed Replacement Pole" in html
     assert "Survey Map Review" in html
     assert "Open review findings" in html
-    assert "Detailed readiness, evidence, and completeness notes are collapsed" in html
+    assert "Review workspace" in html
+    assert "Review workspace summary" in html
+    assert "Route and span review" in html
+    assert "Lifecycle and remarks" in html
+    assert (
+        "Detailed readiness, evidence, and completeness notes are collapsed under "
+        "Review workspace notes" in html
+    )
 
 
 def test_project_map_data_includes_design_chain_spans(client_and_root):
