@@ -99,6 +99,13 @@ def test_map_data_endpoint_backfills_c2d_popup_fields(tmp_path, monkeypatch) -> 
     assert "nearest_stay_distance_m" in props
     assert "wayleave_notes" in props
     assert props["support_schema_role"] == "angle"
+    catalog = res.get_json()["metadata"]["popup_priority_field_catalog"]
+    angle = catalog["roles"]["angle"]
+    assert angle["section_order"][0] == "Physical evidence"
+    assert any(
+        item["field"] == "stay_present_evidence" and item["popup_group"] == "Mechanical"
+        for item in angle["fields"]
+    )
 
 
 def test_map_viewer_includes_span_label_mode_select() -> None:

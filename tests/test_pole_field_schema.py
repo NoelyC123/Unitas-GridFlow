@@ -7,6 +7,8 @@ from app.pole_field_schema import (
     enrich_pole_support_props,
     field_groups_for_role,
     infer_support_schema_role,
+    popup_priority_field_catalog,
+    popup_priority_fields_for_role,
     validate_support_field_coverage,
 )
 
@@ -107,3 +109,29 @@ def test_c2d_priority_inventory_declares_span_owned_electrical_fields() -> None:
     assert fields["conductor_cable_type"]["display_owner"] == "span_or_cable"
     assert "network_voltage" in fields["voltage_carried"]["display_fields"]
     assert "wayleave_notes" in fields["action_access_wayleave"]["display_fields"]
+
+
+def test_popup_priority_fields_for_existing_role_have_labels_and_groups() -> None:
+    fields = {item["field"]: item for item in popup_priority_fields_for_role("existing")}
+
+    assert fields["pole_class"]["display_label"] == "Pole class / strength"
+    assert fields["pole_class"]["popup_group"] == "Physical evidence"
+    assert fields["equipment_presence"]["popup_group"] == "Equipment & pole-top"
+    assert fields["action_access_wayleave"]["popup_group"] == "Design requirements"
+    assert "voltage_carried" not in fields
+
+
+def test_popup_priority_field_catalog_exposes_proposed_section_order() -> None:
+    catalog = popup_priority_field_catalog()
+    proposed = catalog["roles"]["proposed"]
+
+    assert proposed["section_order"] == [
+        "Specification",
+        "Design requirements",
+        "Equipment & pole-top",
+        "Survey metadata and evidence",
+    ]
+    assert any(
+        item["field"] == "measured_design_height" and item["popup_group"] == "Specification"
+        for item in proposed["fields"]
+    )
