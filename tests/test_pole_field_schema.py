@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.pole_field_schema import (
+    C2D_PRIORITY_FIELD_INVENTORY,
     enrich_pole_support_props,
     field_groups_for_role,
     infer_support_schema_role,
@@ -95,3 +96,14 @@ def test_enrich_independent_replacement_status() -> None:
 def test_validate_proposed_height_gap() -> None:
     props = {"support_schema_role": "proposed", "pole_id": "p1"}
     assert "proposed_height_missing" in validate_support_field_coverage(props)
+
+
+def test_c2d_priority_inventory_declares_span_owned_electrical_fields() -> None:
+    fields = {item["field"]: item for item in C2D_PRIORITY_FIELD_INVENTORY}
+
+    assert len(fields) >= 15
+    assert fields["pole_class"]["source_status"] == "present_displayable_controller_alias"
+    assert fields["voltage_carried"]["display_owner"] == "span_or_cable"
+    assert fields["conductor_cable_type"]["display_owner"] == "span_or_cable"
+    assert "network_voltage" in fields["voltage_carried"]["display_fields"]
+    assert "wayleave_notes" in fields["action_access_wayleave"]["display_fields"]

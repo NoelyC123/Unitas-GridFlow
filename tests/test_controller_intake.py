@@ -155,6 +155,54 @@ def test_parse_controller_csv_coerces_numeric_grid_columns() -> None:
     assert result.loc[0, "height"] == pytest.approx(11.5)
 
 
+def test_parse_controller_csv_maps_c2d_display_aliases() -> None:
+    df = pd.DataFrame(
+        [
+            {
+                "Point": "1",
+                "Code": "EXpole",
+                "Grid E": 352_841.0,
+                "Grid N": 503_122.0,
+                "Pole Grade": "Class 9 Medium",
+                "Pole Material": "timber",
+                "Asset Condition": "fair",
+                "Lean Bearing": "west",
+                "Defects": "rot at base",
+                "Has Stay": "yes",
+                "Stay Spec": "flying stay",
+                "Pole Equipment": "Transformer",
+                "Pole Top": "terminal",
+                "Insulator": "pin",
+                "Operator": "N Collins",
+                "GPS Accuracy": "RTK ±0.03 m",
+                "Photo Refs": "pole-1.jpg;top-1.jpg",
+                "Design Action": "confirm replacement",
+                "Access Notes": "private lane",
+                "Wayleave": "owner contact required",
+            }
+        ]
+    )
+
+    result = parse_controller_csv(df)
+
+    assert result.loc[0, "pole_class"] == "Class 9 Medium"
+    assert result.loc[0, "material"] == "timber"
+    assert result.loc[0, "condition"] == "fair"
+    assert result.loc[0, "lean_direction"] == "west"
+    assert result.loc[0, "defect_type"] == "rot at base"
+    assert result.loc[0, "stay_present"] == "yes"
+    assert result.loc[0, "stay_type"] == "flying stay"
+    assert result.loc[0, "equipment"] == "Transformer"
+    assert result.loc[0, "pole_top_arrangement"] == "terminal"
+    assert result.loc[0, "insulator_type"] == "pin"
+    assert result.loc[0, "surveyor"] == "N Collins"
+    assert result.loc[0, "gnss_accuracy"] == "RTK ±0.03 m"
+    assert result.loc[0, "photo_links"] == "pole-1.jpg;top-1.jpg"
+    assert result.loc[0, "action_required"] == "confirm replacement"
+    assert result.loc[0, "access_constraint"] == "private lane"
+    assert result.loc[0, "wayleave_notes"] == "owner contact required"
+
+
 # ---------------------------------------------------------------------------
 # build_completeness_summary
 # ---------------------------------------------------------------------------

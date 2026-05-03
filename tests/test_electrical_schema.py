@@ -90,6 +90,13 @@ def test_merge_electrical_fields_mutates_props() -> None:
     assert props["is_overhead"] is True
 
 
+def test_network_voltage_alias_parses_for_span_owned_electrical_display() -> None:
+    out = parse_conductor_data({"network_voltage": "11kV", "conductor": "AAC"})
+
+    assert out["voltage_detail"]["range"] == "11kV"
+    assert out["conductor_type_normalized"] == "AAC"
+
+
 def test_merge_equipment_fields_parses_kva_and_ratio() -> None:
     props: dict = {
         "equipment": "Transformer",

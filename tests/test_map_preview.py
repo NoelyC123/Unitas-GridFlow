@@ -70,6 +70,37 @@ def test_map_data_endpoint_adds_span_features(tmp_path, monkeypatch) -> None:
     assert fo.get("post_enrichment_violation_count") == 0
 
 
+def test_map_data_endpoint_backfills_c2d_popup_fields(tmp_path, monkeypatch) -> None:
+    jobs_root = tmp_path / "jobs"
+    job_dir = jobs_root / "J_C2D_BACKFILL"
+    _write_json(
+        job_dir / "map_data.json",
+        {
+            "type": "FeatureCollection",
+            "metadata": {"job_id": "J_C2D_BACKFILL"},
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [-3.014, 54.521]},
+                    "properties": {"pole_id": "P1", "structure_type": "Angle"},
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr(map_preview, "JOBS_ROOT", jobs_root)
+
+    app = create_app()
+    client = app.test_client()
+    res = client.get("/map/data/J_C2D_BACKFILL")
+
+    assert res.status_code == 200
+    props = res.get_json()["features"][0]["properties"]
+    assert "stay_evidence_status" in props
+    assert "nearest_stay_distance_m" in props
+    assert "wayleave_notes" in props
+    assert props["support_schema_role"] == "angle"
+
+
 def test_map_viewer_includes_span_label_mode_select() -> None:
     app = create_app()
     client = app.test_client()
