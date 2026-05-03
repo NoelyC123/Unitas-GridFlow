@@ -9,6 +9,109 @@ from __future__ import annotations
 
 from typing import Any
 
+# Phase C2/D priority fields: explicit source/status decisions for intake and display.
+# This is an inventory, not a capture-model expansion.
+C2D_PRIORITY_FIELD_INVENTORY: tuple[dict[str, Any], ...] = (
+    {
+        "field": "pole_class",
+        "display_owner": "point",
+        "source_status": "present_displayable_controller_alias",
+    },
+    {
+        "field": "material",
+        "display_owner": "point",
+        "source_status": "present_displayable_controller_alias",
+    },
+    {
+        "field": "condition",
+        "display_owner": "point",
+        "source_status": "present_displayable_controller_alias",
+    },
+    {
+        "field": "measured_design_height",
+        "display_owner": "point",
+        "source_status": "present_enriched_from_height",
+        "display_fields": ("measured_height_m", "proposed_height_m"),
+    },
+    {
+        "field": "height_source_confidence",
+        "display_owner": "point",
+        "source_status": "present_or_derived",
+        "display_fields": ("height_source", "height_confidence"),
+    },
+    {
+        "field": "stay_present_evidence",
+        "display_owner": "point",
+        "source_status": "present_or_derived",
+        "display_fields": ("stay_present", "stay_evidence_status"),
+    },
+    {
+        "field": "stay_type",
+        "display_owner": "point",
+        "source_status": "present_displayable_controller_alias",
+    },
+    {
+        "field": "lean",
+        "display_owner": "point",
+        "source_status": "present_displayable_controller_alias",
+        "display_fields": ("lean_direction", "lean_severity"),
+    },
+    {
+        "field": "defects",
+        "display_owner": "point",
+        "source_status": "present_displayable_controller_alias",
+        "display_fields": ("defect_type",),
+    },
+    {
+        "field": "equipment_presence",
+        "display_owner": "point",
+        "source_status": "present_or_safely_derived",
+        "display_fields": ("equipment", "equipment_categories", "equipment_primary_category"),
+    },
+    {
+        "field": "pole_top_insulator_crossarm",
+        "display_owner": "point",
+        "source_status": "present_or_safely_derived",
+        "display_fields": ("pole_top_arrangement", "insulator_type", "crossarm_configuration"),
+    },
+    {
+        "field": "voltage_carried",
+        "display_owner": "span_or_cable",
+        "source_status": "electrical_alias_supported_not_point_owned",
+        "display_fields": ("voltage", "line_voltage", "network_voltage", "voltage_detail"),
+    },
+    {
+        "field": "conductor_cable_type",
+        "display_owner": "span_or_cable",
+        "source_status": "electrical_alias_supported_not_point_owned",
+        "display_fields": (
+            "conductor_type",
+            "conductor",
+            "cable_type",
+            "conductor_size",
+            "cable_size",
+        ),
+    },
+    {
+        "field": "survey_metadata",
+        "display_owner": "point_span_or_cable",
+        "source_status": "present_or_derived",
+        "display_fields": ("surveyor", "survey_date", "gnss_accuracy", "gnss_accuracy_summary"),
+    },
+    {
+        "field": "photo_indicator",
+        "display_owner": "point_span_or_cable",
+        "source_status": "present_displayable",
+        "display_fields": ("photo_links", "photo_count"),
+    },
+    {
+        "field": "action_access_wayleave",
+        "display_owner": "point_span_or_cable",
+        "source_status": "present_displayable_controller_alias",
+        "display_fields": ("action_required", "access_constraint", "wayleave_notes"),
+    },
+)
+
 # Universal map-point fields (identity, capture, QA) — documentation / validation sets.
 UNIVERSAL_POINT_FIELDS: frozenset[str] = frozenset(
     {
@@ -46,6 +149,9 @@ UNIVERSAL_POINT_FIELDS: frozenset[str] = frozenset(
         "lifecycle_state",
         "replacement_status",
         "linked_support_id",
+        "action_required",
+        "access_constraint",
+        "wayleave_notes",
     }
 )
 
@@ -65,7 +171,6 @@ EXISTING_POLE_FIELDS: frozenset[str] = frozenset(
         "lean_direction",
         "lean_severity",
         "foundation_type",
-        "access_constraint",
     }
 )
 

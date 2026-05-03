@@ -288,14 +288,18 @@ def row_suggests_hv_overhead(record: Mapping[str, Any] | Any) -> bool:
     """True if normalized voltage is HV and route is treated as overhead."""
     if _is_row_underground(record):
         return False
-    vkey = normalize_voltage_key(_get(record, "voltage") or _get(record, "line_voltage"))
+    vkey = normalize_voltage_key(
+        _get(record, "voltage") or _get(record, "line_voltage") or _get(record, "network_voltage")
+    )
     return vkey in HV_VOLTAGE_KEYS if vkey else False
 
 
 def parse_conductor_data(record: Mapping[str, Any] | Any) -> dict[str, Any]:
     """Parse conductor/cable fields into display-friendly structures."""
 
-    voltage_raw = _get(record, "voltage") or _get(record, "line_voltage")
+    voltage_raw = (
+        _get(record, "voltage") or _get(record, "line_voltage") or _get(record, "network_voltage")
+    )
     vkey = normalize_voltage_key(voltage_raw)
     voltage_detail = dict(VOLTAGE_TYPES[vkey]) if vkey and vkey in VOLTAGE_TYPES else {}
 

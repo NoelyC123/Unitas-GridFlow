@@ -2,7 +2,7 @@
 
 ## Status
 
-**Strategic decision pending.**
+**Phase C2/D professional QA + display refinement active.**
 
 This file has been aligned with the May 2026 source-of-truth references:
 
@@ -23,11 +23,15 @@ It is not currently a full CAD replacement, GIS platform, DNO compliance engine,
 
 ---
 
-## Current decision gate
+## Current implementation path
 
-The next development decision is whether to proceed with the lower-risk **Phase C2/D professional QA + display refinement** path before any **Stage 4/full survey-platform** expansion.
+Noel has approved Phase C2/D professional QA + display refinement as the next implementation path.
 
-This is a product and scope decision, not just a technical sequencing decision.
+Current source of truth:
+
+- `AI_CONTROL/08_PHASE_C2D_IMPLEMENTATION_SPEC.md`
+
+Stage 4/full survey-platform expansion remains out of scope unless Noel/Goss explicitly changes direction.
 
 ---
 
@@ -101,8 +105,4 @@ No Stage 4 implementation should begin from assumption or enthusiasm alone.
 
 ## Next checkpoint
 
-Update this file when Noel confirms the next strategic path:
-
-- Phase C2/D professional QA + display refinement
-- Stage 4 exploration after customer/commercial validation
-- Another explicitly chosen direction
+Complete the Phase C2/D task sequence from `AI_CONTROL/08_PHASE_C2D_IMPLEMENTATION_SPEC.md`, starting with C2D-1 field inventory + alias/display mapping.
