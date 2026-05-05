@@ -300,13 +300,24 @@ def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
         except Exception:
             seq_payload = {}
 
-    attach_span_features_to_collection(data, seq_payload)
+    # 🎯 GEOMETRY CLEANING PIPELINE (NEW)
+    from app.geometry_pipeline import normalize_geometry_for_span_generation
+
+    try:
+        cleaned = normalize_geometry_for_span_generation(data.get("features", []), seq_payload)
+        cleaned_seq = cleaned.sequence_payload
+    except Exception:
+        # Fallback to uncleaned if pipeline fails
+        cleaned_seq = seq_payload
+
+    # Use cleaned sequence for span generation
+    attach_span_features_to_collection(data, cleaned_seq)
     attach_cable_features_to_collection(data)
 
     if "design_chain_spans" not in data:
         spans: list[dict] = []
-        if seq_payload.get("status") == "ok":
-            spans = _build_design_chain_spans(seq_payload)
+        if cleaned_seq.get("status") == "ok":
+            spans = _build_design_chain_spans(cleaned_seq)
         data["design_chain_spans"] = spans
         metadata = data.setdefault("metadata", {})
         if isinstance(metadata, dict):

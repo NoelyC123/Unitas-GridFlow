@@ -502,7 +502,7 @@ def test_project_map_data_includes_design_chain_spans(client_and_root):
             "from_design_pole_no": 1,
             "to_design_pole_no": 2,
             "section_id": "SEC-1",
-            "distance_m": 75.0,
+            "distance_m": 128.6,  # Recalculated by geometry pipeline
             "coordinates": [[54.521, -3.014], [54.522, -3.013]],
         }
     ]
