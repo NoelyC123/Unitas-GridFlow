@@ -106,7 +106,9 @@ class MapViewer {
 
       const data = await res.json();
       const meta = data.metadata || {};
+      this._geometryTrust = String(meta.geometry_trust || 'HIGH').toUpperCase();
       this.renderSummary(meta);
+      this.renderGeometryTrustBanner(this._geometryTrust);
       this._spanLayerOrigin = meta.span_layer_origin === 'survey_circuit' ? 'survey_circuit' : 'provisional_route';
       this._usedDesignChainSpanFallback = false;
       this.renderMarkers(data.features || []);
@@ -129,6 +131,23 @@ class MapViewer {
       if (this.issueNoteEl) {
         this.issueNoteEl.textContent = `Map data failed to load: ${err.message || err}`;
       }
+    }
+  }
+
+  renderGeometryTrustBanner(trust) {
+    const el = document.getElementById('geometry-trust-banner');
+    if (!el) return;
+    el.className = 'issue-note';
+    if (trust === 'LOW') {
+      el.textContent = 'Geometry reliability LOW — verify before design use';
+      el.classList.add('issue-note-fail');
+      el.style.display = '';
+    } else if (trust === 'MEDIUM') {
+      el.textContent = 'Geometry may contain inconsistencies';
+      el.classList.add('issue-note-warn');
+      el.style.display = '';
+    } else {
+      el.style.display = 'none';
     }
   }
 
@@ -855,9 +874,7 @@ class MapViewer {
       else if (r === 'medium') row.classList.add('span-list-item-risk-med');
       else if (r === 'low') row.classList.add('span-list-item-risk-low');
       const seq = props.span_sequence_label || `#${index + 1}`;
-      const dist = props.distance_m != null && !Number.isNaN(Number(props.distance_m))
-        ? `${Number(props.distance_m).toFixed(1)} m`
-        : '';
+      const dist = this.formatSpanDistance(props.distance_m, this._geometryTrust) || '';
       const fromTo = `${this.escapeHtml(props.from_point_id || '?')} → ${this.escapeHtml(props.to_point_id || '?')}`;
       const anomaly = this.classifyRouteSpanAnomaly(props);
       const anomalyChip = anomaly.causes.length
@@ -1016,9 +1033,17 @@ class MapViewer {
     `;
   }
 
+  formatSpanDistance(distance_m, trust) {
+    if (distance_m == null || Number.isNaN(Number(distance_m))) return null;
+    const d = Number(distance_m);
+    const t = String(trust || 'HIGH').toUpperCase();
+    if (t === 'LOW') return `~${Math.round(d)} m`;
+    if (t === 'MEDIUM') return `~${d.toFixed(1)} m`;
+    return `${d.toFixed(2)} m`;
+  }
+
   spanDistanceLabel(props) {
-    if (props.distance_m == null || Number.isNaN(Number(props.distance_m))) return '';
-    return `${Number(props.distance_m).toFixed(1)} m`;
+    return this.formatSpanDistance(props.distance_m, this._geometryTrust) || '';
   }
 
   spanCrossingRiskLabel(props) {
@@ -1100,7 +1125,7 @@ class MapViewer {
       this.popupRow('To support', props.to_point_id || '—', props.to_point_id ? 'ok' : 'info'),
       this.popupRow(
         'Distance',
-        props.distance_m != null ? `${Number(props.distance_m).toFixed(1)} m` : '—',
+        this.formatSpanDistance(props.distance_m, this._geometryTrust) || '—',
         props.distance_m != null ? 'ok' : 'info',
       ),
     ];
@@ -1130,6 +1155,19 @@ class MapViewer {
       }]
       : [];
 
+    const clusterSection = props.geometry_issue_cluster
+      ? [{
+        title: 'Geometry cluster',
+        rows: [
+          this.popupRow(
+            'Note',
+            `Multiple short spans detected in this section${props.cluster_size ? ` (${props.cluster_size} spans)` : ''}`,
+            'warning',
+          ),
+        ],
+      }]
+      : [];
+
     const electricalIntro = [
       this.popupRow(
         'Electrical scope',
@@ -1141,6 +1179,7 @@ class MapViewer {
     return [
       { title: 'Sequence', rows: seqRows },
       { title: 'Route span', rows: routeRows },
+      ...clusterSection,
       ...anomalySection,
       { title: 'Clearance & crossings', rows: clearanceRows },
       ...actionSection,
