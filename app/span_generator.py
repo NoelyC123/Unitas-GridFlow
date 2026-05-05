@@ -398,6 +398,23 @@ def coalesce_electrical_source(
     return merged
 
 
+_SPAN_INVALID_THRESHOLD_M = 5.0
+_SPAN_SUSPECT_THRESHOLD_M = 8.0
+
+
+def classify_span_validity(distance_m: float | None) -> dict[str, Any]:
+    """Classify a span as invalid/suspect/valid based on distance_m only."""
+    if distance_m is None or distance_m < _SPAN_INVALID_THRESHOLD_M:
+        return {
+            "span_validity": "invalid",
+            "design_usable": False,
+            "clearance_check_allowed": False,
+        }
+    if distance_m <= _SPAN_SUSPECT_THRESHOLD_M:
+        return {"span_validity": "suspect", "design_usable": True, "clearance_check_allowed": True}
+    return {"span_validity": "valid", "design_usable": True, "clearance_check_allowed": True}
+
+
 def build_span_feature(
     from_pid: str,
     to_pid: str,
@@ -428,6 +445,7 @@ def build_span_feature(
     base["to_design_pole_no"] = to_design_pole_no
     base["section_id"] = section_id
     base["distance_m"] = dist
+    base.update(classify_span_validity(dist))
     base["span_index"] = span_index
     base["feature_type"] = "circuit_span"
 
