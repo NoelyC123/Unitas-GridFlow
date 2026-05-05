@@ -578,6 +578,7 @@ def attach_span_features_to_collection(
     collection["span_features"] = span_features
     meta["span_feature_count"] = len(span_features)
     high = med = low = 0
+    invalid_count = suspect_count = 0
     for sf in span_features:
         sp = sf.get("properties") if isinstance(sf, dict) else None
         if not isinstance(sp, dict):
@@ -589,9 +590,20 @@ def attach_span_features_to_collection(
             med += 1
         elif r == "low":
             low += 1
+        v = sp.get("span_validity")
+        if v == "invalid":
+            invalid_count += 1
+        elif v == "suspect":
+            suspect_count += 1
     meta["span_crossing_high_count"] = high
     meta["span_crossing_medium_count"] = med
     meta["span_crossing_low_count"] = low
+    if invalid_count > 0:
+        meta["geometry_trust"] = "LOW"
+    elif suspect_count >= 3:
+        meta["geometry_trust"] = "MEDIUM"
+    else:
+        meta["geometry_trust"] = "HIGH"
     # Map viewer: spans are derived from sequenced supports unless a future path sets
     # ``survey_circuit`` from captured line/circuit survey features.
     meta["span_layer_origin"] = meta.get("span_layer_origin") or "provisional_route"
