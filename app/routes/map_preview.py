@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from flask import Blueprint, jsonify, render_template
 
 from app.asset_classifier import classify_asset_type, get_popup_type_label
 from app.cable_generator import attach_cable_features_to_collection
 from app.context_crossing import enrich_context_crossing_records
+from app.duplicate_detection import apply_duplicate_detection
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
     merge_equipment_fields_into_props,
@@ -36,7 +38,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 JOBS_ROOT = PROJECT_ROOT / "uploads" / "jobs"
 PROJECTS_ROOT = PROJECT_ROOT / "uploads" / "projects"
 
-POPUP_DATA_FIELDS = {
+
+POPUP_DATA_FIELDS: dict[str, Any] = {
     "height_source": None,
     "height_confidence": {},
     "pole_class": None,
@@ -77,10 +80,12 @@ POPUP_DATA_FIELDS = {
     "circuit_id": None,
     "stay_present": None,
     "stay_type": None,
-    "stay_bearing": None,
-    "stay_configuration": None,
+    "stay_types": [],
     "stay_evidence_status": None,
     "nearest_stay_distance_m": None,
+    "nearest_stay_point_id": None,
+    "stay_bearing": None,
+    "stay_configuration": None,
     "anchor_details": None,
     "linked_pole_id": None,
     "route_deviation_deg": None,
@@ -155,7 +160,7 @@ POPUP_DATA_FIELDS = {
 }
 
 
-def _empty_feature_collection(job_id: str) -> dict:
+def _empty_feature_collection(job_id: str) -> dict[str, Any]:
     return {
         "type": "FeatureCollection",
         "features": [],
@@ -170,6 +175,9 @@ def _empty_feature_collection(job_id: str) -> dict:
             "pass_count": 0,
             "warn_count": 0,
             "fail_count": 0,
+            "design_chain_span_count": 0,
+            "popup_priority_field_catalog": popup_priority_field_catalog(),
+            "popup_schema_contract": popup_schema_contract(),
         },
     }
 
@@ -183,14 +191,14 @@ def _safe_float(value: object) -> float | None:
         return None
 
 
-def _build_design_chain_spans(seq: dict) -> list[dict]:
-    """Build a lightweight Leaflet-friendly span overlay from sequenced route data."""
+def _build_design_chain_spans(seq: dict[str, Any]) -> list[dict[str, Any]]:
     chain = seq.get("chain") or []
-    spans: list[dict] = []
+    spans: list[dict[str, Any]] = []
 
     for index in range(len(chain) - 1):
         start = chain[index] or {}
         end = chain[index + 1] or {}
+
         start_lat = _safe_float(start.get("lat"))
         start_lon = _safe_float(start.get("lon"))
         end_lat = _safe_float(end.get("lat"))
@@ -199,7 +207,6 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
         if None in (start_lat, start_lon, end_lat, end_lon):
             continue
 
-        distance_m = _safe_float(start.get("span_to_next_m"))
         spans.append(
             {
                 "from_point_id": start.get("point_id"),
@@ -207,7 +214,7 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
                 "from_design_pole_no": start.get("design_pole_number"),
                 "to_design_pole_no": end.get("design_pole_number"),
                 "section_id": start.get("section_id"),
-                "distance_m": distance_m,
+                "distance_m": _safe_float(start.get("span_to_next_m")),
                 "coordinates": [[start_lat, start_lon], [end_lat, end_lon]],
             }
         )
@@ -215,144 +222,190 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
     return spans
 
 
-def _enrich_popup_data_model(data: dict) -> dict:
-    """Backfill C2-2 display fields for previously generated map_data.json files."""
+def _load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _copy_default(default: Any) -> Any:
+    if isinstance(default, list):
+        return list(default)
+    if isinstance(default, dict):
+        return dict(default)
+    return default
+
+
+def _ensure_metadata_contract(data: dict[str, Any]) -> dict[str, Any]:
+    metadata = data.setdefault("metadata", {})
+    if not isinstance(metadata, dict):
+        metadata = {}
+        data["metadata"] = metadata
+
+    metadata.setdefault("popup_priority_field_catalog", popup_priority_field_catalog())
+    metadata.setdefault("popup_schema_contract", popup_schema_contract())
+    metadata.setdefault("design_chain_span_count", len(data.get("design_chain_spans") or []))
+    return metadata
+
+
+def _backfill_popup_fields(props: dict[str, Any]) -> None:
+    for field, default in POPUP_DATA_FIELDS.items():
+        if field not in props:
+            props[field] = _copy_default(default)
+
+
+def _enrich_point_feature(feature: dict[str, Any]) -> int:
+    props = feature.setdefault("properties", {})
+    if not isinstance(props, dict):
+        props = {}
+        feature["properties"] = props
+
+    _backfill_popup_fields(props)
+
+    classification = classify_asset_type(props)
+    if not props.get("primary_type"):
+        props["primary_type"] = classification.get("primary_type")
+        props["infrastructure_owner"] = classification.get("infrastructure_owner")
+        props["asset_subtype"] = classification.get("subtype")
+        props["is_structural_pole"] = bool(classification.get("is_structural_pole"))
+        props["is_electric_network"] = bool(classification.get("is_electric_network"))
+        props["classification_confidence"] = classification.get("classification_confidence")
+        props["classification_warnings"] = classification.get("warnings", [])
+        props["classification_basis"] = classification.get("classification_basis")
+        props["popup_type_label"] = get_popup_type_label(classification)
+
+    if props.get("primary_type") == "third_party_infrastructure":
+        props["record_role"] = "third_party"
+        props["asset_intent"] = "third_party_not_network"
+
+    if not props.get("height_confidence"):
+        props["height_confidence"] = classify_height_confidence(props)
+
+    if not props.get("source_confidence_detail"):
+        props["source_confidence_detail"] = classify_source_confidence(props)
+
+    if not props.get("attachments_detail"):
+        props["attachments_detail"] = parse_attachments(props)
+
+    point_leaks = len(point_map_electrical_violations(props))
+
+    strip_network_electrical_from_point_props(props)
+    merge_equipment_fields_into_props(props)
+    merge_connectivity_into_props(props)
+    merge_survey_metadata_into_props(props)
+    enrich_pole_support_props(props)
+
+    if props.get("photo_links") and not props.get("photo_count"):
+        props["photo_count"] = len(props.get("photo_links") or [])
+
+    return point_leaks
+
+
+def _enrich_popup_data_model(data: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(data, dict):
         return data
-    metadata = data.setdefault("metadata", {})
-    if isinstance(metadata, dict):
-        if "popup_priority_field_catalog" not in metadata:
-            metadata["popup_priority_field_catalog"] = popup_priority_field_catalog()
-        if "popup_schema_contract" not in metadata:
-            metadata["popup_schema_contract"] = popup_schema_contract()
+
+    data.setdefault("features", [])
+    data.setdefault("span_features", [])
+    data.setdefault("cable_features", [])
+    data.setdefault("design_chain_spans", [])
+
+    _ensure_metadata_contract(data)
+
     point_leak_total = 0
     for feature in data.get("features") or []:
         if not isinstance(feature, dict) or feature.get("type") != "Feature":
             continue
-        geom = feature.get("geometry")
-        if not isinstance(geom, dict) or geom.get("type") != "Point":
+
+        geometry = feature.get("geometry")
+        if not isinstance(geometry, dict) or geometry.get("type") != "Point":
             continue
-        props = feature.get("properties")
-        if not isinstance(props, dict):
+
+        point_leak_total += _enrich_point_feature(feature)
+
+    for span_feature in data.get("span_features") or []:
+        if not isinstance(span_feature, dict):
             continue
-        for field, default in POPUP_DATA_FIELDS.items():
-            if field not in props:
-                props[field] = list(default) if isinstance(default, list) else default
-        classification = classify_asset_type(props)
-        if not props.get("primary_type"):
-            props["primary_type"] = classification.get("primary_type")
-            props["infrastructure_owner"] = classification.get("infrastructure_owner")
-            props["asset_subtype"] = classification.get("subtype")
-            props["is_structural_pole"] = bool(classification.get("is_structural_pole"))
-            props["is_electric_network"] = bool(classification.get("is_electric_network"))
-            props["classification_confidence"] = classification.get("classification_confidence")
-            props["classification_warnings"] = classification.get("warnings", [])
-            props["classification_basis"] = classification.get("classification_basis")
-            props["popup_type_label"] = get_popup_type_label(classification)
-        if props.get("primary_type") == "third_party_infrastructure":
-            props["record_role"] = "third_party"
-            props["asset_intent"] = "third_party_not_network"
-        if not props.get("height_confidence"):
-            props["height_confidence"] = classify_height_confidence(props)
-        if not props.get("source_confidence_detail"):
-            props["source_confidence_detail"] = classify_source_confidence(props)
-        if not props.get("attachments_detail"):
-            props["attachments_detail"] = parse_attachments(props)
-        point_leak_total += len(point_map_electrical_violations(props))
-        strip_network_electrical_from_point_props(props)
-        merge_equipment_fields_into_props(props)
-        merge_connectivity_into_props(props)
-        merge_survey_metadata_into_props(props)
-        enrich_pole_support_props(props)
-        if props.get("photo_links") and not props.get("photo_count"):
-            props["photo_count"] = len(props.get("photo_links") or [])
-    for span_feat in data.get("span_features") or []:
-        if not isinstance(span_feat, dict):
+        props = span_feature.get("properties")
+        if isinstance(props, dict):
+            merge_electrical_fields_into_props(props)
+
+    for cable_feature in data.get("cable_features") or []:
+        if not isinstance(cable_feature, dict):
             continue
-        sp = span_feat.get("properties")
-        if isinstance(sp, dict):
-            merge_electrical_fields_into_props(sp)
-    for cab_feat in data.get("cable_features") or []:
-        if not isinstance(cab_feat, dict):
-            continue
-        cp = cab_feat.get("properties")
-        if isinstance(cp, dict):
-            merge_electrical_fields_into_props(cp)
+        props = cable_feature.get("properties")
+        if isinstance(props, dict):
+            merge_electrical_fields_into_props(props)
+
     enrich_context_crossing_records(data)
     enrich_replacement_pair_intelligence(data)
+
+    apply_duplicate_detection(data.get("features") or [])
+
     post_violations = validate_map_feature_collection_field_ownership(data)
     finalize_field_ownership_metadata(
         data,
         point_leak_total=point_leak_total,
         post_enrichment_violations=post_violations,
     )
+
+    _ensure_metadata_contract(data)
     return data
 
 
-def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
-    """Attach span LineStrings and legacy design-chain overlay metadata."""
+def _enrich_with_design_chain_spans(data: dict[str, Any], seq_path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
-        return data
+        return _empty_feature_collection("unknown")
 
-    seq_payload: dict = {}
-    if seq_path.exists():
-        try:
-            seq_payload = json.loads(seq_path.read_text(encoding="utf-8"))
-        except Exception:
-            seq_payload = {}
+    data.setdefault("features", [])
+    data.setdefault("span_features", [])
+    data.setdefault("cable_features", [])
+    data.setdefault("design_chain_spans", [])
 
-    attach_span_features_to_collection(data, seq_payload)
+    seq_payload = _load_json(seq_path)
+
+    try:
+        cleaned = normalize_geometry_for_span_generation(data.get("features") or [], seq_payload)
+        cleaned_seq = getattr(cleaned, "sequence_payload", None) or seq_payload
+    except Exception:
+        cleaned_seq = seq_payload
+
+    attach_span_features_to_collection(data, cleaned_seq)
     attach_cable_features_to_collection(data)
 
-    if "design_chain_spans" not in data:
-        spans: list[dict] = []
-        cleaned = normalize_geometry_for_span_generation(data.get("features") or [], seq_payload)
-        cleaned_seq = cleaned.sequence_payload or {}
-        if cleaned_seq.get("status") == "ok":
-            spans = _build_design_chain_spans(cleaned_seq)
-        data["design_chain_spans"] = spans
-        metadata = data.setdefault("metadata", {})
-        if isinstance(metadata, dict):
-            metadata["design_chain_span_count"] = len(spans)
+    spans = _build_design_chain_spans(cleaned_seq)
+    data["design_chain_spans"] = spans
+
+    metadata = _ensure_metadata_contract(data)
+    metadata["design_chain_span_count"] = len(spans)
 
     return _enrich_popup_data_model(data)
 
 
+def _template_context_from_meta(meta: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "completeness": meta.get("completeness") or {},
+        "design_readiness": meta.get("design_readiness") or {},
+        "circuit_summary": meta.get("circuit_summary") or {},
+        "top_design_risks": meta.get("top_design_risks") or [],
+        "replacement_narratives": meta.get("replacement_narratives") or [],
+        "recommended_actions": meta.get("recommended_actions") or [],
+        "evidence_gates": meta.get("evidence_gates") or [],
+        "sequence_summary": meta.get("sequence_summary") or {},
+    }
+
+
 @map_preview_bp.get("/view/<job_id>")
 def map_view(job_id: str):
-    meta_path = JOBS_ROOT / job_id / "meta.json"
-    completeness: dict = {}
-    design_readiness: dict = {}
-    circuit_summary: dict = {}
-    top_design_risks: list = []
-    replacement_narratives: list = []
-    recommended_actions: list = []
-    evidence_gates: list = []
-    sequence_summary: dict = {}
-    if meta_path.exists():
-        try:
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            completeness = meta.get("completeness") or {}
-            design_readiness = meta.get("design_readiness") or {}
-            circuit_summary = meta.get("circuit_summary") or {}
-            top_design_risks = meta.get("top_design_risks") or []
-            replacement_narratives = meta.get("replacement_narratives") or []
-            recommended_actions = meta.get("recommended_actions") or []
-            evidence_gates = meta.get("evidence_gates") or []
-            sequence_summary = meta.get("sequence_summary") or {}
-        except Exception:
-            pass
+    meta = _load_json(JOBS_ROOT / job_id / "meta.json")
     return render_template(
         "map_viewer.html",
         job_id=job_id,
-        completeness=completeness,
-        design_readiness=design_readiness,
-        circuit_summary=circuit_summary,
-        top_design_risks=top_design_risks,
-        replacement_narratives=replacement_narratives,
-        recommended_actions=recommended_actions,
-        evidence_gates=evidence_gates,
-        sequence_summary=sequence_summary,
+        **_template_context_from_meta(meta),
     )
 
 
@@ -365,46 +418,31 @@ def map_data(job_id: str):
         return jsonify(_empty_feature_collection(job_id))
 
     try:
-        data = json.loads(map_path.read_text(encoding="utf-8"))
-        data = _enrich_with_design_chain_spans(data, seq_path)
-        return jsonify(data)
+        data = _load_json(map_path)
+        if not data:
+            return jsonify(_empty_feature_collection(job_id))
+        return jsonify(_enrich_with_design_chain_spans(data, seq_path))
     except Exception:
         return jsonify(_empty_feature_collection(job_id))
-
-
-def _load_file_meta(file_dir: Path) -> dict:
-    meta_path = file_dir / "meta.json"
-    if not meta_path.exists():
-        return {}
-    try:
-        return json.loads(meta_path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
 
 
 @map_preview_bp.get("/view/project/<project_id>/<file_id>")
 def project_map_view(project_id: str, file_id: str):
     file_dir = PROJECTS_ROOT / project_id / "files" / file_id
-    meta = _load_file_meta(file_dir)
+    meta = _load_json(file_dir / "meta.json")
     display_id = f"{project_id}/{file_id}"
+
     return render_template(
         "map_viewer.html",
         job_id=display_id,
         map_data_url=f"/map/data/project/{project_id}/{file_id}",
         project_id=project_id,
         file_id=file_id,
-        completeness=meta.get("completeness") or {},
-        design_readiness=meta.get("design_readiness") or {},
-        circuit_summary=meta.get("circuit_summary") or {},
-        top_design_risks=meta.get("top_design_risks") or [],
-        replacement_narratives=meta.get("replacement_narratives") or [],
-        recommended_actions=meta.get("recommended_actions") or [],
-        evidence_gates=meta.get("evidence_gates") or [],
-        sequence_summary=meta.get("sequence_summary") or {},
         d2d_url=f"/d2d/export/project/{project_id}/{file_id}",
         d2d_interleaved_url=f"/d2d/interleaved/project/{project_id}/{file_id}",
         pdf_url=f"/pdf/qa/project/{project_id}/{file_id}",
         back_url=f"/project/{project_id}",
+        **_template_context_from_meta(meta),
     )
 
 
@@ -414,11 +452,14 @@ def project_map_data(project_id: str, file_id: str):
     file_dir = PROJECTS_ROOT / project_id / "files" / file_id
     map_path = file_dir / "map_data.json"
     seq_path = file_dir / "sequenced_route.json"
+
     if not map_path.exists():
         return jsonify(_empty_feature_collection(display_id))
+
     try:
-        data = json.loads(map_path.read_text(encoding="utf-8"))
-        data = _enrich_with_design_chain_spans(data, seq_path)
-        return jsonify(data)
+        data = _load_json(map_path)
+        if not data:
+            return jsonify(_empty_feature_collection(display_id))
+        return jsonify(_enrich_with_design_chain_spans(data, seq_path))
     except Exception:
         return jsonify(_empty_feature_collection(display_id))
