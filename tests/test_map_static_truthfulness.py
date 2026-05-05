@@ -266,6 +266,16 @@ def test_map_js_condense_vacuous_popup_rows(map_js_source: str) -> None:
     assert "isVacuousPopupRowHtml" in map_js_source
 
 
+def test_map_js_c2d_ab_popup_truthfulness_wording(map_js_source: str) -> None:
+    assert "evidence gap - not captured in current export" in map_js_source
+    assert "design decision pending" in map_js_source
+    assert "not measured in current export" in map_js_source
+    assert "none inferred from current fields" in map_js_source
+    assert "no linked photo references in current export" in map_js_source
+    assert "stayEvidenceSummary(props)" in map_js_source
+    assert "not recorded - circuit voltage not supplied for this ${routeKind}" in map_js_source
+
+
 def test_map_js_span_layer_origin_sync(map_js_source: str) -> None:
     assert "syncSpanPanelHeading" in map_js_source
     assert "span_layer_origin" in map_js_source
