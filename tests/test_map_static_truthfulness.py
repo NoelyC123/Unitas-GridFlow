@@ -189,6 +189,23 @@ def test_map_js_popup_blank_state_detection(map_js_source: str) -> None:
 
 def test_map_js_primary_layer_key(map_js_source: str) -> None:
     assert "primaryLayerKey" in map_js_source
+    primary_layer_block = map_js_source[
+        map_js_source.index("  primaryLayerKey(props) {") : map_js_source.index(
+            "  applyLayerAndFilterCounts(meta) {"
+        )
+    ]
+    assert "isAnglePole" not in primary_layer_block
+
+
+def test_map_js_angle_toggle_controls_highlights_not_record_visibility(
+    map_js_source: str, map_view_html: str
+) -> None:
+    assert "angleHighlightCount()" in map_js_source
+    assert "applyAngleHighlightState()" in map_js_source
+    assert "Angle highlights are derived from structural pole records" in map_js_source
+    assert "layerName === 'angle'" in map_js_source
+    assert "angle-highlight-hidden" in map_js_source
+    assert "angle-highlight-hidden" in map_view_html
 
 
 def test_map_view_meta_map_data_url(map_view_html: str) -> None:
@@ -283,6 +300,13 @@ def test_map_js_height_evidence_excludes_context_popups(map_js_source: str) -> N
 
 def test_map_view_angle_layer_uses_highlight_wording(map_view_html: str) -> None:
     assert "Angle pole highlights" in map_view_html
+
+
+def test_map_view_review_panel_scrolls_inside_map_workspace(map_view_html: str) -> None:
+    assert ".content-shell" in map_view_html
+    assert "overflow: hidden;" in map_view_html
+    assert "scrollbar-gutter: stable;" in map_view_html
+    assert "overscroll-behavior: contain;" in map_view_html
 
 
 def test_map_js_span_layer_origin_sync(map_js_source: str) -> None:

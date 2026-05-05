@@ -61,22 +61,28 @@
     }
 
     .content-shell {
-      flex: 1;
+      flex: 1 1 auto;
       display: flex;
       min-height: 0;
+      overflow: hidden;
       position: relative;
     }
 
     #map {
-      flex: 1;
-      min-height: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
     }
 
     .side-panel {
       position: absolute;
       top: 18px;
       right: 18px;
-      width: 320px;
+      max-height: calc(100% - 36px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      width: clamp(320px, 28vw, 390px);
       max-width: calc(100vw - 36px);
       z-index: 900;
     }
@@ -404,6 +410,8 @@
     .asset-marker.source-legacy-data .asset-marker-shape { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.45), 0 1px 5px rgba(15, 23, 42, 0.35); }
     .asset-marker.asset-other .asset-marker-shape { border-radius: 999px; }
     .asset-marker.is-angle .asset-marker-shape { font-size: 0.36rem; height: 12px; position: relative; width: 12px; }
+    .asset-marker.is-angle.angle-highlight-hidden .asset-marker-shape { font-size: 0.32rem; height: 10px; width: 10px; }
+    .asset-marker.angle-highlight-hidden .asset-marker-angle-badge { display: none; }
     .asset-marker-angle-badge {
       align-items: center;
       background: #111827;
@@ -936,6 +944,8 @@
         position: static;
         width: 100%;
         max-width: 100%;
+        max-height: none;
+        overflow: visible;
         padding: 12px;
       }
 

@@ -254,7 +254,7 @@ class MapViewer {
    */
   applyZeroCountLayerTruthfulness(meta) {
     const lc = {
-      existing: 0, proposed: 0, angle: 0, stays: 0, thirdparty: 0, context: 0,
+      existing: 0, proposed: 0, stays: 0, thirdparty: 0, context: 0,
     };
     for (const fd of this.featureData) {
       const k = this.primaryLayerKey(fd.props);
@@ -264,10 +264,11 @@ class MapViewer {
     const spanN = Number(m.span_feature_count ?? this._spanFeatureList?.length ?? 0);
     const cabN = Number(m.cable_feature_count ?? 0);
     const matchRecN = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
+    const angleN = this.angleHighlightCount();
 
     this._resetLayerToggle('existing', lc.existing >= 1, 'No existing pole records in this job.');
     this._resetLayerToggle('proposed', lc.proposed >= 1, 'No proposed pole records in this job.');
-    this._resetLayerToggle('angle', lc.angle >= 1, 'No angle pole highlights in this job.');
+    this._resetLayerToggle('angle', angleN >= 1, 'No angle pole highlights in this job.');
     this._resetLayerToggle('stays', lc.stays >= 1, 'No stay or anchor structure records in this job.');
     this._resetLayerToggle('thirdparty', lc.thirdparty >= 1, 'No third-party infrastructure records in this job.');
     this._resetLayerToggle('context', lc.context >= 1, 'No context / crossing records in this job.');
@@ -292,7 +293,6 @@ class MapViewer {
     if (this.isThirdPartyInfrastructure(props)) return 'thirdparty';
     if (this.isContextRecord(props)) return 'context';
     if (this.isStayOrAnchor(props)) return 'stays';
-    if (this.isAnglePole(props)) return 'angle';
     if (this.isExistingPole(props)) return 'existing';
     if (this.isProposedPole(props)) return 'proposed';
     return null;
@@ -300,7 +300,7 @@ class MapViewer {
 
   applyLayerAndFilterCounts(meta) {
     const lc = {
-      existing: 0, proposed: 0, angle: 0, stays: 0, thirdparty: 0, context: 0,
+      existing: 0, proposed: 0, stays: 0, thirdparty: 0, context: 0,
     };
     for (const fd of this.featureData) {
       const k = this.primaryLayerKey(fd.props);
@@ -324,6 +324,14 @@ class MapViewer {
       }
       if (key === 'cables') {
         cap.textContent = `${raw} (${cabN})`;
+        return;
+      }
+      if (key === 'angle') {
+        const angleN = this.angleHighlightCount();
+        cap.textContent = `${raw} (${angleN})`;
+        if (angleN > 0) {
+          lab.title = 'Angle highlights are derived from structural pole records; toggling them only hides or shows the A badge, not the pole record.';
+        }
         return;
       }
       if (key === 'matches') {
@@ -1337,6 +1345,8 @@ class MapViewer {
           this.toggleLayer(this.cableLayer, input.checked);
         } else if (layerName === 'matches') {
           this.toggleLayer(this.lifecycleMatchLayer, input.checked);
+        } else if (layerName === 'angle') {
+          this.applyAngleHighlightState();
         } else {
           this.applyVisibility();
         }
@@ -1522,6 +1532,7 @@ class MapViewer {
         this.map.removeLayer(fd.marker);
       }
     }
+    this.applyAngleHighlightState();
   }
 
   passesLayerState(fd) {
@@ -1529,10 +1540,22 @@ class MapViewer {
     if (this.isThirdPartyInfrastructure(props)) return this.layerState.thirdparty;
     if (this.isContextRecord(props)) return this.layerState.context;
     if (this.isStayOrAnchor(props)) return this.layerState.stays;
-    if (this.isAnglePole(props) && !this.layerState.angle) return false;
     if (this.isExistingPole(props)) return this.layerState.existing;
     if (this.isProposedPole(props)) return this.layerState.proposed;
     return true;
+  }
+
+  angleHighlightCount() {
+    return this.featureData.filter((fd) => this.isAnglePole(fd.props)).length;
+  }
+
+  applyAngleHighlightState() {
+    const showAngleHighlights = Boolean(this.layerState.angle);
+    for (const fd of this.featureData) {
+      if (!this.isAnglePole(fd.props)) continue;
+      const el = fd.marker?.getElement?.();
+      if (el) el.classList.toggle('angle-highlight-hidden', !showAngleHighlights);
+    }
   }
 
   toggleLayer(layer, shouldShow) {
