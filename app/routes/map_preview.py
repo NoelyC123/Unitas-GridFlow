@@ -19,6 +19,7 @@ from app.field_ownership import (
     point_map_electrical_violations,
     validate_map_feature_collection_field_ownership,
 )
+from app.geometry_pipeline import normalize_geometry_for_span_generation
 from app.pole_field_schema import (
     enrich_pole_support_props,
     popup_priority_field_catalog,
@@ -305,8 +306,10 @@ def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
 
     if "design_chain_spans" not in data:
         spans: list[dict] = []
-        if seq_payload.get("status") == "ok":
-            spans = _build_design_chain_spans(seq_payload)
+        cleaned = normalize_geometry_for_span_generation(data.get("features") or [], seq_payload)
+        cleaned_seq = cleaned.sequence_payload or {}
+        if cleaned_seq.get("status") == "ok":
+            spans = _build_design_chain_spans(cleaned_seq)
         data["design_chain_spans"] = spans
         metadata = data.setdefault("metadata", {})
         if isinstance(metadata, dict):

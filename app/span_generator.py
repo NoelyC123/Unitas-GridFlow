@@ -10,6 +10,7 @@ import math
 from typing import Any
 
 from app.electrical_schema import merge_electrical_fields_into_props
+from app.geometry_pipeline import normalize_geometry_for_span_generation
 from app.qa_engine import infer_display_network_fields
 
 EARTH_RADIUS_M = 6371000.0
@@ -453,6 +454,12 @@ def generate_span_features_geojson(
     meta = metadata or {}
     rulepack_id = meta.get("rulepack_id")
 
+    if not sequence_payload or sequence_payload.get("status") != "ok":
+        return []
+
+    cleaned = normalize_geometry_for_span_generation(point_features, sequence_payload)
+    point_features = cleaned.point_features
+    sequence_payload = cleaned.sequence_payload
     if not sequence_payload or sequence_payload.get("status") != "ok":
         return []
 
