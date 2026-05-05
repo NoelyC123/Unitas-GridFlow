@@ -279,6 +279,10 @@ def _enrich_popup_data_model(data: dict) -> dict:
             merge_electrical_fields_into_props(cp)
     enrich_context_crossing_records(data)
     enrich_replacement_pair_intelligence(data)
+
+    from app.duplicate_detection import apply_duplicate_detection
+
+    apply_duplicate_detection(data.get("features") or [])
     post_violations = validate_map_feature_collection_field_ownership(data)
     finalize_field_ownership_metadata(
         data,
