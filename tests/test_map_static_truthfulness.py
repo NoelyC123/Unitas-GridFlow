@@ -177,6 +177,8 @@ def test_map_js_popup_review_polish_hooks(map_js_source: str) -> None:
     assert "popup-section-chip" in map_js_source
     assert 'data-popup-label="${this.escapeHtml(label)}"' in map_js_source
     assert "keepInView: true" in map_js_source
+    assert "workspace-blocker-count" in map_js_source
+    assert "issue-note-fail" in map_js_source
 
 
 def test_map_js_popup_blank_state_detection(map_js_source: str) -> None:
@@ -221,12 +223,24 @@ def test_map_view_review_focus_polish_labels(map_view_html: str) -> None:
     assert "Replacement pairing signals" in map_view_html
     assert "Span crossing / context review" in map_view_html
     assert "UG cable records missing spec" in map_view_html
+    assert "Evidence gaps" in map_view_html
+    assert "Route and span review" in map_view_html
+    assert "Lifecycle and remarks" in map_view_html
 
 
 def test_map_view_legend_truthful_review_wording(map_view_html: str) -> None:
     assert "Suggested Existing/Proposed Match (map evidence only)" in map_view_html
     assert "Design blocker — issue prevents design-readiness" in map_view_html
     assert "click for span review detail, or pin labels for QA scanning" in map_view_html
+
+
+def test_map_view_review_workspace_summary_wording(map_view_html: str) -> None:
+    assert "Review workspace" in map_view_html
+    assert "Review workspace summary" in map_view_html
+    assert (
+        "Detailed readiness, evidence, and completeness notes are collapsed under "
+        "Review workspace notes" in map_view_html
+    )
 
 
 def test_map_js_span_label_pin_modes(map_js_source: str) -> None:

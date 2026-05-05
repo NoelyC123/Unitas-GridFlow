@@ -336,7 +336,7 @@ def _draw_design_review_items_table(
         new_y = top
         _draw_line(
             pdf,
-            "Unitas GridFlow - QA Report (continued)",
+            "Unitas GridFlow - C2/D Review Workspace (continued)",
             left,
             new_y,
             font="Helvetica-Bold",
@@ -434,7 +434,9 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
     line_gap = 6 * mm
     y = top
 
-    _draw_line(pdf, "Unitas GridFlow — QA Report", left, y, font="Helvetica-Bold", size=16)
+    _draw_line(
+        pdf, "Unitas GridFlow — C2/D Review Workspace", left, y, font="Helvetica-Bold", size=16
+    )
     y -= 10 * mm
 
     _draw_line(pdf, f"Job ID: {job_id}", left, y, font="Helvetica-Bold", size=11)
@@ -488,7 +490,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
 
         what_supports = design_readiness.get("what_this_supports") or []
         if what_supports:
-            _draw_line(pdf, "This file supports:", left, y)
+            _draw_line(pdf, "This evidence currently supports:", left, y)
             y -= line_gap
             for item in what_supports:
                 _draw_line(pdf, f"  + {str(item)[:110]}", left, y, size=9)
@@ -501,7 +503,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
 
     evidence_gates = meta.get("evidence_gates") or []
     if evidence_gates:
-        _draw_line(pdf, "Design readiness checks", left, y, font="Helvetica-Bold", size=12)
+        _draw_line(pdf, "C2/D evidence gates", left, y, font="Helvetica-Bold", size=12)
         y -= 8 * mm
         for gate in evidence_gates:
             label = str(gate.get("label", ""))
@@ -519,7 +521,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
 
     top_design_risks = meta.get("top_design_risks") or []
     if top_design_risks:
-        _draw_line(pdf, "Top Design Risks", left, y, font="Helvetica-Bold", size=12)
+        _draw_line(pdf, "Priority review risks", left, y, font="Helvetica-Bold", size=12)
         y -= 8 * mm
         for risk in top_design_risks:
             title = str(risk.get("title", ""))
@@ -541,7 +543,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
 
     recommended_actions = meta.get("recommended_actions") or []
     if recommended_actions:
-        _draw_line(pdf, "Recommended Actions", left, y, font="Helvetica-Bold", size=12)
+        _draw_line(pdf, "Suggested next checks", left, y, font="Helvetica-Bold", size=12)
         y -= 8 * mm
         for item in recommended_actions:
             action_text = str(item.get("action", "")).strip()
@@ -556,7 +558,7 @@ def _generate_qa_pdf(job_dir: Path, display_id: str, review_context: dict | None
 
     replacement_narratives = meta.get("replacement_narratives") or []
     if replacement_narratives:
-        _draw_line(pdf, "Replacement Pairs", left, y, font="Helvetica-Bold", size=12)
+        _draw_line(pdf, "Replacement pairing signals", left, y, font="Helvetica-Bold", size=12)
         y -= 8 * mm
         for narrative in replacement_narratives:
             _draw_line(pdf, f"  {str(narrative)[:110]}", left, y, size=9)

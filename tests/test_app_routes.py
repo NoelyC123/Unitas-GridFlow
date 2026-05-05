@@ -155,6 +155,16 @@ def test_pdf_route_returns_pdf_for_valid_job(tmp_path, monkeypatch) -> None:
     assert response.data.startswith(b"%PDF")
 
 
+def test_pdf_report_source_uses_c2d_review_workspace_wording() -> None:
+    source = Path(pdf_reports.__file__).read_text(encoding="utf-8")
+
+    assert "Unitas GridFlow — C2/D Review Workspace" in source
+    assert "C2/D evidence gates" in source
+    assert "Priority review risks" in source
+    assert "Suggested next checks" in source
+    assert "Replacement pairing signals" in source
+
+
 def test_design_review_item_includes_record_coordinates_status_and_action() -> None:
     item = pdf_reports._build_design_review_item(
         {
@@ -703,7 +713,7 @@ def test_map_view_clarifies_replacement_narratives_are_not_reviewed_assignments(
 
     assert response.status_code == 200
     html = response.data.decode("utf-8")
-    assert "Probable Replacement Signals" in html
+    assert "Replacement pairing signals" in html
     assert "Map narratives are evidence prompts" in html
 
 
