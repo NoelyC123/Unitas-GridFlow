@@ -8,6 +8,20 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-05 - C2D-AA review workspace polish/package complete
+
+### Changed
+
+- Recorded **C2D-AA review workspace polish/package** as the latest completed package after `0106904 Merge C2D review workspace polish`.
+- Set the next explicit task to **C2D-AB popup field truthfulness / evidence-status pass**.
+- Noted that C2D-AB was previously inferred and is now recorded as the next task.
+
+### Tests
+
+- At merge: `pytest -v` passed, **514 passed**; `pre-commit` passed.
+
+---
+
 ## 2026-05-01 — Map truthfulness F1–F8 (follow-up batch)
 
 ### Changed

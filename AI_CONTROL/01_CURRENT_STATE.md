@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Phase C complete; strategic scope decision pending.**
+**Phase C complete; Phase C2/D professional QA + display refinement active.**
 
 GridFlow has evolved from an MVP into an operational survey-to-design intelligence and design-readiness workspace for electricity network handoffs. It is currently strongest around UK OHL / 11kV / real controller survey workflows.
 
@@ -12,7 +12,15 @@ The May 2026 source-of-truth references describe the current state as:
 - Stage 2 design-ready handoff / Design Chain: complete for the current evidence set
 - Stage 3 live intake platform: complete for the current evidence set
 - Phase C map intelligence: complete
-- Current status: strategic decision pending between Phase C2/D professional QA + display refinement and Stage 4/full survey-platform expansion
+- Current status: Phase C2/D professional QA + display refinement is the active implementation path
+
+---
+
+## Latest completed package
+
+- **C2D-AA review workspace polish/package**
+- Merged as `0106904 Merge C2D review workspace polish`
+- Tests at merge: `pytest -v` passed, **514 passed**; `pre-commit` passed
 
 ---
 
@@ -103,30 +111,13 @@ GridFlow does not yet have enough validated commercial evidence to justify jumpi
 
 ---
 
-## Main current decision gate
+## Current C2/D checkpoint
 
-The next development decision gate is:
+Next explicit task:
 
-**Should GridFlow proceed with the lower-risk Phase C2/D professional QA + display refinement path before any Stage 4/full survey-platform expansion?**
+- **C2D-AB popup field truthfulness / evidence-status pass**
 
-The May 2026 references frame the options as:
-
-- **Path A: Phase C2/D professional QA + display refinement**
-  - 2-4 week scale
-  - Add 10-15 key survey fields
-  - Refine map UX and popup organisation
-  - Preserve GridFlow as an enhanced pre-CAD QA/design-readiness workspace
-  - Low risk, immediately testable on the existing real job corpus
-
-- **Path B: Stage 4/full electrical survey platform**
-  - 6-12 month scale
-  - Full 50-field data model
-  - Mobile/tablet field capture
-  - Evidence/photo workflows
-  - Asset relationships, GIS parity, and commercial platform scope
-  - High risk without customer/commercial validation
-
-Stage 4 must not begin without customer/commercial validation.
+C2D-AB was previously inferred from the review workspace polish work and is now recorded as the next task.
 
 ---
 
@@ -134,4 +125,4 @@ Stage 4 must not begin without customer/commercial validation.
 
 No implementation scope should be started from stale Phase C-pending, Phase 1, Phase 2, or Phase 3 wording.
 
-Use the May 2026 references and this refreshed control layer for current state until Noel records the next strategic decision.
+Use the May 2026 references and this refreshed control layer for current state. Stage 4 remains out of scope unless Noel records a new decision gate.
