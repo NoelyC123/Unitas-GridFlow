@@ -461,6 +461,42 @@ def build_span_feature(
     }
 
 
+def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
+    """Annotate consecutive invalid/suspect spans as geometry issue clusters.
+
+    Mutates span properties in-place. Adds:
+    - geometry_issue_cluster (bool)
+    - cluster_size (int | None)
+
+    Clustering is strictly consecutive: a valid span breaks the current cluster.
+    """
+    _CLUSTER_STATUSES = frozenset(("invalid", "suspect"))
+
+    current_cluster: list[dict[str, Any]] = []
+
+    def _flush(cluster: list[dict[str, Any]]) -> None:
+        size = len(cluster)
+        for span in cluster:
+            props = span.setdefault("properties", {})
+            props["geometry_issue_cluster"] = True
+            props["cluster_size"] = size
+
+    for span in spans:
+        props = span.get("properties") or {}
+        validity = props.get("span_validity")
+        if validity in _CLUSTER_STATUSES:
+            current_cluster.append(span)
+        else:
+            if current_cluster:
+                _flush(current_cluster)
+                current_cluster = []
+            span.setdefault("properties", {})["geometry_issue_cluster"] = False
+            span["properties"]["cluster_size"] = None
+
+    if current_cluster:
+        _flush(current_cluster)
+
+
 def generate_span_features_geojson(
     point_features: list[dict[str, Any]],
     sequence_payload: dict[str, Any] | None,
@@ -521,6 +557,7 @@ def generate_span_features_geojson(
 
     if spans:
         enrich_spans_phase3b(spans, point_features)
+        annotate_geometry_issue_clusters(spans)
     return spans
 
 
