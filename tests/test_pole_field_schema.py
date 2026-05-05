@@ -178,6 +178,14 @@ def test_popup_schema_contract_for_existing_assembles_sections_and_blank_states(
     assert contract["section_order"][0] == "Design focus banners"
     assert sections["Physical evidence"]["kind"] == "condenseable"
     assert sections["Physical evidence"]["blank_state_text"]
+    assert (
+        sections["Equipment & pole-top"]["blank_state_text"]
+        == "No pole-mounted equipment inferred from current fields."
+    )
+    assert (
+        sections["Mechanical"]["blank_state_text"]
+        == "Stay and mechanical evidence is not explicit in the current export."
+    )
     assert "pole_class" in sections["Physical evidence"]["priority_fields"]
     assert "stay_present_evidence" in sections["Mechanical"]["priority_fields"]
     assert "voltage_carried" in contract["hidden_priority_fields"]

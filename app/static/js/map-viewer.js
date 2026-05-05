@@ -444,7 +444,7 @@ class MapViewer {
   isVacuousPopupRowHtml(rowHtml) {
     if (!rowHtml || typeof rowHtml !== 'string') return false;
     if (rowHtml.includes('status-blocker') || rowHtml.includes('status-warning')) return false;
-    return /popup-field-value">(?:—|not captured|none recorded|not specified|not linked|not applicable yet|not yet specified|not inferred|none inferred|not parsed|no linked photos)(<\/div>)/i.test(rowHtml)
+    return /popup-field-value">(?:—|not captured|not recorded(?: [^<]*)?|not supplied(?: [^<]*)?|evidence gap - [^<]+|none recorded|not specified|not specified yet|design decision pending|not linked(?: [^<]*)?|not applicable yet|not yet specified|not inferred|none inferred|none inferred from current fields|not parsed|no linked photos|no linked photo references in current export)(<\/div>)/i.test(rowHtml)
       && !rowHtml.includes('popup-field-detail');
   }
 
@@ -1650,7 +1650,7 @@ class MapViewer {
 
   stayEvidenceLine(props) {
     if (props.stay_evidence_status === 'missing') {
-      return '<div class="popup-row" style="color:#92400e;font-weight:700;">⚠️ Angle pole — stay evidence not captured. Check field notes, photos or plan evidence.</div>';
+      return '<div class="popup-row" style="color:#92400e;font-weight:700;">⚠️ Angle pole — stay evidence gap. Check field notes, photos or plan evidence.</div>';
     }
     if (props.stay_evidence_status === 'captured') {
       const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
@@ -1678,11 +1678,11 @@ class MapViewer {
 
   buildLegacyPointPopupHtml(assetKind, title, designSections, sections, props) {
     const emptySectionSummary = {
-      'Equipment & pole-top': 'No pole-mounted equipment captured or inferred.',
+      'Equipment & pole-top': 'No pole-mounted equipment inferred from current fields.',
       'Physical': 'Pole class, material, lean and foundation not fully specified in this export.',
-      'Mechanical': 'Stay / mechanical detail not captured where applicable.',
+      'Mechanical': 'Stay / mechanical evidence is not explicit in the current export.',
       'Specification': 'Pole class, material and design height not fully specified.',
-      'Evidence': 'Surveyor, date and GNSS accuracy not captured in this export.',
+      'Evidence': 'Surveyor, date and GNSS/photo references are not fully recorded in this export.',
     };
     const condenseable = new Set(Object.keys(emptySectionSummary));
     const mapSection = (section) => {
@@ -1977,10 +1977,11 @@ class MapViewer {
             'Measured Height',
             this.hasValue(props.measured_height_m ?? props.height)
               ? `${this.displayValue(props.measured_height_m ?? props.height)}m`
-              : 'not captured',
+              : 'evidence gap - not captured in current export',
             heightConf.status,
+            'Existing pole height is missing survey evidence; clearance checks cannot rely on this record.',
           ),
-          this.popupRow('Height Source', props.height_source || 'not captured', props.height_source ? 'info' : 'warning'),
+          this.popupRow('Height Source', props.height_source || 'evidence gap - source not recorded', props.height_source ? 'info' : 'warning'),
           this.popupRow('Height Confidence', this.formatHeightConfidence(heightConf.level), heightConf.status, heightConf.warning),
         ],
       },
@@ -2081,8 +2082,8 @@ class MapViewer {
       this.popupRow('Point', props.pole_id || props.id),
       this.popupRow('Type', props.popup_type_label || this.explainAssetType(props.structure_type) || fallbackType),
       this.popupRow('Feature Code', props.structure_type),
-      this.popupRow('Circuit ID', props.circuit_id || 'not captured', props.circuit_id ? 'ok' : 'info'),
-      this.popupRow('Year Installed', props.year_installed || 'not captured', props.year_installed ? 'ok' : 'info'),
+      this.popupRow('Circuit ID', props.circuit_id || 'not recorded in export', props.circuit_id ? 'ok' : 'info'),
+      this.popupRow('Year Installed', props.year_installed || 'not recorded in export', props.year_installed ? 'ok' : 'info'),
       this.popupRow('Function', this.isAnglePole(props) ? 'Angle' : props.record_role),
       this.popupRow('Status', this.statusText(status), this.statusToFieldStatus(status)),
       this.popupRow('Role', props.asset_intent || props.record_role || 'mapped survey record'),
@@ -2090,6 +2091,7 @@ class MapViewer {
   }
 
   physicalRows(props, mode) {
+    const isProposedMode = mode === 'proposed';
     const rawHeight = mode === 'proposed'
       ? (props.proposed_height_m ?? props.height)
       : (props.measured_height_m ?? props.height);
@@ -2098,17 +2100,21 @@ class MapViewer {
     return [
       this.popupRow(
         mode === 'proposed' ? 'Proposed Height' : 'Measured Height',
-        hasHeight ? `${rawHeight}m` : 'not captured',
-        heightConf.status || (hasHeight ? 'ok' : mode === 'existing' ? 'blocker' : 'info'),
-        heightConf.warning || (mode === 'existing' && !hasHeight ? 'Clearance check impossible without measured existing pole height.' : ''),
+        hasHeight ? `${rawHeight}m` : isProposedMode ? 'design decision pending' : 'evidence gap - not captured in current export',
+        heightConf.status || (hasHeight ? 'ok' : isProposedMode ? 'info' : 'blocker'),
+        heightConf.warning || (isProposedMode
+          ? 'Proposed height is a future design specification, not a survey capture gap.'
+          : 'Existing pole height is missing survey evidence; clearance checks cannot rely on this record.'),
       ),
       this.popupRow(
         'Height Source',
-        props.height_source || 'not captured',
+        props.height_source || (isProposedMode ? 'not applicable until design height is specified' : 'evidence gap - source not recorded'),
         props.height_source ? 'info' : 'warning',
         props.height_source
           ? this.explainHeightSource(props.height_source)
-          : 'Height measurement method not recorded - reliability unknown',
+          : isProposedMode
+            ? 'Design height source will be known when the proposed specification is confirmed.'
+            : 'Height measurement method not recorded - reliability unknown.',
       ),
       hasHeight
         ? this.popupRow(
@@ -2120,21 +2126,36 @@ class MapViewer {
             : 'Verify before use in clearance calculations',
         )
         : null,
-      this.popupRow('Pole Class', props.pole_class || 'not captured', props.pole_class ? 'ok' : 'review'),
+      this.popupRow(
+        'Pole Class',
+        props.pole_class || (isProposedMode ? 'design decision pending' : 'evidence gap - not captured in current export'),
+        props.pole_class ? 'ok' : 'review',
+        props.pole_class ? '' : isProposedMode
+          ? 'Specify pole strength/class before design issue.'
+          : 'Confirm from field notes, pole plate, or asset records.',
+      ),
       this.popupRow(
         'Material / Condition',
-        `${this.displayValue(props.material)} / ${this.displayValue(props.condition)}`,
+        `${props.material || (isProposedMode ? 'design decision pending' : 'evidence gap - material unknown')} / ${props.condition || (isProposedMode ? 'not applicable yet' : 'evidence gap - condition not evidenced')}`,
         props.material || props.condition ? 'ok' : 'review',
       ),
       this.popupRow(
         'Lean',
         props.lean_severity || props.lean_direction
           ? `${this.displayValue(props.lean_severity)} ${this.displayValue(props.lean_direction)}`.trim()
-          : 'not captured',
+          : isProposedMode ? 'not applicable yet' : 'evidence gap - lean not assessed in digital file',
         props.lean_severity || props.lean_direction ? 'warning' : 'info',
       ),
-      this.popupRow('Defects', props.defect_type || 'not captured', props.defect_type ? 'warning' : 'info'),
-      this.popupRow('Foundation', props.foundation_type || 'not captured', props.foundation_type ? 'ok' : 'info'),
+      this.popupRow(
+        'Defects',
+        props.defect_type || (isProposedMode ? 'not applicable yet' : 'evidence gap - defect evidence not supplied'),
+        props.defect_type ? 'warning' : 'info',
+      ),
+      this.popupRow(
+        'Foundation',
+        props.foundation_type || (isProposedMode ? 'design decision pending' : 'evidence gap - foundation not recorded'),
+        props.foundation_type ? 'ok' : 'info',
+      ),
     ].filter(Boolean);
   }
 
@@ -2171,14 +2192,14 @@ class MapViewer {
     return [
       this.popupRow(
         'Specification',
-        props.specification || 'not specified',
+        props.specification || 'design decision pending',
         hasSpec ? 'ok' : 'review',
-        hasSpec ? '' : 'Design decision required; this is not a field-capture error.',
+        hasSpec ? '' : 'Future pole specification required; this is not a field-capture error.',
       ),
-      this.popupRow('Pole Class', props.pole_class || 'not specified', props.pole_class ? 'ok' : 'review'),
-      this.popupRow('Material', props.material || 'not specified', props.material ? 'ok' : 'review'),
+      this.popupRow('Pole Class', props.pole_class || 'design decision pending', props.pole_class ? 'ok' : 'review'),
+      this.popupRow('Material', props.material || 'design decision pending', props.material ? 'ok' : 'review'),
       this.popupRow('Condition', props.condition || 'not applicable yet', 'info'),
-      this.popupRow('Design Height', props.proposed_height_m != null ? `${props.proposed_height_m}m` : (props.height ? `${props.height}m` : 'not yet specified'), props.proposed_height_m != null || props.height ? 'ok' : 'review'),
+      this.popupRow('Design Height', props.proposed_height_m != null ? `${props.proposed_height_m}m` : (props.height ? `${props.height}m` : 'design decision pending'), props.proposed_height_m != null || props.height ? 'ok' : 'review'),
     ];
   }
 
@@ -2186,6 +2207,7 @@ class MapViewer {
     const includeEquipment = opts.includeEquipment !== false;
     const rows = [];
     const isUg = props.is_underground === true;
+    const routeKind = isUg ? 'underground cable trace' : 'overhead span';
     const voltageLabel =
       props.voltage_detail && props.voltage_detail.label
         ? String(props.voltage_detail.label)
@@ -2194,7 +2216,7 @@ class MapViewer {
     rows.push(
       this.popupRow(
         'Line Voltage',
-        props.voltage || 'not recorded',
+        props.voltage || `not recorded - circuit voltage not supplied for this ${routeKind}`,
         props.voltage ? 'ok' : 'review',
         voltageLabel,
       ),
@@ -2204,7 +2226,7 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Conductor Type',
-          props.conductor_type || 'not recorded',
+          props.conductor_type || 'not recorded - conductor specification not supplied for this span',
           props.conductor_type ? 'ok' : 'review',
           props.conductor_detail && props.conductor_detail.name ? String(props.conductor_detail.name) : '',
         ),
@@ -2212,7 +2234,7 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Conductor Size',
-          props.conductor_size || 'not recorded',
+          props.conductor_size || 'not recorded - conductor size not supplied for this span',
           props.conductor_size ? 'ok' : 'info',
           props.conductor_size_description ? String(props.conductor_size_description) : '',
         ),
@@ -2220,7 +2242,7 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Phase Configuration',
-          props.phase_count || 'not recorded',
+          props.phase_count || 'not recorded - phase configuration not supplied for this span',
           props.phase_count ? 'ok' : 'info',
           props.phase_detail && props.phase_detail.description
             ? String(props.phase_detail.description)
@@ -2237,7 +2259,7 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Cable Type',
-          props.cable_type || 'not recorded',
+          props.cable_type || 'not recorded - cable specification not supplied for this trace',
           props.cable_type ? 'ok' : 'review',
           props.cable_detail && props.cable_detail.name ? String(props.cable_detail.name) : '',
         ),
@@ -2245,7 +2267,7 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Cable Size',
-          props.cable_size || props.conductor_size || 'not recorded',
+          props.cable_size || props.conductor_size || 'not recorded - cable size not supplied for this trace',
           props.cable_size || props.conductor_size ? 'ok' : 'info',
           props.conductor_size_description ? String(props.conductor_size_description) : '',
         ),
@@ -2253,7 +2275,7 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Cores/Phases',
-          props.cores_phases || props.phase_count || 'not recorded',
+          props.cores_phases || props.phase_count || 'not recorded - cores/phases not supplied for this trace',
           props.cores_phases || props.phase_count ? 'ok' : 'info',
           props.phase_detail && props.phase_detail.description
             ? String(props.phase_detail.description)
@@ -2269,14 +2291,14 @@ class MapViewer {
       rows.push(
         this.popupRow(
           'Mounted Equipment',
-          equipment || 'none recorded',
+          equipment || 'none inferred from current fields',
           equipment ? 'ok' : 'info',
         ),
       );
       rows.push(
         this.popupRow(
           'Equipment Rating',
-          props.equipment_rating || 'not recorded',
+          props.equipment_rating || 'not recorded in current export',
           props.equipment_rating ? 'ok' : 'info',
         ),
       );
@@ -2290,14 +2312,14 @@ class MapViewer {
       ? props.equipment_categories.join(', ')
       : '';
     const ptc = props.equipment_primary_category || '';
-    rows.push(this.popupRow('Equipment categories', cats || 'none inferred', cats ? 'ok' : 'info'));
-    rows.push(this.popupRow('Primary equipment', ptc || 'not inferred', ptc ? 'ok' : 'info'));
+    rows.push(this.popupRow('Equipment categories', cats || 'none inferred from current fields', cats ? 'ok' : 'info'));
+    rows.push(this.popupRow('Primary equipment', ptc || 'none inferred from current fields', ptc ? 'ok' : 'info'));
     const kvaLabel = props.equipment_kva_label || (props.equipment_kva != null ? `${props.equipment_kva} kVA` : '');
     rows.push(this.popupRow('Parsed kVA', kvaLabel || 'not parsed', kvaLabel ? 'ok' : 'info'));
     rows.push(
       this.popupRow(
         'Voltage ratio',
-        props.equipment_voltage_ratio || 'not recorded',
+        props.equipment_voltage_ratio || 'not recorded in digital file',
         props.equipment_voltage_ratio ? 'ok' : 'info',
       ),
     );
@@ -2305,32 +2327,32 @@ class MapViewer {
     rows.push(
       this.popupRow(
         'Pole-top arrangement',
-        ptd || props.pole_top_arrangement || 'not recorded',
+        ptd || props.pole_top_arrangement || 'not recorded in digital file',
         ptd || props.pole_top_arrangement ? 'ok' : 'info',
         props.pole_top_detail && props.pole_top_detail.description ? String(props.pole_top_detail.description) : '',
       ),
     );
     rows.push(
-      this.popupRow('Insulator type', props.insulator_type || 'not recorded', props.insulator_type ? 'ok' : 'info'),
+      this.popupRow('Insulator type', props.insulator_type || 'not recorded in digital file', props.insulator_type ? 'ok' : 'info'),
     );
     rows.push(
       this.popupRow(
         'Crossarm configuration',
-        props.crossarm_configuration || 'not recorded',
+        props.crossarm_configuration || 'not recorded in digital file',
         props.crossarm_configuration ? 'ok' : 'info',
       ),
     );
     rows.push(
-      this.popupRow('Earthing', props.earthing_status || 'not recorded', props.earthing_status ? 'ok' : 'info'),
+      this.popupRow('Earthing', props.earthing_status || 'not recorded in digital file', props.earthing_status ? 'ok' : 'info'),
     );
     rows.push(
       this.popupRow(
         'Asset plate / label',
-        props.asset_plate_id || 'not recorded',
+        props.asset_plate_id || 'not recorded in digital file',
         props.asset_plate_id ? 'ok' : 'info',
       ),
     );
-    let mount = 'not recorded';
+    let mount = 'not recorded in digital file';
     if (props.equipment_mounting === 'pole') mount = 'Pole-mounted';
     else if (props.equipment_mounting === 'ground') mount = 'Ground-mounted';
     rows.push(this.popupRow('Equipment mounting', mount, props.equipment_mounting ? 'ok' : 'info'));
@@ -2376,25 +2398,25 @@ class MapViewer {
 
   surveyMetadataRows(props) {
     const rows = [];
-    rows.push(this.popupRow('Job / scheme ref', props.survey_job_ref || '—', props.survey_job_ref ? 'ok' : 'info'));
-    rows.push(this.popupRow('Surveyor', props.surveyor || '—', props.surveyor ? 'ok' : 'info'));
-    rows.push(this.popupRow('Survey date', props.survey_date || '—', props.survey_date ? 'ok' : 'info'));
+    rows.push(this.popupRow('Job / scheme ref', props.survey_job_ref || 'not recorded in export', props.survey_job_ref ? 'ok' : 'info'));
+    rows.push(this.popupRow('Surveyor', props.surveyor || 'not recorded in export', props.surveyor ? 'ok' : 'info'));
+    rows.push(this.popupRow('Survey date', props.survey_date || 'not recorded in export', props.survey_date ? 'ok' : 'info'));
     rows.push(
       this.popupRow(
         'Survey equipment',
-        props.equipment_used || '—',
+        props.equipment_used || 'not recorded in export',
         props.equipment_used ? 'ok' : 'info',
       ),
     );
     rows.push(
       this.popupRow(
         'Capture method',
-        props.capture_method_label || props.capture_method || '—',
+        props.capture_method_label || props.capture_method || 'not recorded in export',
         props.capture_method_label || props.capture_method ? 'ok' : 'info',
       ),
     );
     const gsum = props.gnss_accuracy_summary || props.gnss_accuracy;
-    rows.push(this.popupRow('GNSS / accuracy', gsum || '—', gsum ? 'ok' : 'info'));
+    rows.push(this.popupRow('GNSS / accuracy', gsum || 'not recorded - positional confidence unknown', gsum ? 'ok' : 'info'));
     if (props.horizontal_accuracy_m != null || props.vertical_accuracy_m != null) {
       const h = props.horizontal_accuracy_m != null ? `H ±${props.horizontal_accuracy_m} m` : '';
       const v = props.vertical_accuracy_m != null ? `V ±${props.vertical_accuracy_m} m` : '';
@@ -2403,7 +2425,7 @@ class MapViewer {
     rows.push(
       this.popupRow(
         'Survey limitations',
-        props.survey_limitations || 'none recorded',
+        props.survey_limitations || 'not recorded in current export',
         props.survey_limitations ? 'warning' : 'info',
       ),
     );
@@ -2413,11 +2435,11 @@ class MapViewer {
   surveyMetadataEvidenceRows(props) {
     const rows = [...this.surveyMetadataRows(props)];
     const photos = this.photoEvidenceText(props);
-    rows.push(this.popupRow('Photo Evidence', photos, photos === 'no linked photos' ? 'info' : 'ok'));
+    rows.push(this.popupRow('Photo Evidence', photos, photos === 'no linked photo references in current export' ? 'info' : 'ok'));
     rows.push(
       this.popupRow(
         'Remarks',
-        props.name && props.name !== props.id ? props.name : 'not captured',
+        props.name && props.name !== props.id ? props.name : 'not recorded in export',
         props.name && props.name !== props.id ? 'ok' : 'info',
       ),
     );
@@ -2425,27 +2447,73 @@ class MapViewer {
   }
 
   mechanicalRows(props, prominent = false) {
-    const stayStatus = props.stay_evidence_status;
+    const stayEvidence = this.stayEvidenceSummary(props);
     const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
       ? props.stay_types.join(', ')
       : props.stay_type;
     return [
       this.popupRow(
         'Stay Evidence',
-        stayStatus === 'captured' || props.stay_present
-          ? `captured: ${stayTypes || props.stay_present || 'stay record'}`
-          : 'not captured',
-        stayStatus === 'captured' ? 'ok' : prominent ? 'warning' : 'info',
-        stayStatus === 'captured'
-          ? this.nearestStayDetail(props)
-          : 'Angle pole — stay evidence not captured. Check field notes, photos or plan evidence.',
+        stayEvidence.value,
+        stayEvidence.status === 'ok' ? 'ok' : prominent && stayEvidence.status !== 'info' ? 'warning' : stayEvidence.status,
+        stayEvidence.detail,
       ),
-      this.popupRow('Stay Type', stayTypes || 'not captured', stayTypes ? 'ok' : 'info'),
-      this.popupRow('Stay Bearing', props.stay_bearing || 'not captured', props.stay_bearing ? 'ok' : 'info'),
-      this.popupRow('Anchor Details', props.anchor_details || 'not linked', props.anchor_details ? 'ok' : 'info'),
+      this.popupRow(
+        'Stay Type',
+        stayTypes || (stayEvidence.kind === 'captured' ? 'captured stay record - type not supplied' : stayEvidence.kind === 'inferred' ? 'inferred - type not supplied' : 'evidence gap - stay configuration unknown'),
+        stayTypes ? 'ok' : stayEvidence.kind === 'missing' && prominent ? 'warning' : 'info',
+      ),
+      this.popupRow('Stay Bearing', props.stay_bearing || 'not recorded in current export', props.stay_bearing ? 'ok' : 'info'),
+      this.popupRow('Anchor Details', props.anchor_details || 'not linked in current export', props.anchor_details ? 'ok' : 'info'),
       this.popupRow('Route Deviation', props.route_deviation_deg ? `${props.route_deviation_deg}°` : 'not calculated', props.route_deviation_deg ? 'warning' : 'info'),
       this.popupRow('Action', prominent ? 'Verify stay configuration before design' : 'Check field notes if stay evidence is expected', prominent ? 'warning' : 'info'),
     ];
+  }
+
+  stayEvidenceSummary(props) {
+    const stayStatus = String(props.stay_evidence_status || '').toLowerCase();
+    const stayTypes = Array.isArray(props.stay_types) && props.stay_types.length > 0
+      ? props.stay_types.join(', ')
+      : props.stay_type;
+    const stayPresent = String(props.stay_present || '').trim();
+    if (stayStatus === 'captured') {
+      return {
+        kind: 'captured',
+        value: `captured evidence: ${stayTypes || stayPresent || 'stay record'}`,
+        status: 'ok',
+        detail: this.nearestStayDetail(props) || 'Captured from stay/anchor record or explicit survey evidence.',
+      };
+    }
+    if (stayStatus === 'inferred') {
+      return {
+        kind: 'inferred',
+        value: `inferred evidence: ${stayTypes || stayPresent || 'stay likely from current fields'}`,
+        status: 'review',
+        detail: 'Inferred from current fields; confirm against field notes, photos, or plan evidence.',
+      };
+    }
+    if (stayStatus === 'missing') {
+      return {
+        kind: 'missing',
+        value: 'evidence gap - no captured stay evidence in current export',
+        status: 'warning',
+        detail: 'Angle pole - check field notes, photos, or plan evidence before design reliance.',
+      };
+    }
+    if (stayPresent && !/^no|false|none$/i.test(stayPresent)) {
+      return {
+        kind: 'inferred',
+        value: `survey field indicates stay: ${stayPresent}`,
+        status: 'review',
+        detail: 'Stay presence is indicated, but linked stay/anchor evidence is not explicit.',
+      };
+    }
+    return {
+      kind: 'absent',
+      value: 'not indicated by current data',
+      status: 'info',
+      detail: 'No captured or inferred stay evidence in the current export.',
+    };
   }
 
   stayDetailRows(props) {
@@ -2453,22 +2521,22 @@ class MapViewer {
       this.popupRow('Type', props.structure_type || 'Stay / anchor'),
       this.popupRow(
         'Parent pole',
-        props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id || 'not linked',
+        props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id || 'not linked in current export',
         props.connectivity_parent_pole || props.parent_support_id || props.linked_pole_id ? 'ok' : 'info',
       ),
-      this.popupRow('Direction', props.stay_bearing || 'not captured', props.stay_bearing ? 'ok' : 'info'),
-      this.popupRow('Configuration', props.stay_configuration || 'not captured', props.stay_configuration ? 'ok' : 'info'),
+      this.popupRow('Direction', props.stay_bearing || 'not recorded in current export', props.stay_bearing ? 'ok' : 'info'),
+      this.popupRow('Configuration', props.stay_configuration || 'not recorded in current export', props.stay_configuration ? 'ok' : 'info'),
       this.popupRow('Nearest Pole', this.nearestStayDetail(props) || 'not calculated', props.nearest_stay_distance_m ? 'ok' : 'info'),
     ];
   }
 
   designRequirementRows(props) {
     return [
-      this.popupRow('Action Required', props.action_required || 'not captured', props.action_required ? 'warning' : 'info'),
+      this.popupRow('Action Required', props.action_required || 'not specified yet', props.action_required ? 'warning' : 'info'),
       this.popupRow('Clearance', this.isClearanceCrossing(props) ? this.contextReviewLabel(props) : 'check route context / plans', 'info'),
       this.popupRow('Stay Required', this.isAnglePole(props) ? 'review angle/stay evidence' : 'not indicated by current data', this.isAnglePole(props) ? 'warning' : 'info'),
       this.popupRow('Access', props.access_constraint || 'check field notes / plans', 'info'),
-      this.popupRow('Design Note', props.name && props.name !== props.id ? props.name : 'not captured', props.name && props.name !== props.id ? 'ok' : 'info'),
+      this.popupRow('Design Note', props.name && props.name !== props.id ? props.name : 'not specified yet', props.name && props.name !== props.id ? 'ok' : 'info'),
     ];
   }
 
@@ -2510,7 +2578,12 @@ class MapViewer {
       ...linkRows,
       this.popupRow('Priority', this.isClearanceCrossing(props) ? 'HIGH' : 'Review', this.isClearanceCrossing(props) ? 'warning' : 'info'),
       this.popupRow('Label', this.contextReviewLabel(props), this.isClearanceCrossing(props) ? 'warning' : 'info'),
-      this.popupRow('Clearance Measured', props.clearance_measured || 'No', props.clearance_measured ? 'ok' : 'warning'),
+      this.popupRow(
+        'Clearance Measured',
+        props.clearance_measured || 'not measured in current export',
+        props.clearance_measured ? 'ok' : 'review',
+        props.clearance_measured ? '' : 'Do not infer absence of clearance risk from a blank measurement.',
+      ),
       this.popupRow('Distance from Route', props.distance_from_route_m ? `${props.distance_from_route_m}m` : 'not calculated', 'info'),
       this.popupRow('Action', this.isClearanceCrossing(props) ? 'Measure statutory clearance to crossing surface' : 'Review site constraint before design', 'warning'),
     ];
@@ -2518,22 +2591,22 @@ class MapViewer {
 
   locationRows(props, lat, lon) {
     return [
-      this.popupRow('Easting / Northing', props.easting ? `${props.easting}, ${props.northing}` : 'not captured', props.easting ? 'ok' : 'info'),
+      this.popupRow('Easting / Northing', props.easting ? `${props.easting}, ${props.northing}` : 'not recorded in export', props.easting ? 'ok' : 'info'),
       this.popupRow('Lat / Lon', `${lat.toFixed(5)}, ${lon.toFixed(5)}`, 'ok'),
-      this.popupRow('Elevation', props.elevation != null && props.elevation !== '' ? `${props.elevation}m` : 'not captured', props.elevation ? 'ok' : 'info'),
-      this.popupRow('GNSS Accuracy', props.gnss_accuracy || 'not captured', props.gnss_accuracy ? 'ok' : 'info'),
+      this.popupRow('Elevation', props.elevation != null && props.elevation !== '' ? `${props.elevation}m` : 'not recorded in export', props.elevation ? 'ok' : 'info'),
+      this.popupRow('GNSS Accuracy', props.gnss_accuracy || 'not recorded - positional confidence unknown', props.gnss_accuracy ? 'ok' : 'info'),
     ];
   }
 
   evidenceRows(props) {
     const photos = this.photoEvidenceText(props);
     return [
-      this.popupRow('Surveyed By', props.surveyor || 'not captured', props.surveyor ? 'ok' : 'info'),
-      this.popupRow('Survey Date', props.survey_date || 'not captured', props.survey_date ? 'ok' : 'info'),
-      this.popupRow('GNSS Accuracy', props.gnss_accuracy || 'not captured', props.gnss_accuracy ? 'ok' : 'info'),
-      this.popupRow('Photo Evidence', photos, photos === 'no linked photos' ? 'info' : 'ok'),
+      this.popupRow('Surveyed By', props.surveyor || 'not recorded in export', props.surveyor ? 'ok' : 'info'),
+      this.popupRow('Survey Date', props.survey_date || 'not recorded in export', props.survey_date ? 'ok' : 'info'),
+      this.popupRow('GNSS Accuracy', props.gnss_accuracy || 'not recorded - positional confidence unknown', props.gnss_accuracy ? 'ok' : 'info'),
+      this.popupRow('Photo Evidence', photos, photos === 'no linked photo references in current export' ? 'info' : 'ok'),
       this.popupRow('Source Confidence', props.source_confidence || 'raw survey export', 'info'),
-      this.popupRow('Remarks', props.name && props.name !== props.id ? props.name : 'not captured', props.name && props.name !== props.id ? 'ok' : 'info'),
+      this.popupRow('Remarks', props.name && props.name !== props.id ? props.name : 'not recorded in export', props.name && props.name !== props.id ? 'ok' : 'info'),
     ];
   }
 
@@ -2673,7 +2746,7 @@ class MapViewer {
     if (props.issue_count > 0) {
       rows.push(this.popupRow('Design Blockers', `${props.issue_count}`, 'blocker', (props.issue_texts || []).join(' | ')));
     }
-    if (rows.length === 0) rows.push(this.popupRow('QA Items', 'none recorded', 'ok'));
+    if (rows.length === 0) rows.push(this.popupRow('QA Items', 'no QA items in current export', 'ok'));
     return rows;
   }
 
@@ -2755,19 +2828,31 @@ class MapViewer {
 
   isEmptyPopupDisplay(display) {
     const value = String(display || '').trim().toLowerCase();
+    if (
+      value.startsWith('not recorded')
+      || value.startsWith('not supplied')
+      || value.startsWith('evidence gap -')
+      || value.startsWith('not linked')
+    ) {
+      return true;
+    }
     return new Set([
       '—',
       'not captured',
       'none recorded',
       'not specified',
+      'not specified yet',
+      'design decision pending',
       'not linked',
       'not applicable',
       'not applicable yet',
       'not yet specified',
       'not inferred',
       'none inferred',
+      'none inferred from current fields',
       'not parsed',
       'no linked photos',
+      'no linked photo references in current export',
     ]).has(value);
   }
 
@@ -2804,7 +2889,7 @@ class MapViewer {
     if (Array.isArray(props.photo_links) && props.photo_links.length > 0) {
       photos.push(`${props.photo_links.length} linked ref${props.photo_links.length === 1 ? '' : 's'}`);
     }
-    return photos.length > 0 ? photos.join(', ') : 'no linked photos';
+    return photos.length > 0 ? photos.join(', ') : 'no linked photo references in current export';
   }
 
   _showRecordPanel(items, title) {

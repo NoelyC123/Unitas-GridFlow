@@ -536,13 +536,15 @@ POPUP_ASSEMBLY_BY_ROLE: dict[str, tuple[dict[str, Any], ...]] = {
             "id": "mechanical",
             "title": "Mechanical",
             "kind": "condenseable",
-            "blank_state_text": "Stay and mechanical detail were not captured where applicable.",
+            "blank_state_text": (
+                "Stay and mechanical evidence is not explicit in the current export."
+            ),
         },
         {
             "id": "equipment_pole_top",
             "title": "Equipment & pole-top",
             "kind": "condenseable",
-            "blank_state_text": "No pole-mounted equipment captured or inferred.",
+            "blank_state_text": "No pole-mounted equipment inferred from current fields.",
         },
         {"id": "network_links", "title": "Network links", "kind": "standard"},
         {
@@ -583,7 +585,7 @@ POPUP_ASSEMBLY_BY_ROLE: dict[str, tuple[dict[str, Any], ...]] = {
             "id": "equipment_pole_top",
             "title": "Equipment & pole-top",
             "kind": "condenseable",
-            "blank_state_text": "No proposed pole-mounted equipment is captured or inferred.",
+            "blank_state_text": "No proposed pole-mounted equipment inferred from current fields.",
         },
         {"id": "network_links", "title": "Network links", "kind": "standard"},
         {
@@ -639,13 +641,15 @@ POPUP_ASSEMBLY_BY_ROLE: dict[str, tuple[dict[str, Any], ...]] = {
             "id": "mechanical",
             "title": "Mechanical",
             "kind": "condenseable",
-            "blank_state_text": "Stay and mechanical detail were not captured where applicable.",
+            "blank_state_text": (
+                "Stay and mechanical evidence is not explicit in the current export."
+            ),
         },
         {
             "id": "equipment_pole_top",
             "title": "Equipment & pole-top",
             "kind": "condenseable",
-            "blank_state_text": "No pole-mounted equipment captured or inferred.",
+            "blank_state_text": "No pole-mounted equipment inferred from current fields.",
         },
         {"id": "network_links", "title": "Network links", "kind": "standard"},
         {
