@@ -215,6 +215,26 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
     return spans
 
 
+def apply_structural_inference(props: dict) -> None:
+    """Infer stay wire requirement from route angle deviation.
+
+    Writes inferred_requires_stay, inference_source, inference_confidence.
+    Never overwrites stay_present, stay_type, or stay_configuration.
+    Does nothing if route_deviation_deg is absent or unparseable.
+    """
+    angle = props.get("route_deviation_deg")
+    if angle is None:
+        return
+    try:
+        angle = float(angle)
+    except (TypeError, ValueError):
+        return
+    inferred = angle > 15.0
+    props["inferred_requires_stay"] = inferred
+    props["inference_source"] = "geometry_angle"
+    props["inference_confidence"] = "medium" if inferred else "low"
+
+
 def _enrich_popup_data_model(data: dict) -> dict:
     """Backfill C2-2 display fields for previously generated map_data.json files."""
     if not isinstance(data, dict):
@@ -264,6 +284,7 @@ def _enrich_popup_data_model(data: dict) -> dict:
         merge_connectivity_into_props(props)
         merge_survey_metadata_into_props(props)
         enrich_pole_support_props(props)
+        apply_structural_inference(props)
         if props.get("photo_links") and not props.get("photo_count"):
             props["photo_count"] = len(props.get("photo_links") or [])
     for span_feat in data.get("span_features") or []:
