@@ -18,9 +18,10 @@ The May 2026 source-of-truth references describe the current state as:
 
 ## Latest completed package
 
-- **C2D-AA review workspace polish/package**
-- Merged as `0106904 Merge C2D review workspace polish`
-- Tests at merge: `pytest -v` passed, **514 passed**; `pre-commit` passed
+- **C2D-AC map review workspace usability polish**
+- Merged as `f42e809 Merge C2D map workspace usability polish`
+- Package commit: `1c2f730 Polish C2D map review workspace usability`
+- Tests at package: `pytest -v` passed, **519 passed**; `pre-commit` passed
 
 ---
 
@@ -60,6 +61,9 @@ Core capabilities described by the May 2026 references:
 - Span anomaly detection
 - Crossing/context enrichment
 - Professional popup organisation with conditional display for existing, proposed, and context records
+- Popup truthfulness wording that distinguishes known evidence, missing evidence, inferred values, unavailable values, and design decisions
+- Angle pole controls represented as runtime highlights/subsets rather than separate stored record layers
+- Bounded map review side-panel scrolling and clearer map/panel sizing
 - PDF QA/design-readiness handoff reports
 - Design Chain and Raw Working Audit style handoff outputs
 
@@ -113,11 +117,17 @@ GridFlow does not yet have enough validated commercial evidence to justify jumpi
 
 ## Current C2/D checkpoint
 
-Next explicit task:
+Current consolidation task:
 
-- **C2D-AB popup field truthfulness / evidence-status pass**
+- **C2D-AD validation evidence and readiness consolidation**
+- Source commit for validation: `f42e809 Merge C2D map workspace usability polish`
+- Evidence report: `AI_CONTROL/09_C2D_VALIDATION_READINESS_REPORT.md`
 
-C2D-AB was previously inferred from the review workspace polish work and is now recorded as the next task.
+Recommended next implementation priorities:
+
+- Refresh/persist canonical local validation fixtures so stored `meta.json` / `map_data.json` carry current C2/D metadata instead of relying only on runtime enrichment.
+- Tighten PDF/report evidence wording parity with C2D popup truthfulness where static route smoke checks are weaker than popup tests.
+- Run a focused browser/screenshot UX validation pass on Gordon, Bellsprings, and Irish Grid fixtures before any broader workspace redesign.
 
 ---
 
