@@ -2,14 +2,14 @@
 
 ## Status
 
-**Phase C2/D professional QA + display refinement active.**
+**Validation-first phase active.**
 
-Latest completed package:
+Completed C2/D packages:
 
-- **C2D-AC map review workspace usability polish**
-- Merged as `f42e809 Merge C2D map workspace usability polish`
-- Package commit: `1c2f730 Polish C2D map review workspace usability`
-- Tests at package: `pytest -v` passed, **519 passed**; `pre-commit` passed
+- **C2D-AA review workspace polish/package** - merged as `0106904 Merge C2D review workspace polish`
+- **C2D-AB popup field truthfulness / evidence-status pass** - merged as `f06026b Merge C2D-AB popup field truthfulness`
+- **C2D-AC map review workspace usability polish** - merged as `f42e809 Merge C2D map workspace usability polish`
+- **C2D-AD validation evidence and readiness consolidation** - merged as `d433596 Merge C2D validation readiness consolidation`
 
 This file has been aligned with the May 2026 source-of-truth references:
 
@@ -32,31 +32,45 @@ It is not currently a full CAD replacement, GIS platform, DNO compliance engine,
 
 ## Current implementation path
 
-Noel has approved Phase C2/D professional QA + display refinement as the next implementation path.
+Noel has approved a manual real-job validation pass as the current task.
 
 Current source of truth:
 
-- `AI_CONTROL/08_PHASE_C2D_IMPLEMENTATION_SPEC.md`
+- `AI_CONTROL/01_CURRENT_STATE.md`
+- `AI_CONTROL/10_REAL_JOB_VALIDATION_PLAN.md`
 
 Stage 4/full survey-platform expansion remains out of scope unless Noel/Goss explicitly changes direction.
 
+No new Codex implementation tasks are approved until validation findings exist.
+
 ---
 
-## Option A — Phase C2/D professional QA + display refinement
+## Current approved task - manual real-job validation pass
 
-The May 2026 references describe this as the lower-risk next path.
+Purpose:
 
-Scope framing:
+- Validate the current C2/D map/review workspace against representative real/local jobs.
+- Decide which observed outputs are trustworthy and which require fixes.
+- Record findings before requesting further Codex implementation.
 
-- Keep GridFlow as an enhanced pre-CAD QA/design-readiness workspace
-- Improve professional survey display and map UX
-- Add a limited set of 10-15 priority survey fields
-- Improve popup organisation and asset-specific display
-- Validate immediately on the existing real job corpus
+Jobs:
 
-Approximate scale in the May 2026 references: 2-4 weeks.
+- `P005/F001`
+- `P008/F001`
+- `P009/F001`
+- `P010/F001`
 
-This path preserves scope discipline and does not require full commercial validation before starting.
+Validation focus:
+
+- Asset classification
+- Stay evidence
+- Span sequencing
+- Lifecycle matching
+- Irish Grid coordinates
+- Popup field gaps
+- QA rule usefulness
+
+Findings must be recorded in `AI_CONTROL/10_REAL_JOB_VALIDATION_PLAN.md`.
 
 ---
 
@@ -102,6 +116,7 @@ No Stage 4 implementation should begin from assumption or enthusiasm alone.
 
 ## What not to do from this task file
 
+- Do not start new Codex implementation tasks before validation findings exist.
 - Do not start Stage 4 without customer/commercial validation.
 - Do not treat GridFlow as a full CAD, GIS, DNO compliance, or survey-capture platform.
 - Do not expand from Phase C2/D into a 50-field data model without a decision gate.
@@ -114,19 +129,16 @@ No Stage 4 implementation should begin from assumption or enthusiasm alone.
 
 Current task:
 
-- **C2D-AD validation evidence and readiness consolidation**
-- Validate current C2/D map/review workspace behaviour after `f42e809`.
-- Record evidence for Gordon-style, Bellsprings-style, and Irish Grid/controller-style local jobs where present.
-- Keep this as validation/readiness consolidation only; do not start Stage 4 or add survey-platform scope.
+- **Manual real-job validation pass**
+- Use `AI_CONTROL/10_REAL_JOB_VALIDATION_PLAN.md` as the validation source of truth.
+- Do not infer findings. Add only findings observed during manual validation.
+- Do not request implementation until findings exist.
 
 Expected outputs:
 
-- `CHANGELOG.md` records C2D-AC completion and C2D-AD validation evidence.
-- `AI_CONTROL/01_CURRENT_STATE.md` reflects the latest completed package and next priorities.
-- `AI_CONTROL/09_C2D_VALIDATION_READINESS_REPORT.md` records the validation evidence and duplicate-work warnings.
+- Filled findings in `AI_CONTROL/10_REAL_JOB_VALIDATION_PLAN.md`.
+- A prioritised list of validated defects/gaps after manual review.
 
-Recommended next implementation priorities after C2D-AD:
+Next implementation gate:
 
-- **C2D-AE validation fixture refresh:** persist/regenerate canonical local fixture outputs so stored metadata reflects current C2/D runtime enrichment and design-readiness fields.
-- **C2D-AF report wording parity:** tighten PDF/report evidence-status wording against popup truthfulness, especially angle/context/span ownership language.
-- **C2D-AG browser validation pack:** capture focused real-job screenshots for map controls, popup examples, and right-panel usability before broader UX redesign.
+- Codex implementation resumes only when Noel supplies specific validation findings or authorises a focused fix task based on this validation plan.

@@ -2,7 +2,7 @@
 
 ## Project phase
 
-**Phase C complete; Phase C2/D professional QA + display refinement active.**
+**Phase C complete; Phase C2/D display refinement complete through C2D-AD; validation-first phase active.**
 
 GridFlow has evolved from an MVP into an operational survey-to-design intelligence and design-readiness workspace for electricity network handoffs. It is currently strongest around UK OHL / 11kV / real controller survey workflows.
 
@@ -12,16 +12,18 @@ The May 2026 source-of-truth references describe the current state as:
 - Stage 2 design-ready handoff / Design Chain: complete for the current evidence set
 - Stage 3 live intake platform: complete for the current evidence set
 - Phase C map intelligence: complete
-- Current status: Phase C2/D professional QA + display refinement is the active implementation path
+- Current status: Phase C2/D professional QA + display refinement has produced a review workspace that now needs manual real-job validation before more development
 
 ---
 
-## Latest completed package
+## Latest completed packages
 
-- **C2D-AC map review workspace usability polish**
-- Merged as `f42e809 Merge C2D map workspace usability polish`
-- Package commit: `1c2f730 Polish C2D map review workspace usability`
-- Tests at package: `pytest -v` passed, **519 passed**; `pre-commit` passed
+- **C2D-AA review workspace polish/package** - merged as `0106904 Merge C2D review workspace polish`
+- **C2D-AB popup field truthfulness / evidence-status pass** - merged as `f06026b Merge C2D-AB popup field truthfulness`
+- **C2D-AC map review workspace usability polish** - merged as `f42e809 Merge C2D map workspace usability polish`
+- **C2D-AD validation evidence and readiness consolidation** - merged as `d433596 Merge C2D validation readiness consolidation`
+
+C2D-AA through C2D-AD are complete and merged. The map workspace, popup wording, angle-highlight semantics, and review UI have been improved. This does **not** mean the underlying engineering logic is validated.
 
 ---
 
@@ -44,9 +46,9 @@ GridFlow should complement Field Maps/basic spatial display by showing the same 
 
 ---
 
-## What works right now
+## What is implemented right now
 
-Core capabilities described by the May 2026 references:
+Core capabilities described by the May 2026 references and current C2/D work:
 
 - Multi-format CSV intake for Trimble/controller and structured exports
 - Column/header normalisation
@@ -69,6 +71,22 @@ Core capabilities described by the May 2026 references:
 
 ---
 
+## Validation boundary
+
+Current C2/D implementation should be treated as **display-ready for manual review**, not engineering-correct.
+
+The following underlying logic is implemented but **not yet validated as engineering-correct** across real jobs:
+
+- Asset classification
+- Stay detection
+- Span sequencing
+- Lifecycle matching
+- Irish Grid handling
+
+Do not treat these outputs as final engineering truth until manual validation findings exist. The current product state supports structured review, evidence capture, and issue discovery; it does not yet prove that these interpretations are correct for all representative real jobs.
+
+---
+
 ## Validation and quality status
 
 The May 2026 source-of-truth references report:
@@ -78,7 +96,9 @@ The May 2026 source-of-truth references report:
 - Real operational validation integrated from P011, Gordon/NIE, and Bellsprings/SPEN
 - Consistent issue patterns across real jobs, including EX/PR replacement relationships, span anomalies, angle poles without stay evidence, estimated existing-pole heights, and height plausibility issues
 
-No new test run is implied by this state file; this is a documentation/control-layer summary of the referenced state.
+Code tests and route smoke checks confirm the application runs and the display logic is guarded. They do not validate that asset classification, stay evidence, span sequencing, lifecycle matching, or Irish Grid handling are engineering-correct.
+
+The next phase is manual real-job validation, not further development.
 
 ---
 
@@ -105,10 +125,10 @@ These remain future scope and must not be treated as current implementation real
 
 GridFlow currently has:
 
-- Proven real-survey intake and normalisation
+- Real-survey intake and normalisation implemented and covered by tests
 - Design-readiness QA and issue reporting
 - Map-based engineering review tools
-- Real operational validation
+- Real operational evidence that now needs structured validation findings
 - Strongest fit as an internal/consultancy productivity and QA tool for survey-to-design handoff
 
 GridFlow does not yet have enough validated commercial evidence to justify jumping directly into a full Stage 4 survey-platform build.
@@ -117,17 +137,18 @@ GridFlow does not yet have enough validated commercial evidence to justify jumpi
 
 ## Current C2/D checkpoint
 
-Current consolidation task:
+Current approved phase:
 
-- **C2D-AD validation evidence and readiness consolidation**
-- Source commit for validation: `f42e809 Merge C2D map workspace usability polish`
-- Evidence report: `AI_CONTROL/09_C2D_VALIDATION_READINESS_REPORT.md`
+- **Manual real-job validation pass**
+- Validation source of truth: `AI_CONTROL/10_REAL_JOB_VALIDATION_PLAN.md`
+- Current jobs: `P005/F001`, `P008/F001`, `P009/F001`, `P010/F001`
 
-Recommended next implementation priorities:
+No new Codex implementation tasks are approved until validation findings have been recorded.
 
-- Refresh/persist canonical local validation fixtures so stored `meta.json` / `map_data.json` carry current C2/D metadata instead of relying only on runtime enrichment.
-- Tighten PDF/report evidence wording parity with C2D popup truthfulness where static route smoke checks are weaker than popup tests.
-- Run a focused browser/screenshot UX validation pass on Gordon, Bellsprings, and Irish Grid fixtures before any broader workspace redesign.
+Recommended next action:
+
+- Manually inspect the listed real jobs and add findings to `AI_CONTROL/10_REAL_JOB_VALIDATION_PLAN.md` using the required finding format.
+- Only after findings exist should Codex receive implementation tasks for specific validated defects or gaps.
 
 ---
 
@@ -135,4 +156,4 @@ Recommended next implementation priorities:
 
 No implementation scope should be started from stale Phase C-pending, Phase 1, Phase 2, or Phase 3 wording.
 
-Use the May 2026 references and this refreshed control layer for current state. Stage 4 remains out of scope unless Noel records a new decision gate.
+Use the May 2026 references and this refreshed control layer for current state. Stage 4 remains out of scope unless Noel records a new decision gate. Further C2/D development must be driven by recorded real-job validation findings.
