@@ -4,6 +4,12 @@
 
 **Phase C2/D professional QA + display refinement active.**
 
+Latest completed package:
+
+- **C2D-AA review workspace polish/package**
+- Merged as `0106904 Merge C2D review workspace polish`
+- Tests at merge: `pytest -v` passed, **514 passed**; `pre-commit` passed
+
 This file has been aligned with the May 2026 source-of-truth references:
 
 - `AI_CONTROL/reference/GridFlow_Project-Control_Review_May_2026.txt`
@@ -105,4 +111,8 @@ No Stage 4 implementation should begin from assumption or enthusiasm alone.
 
 ## Next checkpoint
 
-Complete the Phase C2/D task sequence from `AI_CONTROL/08_PHASE_C2D_IMPLEMENTATION_SPEC.md`, starting with C2D-1 field inventory + alias/display mapping.
+Next explicit task:
+
+- **C2D-AB popup field truthfulness / evidence-status pass**
+
+C2D-AB was previously inferred from the review workspace polish work and is now recorded as the next task.
