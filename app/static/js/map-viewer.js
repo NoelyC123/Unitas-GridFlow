@@ -267,7 +267,7 @@ class MapViewer {
 
     this._resetLayerToggle('existing', lc.existing >= 1, 'No existing pole records in this job.');
     this._resetLayerToggle('proposed', lc.proposed >= 1, 'No proposed pole records in this job.');
-    this._resetLayerToggle('angle', lc.angle >= 1, 'No angle pole records in this job.');
+    this._resetLayerToggle('angle', lc.angle >= 1, 'No angle pole highlights in this job.');
     this._resetLayerToggle('stays', lc.stays >= 1, 'No stay or anchor structure records in this job.');
     this._resetLayerToggle('thirdparty', lc.thirdparty >= 1, 'No third-party infrastructure records in this job.');
     this._resetLayerToggle('context', lc.context >= 1, 'No context / crossing records in this job.');
@@ -1965,6 +1965,10 @@ class MapViewer {
   }
 
   heightEvidenceAlertSections(props) {
+    const kind = this.popupAssetKind(props);
+    if (!['existing', 'angle'].includes(kind)) {
+      return [];
+    }
     const heightConf = props.height_confidence || {};
     if (!['warning', 'blocker', 'fail', 'review'].includes(heightConf.status)) {
       return [];

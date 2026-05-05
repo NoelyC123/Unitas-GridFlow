@@ -276,6 +276,15 @@ def test_map_js_c2d_ab_popup_truthfulness_wording(map_js_source: str) -> None:
     assert "not recorded - circuit voltage not supplied for this ${routeKind}" in map_js_source
 
 
+def test_map_js_height_evidence_excludes_context_popups(map_js_source: str) -> None:
+    assert "heightEvidenceAlertSections(props)" in map_js_source
+    assert "if (!['existing', 'angle'].includes(kind))" in map_js_source
+
+
+def test_map_view_angle_layer_uses_highlight_wording(map_view_html: str) -> None:
+    assert "Angle pole highlights" in map_view_html
+
+
 def test_map_js_span_layer_origin_sync(map_js_source: str) -> None:
     assert "syncSpanPanelHeading" in map_js_source
     assert "span_layer_origin" in map_js_source
