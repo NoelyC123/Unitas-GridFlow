@@ -6,9 +6,10 @@
 
 Latest completed package:
 
-- **C2D-AA review workspace polish/package**
-- Merged as `0106904 Merge C2D review workspace polish`
-- Tests at merge: `pytest -v` passed, **514 passed**; `pre-commit` passed
+- **C2D-AC map review workspace usability polish**
+- Merged as `f42e809 Merge C2D map workspace usability polish`
+- Package commit: `1c2f730 Polish C2D map review workspace usability`
+- Tests at package: `pytest -v` passed, **519 passed**; `pre-commit` passed
 
 This file has been aligned with the May 2026 source-of-truth references:
 
@@ -109,10 +110,23 @@ No Stage 4 implementation should begin from assumption or enthusiasm alone.
 
 ---
 
-## Next checkpoint
+## Current checkpoint
 
-Next explicit task:
+Current task:
 
-- **C2D-AB popup field truthfulness / evidence-status pass**
+- **C2D-AD validation evidence and readiness consolidation**
+- Validate current C2/D map/review workspace behaviour after `f42e809`.
+- Record evidence for Gordon-style, Bellsprings-style, and Irish Grid/controller-style local jobs where present.
+- Keep this as validation/readiness consolidation only; do not start Stage 4 or add survey-platform scope.
 
-C2D-AB was previously inferred from the review workspace polish work and is now recorded as the next task.
+Expected outputs:
+
+- `CHANGELOG.md` records C2D-AC completion and C2D-AD validation evidence.
+- `AI_CONTROL/01_CURRENT_STATE.md` reflects the latest completed package and next priorities.
+- `AI_CONTROL/09_C2D_VALIDATION_READINESS_REPORT.md` records the validation evidence and duplicate-work warnings.
+
+Recommended next implementation priorities after C2D-AD:
+
+- **C2D-AE validation fixture refresh:** persist/regenerate canonical local fixture outputs so stored metadata reflects current C2/D runtime enrichment and design-readiness fields.
+- **C2D-AF report wording parity:** tighten PDF/report evidence-status wording against popup truthfulness, especially angle/context/span ownership language.
+- **C2D-AG browser validation pack:** capture focused real-job screenshots for map controls, popup examples, and right-panel usability before broader UX redesign.

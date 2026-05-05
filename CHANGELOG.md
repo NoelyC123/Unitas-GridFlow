@@ -8,6 +8,36 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-05 - C2D-AD validation readiness consolidation
+
+### Changed
+
+- Recorded **C2D-AC map review workspace usability polish** as the latest completed package after `f42e809 Merge C2D map workspace usability polish`.
+- Added `AI_CONTROL/09_C2D_VALIDATION_READINESS_REPORT.md` with current C2/D validation evidence and duplicate-work warnings.
+- Updated control state with next recommended priorities: fixture refresh, PDF/report wording parity, and browser validation evidence.
+
+### Validated
+
+- Checked current runtime map view, map data, and PDF routes across `P005/F001`, `P008/F001`, `P009/F001`, `P010/F001`, and `P009/F002`.
+- Confirmed angle highlight semantics, context/crossing enrichment, span controls, PDF route health, and span/cable field ownership on representative Gordon-style, Bellsprings-style, and Irish Grid/controller-style fixtures.
+- Noted that some stored local validation JSON predates current runtime enrichment and should be refreshed in a focused follow-up before treating stored outputs as canonical snapshots.
+
+---
+
+## 2026-05-05 - C2D-AC map review workspace usability polish
+
+### Changed
+
+- Made angle pole controls truthful as runtime highlights/subsets rather than a separate stored record layer.
+- Kept existing/proposed structural records visible when the angle highlight control is toggled off.
+- Improved map/review side-panel sizing and scroll behaviour so the workspace is less constrained.
+
+### Tests
+
+- `pytest -v` passed, **519 passed**; `pre-commit run --all-files` passed.
+
+---
+
 ## 2026-05-05 - C2D-AA review workspace polish/package complete
 
 ### Changed
