@@ -9,6 +9,7 @@ from flask import Blueprint, jsonify, render_template
 from app.asset_classifier import classify_asset_type, get_popup_type_label
 from app.cable_generator import attach_cable_features_to_collection
 from app.context_crossing import enrich_context_crossing_records
+from app.duplicate_detection import apply_duplicate_detection
 from app.electrical_schema import (
     merge_electrical_fields_into_props,
     merge_equipment_fields_into_props,
@@ -279,10 +280,6 @@ def _enrich_popup_data_model(data: dict) -> dict:
             merge_electrical_fields_into_props(cp)
     enrich_context_crossing_records(data)
     enrich_replacement_pair_intelligence(data)
-
-    from app.duplicate_detection import apply_duplicate_detection
-
-    apply_duplicate_detection(data.get("features") or [])
     post_violations = validate_map_feature_collection_field_ownership(data)
     finalize_field_ownership_metadata(
         data,
@@ -313,6 +310,9 @@ def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
     except Exception:
         # Fallback to uncleaned if pipeline fails
         cleaned_seq = seq_payload
+
+    # Duplicate detection runs on normalised geometry, before schema enrichment or span logic
+    apply_duplicate_detection(data.get("features") or [])
 
     # Use cleaned sequence for span generation
     attach_span_features_to_collection(data, cleaned_seq)
