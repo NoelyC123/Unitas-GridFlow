@@ -1034,37 +1034,29 @@
             </div>
             <div id="filter-note" style="font-size:0.82rem;color:#6b7280;text-align:center;margin-top:6px;min-height:1.2em;"></div>
             <div id="frame-summary" style="display:none;font-size:0.78rem;color:#6b7280;text-align:center;margin-top:2px;"></div>
-            <div class="workspace-panel" aria-label="Review workspace summary">
+            <div class="workspace-panel review-intelligence-panel" aria-label="Review workspace summary">
               <div class="workspace-panel-title">Review workspace</div>
-              <div class="workspace-panel-note">Use blockers, review-needed counts, evidence gates, and lifecycle signals together before relying on route or popup detail.</div>
-              <div class="workspace-kpi-grid">
-                <div class="workspace-kpi">
+              <div id="review-intelligence-note" class="workspace-panel-note">Span-level review intelligence loads with the map route data.</div>
+              <div class="workspace-kpi-grid review-intelligence-grid">
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-fail">
                   <div class="workspace-kpi-label">Design blockers</div>
                   <div id="workspace-blocker-count" class="workspace-kpi-value status-fail">0</div>
-                  <div class="workspace-kpi-detail">Records that currently prevent design-readiness.</div>
+                  <div class="workspace-kpi-detail">Span issues that currently block design use.</div>
                 </div>
-                <div class="workspace-kpi">
-                  <div class="workspace-kpi-label">Review needed</div>
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-warn">
+                  <div class="workspace-kpi-label">Review required</div>
                   <div id="workspace-warning-count" class="workspace-kpi-value status-warn">0</div>
-                  <div class="workspace-kpi-detail">Evidence gaps or checks still requiring practitioner review.</div>
+                  <div class="workspace-kpi-detail">Non-critical span warnings needing practitioner review.</div>
                 </div>
-                {% set gate_ns = namespace(needs_action=0) %}
-                {% for gate in evidence_gates or [] %}
-                  {% if gate.status in ['Partial', 'Weak', 'Blocked'] %}
-                    {% set gate_ns.needs_action = gate_ns.needs_action + 1 %}
-                  {% endif %}
-                {% endfor %}
-                <div class="workspace-kpi">
-                  <div class="workspace-kpi-label">Evidence gates</div>
-                  <div class="workspace-kpi-value {% if gate_ns.needs_action %}status-warn{% else %}status-ok{% endif %}">{{ gate_ns.needs_action }}</div>
-                  <div class="workspace-kpi-detail">C2/D evidence gates still needing follow-up.</div>
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-gap">
+                  <div class="workspace-kpi-label">Evidence gaps</div>
+                  <div id="workspace-gap-count" class="workspace-kpi-value status-gap">0</div>
+                  <div class="workspace-kpi-detail">Spans with missing or unconfirmed required attributes.</div>
                 </div>
-                <div class="workspace-kpi">
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-verdict">
                   <div class="workspace-kpi-label">Readiness verdict</div>
-                  <div class="workspace-kpi-value {% if design_readiness and design_readiness.verdict == 'LIKELY READY' %}status-ok{% elif design_readiness and design_readiness.verdict == 'NOT READY' %}status-fail{% else %}status-warn{% endif %}">
-                    {{ design_readiness.verdict if design_readiness and design_readiness.verdict else 'Pending review' }}
-                  </div>
-                  <div class="workspace-kpi-detail">Overall workspace signal from current survey evidence and issues.</div>
+                  <div id="workspace-readiness-verdict" class="workspace-kpi-value status-warn">PARTIALLY READY</div>
+                  <div class="workspace-kpi-detail">Derived from current span status and evidence signals.</div>
                 </div>
               </div>
             </div>

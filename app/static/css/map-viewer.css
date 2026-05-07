@@ -22,6 +22,46 @@
   filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
 }
 
+.gf-span-review:not(.gf-route-highlight) {
+  filter: drop-shadow(0 0 3px rgba(217, 119, 6, 0.45));
+}
+
+.gf-span-blocker:not(.gf-route-highlight) {
+  filter: drop-shadow(0 0 4px rgba(185, 28, 28, 0.55));
+}
+
+.review-intelligence-panel {
+  background: #ffffff;
+}
+
+.review-intelligence-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.review-intelligence-kpi {
+  min-height: 94px;
+}
+
+.review-intelligence-kpi-fail {
+  border-left: 4px solid #dc2626;
+}
+
+.review-intelligence-kpi-warn {
+  border-left: 4px solid #d97706;
+}
+
+.review-intelligence-kpi-gap {
+  border-left: 4px solid #94a3b8;
+}
+
+.review-intelligence-kpi-verdict {
+  border-left: 4px solid #64748b;
+}
+
+.workspace-kpi-value.status-gap {
+  color: #64748b;
+}
+
 .legend-line.legend-ug-cable {
   background: transparent;
   border-top: 3px dashed #6b21a8;

@@ -68,6 +68,7 @@ class MapViewer {
     this._activeRouteGroupIndex = null;
     this._spanCrossingFilterOnly = false;
     this._cableLineRefs = [];
+    this._plannerAwarenessItems = [];
     try {
       const v = localStorage.getItem('gridflow_map_span_label_mode');
       const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
@@ -539,6 +540,240 @@ class MapViewer {
     return { short: short || (causes.length ? 'Review span' : ''), causes };
   }
 
+  spanIssueSeverityRank(severity) {
+    const s = String(severity || 'INFO').toUpperCase();
+    if (s === 'BLOCKER') return 3;
+    if (s === 'REVIEW' || s === 'WARNING' || s === 'WARN' || s === 'HIGH' || s === 'MEDIUM') return 2;
+    return 1;
+  }
+
+  spanIssueSeverityFromSignal(severity) {
+    const s = String(severity || 'INFO').toUpperCase();
+    if (s === 'BLOCKER' || s === 'BLOCKED' || s === 'FAIL' || s === 'CRITICAL') return 'BLOCKER';
+    if (s === 'REVIEW' || s === 'WARNING' || s === 'WARN' || s === 'HIGH' || s === 'MEDIUM') return 'REVIEW';
+    return 'INFO';
+  }
+
+  strongestSpanIssueSeverity(current, candidate) {
+    return this.spanIssueSeverityRank(candidate) > this.spanIssueSeverityRank(current)
+      ? (String(candidate || 'INFO').toUpperCase() === 'BLOCKER' ? 'BLOCKER' : 'REVIEW')
+      : current;
+  }
+
+  spanAwarenessKeys(props) {
+    const from = this.hasValue(props?.from_point_id) ? String(props.from_point_id) : '';
+    const to = this.hasValue(props?.to_point_id) ? String(props.to_point_id) : '';
+    const keys = new Set();
+    if (this.hasValue(props?.span_id)) keys.add(String(props.span_id));
+    if (from && to) {
+      keys.add(`${from}->${to}`);
+      keys.add(`${to}->${from}`);
+    }
+    return keys;
+  }
+
+  spanAwarenessItems(props) {
+    const keys = this.spanAwarenessKeys(props);
+    if (!keys.size || !Array.isArray(this._plannerAwarenessItems)) return [];
+    return this._plannerAwarenessItems.filter((item) => keys.has(String(item?.related_span_id || '')));
+  }
+
+  classifyTextIssue(text, categories) {
+    const s = String(text || '');
+    if (!s) return false;
+    let matched = false;
+    if (/clearance|crossing|obstruction|road|stream|track|access/i.test(s)) {
+      categories.add('CLEARANCE');
+      matched = true;
+    }
+    if (/span|geometry|duplicate|sequence|intermediate|distance|route/i.test(s)) {
+      categories.add('GEOMETRY');
+      matched = true;
+    }
+    if (/stay|anchor|structure|pole|height|material|specification|spec\b/i.test(s)) {
+      categories.add('STRUCTURAL');
+      matched = true;
+    }
+    if (/voltage|conductor|phase|cable|circuit|electrical/i.test(s)) {
+      categories.add('ELECTRICAL');
+      matched = true;
+    }
+    if (/missing|unknown|confirm|verify|not captured|not available|gap|required|pending/i.test(s)) {
+      categories.add('DATA');
+      matched = true;
+    }
+    return matched;
+  }
+
+  classifySpanIssues(span) {
+    const props = span?.properties || span?.props || span || {};
+    const categories = new Set();
+    let severity = 'INFO';
+    const addIssue = (category, issueSeverity = 'REVIEW') => {
+      if (category) categories.add(category);
+      severity = this.strongestSpanIssueSeverity(severity, issueSeverity);
+    };
+
+    const designStatus = String(props.design_status || '').toUpperCase();
+    if (designStatus === 'BLOCKED') addIssue('GEOMETRY', 'BLOCKER');
+    else if (designStatus === 'REVIEW') severity = this.strongestSpanIssueSeverity(severity, 'REVIEW');
+    if (props.design_usable === false) addIssue('GEOMETRY', 'BLOCKER');
+
+    const sourceDetail = props.source_confidence_detail || {};
+    const geometryTrust = String(props.geometry_trust || sourceDetail.geometry_trust || '').toLowerCase();
+    if (geometryTrust === 'unverified') addIssue('GEOMETRY', 'REVIEW');
+
+    const qaStatus = String(props.qa_status || '').toUpperCase();
+    if (qaStatus === 'FAIL') addIssue('DATA', 'BLOCKER');
+    else if (qaStatus === 'WARN') addIssue('DATA', 'REVIEW');
+
+    const validity = String(props.span_validity || '').toLowerCase();
+    if (validity === 'invalid') addIssue('GEOMETRY', 'BLOCKER');
+    else if (validity === 'suspect') addIssue('GEOMETRY', 'REVIEW');
+
+    const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
+    if (!Number.isNaN(dm)) {
+      if (dm < 5) addIssue('GEOMETRY', 'BLOCKER');
+      else if (dm < 12 || dm > 280) addIssue('GEOMETRY', 'REVIEW');
+    }
+
+    const crossingRisk = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (crossingRisk === 'blocker') addIssue('CLEARANCE', 'BLOCKER');
+    else if (crossingRisk && crossingRisk !== 'none') addIssue('CLEARANCE', 'REVIEW');
+
+    const reasonTypes = {
+      clearance: 'CLEARANCE',
+      geometry: 'GEOMETRY',
+      geometry_cluster: 'GEOMETRY',
+      geometry_trust: 'GEOMETRY',
+      structural: 'STRUCTURAL',
+      electrical: 'ELECTRICAL',
+      data: 'DATA',
+      evidence: 'DATA',
+      source: 'DATA',
+    };
+    const reasons = Array.isArray(props.design_blocker_reasons) ? props.design_blocker_reasons : [];
+    reasons.forEach((reason) => {
+      const item = reason && typeof reason === 'object'
+        ? reason
+        : { type: 'legacy', severity: 'info', message: String(reason || '') };
+      const type = String(item.type || '').toLowerCase();
+      const category = reasonTypes[type] || null;
+      if (category) categories.add(category);
+      this.classifyTextIssue(item.message, categories);
+      severity = this.strongestSpanIssueSeverity(severity, this.spanIssueSeverityFromSignal(item.severity));
+    });
+
+    const actions = Array.isArray(props.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    actions.forEach((action) => {
+      if (this.classifyTextIssue(action, categories)) {
+        severity = this.strongestSpanIssueSeverity(severity, 'REVIEW');
+      }
+    });
+
+    const issueTexts = [
+      ...(Array.isArray(props.issue_texts) ? props.issue_texts : []),
+      ...(Array.isArray(props.warn_texts) ? props.warn_texts : []),
+    ];
+    issueTexts.forEach((text) => {
+      if (this.classifyTextIssue(text, categories)) {
+        const critical = /fail|blocker|invalid|impossible|duplicate pole/i.test(String(text || ''));
+        severity = this.strongestSpanIssueSeverity(severity, critical ? 'BLOCKER' : 'REVIEW');
+      }
+    });
+
+    ['missing_fields', 'missing_required_fields', 'evidence_gaps', 'field_gaps'].forEach((key) => {
+      const value = props[key];
+      const values = Array.isArray(value) ? value : (this.hasValue(value) ? [value] : []);
+      values.forEach((item) => {
+        categories.add('DATA');
+        this.classifyTextIssue(item, categories);
+        severity = this.strongestSpanIssueSeverity(severity, 'REVIEW');
+      });
+    });
+
+    const awareness = this.spanAwarenessItems(props);
+    awareness.forEach((item) => {
+      this.classifyTextIssue(`${item.category || ''} ${item.message || ''}`, categories);
+      severity = this.strongestSpanIssueSeverity(severity, this.spanIssueSeverityFromSignal(item.severity));
+    });
+
+    return { categories: [...categories], severity };
+  }
+
+  computeReviewSummary(spans) {
+    const items = Array.isArray(spans) ? spans : [];
+    const summary = {
+      blockers: 0,
+      review: 0,
+      gaps: 0,
+      verdict: 'PARTIALLY READY',
+    };
+
+    items.forEach((span) => {
+      const issue = this.classifySpanIssues(span);
+      if (issue.severity === 'BLOCKER') summary.blockers += 1;
+      else if (issue.severity === 'REVIEW') summary.review += 1;
+      if (issue.categories.includes('DATA')) summary.gaps += 1;
+    });
+
+    if (summary.blockers > 0) summary.verdict = 'NOT READY';
+    else if (items.length > 0 && summary.review === 0 && summary.gaps === 0) summary.verdict = 'READY';
+
+    return summary;
+  }
+
+  reviewVerdictStatusClass(verdict) {
+    if (verdict === 'READY') return 'status-ok';
+    if (verdict === 'NOT READY') return 'status-fail';
+    return 'status-warn';
+  }
+
+  renderReviewIntelligenceSummary() {
+    const spans = (this._spanLineRefs || []).map((ref) => ref.props || {});
+    const summary = this.computeReviewSummary(spans);
+    const updates = [
+      ['workspace-blocker-count', summary.blockers],
+      ['workspace-warning-count', summary.review],
+      ['workspace-gap-count', summary.gaps],
+    ];
+    updates.forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    });
+
+    const verdictEl = document.getElementById('workspace-readiness-verdict');
+    if (verdictEl) {
+      verdictEl.textContent = summary.verdict;
+      verdictEl.classList.remove('status-ok', 'status-warn', 'status-fail');
+      verdictEl.classList.add(this.reviewVerdictStatusClass(summary.verdict));
+    }
+
+    const noteEl = document.getElementById('review-intelligence-note');
+    if (noteEl) {
+      noteEl.textContent = spans.length
+        ? 'Span-level review signals derived from current map data only.'
+        : 'No route spans available for review intelligence yet.';
+    }
+  }
+
+  spanReviewClassName(props) {
+    const issue = this.classifySpanIssues(props);
+    if (issue.severity === 'BLOCKER') return 'gf-span-blocker';
+    if (issue.severity === 'REVIEW') return 'gf-span-review';
+    return '';
+  }
+
+  applySpanReviewSignalClasses() {
+    for (const ref of this._spanLineRefs || []) {
+      const el = typeof ref.line?.getElement === 'function' ? ref.line.getElement() : null;
+      if (!el?.classList) continue;
+      const cls = this.spanReviewClassName(ref.props || {});
+      el.classList.toggle('gf-span-blocker', cls === 'gf-span-blocker');
+      el.classList.toggle('gf-span-review', cls === 'gf-span-review');
+    }
+  }
+
   renderMarkers(features) {
     const bounds = [];
 
@@ -806,13 +1041,14 @@ class MapViewer {
 
       const props = feat.properties || {};
       const vis = this.spanPolylineVisual(props, false);
+      const reviewClass = this.spanReviewClassName(props);
       const line = L.polyline(latLngs, {
         color: vis.color,
         weight: vis.weight,
         opacity: vis.opacity,
         lineCap: 'round',
         lineJoin: 'round',
-        className: 'gridflow-span-line',
+        className: ['gridflow-span-line', reviewClass].filter(Boolean).join(' '),
       });
 
       const label = this.spanDistanceLabel(props);
@@ -1060,12 +1296,17 @@ class MapViewer {
 
   renderPlannerAwareness(items) {
     if (!this.map) return;
+    this._plannerAwarenessItems = Array.isArray(items) ? items.slice() : [];
     if (this.plannerAwarenessLayer) {
       this.plannerAwarenessLayer.clearLayers();
       this.map.removeLayer(this.plannerAwarenessLayer);
     }
     this.plannerAwarenessLayer = L.layerGroup();
-    if (!Array.isArray(items) || items.length === 0) return;
+    if (!Array.isArray(items) || items.length === 0) {
+      this.applySpanReviewSignalClasses();
+      this.renderReviewIntelligenceSummary();
+      return;
+    }
 
     items.forEach((item) => {
       if (!item || item.lat == null || item.lon == null) return;
@@ -1094,6 +1335,8 @@ class MapViewer {
     if (this.layerState.plannerAwareness) {
       this.plannerAwarenessLayer.addTo(this.map);
     }
+    this.applySpanReviewSignalClasses();
+    this.renderReviewIntelligenceSummary();
   }
 
   renderCableFeatures(cableFeatures) {
@@ -1475,13 +1718,14 @@ class MapViewer {
       };
 
       const vis = this.spanPolylineVisual(props, false);
+      const reviewClass = this.spanReviewClassName(props);
       const line = L.polyline([from, to], {
         color: vis.color,
         weight: vis.weight,
         opacity: vis.opacity,
         lineCap: 'round',
         lineJoin: 'round',
-        className: 'gridflow-span-line',
+        className: ['gridflow-span-line', reviewClass].filter(Boolean).join(' '),
       });
 
       const label = this.spanDistanceLabel(props);
