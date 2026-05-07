@@ -24,6 +24,8 @@ _MEDIUM_CROSSING_HINTS = frozenset(("wall", "fence", "gate", "hedge", "tree", "p
 _SPAN_CROSSING_BUFFER_HIGH_M = 40.0
 _SPAN_CROSSING_BUFFER_MEDIUM_M = 28.0
 _SPAN_CROSSING_BUFFER_LOW_M = 18.0
+_HIGH_TIER_BLOCKER_DISTANCE_M = 2.0
+_DESIGN_REASON_SEVERITIES = frozenset(("blocker", "high", "medium", "low", "info"))
 
 
 def haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -206,19 +208,33 @@ def _hits_for_span(
             continue
         if tier_token == "low" and d > _SPAN_CROSSING_BUFFER_LOW_M:
             continue
+        risk_level = (
+            "BLOCKER" if tier_token == "high" and d <= _HIGH_TIER_BLOCKER_DISTANCE_M else tier_token
+        )
         hits.append(
             {
                 "point_id": ctx.get("pole_id") or "",
                 "structure_type": ctx.get("structure_type") or "",
                 "distance_m": d,
                 "crossing_tier": tier_token,
+                "proximity_threshold_m": (
+                    _SPAN_CROSSING_BUFFER_HIGH_M
+                    if tier_token == "high"
+                    else _SPAN_CROSSING_BUFFER_MEDIUM_M
+                    if tier_token == "medium"
+                    else _SPAN_CROSSING_BUFFER_LOW_M
+                ),
+                "risk_level": risk_level,
             }
         )
 
     hits.sort(key=lambda h: (h["distance_m"], h["structure_type"]))
     level = "none"
     for h in hits:
-        t = h.get("crossing_tier") or "low"
+        t = h.get("risk_level") or h.get("crossing_tier") or "low"
+        if t == "BLOCKER":
+            level = "BLOCKER"
+            break
         if t == "high":
             level = "high"
             break
@@ -233,7 +249,12 @@ def derive_designer_actions_for_span(props: dict[str, Any]) -> list[str]:
     """Suggested office actions from span enrichment (advisory, not rulepack verdict)."""
     actions: list[str] = []
     risk = str(props.get("crossing_risk_level") or "none").lower()
-    if risk == "high":
+    if risk == "blocker":
+        actions.append(
+            "Confirm statutory clearance and crossing profile for this span — "
+            "high-tier crossing context is within clearance proximity.",
+        )
+    elif risk == "high":
         actions.append(
             "Confirm statutory clearance and crossing profile for this span — "
             "road/track/utility crossing context within survey corridor.",
@@ -405,14 +426,26 @@ _SPAN_SUSPECT_THRESHOLD_M = 8.0
 def classify_span_validity(distance_m: float | None) -> dict[str, Any]:
     """Classify a span as invalid/suspect/valid based on distance_m only."""
     if distance_m is None or distance_m < _SPAN_INVALID_THRESHOLD_M:
+        design_status = "BLOCKED" if distance_m is None or distance_m < 2.0 else "REVIEW"
         return {
             "span_validity": "invalid",
             "design_usable": False,
+            "design_status": design_status,
             "clearance_check_allowed": False,
         }
     if distance_m <= _SPAN_SUSPECT_THRESHOLD_M:
-        return {"span_validity": "suspect", "design_usable": True, "clearance_check_allowed": True}
-    return {"span_validity": "valid", "design_usable": True, "clearance_check_allowed": True}
+        return {
+            "span_validity": "suspect",
+            "design_usable": True,
+            "design_status": "REVIEW",
+            "clearance_check_allowed": True,
+        }
+    return {
+        "span_validity": "valid",
+        "design_usable": True,
+        "design_status": "PASS",
+        "clearance_check_allowed": True,
+    }
 
 
 def build_span_feature(
@@ -462,6 +495,47 @@ def build_span_feature(
     }
 
 
+def _design_reason(reason_type: str, severity: str, message: str) -> dict[str, str]:
+    """Structured validation reason used by design gating and frontend display."""
+    sev = severity if severity in _DESIGN_REASON_SEVERITIES else "info"
+    return {"type": reason_type, "severity": sev, "message": message}
+
+
+def _span_geometry_trust(props: dict[str, Any]) -> str:
+    detail = props.get("source_confidence_detail") or {}
+    trust = props.get("geometry_trust")
+    if isinstance(detail, dict) and detail.get("geometry_trust"):
+        trust = detail.get("geometry_trust")
+    if props.get("capture_method") == "legacy map data":
+        trust = "unverified"
+    return str(trust or "").strip().lower()
+
+
+def _design_status_from_props(props: dict[str, Any]) -> str:
+    """Deterministic tri-state design status from span validation properties."""
+    crossing_risk = str(props.get("crossing_risk_level") or "").strip().upper()
+    if crossing_risk == "BLOCKER":
+        return "BLOCKED"
+
+    span_validity = str(props.get("span_validity") or "valid").strip().lower()
+    if span_validity != "valid":
+        distance_m = _safe_float(props.get("distance_m"))
+        if span_validity == "invalid" and (distance_m is None or distance_m < 2.0):
+            return "BLOCKED"
+        return "REVIEW"
+
+    if _span_geometry_trust(props) == "unverified":
+        return "REVIEW"
+
+    return "PASS"
+
+
+def _set_design_status(props: dict[str, Any]) -> None:
+    status = _design_status_from_props(props)
+    props["design_status"] = status
+    props["design_usable"] = status != "BLOCKED"
+
+
 def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
     """Annotate consecutive invalid/suspect spans as geometry issue clusters.
 
@@ -479,8 +553,8 @@ def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
         size = len(cluster)
         for span in cluster:
             props = span.setdefault("properties", {})
-            props["geometry_issue_cluster"] = True
-            props["cluster_size"] = size
+            props["geometry_issue_cluster"] = size >= 2
+            props["cluster_size"] = size if size >= 2 else None
 
     for span in spans:
         props = span.get("properties") or {}
@@ -499,27 +573,76 @@ def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
 
 
 def _apply_design_gating(spans: list[dict[str, Any]]) -> None:
-    """Augment design_usable with multi-rule gating; populate design_blocker_reasons."""
+    """Populate structured validation reasons and deterministic design_status."""
     for span in spans:
         if not isinstance(span, dict):
             continue
         props = span.get("properties")
         if not isinstance(props, dict):
             continue
-        reasons: list[str] = []
+        reasons: list[dict[str, str]] = []
         if props.get("span_validity") == "invalid":
-            reasons.append("Invalid span distance (< 5 m) — survey geometry suspect")
-        if props.get("capture_method") == "legacy map data":
-            reasons.append("Legacy map data — field verification required before design use")
-        if props.get("crossing_risk_level") == "high":
-            reasons.append("High crossing risk — clearance check required before design use")
-        if reasons:
-            props["design_usable"] = False
+            distance_m = _safe_float(props.get("distance_m"))
+            severity = "blocker" if distance_m is None or distance_m < 2.0 else "high"
+            reasons.append(
+                _design_reason(
+                    "span_validity",
+                    severity,
+                    "Invalid span distance (< 5 m) - survey geometry suspect",
+                )
+            )
+        elif props.get("span_validity") == "suspect":
+            reasons.append(
+                _design_reason(
+                    "span_validity",
+                    "medium",
+                    "Suspect span distance (5-8 m) - verify route geometry",
+                )
+            )
+        if _span_geometry_trust(props) == "unverified":
+            geometry_message = (
+                "Legacy map data - field verification required before design use"
+                if props.get("capture_method") == "legacy map data"
+                else "Unverified geometry - field verification required before design use"
+            )
+            reasons.append(
+                _design_reason(
+                    "geometry_trust",
+                    "medium",
+                    geometry_message,
+                )
+            )
+        crossing_risk = str(props.get("crossing_risk_level") or "").strip().lower()
+        if crossing_risk == "blocker":
+            reasons.append(
+                _design_reason(
+                    "clearance",
+                    "blocker",
+                    "Clearance blocker present - high-tier crossing within 2 m of span",
+                )
+            )
+        elif crossing_risk == "high":
+            reasons.append(
+                _design_reason(
+                    "clearance",
+                    "high",
+                    "High crossing risk - clearance check required before design use",
+                )
+            )
+        elif crossing_risk == "medium":
+            reasons.append(
+                _design_reason(
+                    "clearance",
+                    "medium",
+                    "Medium crossing risk - review obstruction or access context",
+                )
+            )
         props["design_blocker_reasons"] = reasons
+        _set_design_status(props)
 
 
 def _apply_cluster_gating(spans: list[dict[str, Any]]) -> None:
-    """Append cluster-based blocker reason to spans inside geometry issue clusters."""
+    """Append cluster-level reason to multi-span suspect geometry clusters."""
     for span in spans:
         if not isinstance(span, dict):
             continue
@@ -532,12 +655,16 @@ def _apply_cluster_gating(spans: list[dict[str, Any]]) -> None:
             and isinstance(cluster_size, int)
             and cluster_size >= 2
         ):
-            reasons: list[str] = props.get("design_blocker_reasons") or []
+            reasons: list[dict[str, str]] = props.get("design_blocker_reasons") or []
             reasons.append(
-                f"Part of geometry issue cluster ({cluster_size} consecutive short/invalid spans)"
+                _design_reason(
+                    "geometry_cluster",
+                    "high",
+                    "Multiple suspect spans detected",
+                )
             )
             props["design_blocker_reasons"] = reasons
-            props["design_usable"] = False
+            _set_design_status(props)
 
 
 def generate_span_features_geojson(
@@ -622,14 +749,17 @@ def attach_span_features_to_collection(
     span_features = generate_span_features_geojson(feats, sequence_payload, meta)
     collection["span_features"] = span_features
     meta["span_feature_count"] = len(span_features)
-    high = med = low = 0
+    blocker = high = med = low = 0
     invalid_count = suspect_count = 0
     for sf in span_features:
         sp = sf.get("properties") if isinstance(sf, dict) else None
         if not isinstance(sp, dict):
             continue
         r = str(sp.get("crossing_risk_level") or "").lower()
-        if r == "high":
+        if r == "blocker":
+            blocker += 1
+            high += 1
+        elif r == "high":
             high += 1
         elif r == "medium":
             med += 1
@@ -640,6 +770,7 @@ def attach_span_features_to_collection(
             invalid_count += 1
         elif v == "suspect":
             suspect_count += 1
+    meta["span_crossing_blocker_count"] = blocker
     meta["span_crossing_high_count"] = high
     meta["span_crossing_medium_count"] = med
     meta["span_crossing_low_count"] = low

@@ -128,3 +128,24 @@ def test_cluster_section_included_in_span_popup_return(js: str) -> None:
 def test_cluster_uses_warning_status(js: str) -> None:
     # clusterSection row must use 'warning' status, not 'info' or 'ok'
     assert "'warning'" in js
+
+
+def test_design_reasons_are_sorted_by_severity(js: str) -> None:
+    assert "sortedDesignReasons" in js
+    assert "designReasonSeverityRank" in js
+    assert "blocker: 0" in js
+    assert "high: 1" in js
+    assert "medium: 2" in js
+
+
+def test_design_reason_severity_label_displayed(js: str) -> None:
+    assert "Reason (${String(r.severity || 'info').toUpperCase()})" in js
+    assert "designReasonStatus" in js
+
+
+def test_geometry_warning_condition_excludes_legacy_shortcut(js: str) -> None:
+    snippet = js[js.index("const showGeometryWarning") : js.index("const warningBanner")]
+    assert "trust === 'unverified'" in snippet
+    assert "confidence === 'low'" in snippet
+    assert "isLegacy" not in snippet
+    assert "unknown" not in snippet

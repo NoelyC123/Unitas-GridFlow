@@ -15,6 +15,7 @@ def test_classify_invalid_below_threshold():
     result = classify_span_validity(1.0)
     assert result["span_validity"] == "invalid"
     assert result["design_usable"] is False
+    assert result["design_status"] == "BLOCKED"
     assert result["clearance_check_allowed"] is False
 
 
@@ -22,12 +23,14 @@ def test_classify_invalid_just_below_5m():
     result = classify_span_validity(4.99)
     assert result["span_validity"] == "invalid"
     assert result["design_usable"] is False
+    assert result["design_status"] == "REVIEW"
 
 
 def test_classify_suspect_at_lower_boundary():
     result = classify_span_validity(5.0)
     assert result["span_validity"] == "suspect"
     assert result["design_usable"] is True
+    assert result["design_status"] == "REVIEW"
     assert result["clearance_check_allowed"] is True
 
 
@@ -48,6 +51,7 @@ def test_classify_valid_above_threshold():
     result = classify_span_validity(15.0)
     assert result["span_validity"] == "valid"
     assert result["design_usable"] is True
+    assert result["design_status"] == "PASS"
     assert result["clearance_check_allowed"] is True
 
 

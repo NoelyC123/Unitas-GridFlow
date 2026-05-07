@@ -43,11 +43,11 @@ def test_valid_spans_have_no_cluster():
         assert s["properties"]["cluster_size"] is None
 
 
-def test_single_invalid_span_forms_cluster_of_size_one():
+def test_single_invalid_span_does_not_form_cluster():
     spans = [_span("invalid")]
     annotate_geometry_issue_clusters(spans)
-    assert spans[0]["properties"]["geometry_issue_cluster"] is True
-    assert spans[0]["properties"]["cluster_size"] == 1
+    assert spans[0]["properties"]["geometry_issue_cluster"] is False
+    assert spans[0]["properties"]["cluster_size"] is None
 
 
 # ---------------------------------------------------------------------------
@@ -56,13 +56,15 @@ def test_single_invalid_span_forms_cluster_of_size_one():
 
 
 def test_two_separate_clusters_of_size_one():
-    # [invalid, valid, invalid] → two clusters, each size 1
+    # [invalid, valid, invalid] → no clusters because clusters require >=2 spans.
     spans = [_span("invalid"), _span("valid"), _span("invalid")]
     annotate_geometry_issue_clusters(spans)
 
-    assert spans[0]["properties"]["cluster_size"] == 1
+    assert spans[0]["properties"]["geometry_issue_cluster"] is False
+    assert spans[0]["properties"]["cluster_size"] is None
     assert spans[1]["properties"]["geometry_issue_cluster"] is False
-    assert spans[2]["properties"]["cluster_size"] == 1
+    assert spans[2]["properties"]["geometry_issue_cluster"] is False
+    assert spans[2]["properties"]["cluster_size"] is None
 
 
 def test_cluster_at_end_of_list():
@@ -114,7 +116,7 @@ def test_mixed_invalid_and_suspect_in_same_cluster():
 
 def test_longer_sequence_with_multiple_clusters():
     # [valid, invalid, invalid, valid, suspect, valid]
-    # clusters: [invalid,invalid] size 2, [suspect] size 1
+    # clusters: [invalid,invalid] size 2; single suspect is not a cluster.
     spans = [
         _span("valid"),
         _span("invalid"),
@@ -129,5 +131,6 @@ def test_longer_sequence_with_multiple_clusters():
     assert spans[1]["properties"]["cluster_size"] == 2
     assert spans[2]["properties"]["cluster_size"] == 2
     assert spans[3]["properties"]["geometry_issue_cluster"] is False
-    assert spans[4]["properties"]["cluster_size"] == 1
+    assert spans[4]["properties"]["geometry_issue_cluster"] is False
+    assert spans[4]["properties"]["cluster_size"] is None
     assert spans[5]["properties"]["geometry_issue_cluster"] is False

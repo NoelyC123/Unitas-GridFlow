@@ -392,9 +392,13 @@ def map_view(job_id: str):
 
 
 def _build_validation_summary(data: dict) -> dict:
-    """Count unverified-geometry and design-blocker spans for the frontend."""
-    unverified = 0
-    blockers = 0
+    """Summarise span validation status for the frontend from span properties only."""
+    summary = {
+        "pass": 0,
+        "review": 0,
+        "blocked": 0,
+        "unverified_geometry": 0,
+    }
     for sf in data.get("span_features") or []:
         if not isinstance(sf, dict):
             continue
@@ -404,10 +408,16 @@ def _build_validation_summary(data: dict) -> dict:
             detail.get("geometry_trust") == "unverified"
             or sp.get("capture_method") == "legacy map data"
         ):
-            unverified += 1
-        if not sp.get("design_usable", True):
-            blockers += 1
-    return {"unverified_geometry": unverified, "design_blockers": blockers}
+            summary["unverified_geometry"] += 1
+
+        status = str(sp.get("design_status") or "").upper()
+        if status == "BLOCKED":
+            summary["blocked"] += 1
+        elif status == "REVIEW":
+            summary["review"] += 1
+        else:
+            summary["pass"] += 1
+    return summary
 
 
 @map_preview_bp.get("/data/<job_id>")

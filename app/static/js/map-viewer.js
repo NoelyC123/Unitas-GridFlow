@@ -823,7 +823,10 @@ class MapViewer {
     let color = '#1d4ed8';
     let weight = 5;
     let opacity = 0.88;
-    if (risk === 'high') {
+    if (risk === 'blocker') {
+      color = '#991b1b';
+      weight = 7;
+    } else if (risk === 'high') {
       color = '#c2410c';
       weight = 6;
     } else if (risk === 'medium') {
@@ -870,7 +873,7 @@ class MapViewer {
       row.type = 'button';
       row.className = 'span-list-item';
       const r = String(props.crossing_risk_level || 'none').toLowerCase();
-      if (r === 'high') row.classList.add('span-list-item-risk-high');
+      if (r === 'blocker' || r === 'high') row.classList.add('span-list-item-risk-high');
       else if (r === 'medium') row.classList.add('span-list-item-risk-med');
       else if (r === 'low') row.classList.add('span-list-item-risk-low');
       const seq = props.span_sequence_label || `#${index + 1}`;
@@ -903,7 +906,10 @@ class MapViewer {
     let color = '#6b21a8';
     let weight = 4;
     let opacity = 0.9;
-    if (risk === 'high') {
+    if (risk === 'blocker') {
+      color = '#7f1d1d';
+      weight = 6;
+    } else if (risk === 'high') {
       color = '#9f1239';
       weight = 5;
     } else if (risk === 'medium') {
@@ -973,6 +979,7 @@ class MapViewer {
 
   cableCrossingRiskLabel(props) {
     const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'blocker') return 'Blocker — high-tier crossing within clearance proximity';
     if (r === 'high') return 'High — road/track/utility-type context near cable trace';
     if (r === 'medium') return 'Medium — obstruction or environmental context nearby';
     if (r === 'low') return 'Low — general route context nearby';
@@ -1048,6 +1055,7 @@ class MapViewer {
 
   spanCrossingRiskLabel(props) {
     const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'blocker') return 'Blocker — high-tier crossing within clearance proximity';
     if (r === 'high') return 'High — road/track/utility-type context near span';
     if (r === 'medium') return 'Medium — obstruction or environmental context nearby';
     if (r === 'low') return 'Low — general route context nearby';
@@ -1056,6 +1064,7 @@ class MapViewer {
 
   spanCrossingRiskRowStatus(props) {
     const r = String(props.crossing_risk_level || 'none').toLowerCase();
+    if (r === 'blocker') return 'blocker';
     if (r === 'high') return 'blocker';
     if (r === 'medium') return 'warning';
     if (r === 'low') return 'review';
@@ -1191,11 +1200,9 @@ class MapViewer {
     const detail = props.source_confidence_detail || {};
     const trust = props.geometry_trust || detail.geometry_trust;
     const confidence = detail.confidence;
-    const isLegacy = props.capture_method === 'legacy map data';
     const showGeometryWarning =
       trust === 'unverified' ||
-      confidence === 'low' ||
-      isLegacy;
+      confidence === 'low';
 
     const warningBanner = showGeometryWarning
       ? `<div class="gf-warning-banner">
@@ -1204,11 +1211,16 @@ class MapViewer {
         </div>`
       : '';
 
-    const blockerReasons = Array.isArray(props.design_blocker_reasons) ? props.design_blocker_reasons : [];
+    const blockerReasons = this.sortedDesignReasons(props.design_blocker_reasons);
     const blockerSection = blockerReasons.length
       ? this.popupSection(
-          'Design blockers',
-          blockerReasons.map((r) => this.popupRow('Reason', r, 'warning')),
+          'Design validation',
+          blockerReasons.map((r) => this.popupRow(
+            `Reason (${String(r.severity || 'info').toUpperCase()})`,
+            r.message || r,
+            this.designReasonStatus(r.severity),
+            r.type ? `Type: ${r.type}` : '',
+          )),
         )
       : '';
 
@@ -1220,6 +1232,35 @@ class MapViewer {
         ${sections.map((s) => this.popupSection(s.title, s.rows)).join('')}
       </div>
     `;
+  }
+
+  designReasonSeverityRank(severity) {
+    return {
+      blocker: 0,
+      high: 1,
+      medium: 2,
+      low: 3,
+      info: 4,
+    }[String(severity || 'info').toLowerCase()] ?? 4;
+  }
+
+  designReasonStatus(severity) {
+    const s = String(severity || 'info').toLowerCase();
+    if (s === 'blocker') return 'blocker';
+    if (s === 'high') return 'warning';
+    if (s === 'medium') return 'review';
+    return 'info';
+  }
+
+  sortedDesignReasons(reasons) {
+    if (!Array.isArray(reasons)) return [];
+    return reasons
+      .map((reason) => {
+        if (reason && typeof reason === 'object') return reason;
+        return { type: 'legacy', severity: 'info', message: String(reason || '') };
+      })
+      .filter((reason) => reason.message)
+      .sort((a, b) => this.designReasonSeverityRank(a.severity) - this.designReasonSeverityRank(b.severity));
   }
 
   renderDesignChainSpans(spans) {
@@ -1316,7 +1357,7 @@ class MapViewer {
     const dm = props.distance_m != null ? Number(props.distance_m) : NaN;
     if (!Number.isNaN(dm) && dm < 8) return true;
     const r = String(props.crossing_risk_level || 'none').toLowerCase();
-    if (r === 'high') return true;
+    if (r === 'blocker' || r === 'high') return true;
     return false;
   }
 

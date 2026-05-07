@@ -131,7 +131,7 @@ def test_distance_point_to_segment_midpoint_zero() -> None:
     assert d < 1.0
 
 
-def test_crossing_risk_high_when_road_context_on_span() -> None:
+def test_crossing_risk_blocker_when_road_context_on_span() -> None:
     point_features = [
         {
             "type": "Feature",
@@ -175,7 +175,8 @@ def test_crossing_risk_high_when_road_context_on_span() -> None:
     spans = generate_span_features_geojson(point_features, seq, {"rulepack_id": "SPEN_11kV"})
     assert len(spans) == 1
     prop = spans[0]["properties"]
-    assert prop["crossing_risk_level"] == "high"
+    assert prop["crossing_risk_level"] == "BLOCKER"
+    assert prop["design_status"] == "BLOCKED"
     assert prop["span_sequence_label"] == "1 of 1"
     assert len(prop["crossing_hits_survey"]) >= 1
 

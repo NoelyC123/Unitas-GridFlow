@@ -135,9 +135,10 @@ def test_generate_cable_includes_crossing_and_actions() -> None:
     cables = generate_cable_features_geojson(feats, {})
     assert len(cables) == 1
     p = cables[0]["properties"]
-    assert p["crossing_risk_level"] == "high"
+    assert p["crossing_risk_level"] == "BLOCKER"
     assert isinstance(p.get("designer_suggested_actions"), list)
     assert len(p["designer_suggested_actions"]) >= 1
+    assert any("high-tier crossing" in a for a in p["designer_suggested_actions"])
 
 
 def test_derive_cable_designer_actions_missing_type() -> None:

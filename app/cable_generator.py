@@ -141,7 +141,12 @@ def derive_cable_designer_actions(props: dict[str, Any]) -> list[str]:
             "DNO / statutory requirements.",
         )
     risk = str(props.get("crossing_risk_level") or "none").lower()
-    if risk == "high":
+    if risk == "blocker":
+        actions.append(
+            "Survey context indicates high-tier crossing within clearance proximity — "
+            "verify route tracing and protection before civils design.",
+        )
+    elif risk == "high":
         actions.append(
             "Survey context indicates road-track-utility proximity — verify route tracing "
             "and protection before civils design.",
