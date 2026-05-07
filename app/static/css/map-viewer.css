@@ -16,7 +16,10 @@
 }
 
 .gf-route-highlight {
-  filter: drop-shadow(0 0 5px rgba(15, 99, 255, 0.45));
+  stroke: #3b82f6 !important;
+  stroke-width: 6 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
 }
 
 .legend-line.legend-ug-cable {
