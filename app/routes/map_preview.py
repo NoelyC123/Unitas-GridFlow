@@ -162,6 +162,7 @@ def _empty_feature_collection(job_id: str) -> dict:
         "design_chain_spans": [],
         "span_features": [],
         "cable_features": [],
+        "planner_awareness": [],
         "metadata": {
             "job_id": job_id,
             "rulepack_id": "SPEN_11kV",
@@ -170,6 +171,7 @@ def _empty_feature_collection(job_id: str) -> dict:
             "pass_count": 0,
             "warn_count": 0,
             "fail_count": 0,
+            "planner_awareness_count": 0,
         },
     }
 
@@ -213,6 +215,85 @@ def _build_design_chain_spans(seq: dict) -> list[dict]:
         )
 
     return spans
+
+
+_AWARENESS_FIXTURES = (
+    ("access", "WARNING", "Access constraint to verify before planner review."),
+    ("field_note", "INFO", "Survey note available for planner context."),
+    ("unknown", "REVIEW", "Unresolved route context needs office review."),
+    ("wayleave", "WARNING", "Wayleave or landowner context may need confirmation."),
+    ("obstruction", "REVIEW", "Potential obstruction context near route span."),
+)
+
+
+def _span_awareness_points(data: dict) -> list[dict]:
+    points: list[dict] = []
+    for idx, span_feat in enumerate(data.get("span_features") or []):
+        if not isinstance(span_feat, dict):
+            continue
+        geom = span_feat.get("geometry")
+        if not isinstance(geom, dict) or geom.get("type") != "LineString":
+            continue
+        coords = geom.get("coordinates") or []
+        if len(coords) < 2 or not isinstance(coords[0], list) or not isinstance(coords[-1], list):
+            continue
+        lon1, lat1 = _safe_float(coords[0][0]), _safe_float(coords[0][1])
+        lon2, lat2 = _safe_float(coords[-1][0]), _safe_float(coords[-1][1])
+        if None in (lon1, lat1, lon2, lat2):
+            continue
+        props = span_feat.get("properties") if isinstance(span_feat.get("properties"), dict) else {}
+        span_id = (
+            props.get("span_id")
+            or f"{props.get('from_point_id') or '?'}->{props.get('to_point_id') or '?'}"
+        )
+        points.append(
+            {
+                "lat1": lat1,
+                "lon1": lon1,
+                "lat2": lat2,
+                "lon2": lon2,
+                "related_span_id": span_id,
+                "span_index": idx,
+            }
+        )
+    return points
+
+
+def _build_mock_planner_awareness(data: dict) -> list[dict]:
+    points = _span_awareness_points(data)
+    if not points:
+        return []
+
+    count = min(5, max(3, len(points)))
+    awareness: list[dict] = []
+    for idx in range(count):
+        point = points[idx % len(points)]
+        category, severity, message = _AWARENESS_FIXTURES[idx % len(_AWARENESS_FIXTURES)]
+        offset = ((idx % 3) - 1) * 0.00004
+        awareness.append(
+            {
+                "id": f"mock-awareness-{idx + 1}",
+                "lat": round((point["lat1"] + point["lat2"]) / 2 + offset, 7),
+                "lon": round((point["lon1"] + point["lon2"]) / 2 + offset, 7),
+                "category": category,
+                "severity": severity,
+                "message": message,
+                "related_span_id": point["related_span_id"],
+            }
+        )
+    return awareness
+
+
+def _ensure_planner_awareness(data: dict) -> None:
+    existing = data.get("planner_awareness")
+    if isinstance(existing, list) and existing:
+        awareness = existing
+    else:
+        awareness = _build_mock_planner_awareness(data)
+    data["planner_awareness"] = awareness
+    metadata = data.setdefault("metadata", {})
+    if isinstance(metadata, dict):
+        metadata["planner_awareness_count"] = len(awareness)
 
 
 def apply_structural_inference(props: dict) -> None:
@@ -340,6 +421,7 @@ def _enrich_with_design_chain_spans(data: dict, seq_path: Path) -> dict:
     # Use cleaned sequence for span generation
     attach_span_features_to_collection(data, cleaned_seq)
     attach_cable_features_to_collection(data)
+    _ensure_planner_awareness(data)
 
     if "design_chain_spans" not in data:
         spans: list[dict] = []

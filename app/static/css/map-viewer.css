@@ -25,6 +25,10 @@
   cursor: pointer;
 }
 
+.planner-awareness-marker {
+  cursor: pointer;
+}
+
 .leaflet-tooltip.gridflow-cable-tooltip {
   background: rgba(107, 33, 168, 0.92);
   color: #faf5ff;

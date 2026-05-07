@@ -46,6 +46,7 @@ class MapViewer {
     this.spanLayer = null;
     this.cableLayer = null;
     this.lifecycleMatchLayer = null;
+    this.plannerAwarenessLayer = null;
     this.activeFilter = null;
     this.activeFilterMode = null;
     this.fileType = null;
@@ -59,6 +60,7 @@ class MapViewer {
       spans: true,
       matches: true,
       cables: true,
+      plannerAwareness: true,
     };
     this._spanFeatureList = [];
     this._spanLineRefs = [];
@@ -121,6 +123,7 @@ class MapViewer {
         this._spanLayerOrigin = 'provisional_route';
         this.renderDesignChainSpans(this._fallbackDesignSpans);
       }
+      this.renderPlannerAwareness(data.planner_awareness || []);
       const cableFeatures = data.cable_features || [];
       this.renderCableFeatures(Array.isArray(cableFeatures) ? cableFeatures : []);
       this.applyZeroCountLayerTruthfulness(meta);
@@ -282,6 +285,7 @@ class MapViewer {
     const m = meta || this._mapMeta || {};
     const spanN = Number(m.span_feature_count ?? this._spanFeatureList?.length ?? 0);
     const cabN = Number(m.cable_feature_count ?? 0);
+    const awarenessN = Number(m.planner_awareness_count ?? 0);
     const matchRecN = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
     const angleN = this.angleHighlightCount();
 
@@ -302,10 +306,16 @@ class MapViewer {
       matchRecN >= 1,
       'No suggested replacement links in record data (no replacing references).',
     );
+    this._resetLayerToggle(
+      'plannerAwareness',
+      awarenessN >= 1,
+      'No planner awareness notes for this job.',
+    );
 
     if (cabN < 1) this._removeMapLayerIfPresent(this.cableLayer);
     if (spanN < 1) this._removeMapLayerIfPresent(this.spanLayer);
     if (matchRecN < 1) this._removeMapLayerIfPresent(this.lifecycleMatchLayer);
+    if (awarenessN < 1) this._removeMapLayerIfPresent(this.plannerAwarenessLayer);
   }
 
   primaryLayerKey(props) {
@@ -328,6 +338,7 @@ class MapViewer {
     const m = meta || this._mapMeta || {};
     const spanN = Number(m.span_feature_count ?? this._spanFeatureList?.length ?? 0);
     const cabN = Number(m.cable_feature_count ?? 0);
+    const awarenessN = Number(m.planner_awareness_count ?? 0);
     document.querySelectorAll('label.layer-toggle[data-layer-key]').forEach((lab) => {
       const key = lab.dataset.layerKey;
       const cap = lab.querySelector('.layer-toggle-caption');
@@ -343,6 +354,10 @@ class MapViewer {
       }
       if (key === 'cables') {
         cap.textContent = `${raw} (${cabN})`;
+        return;
+      }
+      if (key === 'plannerAwareness') {
+        cap.textContent = `${raw} (${awarenessN})`;
         return;
       }
       if (key === 'angle') {
@@ -920,6 +935,65 @@ class MapViewer {
     return { color, weight, opacity };
   }
 
+  plannerAwarenessColor(severity) {
+    const s = String(severity || 'INFO').toUpperCase();
+    if (s === 'BLOCKER') return '#dc2626';
+    if (s === 'REVIEW') return '#f97316';
+    if (s === 'WARNING') return '#eab308';
+    return '#2563eb';
+  }
+
+  buildPlannerAwarenessPopupHtml(item) {
+    return `
+      <div class="asset-popup asset-popup-planner-awareness">
+        <div class="popup-title">Planner Awareness</div>
+        ${this.popupSection('Context note', [
+          this.popupRow('Category', item.category || 'planner note', 'info'),
+          this.popupRow('Severity', item.severity || 'INFO', 'review'),
+          this.popupRow('Message', item.message || 'No message supplied', 'info'),
+        ])}
+      </div>
+    `;
+  }
+
+  renderPlannerAwareness(items) {
+    if (!this.map) return;
+    if (this.plannerAwarenessLayer) {
+      this.plannerAwarenessLayer.clearLayers();
+      this.map.removeLayer(this.plannerAwarenessLayer);
+    }
+    this.plannerAwarenessLayer = L.layerGroup();
+    if (!Array.isArray(items) || items.length === 0) return;
+
+    items.forEach((item) => {
+      if (!item || item.lat == null || item.lon == null) return;
+      const lat = Number(item.lat);
+      const lon = Number(item.lon);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) return;
+      const color = this.plannerAwarenessColor(item.severity);
+      const marker = L.circleMarker([lat, lon], {
+        radius: 7,
+        color,
+        fillColor: color,
+        fillOpacity: 0.78,
+        opacity: 0.95,
+        weight: 2,
+        className: 'planner-awareness-marker',
+      });
+      marker.bindPopup(this.buildPlannerAwarenessPopupHtml(item), {
+        autoPanPadding: [24, 24],
+        className: 'gridflow-asset-popup',
+        keepInView: true,
+        maxWidth: 360,
+      });
+      marker.addTo(this.plannerAwarenessLayer);
+    });
+
+    if (this.layerState.plannerAwareness) {
+      this.plannerAwarenessLayer.addTo(this.map);
+    }
+  }
+
   renderCableFeatures(cableFeatures) {
     if (!this.map) return;
     if (this.cableLayer) {
@@ -1449,6 +1523,8 @@ class MapViewer {
           this.toggleLayer(this.cableLayer, input.checked);
         } else if (layerName === 'matches') {
           this.toggleLayer(this.lifecycleMatchLayer, input.checked);
+        } else if (layerName === 'plannerAwareness') {
+          this.toggleLayer(this.plannerAwarenessLayer, input.checked);
         } else if (layerName === 'angle') {
           this.applyAngleHighlightState();
         } else {
