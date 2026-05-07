@@ -23,9 +23,9 @@ def test_design_gating_emits_structured_reasons_and_review_status() -> None:
     assert props["design_status"] == "REVIEW"
     assert props["design_blocker_reasons"] == [
         {
-            "type": "span_validity",
+            "type": "geometry",
             "severity": "medium",
-            "message": "Suspect span distance (5-8 m) - verify route geometry",
+            "message": "Suspect span distance (5-8 m) — verify route geometry",
         }
     ]
 
@@ -107,6 +107,68 @@ def test_cluster_gating_adds_high_severity_cluster_reason() -> None:
             "severity": "high",
             "message": "Multiple suspect spans detected",
         } in reasons
+
+
+def test_cluster_gating_executes_annotation_and_canonicalizes_legacy_reasons() -> None:
+    spans = [
+        _span(
+            {
+                "span_validity": "invalid",
+                "distance_m": 3.0,
+                "design_blocker_reasons": ["Invalid span distance (< 5 m)"],
+            }
+        ),
+        _span(
+            {
+                "span_validity": "suspect",
+                "distance_m": 6.0,
+                "design_blocker_reasons": [
+                    {
+                        "type": "geometry",
+                        "severity": "medium",
+                        "message": "Suspect span distance (5-8 m) — verify route geometry",
+                    }
+                ],
+            }
+        ),
+    ]
+
+    _apply_cluster_gating(spans)
+
+    for span in spans:
+        props = span["properties"]
+        assert props["geometry_issue_cluster"] is True
+        assert props["cluster_size"] == 2
+        assert all(isinstance(r, dict) for r in props["design_blocker_reasons"])
+        assert all(
+            set(r) == {"type", "severity", "message"} for r in props["design_blocker_reasons"]
+        )
+        assert {
+            "type": "geometry_cluster",
+            "severity": "high",
+            "message": "Multiple suspect spans detected",
+        } in props["design_blocker_reasons"]
+
+
+def test_replacement_spans_are_not_geometry_clustered() -> None:
+    spans = [
+        _span(
+            {
+                "span_validity": "invalid",
+                "distance_m": 1.0,
+                "relationship": "replacement_pair",
+            }
+        ),
+        _span({"span_validity": "invalid", "distance_m": 1.0}),
+    ]
+
+    _apply_cluster_gating(spans)
+
+    for span in spans:
+        props = span["properties"]
+        assert props["geometry_issue_cluster"] is False
+        assert props["cluster_size"] is None
+        assert props["design_blocker_reasons"] == []
 
 
 def test_near_high_tier_crossing_sets_blocker_status() -> None:

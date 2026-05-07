@@ -143,6 +143,11 @@ def test_design_reason_severity_label_displayed(js: str) -> None:
     assert "designReasonStatus" in js
 
 
+def test_design_reason_renderer_keeps_legacy_string_compatibility(js: str) -> None:
+    assert "return { type: 'legacy', severity: 'info', message: String(reason || '') }" in js
+    assert "if (reason && typeof reason === 'object') return reason" in js
+
+
 def test_geometry_warning_condition_excludes_legacy_shortcut(js: str) -> None:
     snippet = js[js.index("const showGeometryWarning") : js.index("const warningBanner")]
     assert "trust === 'unverified'" in snippet

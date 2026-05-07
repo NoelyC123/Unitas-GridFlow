@@ -501,6 +501,27 @@ def _design_reason(reason_type: str, severity: str, message: str) -> dict[str, s
     return {"type": reason_type, "severity": sev, "message": message}
 
 
+def _canonical_design_reasons(raw_reasons: Any) -> list[dict[str, str]]:
+    if not isinstance(raw_reasons, list):
+        return []
+    reasons: list[dict[str, str]] = []
+    for reason in raw_reasons:
+        if isinstance(reason, dict):
+            message = str(reason.get("message") or "").strip()
+            if not message:
+                continue
+            reasons.append(
+                _design_reason(
+                    str(reason.get("type") or "legacy"),
+                    str(reason.get("severity") or "info"),
+                    message,
+                )
+            )
+        elif reason not in (None, ""):
+            reasons.append(_design_reason("legacy", "info", str(reason)))
+    return reasons
+
+
 def _span_geometry_trust(props: dict[str, Any]) -> str:
     detail = props.get("source_confidence_detail") or {}
     trust = props.get("geometry_trust")
@@ -536,6 +557,21 @@ def _set_design_status(props: dict[str, Any]) -> None:
     props["design_usable"] = status != "BLOCKED"
 
 
+def _is_replacement_span(props: dict[str, Any]) -> bool:
+    """Replacement links are lifecycle evidence, not route-geometry issue clusters."""
+    relationship = str(props.get("relationship") or "").strip().lower()
+    if relationship == "replacement_pair":
+        return True
+    replacement_keys = (
+        "replacing",
+        "matched_proposed_id",
+        "matched_to_proposed_id",
+        "replacement_pair_audit",
+        "replacement_match_type",
+    )
+    return any(props.get(key) not in (None, "", {}) for key in replacement_keys)
+
+
 def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
     """Annotate consecutive invalid/suspect spans as geometry issue clusters.
 
@@ -559,7 +595,7 @@ def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
     for span in spans:
         props = span.get("properties") or {}
         validity = props.get("span_validity")
-        if validity in _CLUSTER_STATUSES:
+        if validity in _CLUSTER_STATUSES and not _is_replacement_span(props):
             current_cluster.append(span)
         else:
             if current_cluster:
@@ -586,17 +622,17 @@ def _apply_design_gating(spans: list[dict[str, Any]]) -> None:
             severity = "blocker" if distance_m is None or distance_m < 2.0 else "high"
             reasons.append(
                 _design_reason(
-                    "span_validity",
+                    "geometry",
                     severity,
-                    "Invalid span distance (< 5 m) - survey geometry suspect",
+                    "Invalid span distance (< 5 m) — survey geometry suspect",
                 )
             )
         elif props.get("span_validity") == "suspect":
             reasons.append(
                 _design_reason(
-                    "span_validity",
+                    "geometry",
                     "medium",
-                    "Suspect span distance (5-8 m) - verify route geometry",
+                    "Suspect span distance (5-8 m) — verify route geometry",
                 )
             )
         if _span_geometry_trust(props) == "unverified":
@@ -643,28 +679,29 @@ def _apply_design_gating(spans: list[dict[str, Any]]) -> None:
 
 def _apply_cluster_gating(spans: list[dict[str, Any]]) -> None:
     """Append cluster-level reason to multi-span suspect geometry clusters."""
+    annotate_geometry_issue_clusters(spans)
     for span in spans:
         if not isinstance(span, dict):
             continue
         props = span.get("properties")
         if not isinstance(props, dict):
             continue
+        reasons = _canonical_design_reasons(props.get("design_blocker_reasons"))
         cluster_size = props.get("cluster_size")
         if (
             props.get("geometry_issue_cluster") is True
             and isinstance(cluster_size, int)
             and cluster_size >= 2
         ):
-            reasons: list[dict[str, str]] = props.get("design_blocker_reasons") or []
-            reasons.append(
-                _design_reason(
-                    "geometry_cluster",
-                    "high",
-                    "Multiple suspect spans detected",
-                )
+            cluster_reason = _design_reason(
+                "geometry_cluster",
+                "high",
+                "Multiple suspect spans detected",
             )
-            props["design_blocker_reasons"] = reasons
+            if cluster_reason not in reasons:
+                reasons.append(cluster_reason)
             _set_design_status(props)
+        props["design_blocker_reasons"] = reasons
 
 
 def generate_span_features_geojson(
