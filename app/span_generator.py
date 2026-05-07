@@ -441,6 +441,7 @@ def build_span_feature(
     base = coalesce_electrical_source(from_props, to_props, rulepack_id)
     base["from_point_id"] = from_pid
     base["to_point_id"] = to_pid
+    base["capture_method"] = from_props.get("capture_method") or to_props.get("capture_method")
     base["from_design_pole_no"] = from_design_pole_no
     base["to_design_pole_no"] = to_design_pole_no
     base["section_id"] = section_id
@@ -495,6 +496,48 @@ def annotate_geometry_issue_clusters(spans: list[dict[str, Any]]) -> None:
 
     if current_cluster:
         _flush(current_cluster)
+
+
+def _apply_design_gating(spans: list[dict[str, Any]]) -> None:
+    """Augment design_usable with multi-rule gating; populate design_blocker_reasons."""
+    for span in spans:
+        if not isinstance(span, dict):
+            continue
+        props = span.get("properties")
+        if not isinstance(props, dict):
+            continue
+        reasons: list[str] = []
+        if props.get("span_validity") == "invalid":
+            reasons.append("Invalid span distance (< 5 m) — survey geometry suspect")
+        if props.get("capture_method") == "legacy map data":
+            reasons.append("Legacy map data — field verification required before design use")
+        if props.get("crossing_risk_level") == "high":
+            reasons.append("High crossing risk — clearance check required before design use")
+        if reasons:
+            props["design_usable"] = False
+        props["design_blocker_reasons"] = reasons
+
+
+def _apply_cluster_gating(spans: list[dict[str, Any]]) -> None:
+    """Append cluster-based blocker reason to spans inside geometry issue clusters."""
+    for span in spans:
+        if not isinstance(span, dict):
+            continue
+        props = span.get("properties")
+        if not isinstance(props, dict):
+            continue
+        cluster_size = props.get("cluster_size")
+        if (
+            props.get("geometry_issue_cluster") is True
+            and isinstance(cluster_size, int)
+            and cluster_size >= 2
+        ):
+            reasons: list[str] = props.get("design_blocker_reasons") or []
+            reasons.append(
+                f"Part of geometry issue cluster ({cluster_size} consecutive short/invalid spans)"
+            )
+            props["design_blocker_reasons"] = reasons
+            props["design_usable"] = False
 
 
 def generate_span_features_geojson(
@@ -557,7 +600,9 @@ def generate_span_features_geojson(
 
     if spans:
         enrich_spans_phase3b(spans, point_features)
+        _apply_design_gating(spans)
         annotate_geometry_issue_clusters(spans)
+        _apply_cluster_gating(spans)
     return spans
 
 

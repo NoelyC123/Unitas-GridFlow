@@ -293,6 +293,8 @@ def _enrich_popup_data_model(data: dict) -> dict:
         sp = span_feat.get("properties")
         if isinstance(sp, dict):
             merge_electrical_fields_into_props(sp)
+            if not sp.get("source_confidence_detail"):
+                sp["source_confidence_detail"] = classify_source_confidence(sp)
     for cab_feat in data.get("cable_features") or []:
         if not isinstance(cab_feat, dict):
             continue
@@ -389,6 +391,25 @@ def map_view(job_id: str):
     )
 
 
+def _build_validation_summary(data: dict) -> dict:
+    """Count unverified-geometry and design-blocker spans for the frontend."""
+    unverified = 0
+    blockers = 0
+    for sf in data.get("span_features") or []:
+        if not isinstance(sf, dict):
+            continue
+        sp = sf.get("properties") or {}
+        detail = sp.get("source_confidence_detail") or {}
+        if (
+            detail.get("geometry_trust") == "unverified"
+            or sp.get("capture_method") == "legacy map data"
+        ):
+            unverified += 1
+        if not sp.get("design_usable", True):
+            blockers += 1
+    return {"unverified_geometry": unverified, "design_blockers": blockers}
+
+
 @map_preview_bp.get("/data/<job_id>")
 def map_data(job_id: str):
     map_path = JOBS_ROOT / job_id / "map_data.json"
@@ -400,6 +421,7 @@ def map_data(job_id: str):
     try:
         data = json.loads(map_path.read_text(encoding="utf-8"))
         data = _enrich_with_design_chain_spans(data, seq_path)
+        data["validation_summary"] = _build_validation_summary(data)
         return jsonify(data)
     except Exception:
         return jsonify(_empty_feature_collection(job_id))
@@ -452,6 +474,7 @@ def project_map_data(project_id: str, file_id: str):
     try:
         data = json.loads(map_path.read_text(encoding="utf-8"))
         data = _enrich_with_design_chain_spans(data, seq_path)
+        data["validation_summary"] = _build_validation_summary(data)
         return jsonify(data)
     except Exception:
         return jsonify(_empty_feature_collection(display_id))

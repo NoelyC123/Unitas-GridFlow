@@ -345,10 +345,10 @@ def classify_source_confidence(record: "pd.Series | dict") -> dict[str, object]:
 
     return {
         "provenance": "unknown",
-        "confidence": "unknown",
-        "geometry_trust": "unknown",
+        "confidence": "low",
+        "geometry_trust": "unverified",
         "warnings": ["DATA SOURCE UNKNOWN - reliability cannot be determined"],
-        "designer_note": "Source unknown - treat with caution",
+        "designer_note": "Source unclear — treated as unverified; field validation required",
     }
 
 

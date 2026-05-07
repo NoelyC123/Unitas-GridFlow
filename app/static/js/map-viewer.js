@@ -1188,11 +1188,35 @@ class MapViewer {
   }
 
   buildSpanPopupHtml(props) {
+    const detail = props.source_confidence_detail || {};
+    const trust = props.geometry_trust || detail.geometry_trust;
+    const confidence = detail.confidence;
+    const isLegacy = props.capture_method === 'legacy map data';
+    const showGeometryWarning =
+      trust === 'unverified' ||
+      confidence === 'low' ||
+      isLegacy;
+
+    const warningBanner = showGeometryWarning
+      ? `<div class="gf-warning-banner">
+          <strong>⚠️ Unverified geometry</strong><br>
+          ${detail.designer_note || 'Field verification required before design use'}
+        </div>`
+      : '';
+
+    const blockerReasons = Array.isArray(props.design_blocker_reasons) ? props.design_blocker_reasons : [];
+    const blockerSection = blockerReasons.length
+      ? this.popupSection(
+          'Design blockers',
+          blockerReasons.map((r) => this.popupRow('Reason', r, 'warning')),
+        )
+      : '';
+
     const title = `${this.escapeHtml(props.from_point_id || '?')} → ${this.escapeHtml(props.to_point_id || '?')}`;
     const sections = this.spanPopupSections(props);
     return `
       <div class="asset-popup asset-popup-span">
-        <div class="popup-title">${title}</div>
+        ${warningBanner}${blockerSection}<div class="popup-title">${title}</div>
         ${sections.map((s) => this.popupSection(s.title, s.rows)).join('')}
       </div>
     `;
