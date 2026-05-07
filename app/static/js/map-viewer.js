@@ -62,6 +62,8 @@ class MapViewer {
     };
     this._spanFeatureList = [];
     this._spanLineRefs = [];
+    this._spanRouteGroups = [];
+    this._activeRouteGroupIndex = null;
     this._spanCrossingFilterOnly = false;
     this._cableLineRefs = [];
     try {
@@ -772,6 +774,8 @@ class MapViewer {
     this.spanLayer = L.layerGroup();
     this._spanFeatureList = spanFeatures.slice();
     this._spanLineRefs = [];
+    this._spanRouteGroups = [];
+    this._activeRouteGroupIndex = null;
 
     spanFeatures.forEach((feat, si) => {
       if (!feat || feat.type !== 'Feature') return;
@@ -807,9 +811,13 @@ class MapViewer {
         keepInView: true,
         maxWidth: 476,
       });
+      const ref = { line, props, index: si, routeGroupIndex: null };
+      line.on('click', () => this.toggleSpanRouteHighlight(ref));
       line.addTo(this.spanLayer);
-      this._spanLineRefs.push({ line, props, index: si });
+      this._spanLineRefs.push(ref);
     });
+
+    this.initialiseSpanRouteGroups();
 
     if (this.layerState.spans) {
       this.spanLayer.addTo(this.map);
@@ -886,6 +894,8 @@ class MapViewer {
       row.innerHTML = `<span class="span-list-seq">${this.escapeHtml(seq)}</span><span class="span-list-route">${fromTo}</span>${dist ? `<span class="span-list-dist">${dist}</span>` : ''}${anomalyChip}${r !== 'none' ? `<span class="span-list-risk">${r}</span>` : ''}`;
       row.addEventListener('click', () => {
         if (!this.map || !line.getBounds) return;
+        const ref = this._spanLineRefs.find((item) => item.line === line);
+        if (ref) this.toggleSpanRouteHighlight(ref);
         this.map.fitBounds(line.getBounds(), { padding: [48, 48], maxZoom: 17 });
         line.openPopup();
       });
@@ -895,9 +905,101 @@ class MapViewer {
 
   _applySpanCrossingFocusMode(active) {
     if (!this._spanLineRefs || !this.map) return;
-    for (const { line, props } of this._spanLineRefs) {
-      const vis = this.spanPolylineVisual(props, active);
-      line.setStyle({ color: vis.color, weight: vis.weight, opacity: vis.opacity });
+    this.applySpanRouteHighlightStyles(active);
+  }
+
+  spanRouteKey(value) {
+    const s = String(value ?? '').trim();
+    return s ? s.toUpperCase() : null;
+  }
+
+  spanRouteKeys(props) {
+    const keys = [
+      this.spanRouteKey(props?.from_point_id),
+      this.spanRouteKey(props?.to_point_id),
+    ].filter(Boolean);
+    if (!keys.length && props?.section_id != null && props.section_id !== '') {
+      keys.push(`SECTION:${String(props.section_id).trim().toUpperCase()}`);
+    }
+    return keys;
+  }
+
+  buildSpanRouteGroups(spanRefs = this._spanLineRefs) {
+    const groups = [];
+    const keyToGroup = new Map();
+    if (!Array.isArray(spanRefs)) return groups;
+
+    spanRefs.forEach((ref) => {
+      const keys = this.spanRouteKeys(ref?.props || {});
+      const matchedGroups = [...new Set(keys.map((key) => keyToGroup.get(key)).filter((idx) => idx != null))];
+      let groupIndex = matchedGroups.length ? matchedGroups[0] : groups.length;
+      if (!groups[groupIndex]) groups[groupIndex] = [];
+      if (!groups[groupIndex].includes(ref)) groups[groupIndex].push(ref);
+
+      matchedGroups.slice(1).forEach((mergeIndex) => {
+        if (mergeIndex === groupIndex || !groups[mergeIndex]) return;
+        groups[mergeIndex].forEach((mergeRef) => {
+          if (!groups[groupIndex].includes(mergeRef)) groups[groupIndex].push(mergeRef);
+        });
+        groups[mergeIndex] = [];
+      });
+
+      groups[groupIndex].forEach((groupRef) => {
+        this.spanRouteKeys(groupRef.props || {}).forEach((key) => keyToGroup.set(key, groupIndex));
+      });
+    });
+
+    return groups.filter((group) => group.length > 0);
+  }
+
+  initialiseSpanRouteGroups() {
+    this._spanRouteGroups = this.buildSpanRouteGroups(this._spanLineRefs);
+    this._spanRouteGroups.forEach((group, groupIndex) => {
+      group.forEach((ref) => {
+        ref.routeGroupIndex = groupIndex;
+      });
+    });
+  }
+
+  clearSpanRouteHighlight() {
+    this._activeRouteGroupIndex = null;
+    this.applySpanRouteHighlightStyles(this._spanCrossingFilterOnly);
+  }
+
+  toggleSpanRouteHighlight(spanRef) {
+    const groupIndex = spanRef?.routeGroupIndex;
+    if (groupIndex == null) return;
+    if (this._activeRouteGroupIndex === groupIndex) {
+      this.clearSpanRouteHighlight();
+      return;
+    }
+    this._activeRouteGroupIndex = groupIndex;
+    this.applySpanRouteHighlightStyles(this._spanCrossingFilterOnly);
+  }
+
+  applySpanRouteHighlightStyles(focusDimOthers = false) {
+    const activeGroup = this._activeRouteGroupIndex;
+    const hasActiveRoute = activeGroup != null;
+    for (const ref of this._spanLineRefs || []) {
+      const { line, props } = ref;
+      const selected = hasActiveRoute && ref.routeGroupIndex === activeGroup;
+      const dimNonSelected = hasActiveRoute && !selected;
+      const vis = this.spanPolylineVisual(props, focusDimOthers && !selected);
+      const style = selected
+        ? {
+            color: '#0f63ff',
+            weight: Math.max(vis.weight + 3, 8),
+            opacity: 1,
+          }
+        : {
+            color: vis.color,
+            weight: dimNonSelected ? Math.max(3, vis.weight - 1) : vis.weight,
+            opacity: dimNonSelected ? 0.24 : vis.opacity,
+          };
+      line.setStyle(style);
+      const el = typeof line.getElement === 'function' ? line.getElement() : null;
+      if (el?.classList) el.classList.toggle('gf-route-highlight', selected);
+      if (selected && typeof line.bringToFront === 'function') line.bringToFront();
     }
   }
 
@@ -1269,6 +1371,8 @@ class MapViewer {
     this.spanLayer = L.layerGroup();
     this._spanFeatureList = spans.slice();
     this._spanLineRefs = [];
+    this._spanRouteGroups = [];
+    this._activeRouteGroupIndex = null;
 
     spans.forEach((span, si) => {
       const coords = span.coordinates || [];
@@ -1317,9 +1421,13 @@ class MapViewer {
         keepInView: true,
         maxWidth: 476,
       });
+      const ref = { line, props, index: si, routeGroupIndex: null };
+      line.on('click', () => this.toggleSpanRouteHighlight(ref));
       line.addTo(this.spanLayer);
-      this._spanLineRefs.push({ line, props, index: si });
+      this._spanLineRefs.push(ref);
     });
+
+    this.initialiseSpanRouteGroups();
 
     if (this.layerState.spans) {
       this.spanLayer.addTo(this.map);
