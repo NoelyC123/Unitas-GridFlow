@@ -110,6 +110,9 @@ def test_review_navigation_static_wiring_present() -> None:
     assert ".gf-review-card-active" in css
     assert ".gf-review-card-disabled" in css
     assert ".gf-review-nav-controls" in css
+    assert "togglePlannerAwarenessLayer" in js
+    assert "this.togglePlannerAwarenessLayer(input.checked)" in js
+    assert "Design blockers (" not in html
 
 
 @NODE_UNAVAILABLE
@@ -161,6 +164,51 @@ def test_build_review_navigation_targets_and_empty_groups_are_safe() -> None:
             viewer.focusNextReviewTarget();
             viewer.focusPreviousReviewTarget();
             assert(viewer._activeReviewTargetIndex === -1, 'empty selection index should be -1');
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_planner_awareness_toggle_reuses_existing_layer_and_marker_refs() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            function fakeLayer() {
+              const members = new Set();
+              return {
+                addCount: 0,
+                members,
+                addTo(map) { this.addCount += 1; map.layers.add(this); return this; },
+                hasLayer(marker) { return members.has(marker); },
+              };
+            }
+            function layerMarker() {
+              return {
+                addTo(layer) { layer.members.add(this); return this; },
+              };
+            }
+            const layer = fakeLayer();
+            const marker = layerMarker();
+            const strayMarker = layerMarker();
+            layer.members.add(marker);
+            viewer.plannerAwarenessLayer = layer;
+            viewer._awarenessMarkerRefs = [{ marker }, { marker: strayMarker }];
+            viewer.map = {
+              layers: new Set([layer, marker, strayMarker]),
+              hasLayer(item) { return this.layers.has(item); },
+              removeLayer(item) { this.layers.delete(item); },
+            };
+
+            viewer.togglePlannerAwarenessLayer(false);
+            assert(!viewer.map.layers.has(layer), 'awareness layer should be removed');
+            assert(!viewer.map.layers.has(marker), 'marker refs should be removed defensively');
+            assert(!viewer.map.layers.has(strayMarker), 'stray marker refs should be removed');
+
+            viewer.togglePlannerAwarenessLayer(true);
+            assert(viewer.map.layers.has(layer), 'awareness layer should be restored');
+            assert(layer.members.has(marker), 'existing marker should remain in layer group');
+            assert(layer.members.has(strayMarker), 'missing marker should be restored to group');
             """
         )
     )

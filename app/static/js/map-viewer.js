@@ -1573,6 +1573,30 @@ class MapViewer {
     this.renderReviewIntelligenceSummary();
   }
 
+  togglePlannerAwarenessLayer(shouldShow) {
+    if (!this.map || !this.plannerAwarenessLayer) return;
+    if (shouldShow) {
+      if (!this.map.hasLayer(this.plannerAwarenessLayer)) {
+        this.plannerAwarenessLayer.addTo(this.map);
+      }
+      (this._awarenessMarkerRefs || []).forEach(({ marker }) => {
+        if (marker && !this.plannerAwarenessLayer.hasLayer?.(marker)) {
+          marker.addTo(this.plannerAwarenessLayer);
+        }
+      });
+      return;
+    }
+
+    if (this.map.hasLayer(this.plannerAwarenessLayer)) {
+      this.map.removeLayer(this.plannerAwarenessLayer);
+    }
+    (this._awarenessMarkerRefs || []).forEach(({ marker }) => {
+      if (marker && this.map.hasLayer(marker)) {
+        this.map.removeLayer(marker);
+      }
+    });
+  }
+
   renderCableFeatures(cableFeatures) {
     if (!this.map) return;
     if (this.cableLayer) {
@@ -2110,7 +2134,7 @@ class MapViewer {
         } else if (layerName === 'matches') {
           this.toggleLayer(this.lifecycleMatchLayer, input.checked);
         } else if (layerName === 'plannerAwareness') {
-          this.toggleLayer(this.plannerAwarenessLayer, input.checked);
+          this.togglePlannerAwarenessLayer(input.checked);
         } else if (layerName === 'angle') {
           this.applyAngleHighlightState();
         } else {
