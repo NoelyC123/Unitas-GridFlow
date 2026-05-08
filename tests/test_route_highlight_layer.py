@@ -130,7 +130,7 @@ def test_route_highlight_click_binding_and_css_present() -> None:
     js = MAP_JS.read_text(encoding="utf-8")
     css = MAP_CSS.read_text(encoding="utf-8")
 
-    assert "line.on('click', () => this.toggleSpanRouteHighlight(ref));" in js
+    assert "line.on('click', () => this.handleDirectSpanClick(ref));" in js
     assert "buildSpanRouteGroups" in js
     assert "initialiseSpanRouteGroups" in js
     assert ".gf-route-highlight" in css

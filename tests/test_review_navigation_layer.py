@@ -54,8 +54,8 @@ def _viewer_harness(extra_js: str) -> str:
           const classes = new Set();
           return {{
             classes,
-            add(cls) {{ classes.add(cls); }},
-            remove(cls) {{ classes.delete(cls); }},
+            add(...names) {{ names.forEach((cls) => classes.add(cls)); }},
+            remove(...names) {{ names.forEach((cls) => classes.delete(cls)); }},
             toggle(cls, on) {{ on ? classes.add(cls) : classes.delete(cls); }},
           }};
         }}
@@ -107,12 +107,22 @@ def test_review_navigation_static_wiring_present() -> None:
     assert 'data-review-nav-group="awareness"' in html
     assert "review-nav-prev" in html
     assert "review-nav-next" in html
+    assert "review-map-release" in html
+    assert "review-map-unlocked-note" in html
     assert ".gf-review-card-active" in css
     assert ".gf-review-card-disabled" in css
     assert ".gf-review-nav-controls" in css
+    assert ".gf-current-review-target-span" in css
+    assert ".gf-review-map-release" in css
+    assert ".gf-review-map-unlocked-note" in css
     assert "togglePlannerAwarenessLayer" in js
     assert "this.togglePlannerAwarenessLayer(input.checked)" in js
     assert "Design blockers (" not in html
+    assert "clearCurrentReviewTargetSpan" in js
+    assert "markCurrentReviewTargetSpan" in js
+    assert "handleSpanPopupClose" in js
+    assert "releaseReviewNavigationMap" in js
+    assert "this._reviewNavigationLocked = true" in js
     assert "_reviewNavigationTargets?.blockers?.length" in js
     assert "smartPopupOffsetForLayer" in js
     assert "bindSmartPopup(line, this.buildSpanPopupHtml(props)" in js
@@ -262,6 +272,10 @@ def test_focus_review_target_reuses_route_highlight_and_opens_popups() -> None:
               line.classList.classes.has('gf-review-target-focused'),
               'focused span class expected',
             );
+            assert(
+              line.classList.classes.has('gf-current-review-target-span'),
+              'current target span class expected',
+            );
 
             viewer.focusReviewTarget({
               type: 'awareness',
@@ -273,6 +287,143 @@ def test_focus_review_target_reuses_route_highlight_and_opens_popups() -> None:
             assert(
               marker.classList.classes.has('gf-review-target-focused'),
               'focused marker class expected',
+            );
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_current_target_span_moves_and_previous_target_is_cleared() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const lineA = fakeLine();
+            const lineB = fakeLine();
+            const refA = {
+              props: { from_point_id: 'A', to_point_id: 'B', span_validity: 'invalid' },
+              line: lineA,
+              routeGroupIndex: 0,
+            };
+            const refB = {
+              props: { from_point_id: 'C', to_point_id: 'D', span_validity: 'invalid' },
+              line: lineB,
+              routeGroupIndex: 1,
+            };
+            viewer._spanLineRefs = [refA, refB];
+            viewer.map = {
+              fitBounds() {},
+            };
+
+            viewer.focusReviewTarget({ type: 'span', spanIndex: 0, spanRef: refA });
+            assert(
+              lineA.classList.classes.has('gf-current-review-target-span'),
+              'first focused span should get current target class',
+            );
+
+            viewer.focusReviewTarget({ type: 'span', spanIndex: 1, spanRef: refB });
+            assert(
+              !lineA.classList.classes.has('gf-current-review-target-span'),
+              'previous current target class should be cleared',
+            );
+            assert(
+              lineB.classList.classes.has('gf-current-review-target-span'),
+              'new focused span should get current target class',
+            );
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_popup_close_clears_direct_span_highlight_but_preserves_review_navigation() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const line = fakeLine();
+            const ref = {
+              props: { from_point_id: 'A', to_point_id: 'B' },
+              line,
+              routeGroupIndex: 0,
+            };
+            viewer._spanLineRefs = [ref];
+
+            viewer.handleDirectSpanClick(ref);
+            assert(viewer._activeRouteGroupIndex === 0, 'direct click should highlight route');
+            assert(
+              line.classList.classes.has('gf-current-review-target-span'),
+              'direct click should mark exact span',
+            );
+            viewer.handleSpanPopupClose(ref);
+            assert(viewer._activeRouteGroupIndex === null, 'direct popup close clears route');
+            assert(
+              !line.classList.classes.has('gf-current-review-target-span'),
+              'direct popup close clears current target span',
+            );
+
+            viewer.handleDirectSpanClick(ref);
+            viewer._activeReviewTargetGroup = 'blockers';
+            viewer.handleSpanPopupClose(ref);
+            assert(
+              viewer._activeRouteGroupIndex === 0,
+              'review navigation keeps route highlighted',
+            );
+            assert(
+              line.classList.classes.has('gf-current-review-target-span'),
+              'review navigation keeps current target span',
+            );
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_release_map_pauses_refocus_until_next_or_previous() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const lineA = fakeLine();
+            const lineB = fakeLine();
+            const refA = {
+              props: { from_point_id: 'A', to_point_id: 'B', span_validity: 'invalid' },
+              line: lineA,
+              routeGroupIndex: 0,
+            };
+            const refB = {
+              props: { from_point_id: 'B', to_point_id: 'C', span_validity: 'invalid' },
+              line: lineB,
+              routeGroupIndex: 0,
+            };
+            const targetA = { type: 'span', spanIndex: 0, spanRef: refA };
+            const targetB = { type: 'span', spanIndex: 1, spanRef: refB };
+            viewer._spanLineRefs = [refA, refB];
+            viewer._reviewNavigationTargets = {
+              blockers: [targetA, targetB],
+              review: [],
+              gaps: [],
+              awareness: [],
+            };
+            viewer._activeReviewTargetGroup = 'blockers';
+            viewer._activeReviewTargetIndex = 0;
+            viewer.map = {
+              fitBoundsCalls: 0,
+              fitBounds() { this.fitBoundsCalls += 1; },
+            };
+
+            viewer.releaseReviewNavigationMap();
+            assert(
+              viewer._reviewNavigationLocked === false,
+              'release map should unlock navigation',
+            );
+            viewer.focusReviewTarget(targetA);
+            assert(viewer.map.fitBoundsCalls === 0, 'unlocked focus should not snap map back');
+
+            viewer.focusNextReviewTarget();
+            assert(viewer._reviewNavigationLocked === true, 'next should re-enable map focus');
+            assert(viewer.map.fitBoundsCalls === 1, 'next should navigate to selected target');
+            assert(
+              lineB.classList.classes.has('gf-current-review-target-span'),
+              'next should move current target span',
             );
             """
         )

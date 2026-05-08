@@ -36,6 +36,15 @@
   filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.65));
 }
 
+.gridflow-span-line.gf-current-review-target-span {
+  stroke: #f97316 !important;
+  stroke-width: 12 !important;
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.98))
+    drop-shadow(0 0 10px rgba(249, 115, 22, 0.88));
+}
+
 .planner-awareness-marker.gf-review-target-focused {
   filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.7));
   stroke-width: 4;
@@ -125,6 +134,28 @@
 .gf-review-nav-button:disabled {
   cursor: default;
   opacity: 0.45;
+}
+
+.gf-review-map-release {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+  white-space: nowrap;
+}
+
+.gf-review-map-release[aria-pressed="true"] {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.gf-review-map-unlocked-note {
+  color: #64748b;
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 5px;
+  text-align: center;
 }
 
 .gf-review-target-count {

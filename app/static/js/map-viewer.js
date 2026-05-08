@@ -74,6 +74,9 @@ class MapViewer {
     this._activeReviewTargetGroup = null;
     this._activeReviewTargetIndex = -1;
     this._focusedReviewTarget = null;
+    this._currentReviewTargetSpan = null;
+    this._directPopupSpanRef = null;
+    this._reviewNavigationLocked = true;
     try {
       const v = localStorage.getItem('gridflow_map_span_label_mode');
       const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
@@ -922,8 +925,10 @@ class MapViewer {
     });
     const prev = document.getElementById('review-nav-prev');
     const next = document.getElementById('review-nav-next');
+    const release = document.getElementById('review-map-release');
     if (prev) prev.addEventListener('click', () => this.focusPreviousReviewTarget());
     if (next) next.addEventListener('click', () => this.focusNextReviewTarget());
+    if (release) release.addEventListener('click', () => this.releaseReviewNavigationMap());
     this.renderReviewNavigationState();
   }
 
@@ -960,6 +965,22 @@ class MapViewer {
       button.disabled = !showStepButtons;
       button.style.visibility = showStepButtons ? 'visible' : 'hidden';
     });
+
+    const hasSelectedTarget = Boolean(group && count > 0 && this._activeReviewTargetIndex >= 0);
+    const release = document.getElementById('review-map-release');
+    if (release) {
+      release.style.display = hasSelectedTarget ? '' : 'none';
+      release.disabled = !hasSelectedTarget || this._reviewNavigationLocked === false;
+      release.textContent = this._reviewNavigationLocked === false ? 'Map released' : 'Release map';
+      release.setAttribute(
+        'aria-pressed',
+        hasSelectedTarget && this._reviewNavigationLocked === false ? 'true' : 'false',
+      );
+    }
+    const unlockedNote = document.getElementById('review-map-unlocked-note');
+    if (unlockedNote) {
+      unlockedNote.style.display = hasSelectedTarget && this._reviewNavigationLocked === false ? '' : 'none';
+    }
   }
 
   selectReviewNavigationGroup(group) {
@@ -973,6 +994,7 @@ class MapViewer {
       return;
     }
     this._activeReviewTargetIndex = 0;
+    this._reviewNavigationLocked = true;
     this.renderReviewNavigationState();
     this.focusReviewTarget(targets[0]);
   }
@@ -987,6 +1009,7 @@ class MapViewer {
     const targets = this.currentReviewTargetGroup();
     if (!targets.length) return;
     this._activeReviewTargetIndex = (this._activeReviewTargetIndex + 1) % targets.length;
+    this._reviewNavigationLocked = true;
     this.renderReviewNavigationState();
     this.focusReviewTarget(targets[this._activeReviewTargetIndex]);
   }
@@ -995,8 +1018,15 @@ class MapViewer {
     const targets = this.currentReviewTargetGroup();
     if (!targets.length) return;
     this._activeReviewTargetIndex = (this._activeReviewTargetIndex - 1 + targets.length) % targets.length;
+    this._reviewNavigationLocked = true;
     this.renderReviewNavigationState();
     this.focusReviewTarget(targets[this._activeReviewTargetIndex]);
+  }
+
+  releaseReviewNavigationMap() {
+    if (!this._activeReviewTargetGroup || this._activeReviewTargetIndex < 0) return;
+    this._reviewNavigationLocked = false;
+    this.renderReviewNavigationState();
   }
 
   clearFocusedReviewTarget() {
@@ -1006,6 +1036,16 @@ class MapViewer {
     this._focusedReviewTarget = null;
   }
 
+  clearCurrentReviewTargetSpan() {
+    if (this._currentReviewTargetSpan?.classList) {
+      this._currentReviewTargetSpan.classList.remove(
+        'gf-current-review-target',
+        'gf-current-review-target-span',
+      );
+    }
+    this._currentReviewTargetSpan = null;
+  }
+
   markFocusedReviewTarget(layer) {
     this.clearFocusedReviewTarget();
     const el = typeof layer?.getElement === 'function' ? layer.getElement() : null;
@@ -1013,6 +1053,38 @@ class MapViewer {
       el.classList.add('gf-review-target-focused');
       this._focusedReviewTarget = el;
     }
+  }
+
+  markCurrentReviewTargetSpan(spanRef) {
+    this.clearCurrentReviewTargetSpan();
+    const line = spanRef?.line;
+    const el = typeof line?.getElement === 'function' ? line.getElement() : null;
+    if (el?.classList) {
+      el.classList.add('gf-current-review-target', 'gf-current-review-target-span');
+      this._currentReviewTargetSpan = el;
+    }
+    if (typeof line?.bringToFront === 'function') line.bringToFront();
+  }
+
+  handleDirectSpanClick(spanRef) {
+    if (!spanRef) return;
+    this._directPopupSpanRef = spanRef;
+    this.toggleSpanRouteHighlight(spanRef);
+    if (this._activeRouteGroupIndex == null) {
+      this.clearCurrentReviewTargetSpan();
+      return;
+    }
+    this.markFocusedReviewTarget(spanRef.line);
+    this.markCurrentReviewTargetSpan(spanRef);
+  }
+
+  handleSpanPopupClose(spanRef) {
+    if (this._activeReviewTargetGroup) return;
+    if (!spanRef || (this._directPopupSpanRef && this._directPopupSpanRef !== spanRef)) return;
+    this.clearSpanRouteHighlight();
+    this.clearFocusedReviewTarget();
+    this.clearCurrentReviewTargetSpan();
+    this._directPopupSpanRef = null;
   }
 
   ensureSpanRouteHighlighted(spanRef) {
@@ -1029,11 +1101,12 @@ class MapViewer {
     if (target.type === 'span') {
       const ref = target.spanRef || this._spanLineRefs?.[target.spanIndex];
       if (!ref?.line) return;
-      if (this.map && typeof ref.line.getBounds === 'function') {
+      if (this._reviewNavigationLocked !== false && this.map && typeof ref.line.getBounds === 'function') {
         this.map.fitBounds(ref.line.getBounds(), { padding: [48, 48], maxZoom: 17 });
       }
       this.ensureSpanRouteHighlighted(ref);
       this.markFocusedReviewTarget(ref.line);
+      this.markCurrentReviewTargetSpan(ref);
       if (typeof ref.line.openPopup === 'function') ref.line.openPopup();
       return;
     }
@@ -1041,7 +1114,8 @@ class MapViewer {
     if (target.type === 'awareness') {
       const marker = target.markerRef?.marker;
       if (target.spanRef) this.ensureSpanRouteHighlighted(target.spanRef);
-      if (this.map && marker && typeof marker.getLatLng === 'function') {
+      this.clearCurrentReviewTargetSpan();
+      if (this._reviewNavigationLocked !== false && this.map && marker && typeof marker.getLatLng === 'function') {
         this.map.setView(marker.getLatLng(), Math.max(this.map.getZoom?.() || 15, 16));
       }
       this.markFocusedReviewTarget(marker);
@@ -1348,14 +1422,15 @@ class MapViewer {
         this.bindSpanDistanceTooltip(line, props);
       }
 
+      const ref = { line, props, index: si, routeGroupIndex: null };
       this.bindSmartPopup(line, this.buildSpanPopupHtml(props), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,
         maxWidth: 476,
       });
-      const ref = { line, props, index: si, routeGroupIndex: null };
-      line.on('click', () => this.toggleSpanRouteHighlight(ref));
+      line.on('click', () => this.handleDirectSpanClick(ref));
+      line.on('popupclose', () => this.handleSpanPopupClose(ref));
       line.addTo(this.spanLayer);
       this._spanLineRefs.push(ref);
     });
@@ -1438,7 +1513,7 @@ class MapViewer {
       row.addEventListener('click', () => {
         if (!this.map || !line.getBounds) return;
         const ref = this._spanLineRefs.find((item) => item.line === line);
-        if (ref) this.toggleSpanRouteHighlight(ref);
+        if (ref) this.handleDirectSpanClick(ref);
         this.map.fitBounds(line.getBounds(), { padding: [48, 48], maxZoom: 17 });
         line.openPopup();
       });
@@ -2051,14 +2126,15 @@ class MapViewer {
         this.bindSpanDistanceTooltip(line, props);
       }
 
+      const ref = { line, props, index: si, routeGroupIndex: null };
       this.bindSmartPopup(line, this.buildSpanPopupHtml(props), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,
         maxWidth: 476,
       });
-      const ref = { line, props, index: si, routeGroupIndex: null };
-      line.on('click', () => this.toggleSpanRouteHighlight(ref));
+      line.on('click', () => this.handleDirectSpanClick(ref));
+      line.on('popupclose', () => this.handleSpanPopupClose(ref));
       line.addTo(this.spanLayer);
       this._spanLineRefs.push(ref);
     });
