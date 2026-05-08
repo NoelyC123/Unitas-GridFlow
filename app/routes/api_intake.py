@@ -105,6 +105,166 @@ def _safe_float(value: Any) -> float | None:
         return None
 
 
+_CLEAN_NUMERIC_NON_VALUES: frozenset[str] = frozenset(
+    {"n/a", "na", "not measured", "not captured", "unknown", "-", "", "none", "null"}
+)
+
+
+def clean_numeric_field(value: Any) -> float | None:
+    """Clean a single value before numeric conversion.
+
+    Handles unit suffixes (9.5m → 9.5, 1.5km → 1500.0), non-value
+    strings (N/A, unknown, -), and whitespace.  Returns None when the
+    value cannot be interpreted as a number.
+    """
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except Exception:
+        pass
+    if isinstance(value, (int, float)):
+        if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+            return None
+        return float(value)
+    s = str(value).strip().lower()
+    if not s or s in _CLEAN_NUMERIC_NON_VALUES:
+        return None
+    if s.endswith("km"):
+        try:
+            return float(s[:-2].strip()) * 1000.0
+        except ValueError:
+            return None
+    s = s.rstrip("m").strip()
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def clean_text_field(value: Any) -> str | None:
+    """Clean a text field value: strip whitespace, collapse internal spaces.
+
+    Returns None for empty / missing values.
+    """
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except Exception:
+        pass
+    cleaned = " ".join(str(value).split())
+    return cleaned if cleaned else None
+
+
+def _remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop rows that carry no usable data.
+
+    A row is removed when all values are NaN, or when every available
+    coordinate column (easting, northing, lat, lon) is NaN — such rows
+    cannot be placed on the map and add no value to the output.
+    """
+    df = df.dropna(how="all")
+    coord_cols = [c for c in ("easting", "northing", "lat", "lon") if c in df.columns]
+    if coord_cols:
+        df = df.dropna(subset=coord_cols, how="all")
+    return df.reset_index(drop=True)
+
+
+def validate_required_fields(df: pd.DataFrame) -> tuple[bool, list[str]]:
+    """Check that at least one usable coordinate pair is present.
+
+    Returns (is_valid, messages) where messages may include errors or
+    advisory warnings about missing recommended fields.
+    """
+    messages: list[str] = []
+    has_latlon = "lat" in df.columns and "lon" in df.columns
+    has_en = "easting" in df.columns and "northing" in df.columns
+    if not has_latlon and not has_en:
+        available = ", ".join(df.columns.tolist())
+        messages.append(
+            f"Missing coordinate fields: no lat/lon or easting/northing found. "
+            f"Available columns: {available}. "
+            f"Check CSV headers (commonly E/Easting/X and N/Northing/Y)."
+        )
+        return False, messages
+    for field in ("feature_code", "point_id", "pole_id"):
+        if field not in df.columns:
+            messages.append(
+                f"Recommended field '{field}' not found — some features may be limited."
+            )
+    return True, messages
+
+
+def generate_import_summary(
+    df_original: pd.DataFrame,
+    df_processed: pd.DataFrame,
+    validation_warnings: list[str],
+) -> dict[str, Any]:
+    """Build a structured import summary dict from before/after DataFrames."""
+    total = len(df_processed)
+    coverage: dict[str, dict[str, Any]] = {}
+    for field in df_processed.columns:
+        non_null = int(df_processed[field].notna().sum())
+        coverage[field] = {
+            "non_null": non_null,
+            "total": total,
+            "percentage": round(100 * non_null / total, 1) if total > 0 else 0,
+        }
+    return {
+        "total_rows_in_csv": len(df_original),
+        "rows_imported": total,
+        "rows_skipped": len(df_original) - total,
+        "fields_found": df_processed.columns.tolist(),
+        "warnings": validation_warnings,
+        "field_coverage": coverage,
+    }
+
+
+def format_import_summary(summary: dict[str, Any]) -> str:
+    """Render an import summary dict as human-readable text."""
+    lines = ["=" * 60, "IMPORT SUMMARY", "=" * 60, ""]
+    lines += [
+        "Records:",
+        f"  Total rows in CSV: {summary['total_rows_in_csv']}",
+        f"  Imported successfully: {summary['rows_imported']}",
+    ]
+    if summary.get("rows_skipped", 0) > 0:
+        lines.append(f"  Skipped (blank/no-coord rows): {summary['rows_skipped']}")
+    coverage = summary.get("field_coverage") or {}
+    coord_fields = [f for f in ("easting", "northing", "lat", "lon") if f in coverage]
+    if coord_fields:
+        lines += ["", "Coordinate Fields:"]
+        for field in coord_fields:
+            c = coverage[field]
+            lines.append(f"  {field}: {c['non_null']}/{c['total']} ({c['percentage']}%)")
+    optional = [
+        "height",
+        "elevation",
+        "feature_code",
+        "point_id",
+        "pole_id",
+        "structure_type",
+    ]
+    opt_present = [f for f in optional if f in coverage]
+    if opt_present:
+        lines += ["", "Optional Fields:"]
+        for field in opt_present:
+            c = coverage[field]
+            lines.append(f"  {field}: {c['non_null']}/{c['total']} ({c['percentage']}%)")
+    warnings = summary.get("warnings") or []
+    if warnings:
+        lines += ["", "Warnings:"]
+        for w in warnings[:10]:
+            lines.append(f"  • {w}")
+        if len(warnings) > 10:
+            lines.append(f"  ... and {len(warnings) - 10} more")
+    lines += ["", "=" * 60]
+    return "\n".join(lines)
+
+
 def _safe_value(value: Any) -> Any:
     if value is None:
         return None
@@ -185,9 +345,14 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
         [
             "height_m",
             "height",
+            "heights",
             "pole_height_m",
             "pole_height",
+            "structure_height",
             "ht_m",
+            "ht",
+            "measured_height",
+            "pole_ht",
         ],
     )
     normalized |= _copy_if_missing(
@@ -527,9 +692,18 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
         "easting",
         [
             "easting",
+            "eastings",
+            "east",
             "os_easting",
             "grid_easting",
             "grid_e",
+            "osgb_e",
+            "osgb_east",
+            "grid_east",
+            "e_coordinate",
+            "x_coordinate",
+            "e",
+            "x",
         ],
     )
     normalized |= _copy_if_missing(
@@ -537,9 +711,18 @@ def _normalize_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
         "northing",
         [
             "northing",
+            "northings",
+            "north",
             "os_northing",
             "grid_northing",
             "grid_n",
+            "osgb_n",
+            "osgb_north",
+            "grid_north",
+            "n_coordinate",
+            "y_coordinate",
+            "n",
+            "y",
         ],
     )
 
@@ -1246,9 +1429,16 @@ def process_job(
                 df = parse_controller_csv(df)
                 file_type = "controller"
 
+        df_raw_for_summary = df.copy()
+
         df, auto_normalized = _normalize_dataframe(df)
         if file_type == "controller":
             auto_normalized = True
+
+        df = _remove_empty_rows(df)
+        _req_valid, _import_warnings = validate_required_fields(df)
+        if _import_warnings:
+            meta["import_warnings"] = _import_warnings
 
         df = convert_grid_to_wgs84(df)
         df = classify_record_roles(df)
@@ -1385,6 +1575,14 @@ def process_job(
             json.dumps(_sanitize_for_json(feature_collection), indent=2, allow_nan=False),
             encoding="utf-8",
         )
+
+        try:
+            _import_summary = generate_import_summary(df_raw_for_summary, df, _import_warnings)
+            (job_dir / "import_summary.txt").write_text(
+                format_import_summary(_import_summary), encoding="utf-8"
+            )
+        except Exception:
+            pass  # non-critical — never let summary generation break the pipeline
 
         meta.update(
             {

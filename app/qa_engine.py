@@ -121,6 +121,161 @@ _STRUCTURAL_FEATURE_CODES: frozenset[str] = frozenset(
 )
 
 
+def safe_get_numeric(
+    record: "pd.Series | dict",
+    field_name: str,
+    default: float | None = None,
+) -> tuple[float | None, str | None]:
+    """Safely extract a numeric value from a record, returning (value, error).
+
+    Returns (default, None) when the field is absent or empty.
+    Returns (default, error_string) when the value is present but non-numeric.
+    """
+    value = record.get(field_name) if hasattr(record, "get") else None
+    if value is None:
+        return default, None
+    try:
+        if pd.isna(value):
+            return default, None
+    except Exception:
+        pass
+    try:
+        return float(value), None
+    except (ValueError, TypeError):
+        return default, f"Invalid numeric value for '{field_name}': {value!r}"
+
+
+def validate_coordinate_consistency(records: list[dict]) -> list[dict]:
+    """Validate coordinate presence and OSGB range for a list of record dicts.
+
+    Returns a list of issue dicts (severity, category, message, record_id, qa_status).
+    Does not raise — missing or invalid records produce error entries instead.
+    """
+    issues: list[dict] = []
+    for i, record in enumerate(records):
+        record_id = record.get("point_id") or record.get("pole_id") or f"row_{i + 1}"
+        easting, e_err = safe_get_numeric(record, "easting")
+        northing, n_err = safe_get_numeric(record, "northing")
+        if e_err or n_err:
+            issues.append(
+                {
+                    "severity": "ERROR",
+                    "category": "geometry",
+                    "message": f"Record {record_id}: missing or invalid coordinates",
+                    "details": " ".join(filter(None, [e_err, n_err])),
+                    "record_id": record_id,
+                    "qa_status": "fail",
+                }
+            )
+            continue
+        if easting is not None and not (0 < easting < 700000):
+            issues.append(
+                {
+                    "severity": "WARNING",
+                    "category": "geometry",
+                    "message": (f"Easting {easting:.1f} outside typical OSGB range (0–700000)"),
+                    "record_id": record_id,
+                    "qa_status": "warning",
+                }
+            )
+        if northing is not None and not (0 < northing < 1300000):
+            issues.append(
+                {
+                    "severity": "WARNING",
+                    "category": "geometry",
+                    "message": (f"Northing {northing:.1f} outside typical OSGB range (0–1300000)"),
+                    "record_id": record_id,
+                    "qa_status": "warning",
+                }
+            )
+    return issues
+
+
+def validate_span_distances(
+    records: list[dict],
+    voltage: str = "11kV",
+) -> list[dict]:
+    """Check span distances between consecutive record dicts.
+
+    Skips pairs where coordinates are missing (logs INFO entry instead of crashing).
+    Returns a list of issue dicts plus a summary INFO entry at the end.
+    """
+    issues: list[dict] = []
+    validated = 0
+    skipped = 0
+    max_m = 500.0
+
+    for i in range(len(records) - 1):
+        r1, r2 = records[i], records[i + 1]
+        id1 = r1.get("point_id") or r1.get("pole_id") or f"row_{i + 1}"
+        id2 = r2.get("point_id") or r2.get("pole_id") or f"row_{i + 2}"
+        e1, e1_err = safe_get_numeric(r1, "easting")
+        n1, n1_err = safe_get_numeric(r1, "northing")
+        e2, e2_err = safe_get_numeric(r2, "easting")
+        n2, n2_err = safe_get_numeric(r2, "northing")
+        if any([e1_err, n1_err, e2_err, n2_err]):
+            skipped += 1
+            issues.append(
+                {
+                    "severity": "INFO",
+                    "category": "geometry",
+                    "message": "Span validation skipped: missing coordinates",
+                    "record_id": f"{id1} → {id2}",
+                    "qa_status": "info",
+                }
+            )
+            continue
+        try:
+            dx = (e2 or 0.0) - (e1 or 0.0)
+            dy = (n2 or 0.0) - (n1 or 0.0)
+            distance = math.sqrt(dx * dx + dy * dy)
+            validated += 1
+            if distance < 10:
+                issues.append(
+                    {
+                        "severity": "WARNING",
+                        "category": "geometry",
+                        "message": (
+                            f"Very short span ({distance:.1f}m) — possible duplicate coordinates"
+                        ),
+                        "record_id": f"{id1} → {id2}",
+                        "qa_status": "warning",
+                    }
+                )
+            elif distance > max_m:
+                issues.append(
+                    {
+                        "severity": "WARNING",
+                        "category": "geometry",
+                        "message": (
+                            f"Very long span ({distance:.1f}m) — possible missing intermediate pole"
+                        ),
+                        "record_id": f"{id1} → {id2}",
+                        "qa_status": "warning",
+                    }
+                )
+        except Exception as exc:
+            issues.append(
+                {
+                    "severity": "ERROR",
+                    "category": "geometry",
+                    "message": f"Distance calculation failed: {exc}",
+                    "record_id": f"{id1} → {id2}",
+                    "qa_status": "fail",
+                }
+            )
+
+    issues.append(
+        {
+            "severity": "INFO",
+            "category": "geometry",
+            "message": (f"Span validation complete: {validated} checked, {skipped} skipped"),
+            "qa_status": "info",
+        }
+    )
+    return issues
+
+
 def infer_display_network_fields(
     row: "pd.Series | dict",
     rulepack_id: str | None = None,

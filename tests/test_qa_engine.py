@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import pandas as pd
+import pytest
 
 from app.qa_engine import (
     classify_height_confidence,
     classify_source_confidence,
     parse_attachments,
     run_qa_checks,
+    safe_get_numeric,
+    validate_coordinate_consistency,
+    validate_span_distances,
 )
 
 
@@ -1602,3 +1606,164 @@ def test_span_distance_2m_still_triggers_duplicate_gps_bounce_with_min_m_5() -> 
     assert len(very_short) == 1, (
         f"Expected duplicate/GPS-bounce issue for 2m span; got: {issues['Issue'].tolist()}"
     )
+
+
+# ---------------------------------------------------------------------------
+# safe_get_numeric
+# ---------------------------------------------------------------------------
+
+
+class TestSafeGetNumeric:
+    def test_numeric_value_returned(self):
+        record = {"height": 9.5}
+        val, err = safe_get_numeric(record, "height")
+        assert val == pytest.approx(9.5)
+        assert err is None
+
+    def test_string_numeric_coerced(self):
+        record = {"height": "12.3"}
+        val, err = safe_get_numeric(record, "height")
+        assert val == pytest.approx(12.3)
+        assert err is None
+
+    def test_absent_field_returns_default(self):
+        record = {}
+        val, err = safe_get_numeric(record, "height", default=0.0)
+        assert val == 0.0
+        assert err is None
+
+    def test_none_value_returns_default(self):
+        record = {"height": None}
+        val, err = safe_get_numeric(record, "height", default=None)
+        assert val is None
+        assert err is None
+
+    def test_non_numeric_string_returns_error(self):
+        record = {"height": "not-a-number"}
+        val, err = safe_get_numeric(record, "height")
+        assert val is None
+        assert err is not None
+        assert "height" in err
+
+    def test_integer_coerced_to_float(self):
+        record = {"height": 10}
+        val, err = safe_get_numeric(record, "height")
+        assert isinstance(val, float)
+        assert err is None
+
+
+# ---------------------------------------------------------------------------
+# validate_coordinate_consistency
+# ---------------------------------------------------------------------------
+
+
+class TestValidateCoordinateConsistency:
+    def test_valid_records_produce_no_issues(self):
+        records = [
+            {"point_id": "P1", "easting": 300000.0, "northing": 400000.0},
+            {"point_id": "P2", "easting": 300100.0, "northing": 400050.0},
+        ]
+        issues = validate_coordinate_consistency(records)
+        assert issues == []
+
+    def test_none_easting_produces_no_issues(self):
+        # safe_get_numeric treats None as absent (not an error) — no range check
+        records = [{"point_id": "P1", "easting": None, "northing": 400000.0}]
+        issues = validate_coordinate_consistency(records)
+        assert issues == []
+
+    def test_non_numeric_easting_produces_error(self):
+        records = [{"point_id": "P1", "easting": "bad", "northing": 400000.0}]
+        issues = validate_coordinate_consistency(records)
+        assert any(i["severity"] == "ERROR" for i in issues)
+
+    def test_out_of_range_easting_produces_warning(self):
+        records = [{"point_id": "P1", "easting": -100.0, "northing": 400000.0}]
+        issues = validate_coordinate_consistency(records)
+        assert any(i["severity"] == "WARNING" for i in issues)
+
+    def test_out_of_range_northing_produces_warning(self):
+        records = [{"point_id": "P1", "easting": 300000.0, "northing": 2000000.0}]
+        issues = validate_coordinate_consistency(records)
+        assert any(i["severity"] == "WARNING" for i in issues)
+
+    def test_record_id_from_point_id(self):
+        records = [{"point_id": "MYPOLE", "easting": "bad", "northing": 400000.0}]
+        issues = validate_coordinate_consistency(records)
+        assert any("MYPOLE" in i["record_id"] for i in issues)
+
+    def test_record_id_fallback_to_row_number(self):
+        records = [{"easting": "bad", "northing": 400000.0}]
+        issues = validate_coordinate_consistency(records)
+        assert any("row_1" in i["record_id"] for i in issues)
+
+    def test_empty_list_returns_no_issues(self):
+        assert validate_coordinate_consistency([]) == []
+
+
+# ---------------------------------------------------------------------------
+# validate_span_distances
+# ---------------------------------------------------------------------------
+
+
+class TestValidateSpanDistances:
+    def _rec(self, e, n, pid):
+        return {"easting": e, "northing": n, "point_id": pid}
+
+    def test_normal_span_no_issues(self):
+        records = [
+            self._rec(300000.0, 400000.0, "P1"),
+            self._rec(300100.0, 400000.0, "P2"),
+        ]
+        issues = validate_span_distances(records)
+        non_info = [i for i in issues if i["severity"] != "INFO"]
+        assert non_info == []
+
+    def test_very_short_span_produces_warning(self):
+        records = [
+            self._rec(300000.0, 400000.0, "P1"),
+            self._rec(300005.0, 400000.0, "P2"),
+        ]
+        issues = validate_span_distances(records)
+        warnings = [i for i in issues if i["severity"] == "WARNING"]
+        assert len(warnings) == 1
+        assert "short" in warnings[0]["message"].lower()
+
+    def test_very_long_span_produces_warning(self):
+        records = [
+            self._rec(300000.0, 400000.0, "P1"),
+            self._rec(301000.0, 400000.0, "P2"),
+        ]
+        issues = validate_span_distances(records)
+        warnings = [i for i in issues if i["severity"] == "WARNING"]
+        assert len(warnings) == 1
+        assert "long" in warnings[0]["message"].lower()
+
+    def test_invalid_coords_produce_info_skip_not_error(self):
+        # Non-numeric coords trigger the skip path (INFO entry, no WARNING/ERROR)
+        records = [
+            {"point_id": "P1", "easting": "bad", "northing": "bad"},
+            self._rec(300100.0, 400000.0, "P2"),
+        ]
+        issues = validate_span_distances(records)
+        assert all(i["severity"] in ("INFO",) for i in issues)
+
+    def test_summary_info_entry_always_present(self):
+        records = [
+            self._rec(300000.0, 400000.0, "P1"),
+            self._rec(300100.0, 400000.0, "P2"),
+        ]
+        issues = validate_span_distances(records)
+        summary = [i for i in issues if "Span validation complete" in i.get("message", "")]
+        assert len(summary) == 1
+
+    def test_single_record_returns_only_summary(self):
+        records = [self._rec(300000.0, 400000.0, "P1")]
+        issues = validate_span_distances(records)
+        assert len(issues) == 1
+        assert issues[0]["severity"] == "INFO"
+
+    def test_empty_list_returns_only_summary(self):
+        issues = validate_span_distances([])
+        assert len(issues) == 1
+        assert issues[0]["severity"] == "INFO"

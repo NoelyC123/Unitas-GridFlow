@@ -228,3 +228,92 @@ def normalize_geometry_for_span_generation(
         merge_count=merge_count,
         zero_length_removed=zero_removed,
     )
+
+
+def validate_coordinates(
+    easting: Any,
+    northing: Any,
+    record_id: str | None = None,
+) -> tuple[bool, str | None]:
+    """Validate an OSGB easting/northing pair before geometry operations.
+
+    Returns (True, None) on success.  Returns (False, reason) on failure.
+    Checks: not-None, numeric, finite, within OSGB national grid bounds.
+    """
+    label = f" for record {record_id}" if record_id else ""
+    if easting is None or northing is None:
+        return False, f"Missing coordinates{label}"
+    try:
+        e = float(easting)
+        n = float(northing)
+    except (ValueError, TypeError):
+        return False, f"Non-numeric coordinates{label}: ({easting}, {northing})"
+    if math.isnan(e) or math.isnan(n) or math.isinf(e) or math.isinf(n):
+        return False, f"Non-finite coordinates{label}: ({easting}, {northing})"
+    if not (0 < e < 700_000):
+        return False, f"Easting {e} outside OSGB range (0–700000){label}"
+    if not (0 < n < 1_300_000):
+        return False, f"Northing {n} outside OSGB range (0–1300000){label}"
+    return True, None
+
+
+def calculate_distance(
+    record1: dict[str, Any],
+    record2: dict[str, Any],
+    include_elevation: bool = True,
+) -> tuple[float | None, str | None]:
+    """Calculate planar distance (metres) between two records using easting/northing.
+
+    Optionally incorporates elevation difference for 3-D distance.
+    Falls back to horizontal distance when elevation is missing or non-numeric.
+    Returns (distance, None) on success or (None, error_string) on failure.
+    """
+    id1 = str(record1.get("point_id") or "unknown")
+    id2 = str(record2.get("point_id") or "unknown")
+    for rec, rid in ((record1, id1), (record2, id2)):
+        ok, err = validate_coordinates(rec.get("easting"), rec.get("northing"), rid)
+        if not ok:
+            return None, err
+    try:
+        e1, n1 = float(record1["easting"]), float(record1["northing"])
+        e2, n2 = float(record2["easting"]), float(record2["northing"])
+        dx, dy = e2 - e1, n2 - n1
+        horizontal = math.sqrt(dx * dx + dy * dy)
+        if include_elevation:
+            elev1 = record1.get("elevation")
+            elev2 = record2.get("elevation")
+            if elev1 is not None and elev2 is not None:
+                try:
+                    dz = float(elev2) - float(elev1)
+                    return math.sqrt(horizontal * horizontal + dz * dz), None
+                except (ValueError, TypeError):
+                    pass
+        return horizontal, None
+    except Exception as exc:
+        return None, f"Distance calculation failed between {id1} and {id2}: {exc}"
+
+
+def calculate_bearing(
+    record1: dict[str, Any],
+    record2: dict[str, Any],
+) -> tuple[float | None, str | None]:
+    """Calculate bearing (0–360°, north = 0°) between two records using easting/northing.
+
+    Returns (bearing_degrees, None) on success or (None, error_string) on failure.
+    """
+    id1 = str(record1.get("point_id") or "unknown")
+    id2 = str(record2.get("point_id") or "unknown")
+    for rec, rid in ((record1, id1), (record2, id2)):
+        ok, err = validate_coordinates(rec.get("easting"), rec.get("northing"), rid)
+        if not ok:
+            return None, err
+    try:
+        e1, n1 = float(record1["easting"]), float(record1["northing"])
+        e2, n2 = float(record2["easting"]), float(record2["northing"])
+        dx, dy = e2 - e1, n2 - n1
+        bearing = math.degrees(math.atan2(dx, dy))
+        if bearing < 0:
+            bearing += 360.0
+        return bearing, None
+    except Exception as exc:
+        return None, f"Bearing calculation failed between {id1} and {id2}: {exc}"
