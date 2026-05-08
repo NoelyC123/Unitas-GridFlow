@@ -113,6 +113,14 @@ def test_review_navigation_static_wiring_present() -> None:
     assert "togglePlannerAwarenessLayer" in js
     assert "this.togglePlannerAwarenessLayer(input.checked)" in js
     assert "Design blockers (" not in html
+    assert "_reviewNavigationTargets?.blockers?.length" in js
+    assert "smartPopupOffsetForLayer" in js
+    assert "bindSmartPopup(line, this.buildSpanPopupHtml(props)" in js
+    assert "autoPanPaddingTopLeft" in js
+    assert "popup.options.offset = this.smartPopupOffsetForLayer(layer)" in js
+    assert "#00a3ff" in css
+    assert "stroke-width: 9 !important" in css
+    assert "max-height: min(52vh, 430px)" in html
 
 
 @NODE_UNAVAILABLE

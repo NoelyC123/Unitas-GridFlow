@@ -110,6 +110,65 @@ class MapViewer {
     this.loadData();
   }
 
+  popupTargetLatLng(layer) {
+    if (!layer) return null;
+    if (typeof layer.getBounds === 'function') {
+      const bounds = layer.getBounds();
+      if (bounds && typeof bounds.getCenter === 'function') {
+        return bounds.getCenter();
+      }
+    }
+    if (typeof layer.getLatLng === 'function') return layer.getLatLng();
+    return null;
+  }
+
+  smartPopupOffsetForLayer(layer) {
+    const fallback = [0, -12];
+    if (!this.map || !layer || typeof this.map.latLngToContainerPoint !== 'function') {
+      return fallback;
+    }
+    if (typeof this.map.getSize !== 'function') return fallback;
+    const latLng = this.popupTargetLatLng(layer);
+    if (!latLng) return fallback;
+    const point = this.map.latLngToContainerPoint(latLng);
+    const size = this.map.getSize();
+    if (!point || !size || !Number.isFinite(point.x) || !Number.isFinite(size.x)) {
+      return fallback;
+    }
+    const sideOffset = Math.min(300, Math.max(220, Math.round(size.x * 0.24)));
+    if (point.x < size.x * 0.38) return [sideOffset, -14];
+    if (point.x > size.x * 0.62) return [-sideOffset, -14];
+    return point.x < size.x / 2 ? [sideOffset, -14] : [-sideOffset, -14];
+  }
+
+  smartPopupOptionsForLayer(layer, options = {}) {
+    return {
+      autoPan: true,
+      autoPanPaddingTopLeft: [320, 80],
+      autoPanPaddingBottomRight: [320, 80],
+      offset: this.smartPopupOffsetForLayer(layer),
+      ...options,
+    };
+  }
+
+  refreshSmartPopupPosition(layer) {
+    const popup = layer && typeof layer.getPopup === 'function' ? layer.getPopup() : null;
+    if (!popup) return;
+    popup.options.offset = this.smartPopupOffsetForLayer(layer);
+    popup.options.autoPan = true;
+    popup.options.autoPanPaddingTopLeft = [320, 80];
+    popup.options.autoPanPaddingBottomRight = [320, 80];
+    if (typeof popup.update === 'function') popup.update();
+  }
+
+  bindSmartPopup(layer, html, options = {}) {
+    if (!layer || typeof layer.bindPopup !== 'function') return;
+    layer.bindPopup(html, this.smartPopupOptionsForLayer(layer, options));
+    if (typeof layer.on === 'function') {
+      layer.on('popupopen', () => this.refreshSmartPopupPosition(layer));
+    }
+  }
+
   async loadData() {
     try {
       const res = await fetch(this.mapDataUrl, { cache: 'no-store' });
@@ -393,7 +452,8 @@ class MapViewer {
     });
 
     const focusDefs = [
-      ['design-blockers', () => this.filterFeatureData('focus', 'design-blockers').length],
+      ['design-blockers', () => this._reviewNavigationTargets?.blockers?.length
+        ?? this.filterFeatureData('focus', 'design-blockers').length],
       ['review-required', () => this.filterFeatureData('focus', 'review-required').length],
       ['missing-height', () => this.filterFeatureData('focus', 'missing-height').length],
       ['missing-specification', () => this.filterFeatureData('focus', 'missing-specification').length],
@@ -1141,7 +1201,7 @@ class MapViewer {
         ${issueBlock}
       `;
 
-      marker.bindPopup(this.buildPopupHtml(props, status, lat, lon), {
+      this.bindSmartPopup(marker, this.buildPopupHtml(props, status, lat, lon), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,
@@ -1227,7 +1287,7 @@ class MapViewer {
       const confBlock = pct != null
         ? `<div class="popup-row"><strong>Match confidence:</strong> <span class="${pctClass}">${pct}%</span>${audit.match_type ? ` — ${this.escapeHtml(String(audit.match_type))}` : ''}</div>`
         : '';
-      line.bindPopup(`
+      this.bindSmartPopup(line, `
         <div class="popup-title">Suggested Existing/Proposed Match</div>
         <div class="popup-row"><strong>Existing:</strong> Point ${this.escapeHtml(fd.props.replacing)}</div>
         <div class="popup-row"><strong>Proposed:</strong> Point ${this.escapeHtml(fd.props.pole_id || fd.props.id || 'Unknown')}</div>
@@ -1288,7 +1348,7 @@ class MapViewer {
         this.bindSpanDistanceTooltip(line, props);
       }
 
-      line.bindPopup(this.buildSpanPopupHtml(props), {
+      this.bindSmartPopup(line, this.buildSpanPopupHtml(props), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,
@@ -1470,8 +1530,8 @@ class MapViewer {
       const vis = this.spanPolylineVisual(props, focusDimOthers && !selected);
       const style = selected
         ? {
-            color: '#0f63ff',
-            weight: Math.max(vis.weight + 3, 8),
+            color: '#00a3ff',
+            weight: Math.max(vis.weight + 5, 10),
             opacity: 1,
           }
         : {
@@ -1556,7 +1616,7 @@ class MapViewer {
         weight: 2,
         className: 'planner-awareness-marker',
       });
-      marker.bindPopup(this.buildPlannerAwarenessPopupHtml(item), {
+      this.bindSmartPopup(marker, this.buildPlannerAwarenessPopupHtml(item), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,
@@ -1640,7 +1700,7 @@ class MapViewer {
         className: 'gridflow-cable-tooltip',
         sticky: true,
       });
-      line.bindPopup(this.buildCablePopupHtml(props), {
+      this.bindSmartPopup(line, this.buildCablePopupHtml(props), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,
@@ -1991,7 +2051,7 @@ class MapViewer {
         this.bindSpanDistanceTooltip(line, props);
       }
 
-      line.bindPopup(this.buildSpanPopupHtml(props), {
+      this.bindSmartPopup(line, this.buildSpanPopupHtml(props), {
         autoPanPadding: [24, 24],
         className: 'gridflow-asset-popup',
         keepInView: true,

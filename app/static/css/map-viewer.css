@@ -16,10 +16,12 @@
 }
 
 .gf-route-highlight {
-  stroke: #3b82f6 !important;
-  stroke-width: 6 !important;
+  stroke: #00a3ff !important;
+  stroke-width: 9 !important;
   opacity: 1 !important;
-  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 10px rgba(0, 163, 255, 0.9));
 }
 
 .gf-span-review:not(.gf-route-highlight) {
