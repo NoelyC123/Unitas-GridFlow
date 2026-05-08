@@ -1038,26 +1038,36 @@
               <div class="workspace-panel-title">Review workspace</div>
               <div id="review-intelligence-note" class="workspace-panel-note">Span-level review intelligence loads with the map route data.</div>
               <div class="workspace-kpi-grid review-intelligence-grid">
-                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-fail">
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-fail gf-review-nav-card gf-review-card-disabled" data-review-nav-group="blockers" role="button" tabindex="0" aria-disabled="true">
                   <div class="workspace-kpi-label">Design blockers</div>
                   <div id="workspace-blocker-count" class="workspace-kpi-value status-fail">0</div>
                   <div class="workspace-kpi-detail">Span issues that currently block design use.</div>
                 </div>
-                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-warn">
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-warn gf-review-nav-card gf-review-card-disabled" data-review-nav-group="review" role="button" tabindex="0" aria-disabled="true">
                   <div class="workspace-kpi-label">Review required</div>
                   <div id="workspace-warning-count" class="workspace-kpi-value status-warn">0</div>
                   <div class="workspace-kpi-detail">Non-critical span warnings needing practitioner review.</div>
                 </div>
-                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-gap">
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-gap gf-review-nav-card gf-review-card-disabled" data-review-nav-group="gaps" role="button" tabindex="0" aria-disabled="true">
                   <div class="workspace-kpi-label">Evidence gaps</div>
                   <div id="workspace-gap-count" class="workspace-kpi-value status-gap">0</div>
                   <div class="workspace-kpi-detail">Spans with missing or unconfirmed required attributes.</div>
+                </div>
+                <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-awareness gf-review-nav-card gf-review-card-disabled" data-review-nav-group="awareness" role="button" tabindex="0" aria-disabled="true">
+                  <div class="workspace-kpi-label">Planner awareness</div>
+                  <div id="workspace-awareness-count" class="workspace-kpi-value status-review">0</div>
+                  <div class="workspace-kpi-detail">Context notes linked to route review.</div>
                 </div>
                 <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-verdict">
                   <div class="workspace-kpi-label">Readiness verdict</div>
                   <div id="workspace-readiness-verdict" class="workspace-kpi-value status-warn">PARTIALLY READY</div>
                   <div class="workspace-kpi-detail">Derived from current span status and evidence signals.</div>
                 </div>
+              </div>
+              <div id="review-nav-controls" class="gf-review-nav-controls" aria-live="polite">
+                <button id="review-nav-prev" type="button" class="gf-review-nav-button">Previous</button>
+                <span id="review-nav-status" class="gf-review-target-count">Select a review category</span>
+                <button id="review-nav-next" type="button" class="gf-review-nav-button">Next</button>
               </div>
             </div>
             <div class="map-control-section" aria-label="Map layer controls">

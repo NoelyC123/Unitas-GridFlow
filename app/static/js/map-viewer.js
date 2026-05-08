@@ -69,6 +69,11 @@ class MapViewer {
     this._spanCrossingFilterOnly = false;
     this._cableLineRefs = [];
     this._plannerAwarenessItems = [];
+    this._awarenessMarkerRefs = [];
+    this._reviewNavigationTargets = { blockers: [], review: [], gaps: [], awareness: [] };
+    this._activeReviewTargetGroup = null;
+    this._activeReviewTargetIndex = -1;
+    this._focusedReviewTarget = null;
     try {
       const v = localStorage.getItem('gridflow_map_span_label_mode');
       const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
@@ -101,6 +106,7 @@ class MapViewer {
     }).addTo(this.map);
 
     this.bindSpanLabelModeControl();
+    this.bindReviewNavigationControls();
     this.loadData();
   }
 
@@ -732,10 +738,12 @@ class MapViewer {
   renderReviewIntelligenceSummary() {
     const spans = (this._spanLineRefs || []).map((ref) => ref.props || {});
     const summary = this.computeReviewSummary(spans);
+    this._reviewNavigationTargets = this.buildReviewNavigationTargets();
     const updates = [
       ['workspace-blocker-count', summary.blockers],
       ['workspace-warning-count', summary.review],
       ['workspace-gap-count', summary.gaps],
+      ['workspace-awareness-count', this._reviewNavigationTargets.awareness.length],
     ];
     updates.forEach(([id, value]) => {
       const el = document.getElementById(id);
@@ -754,6 +762,230 @@ class MapViewer {
       noteEl.textContent = spans.length
         ? 'Span-level review signals derived from current map data only.'
         : 'No route spans available for review intelligence yet.';
+    }
+    this.renderReviewNavigationState();
+  }
+
+  spanReviewLabel(props, index = null) {
+    const from = props?.from_point_id || props?.from_design_pole_no || '?';
+    const to = props?.to_point_id || props?.to_design_pole_no || '?';
+    if (from !== '?' || to !== '?') return `Span ${from} → ${to}`;
+    if (props?.span_sequence_label) return `Span ${props.span_sequence_label}`;
+    return index == null ? 'Span' : `Span ${index + 1}`;
+  }
+
+  primarySpanReviewReason(props, issue) {
+    const reasons = Array.isArray(props?.design_blocker_reasons) ? props.design_blocker_reasons : [];
+    const structuredReason = reasons.find((reason) => reason && typeof reason === 'object' && reason.message);
+    if (structuredReason) return String(structuredReason.message);
+    const legacyReason = reasons.find((reason) => this.hasValue(reason));
+    if (legacyReason) return String(legacyReason);
+
+    const anomaly = this.classifyRouteSpanAnomaly(props || {});
+    if (anomaly.causes.length) return anomaly.causes[0];
+
+    const actions = Array.isArray(props?.designer_suggested_actions) ? props.designer_suggested_actions : [];
+    if (actions.length) return String(actions[0]);
+
+    if (issue?.categories?.includes('DATA')) return 'Missing or unconfirmed span evidence';
+    if (issue?.categories?.includes('CLEARANCE')) return 'Crossing or clearance context needs review';
+    if (issue?.categories?.includes('GEOMETRY')) return 'Route geometry needs review';
+    return issue?.severity === 'BLOCKER' ? 'Design blocker present' : 'Review signal present';
+  }
+
+  awarenessSpanRef(item) {
+    const related = String(item?.related_span_id || '');
+    if (!related) return null;
+    return (this._spanLineRefs || []).find((ref) => this.spanAwarenessKeys(ref.props || {}).has(related)) || null;
+  }
+
+  buildReviewNavigationTargets() {
+    const targets = { blockers: [], review: [], gaps: [], awareness: [] };
+    (this._spanLineRefs || []).forEach((ref, idx) => {
+      const props = ref.props || {};
+      const issue = this.classifySpanIssues(props);
+      const target = {
+        type: 'span',
+        spanIndex: idx,
+        spanRef: ref,
+        label: this.spanReviewLabel(props, idx),
+        category: issue.categories[0] || 'DATA',
+        severity: issue.severity,
+        reason: this.primarySpanReviewReason(props, issue),
+      };
+      if (issue.severity === 'BLOCKER') targets.blockers.push(target);
+      else if (issue.severity === 'REVIEW') targets.review.push(target);
+      if (issue.categories.includes('DATA')) {
+        targets.gaps.push({ ...target, category: 'DATA', reason: 'Missing or unconfirmed span evidence' });
+      }
+    });
+
+    const markerRefs = Array.isArray(this._awarenessMarkerRefs) ? this._awarenessMarkerRefs : [];
+    markerRefs.forEach((markerRef, idx) => {
+      const item = markerRef.item || {};
+      const linkedSpanRef = this.awarenessSpanRef(item);
+      targets.awareness.push({
+        type: 'awareness',
+        id: item.id || `awareness-${idx + 1}`,
+        label: 'Planner Awareness',
+        category: item.category || 'context',
+        severity: item.severity || 'INFO',
+        reason: item.message || 'Planner awareness note',
+        markerRef,
+        spanRef: linkedSpanRef,
+      });
+    });
+
+    return targets;
+  }
+
+  reviewNavigationGroupLabel(group) {
+    const labels = {
+      blockers: 'blockers',
+      review: 'review targets',
+      gaps: 'evidence gaps',
+      awareness: 'planner awareness notes',
+    };
+    return labels[group] || 'review targets';
+  }
+
+  bindReviewNavigationControls() {
+    document.querySelectorAll('[data-review-nav-group]').forEach((card) => {
+      const activate = () => this.selectReviewNavigationGroup(card.dataset.reviewNavGroup);
+      card.addEventListener('click', activate);
+      card.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          activate();
+        }
+      });
+    });
+    const prev = document.getElementById('review-nav-prev');
+    const next = document.getElementById('review-nav-next');
+    if (prev) prev.addEventListener('click', () => this.focusPreviousReviewTarget());
+    if (next) next.addEventListener('click', () => this.focusNextReviewTarget());
+    this.renderReviewNavigationState();
+  }
+
+  renderReviewNavigationState() {
+    const targets = this._reviewNavigationTargets || { blockers: [], review: [], gaps: [], awareness: [] };
+    document.querySelectorAll('[data-review-nav-group]').forEach((card) => {
+      const group = card.dataset.reviewNavGroup;
+      const count = (targets[group] || []).length;
+      const disabled = count < 1;
+      card.classList.toggle('gf-review-card-disabled', disabled);
+      card.classList.toggle('gf-review-card-active', group === this._activeReviewTargetGroup && !disabled);
+      card.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      card.setAttribute('title', disabled ? `No ${this.reviewNavigationGroupLabel(group)} found` : `Jump to ${this.reviewNavigationGroupLabel(group)}`);
+    });
+
+    const group = this._activeReviewTargetGroup;
+    const groupTargets = group ? (targets[group] || []) : [];
+    const count = groupTargets.length;
+    if (group && count < 1) this._activeReviewTargetIndex = -1;
+    else if (group && this._activeReviewTargetIndex < 0) this._activeReviewTargetIndex = 0;
+    else if (group && this._activeReviewTargetIndex >= count) this._activeReviewTargetIndex = count - 1;
+    const status = document.getElementById('review-nav-status');
+    if (status) {
+      if (!group) status.textContent = 'Select a review category';
+      else if (!count) status.textContent = `No ${this.reviewNavigationGroupLabel(group)} found`;
+      else status.textContent = `${this._activeReviewTargetIndex + 1} of ${count}`;
+    }
+
+    const showStepButtons = count > 1;
+    const prev = document.getElementById('review-nav-prev');
+    const next = document.getElementById('review-nav-next');
+    [prev, next].forEach((button) => {
+      if (!button) return;
+      button.disabled = !showStepButtons;
+      button.style.visibility = showStepButtons ? 'visible' : 'hidden';
+    });
+  }
+
+  selectReviewNavigationGroup(group) {
+    if (!group) return;
+    this._reviewNavigationTargets = this.buildReviewNavigationTargets();
+    const targets = this._reviewNavigationTargets[group] || [];
+    this._activeReviewTargetGroup = group;
+    if (!targets.length) {
+      this._activeReviewTargetIndex = -1;
+      this.renderReviewNavigationState();
+      return;
+    }
+    this._activeReviewTargetIndex = 0;
+    this.renderReviewNavigationState();
+    this.focusReviewTarget(targets[0]);
+  }
+
+  currentReviewTargetGroup() {
+    const group = this._activeReviewTargetGroup;
+    if (!group) return [];
+    return (this._reviewNavigationTargets || {})[group] || [];
+  }
+
+  focusNextReviewTarget() {
+    const targets = this.currentReviewTargetGroup();
+    if (!targets.length) return;
+    this._activeReviewTargetIndex = (this._activeReviewTargetIndex + 1) % targets.length;
+    this.renderReviewNavigationState();
+    this.focusReviewTarget(targets[this._activeReviewTargetIndex]);
+  }
+
+  focusPreviousReviewTarget() {
+    const targets = this.currentReviewTargetGroup();
+    if (!targets.length) return;
+    this._activeReviewTargetIndex = (this._activeReviewTargetIndex - 1 + targets.length) % targets.length;
+    this.renderReviewNavigationState();
+    this.focusReviewTarget(targets[this._activeReviewTargetIndex]);
+  }
+
+  clearFocusedReviewTarget() {
+    if (this._focusedReviewTarget?.classList) {
+      this._focusedReviewTarget.classList.remove('gf-review-target-focused');
+    }
+    this._focusedReviewTarget = null;
+  }
+
+  markFocusedReviewTarget(layer) {
+    this.clearFocusedReviewTarget();
+    const el = typeof layer?.getElement === 'function' ? layer.getElement() : null;
+    if (el?.classList) {
+      el.classList.add('gf-review-target-focused');
+      this._focusedReviewTarget = el;
+    }
+  }
+
+  ensureSpanRouteHighlighted(spanRef) {
+    if (!spanRef || spanRef.routeGroupIndex == null) return;
+    if (this._activeRouteGroupIndex !== spanRef.routeGroupIndex) {
+      this.toggleSpanRouteHighlight(spanRef);
+    } else {
+      this.applySpanRouteHighlightStyles(this._spanCrossingFilterOnly);
+    }
+  }
+
+  focusReviewTarget(target) {
+    if (!target) return;
+    if (target.type === 'span') {
+      const ref = target.spanRef || this._spanLineRefs?.[target.spanIndex];
+      if (!ref?.line) return;
+      if (this.map && typeof ref.line.getBounds === 'function') {
+        this.map.fitBounds(ref.line.getBounds(), { padding: [48, 48], maxZoom: 17 });
+      }
+      this.ensureSpanRouteHighlighted(ref);
+      this.markFocusedReviewTarget(ref.line);
+      if (typeof ref.line.openPopup === 'function') ref.line.openPopup();
+      return;
+    }
+
+    if (target.type === 'awareness') {
+      const marker = target.markerRef?.marker;
+      if (target.spanRef) this.ensureSpanRouteHighlighted(target.spanRef);
+      if (this.map && marker && typeof marker.getLatLng === 'function') {
+        this.map.setView(marker.getLatLng(), Math.max(this.map.getZoom?.() || 15, 16));
+      }
+      this.markFocusedReviewTarget(marker);
+      if (marker && typeof marker.openPopup === 'function') marker.openPopup();
     }
   }
 
@@ -1297,6 +1529,7 @@ class MapViewer {
   renderPlannerAwareness(items) {
     if (!this.map) return;
     this._plannerAwarenessItems = Array.isArray(items) ? items.slice() : [];
+    this._awarenessMarkerRefs = [];
     if (this.plannerAwarenessLayer) {
       this.plannerAwarenessLayer.clearLayers();
       this.map.removeLayer(this.plannerAwarenessLayer);
@@ -1329,6 +1562,7 @@ class MapViewer {
         keepInView: true,
         maxWidth: 360,
       });
+      this._awarenessMarkerRefs.push({ item, marker, index: this._awarenessMarkerRefs.length });
       marker.addTo(this.plannerAwarenessLayer);
     });
 
