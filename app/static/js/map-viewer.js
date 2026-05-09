@@ -2617,6 +2617,10 @@ class MapViewer {
     const assetKind = this.popupAssetKind(props);
     const title = this.escapeHtml(props.name || props.id || 'Record');
     const designSections = this.buildDesignDecisionSections(props, status, lat, lon);
+    if (this.usesC2E2SupportPopup(assetKind)) {
+      const sections = this.c2e2SupportPopupSections(assetKind, props, status, lat, lon);
+      return this.buildLegacyPointPopupHtml(assetKind, title, designSections, sections, props);
+    }
     const popupContract = this.popupSchemaContractRole(assetKind);
     if (popupContract) {
       return this.buildContractPopupHtml(props, status, lat, lon, assetKind, title, designSections, popupContract);
@@ -2928,13 +2932,11 @@ class MapViewer {
         rows: [
           this.popupRow(
             'Measured Height',
-            this.hasValue(props.measured_height_m ?? props.height)
-              ? `${this.displayValue(props.measured_height_m ?? props.height)}m`
-              : 'evidence gap - not captured in current export',
+            this.c2e2MeasuredHeightDisplay(props),
             heightConf.status,
-            'Existing pole height is missing survey evidence; clearance checks cannot rely on this record.',
+            this.c2e2HeightDetail(props),
           ),
-          this.popupRow('Height Source', props.height_source || 'evidence gap - source not recorded', props.height_source ? 'info' : 'warning'),
+          this.popupRow('Height Source', props.height_source || 'not recorded in survey', props.height_source ? 'info' : 'warning'),
           this.popupRow('Height Confidence', this.formatHeightConfidence(heightConf.level), heightConf.status, heightConf.warning),
         ],
       },
@@ -3027,6 +3029,198 @@ class MapViewer {
       { title: 'Evidence', rows: this.evidenceRows(props) },
       { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
       { title: 'QA / Review', rows: this.qaRows(props) },
+    ];
+  }
+
+  usesC2E2SupportPopup(assetKind) {
+    return ['existing', 'angle', 'proposed'].includes(assetKind);
+  }
+
+  c2e2SupportPopupSections(assetKind, props, status, lat, lon) {
+    const sections = [
+      { title: 'Identity and role', rows: this.c2e2IdentityRows(props, assetKind) },
+      { title: 'Geometry and measured evidence', rows: this.c2e2GeometryRows(props) },
+      { title: 'QA and review status', rows: this.c2e2QualityRows(props, status) },
+      { title: 'Survey context', rows: this.c2e2SurveyContextRows(props) },
+      { title: 'Lifecycle / relationships', rows: this.c2e2RelationshipRows(props) },
+    ];
+    if (assetKind === 'proposed') {
+      sections.push({ title: 'Design Requirements', rows: this.designRequirementRows(props) });
+    }
+    sections.push(
+      { title: 'Network links', rows: this.connectivityRows(props) },
+      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
+      { title: 'Location', rows: this.locationRows(props, lat, lon) },
+      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
+      { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
+    );
+    return sections;
+  }
+
+  c2e2FieldLabels() {
+    return {
+      pole_id: 'Point ID',
+      structure_type: 'Feature Code',
+      asset_intent: 'Asset Intent',
+      record_role: 'Record Role',
+      easting: 'Easting',
+      northing: 'Northing',
+      height: 'Measured Height',
+      qa_status: 'QA Status',
+      issue_count: 'Issues',
+      warn_count: 'Warnings',
+      name: 'Survey Note',
+      material: 'Material',
+      relationship: 'Relationship',
+      being_replaced_by: 'Being Replaced By',
+      replacing: 'Replacing',
+    };
+  }
+
+  c2e2MissingWording(field, props = {}) {
+    const structureType = String(props.structure_type || '').trim();
+    if (field === 'height') {
+      if (structureType === 'Pol') return 'Not measured (intermediate pole)';
+      if (['EXpole', 'Angle', 'EXangle'].includes(structureType)) return 'Not measured — check survey notes';
+      return 'Not measured';
+    }
+    const defaults = {
+      pole_id: 'No ID',
+      structure_type: 'Unknown',
+      asset_intent: 'Not classified',
+      record_role: 'Unclassified',
+      easting: 'Not recorded',
+      northing: 'Not recorded',
+      qa_status: 'Not assessed',
+      issue_count: '0',
+      warn_count: '0',
+      name: '—',
+      material: 'Not recorded in survey',
+      relationship: '—',
+      being_replaced_by: '—',
+      replacing: '—',
+    };
+    return defaults[field] || '—';
+  }
+
+  c2e2RawValue(props, field) {
+    switch (field) {
+      case 'pole_id':
+        return props.pole_id ?? props.id;
+      case 'height':
+        return props.measured_height_m ?? props.height;
+      case 'name':
+        if (this.hasValue(props.name) && props.name !== props.id && props.name !== props.pole_id) return props.name;
+        return props.location;
+      case 'qa_status':
+        return props.qa_status;
+      case 'issue_count':
+        return props.issue_count ?? 0;
+      case 'warn_count':
+        return props.warn_count ?? 0;
+      default:
+        return props[field];
+    }
+  }
+
+  c2e2FieldDisplay(props, field) {
+    const value = this.c2e2RawValue(props, field);
+    if (!this.hasValue(value)) return this.c2e2MissingWording(field, props);
+    if (field === 'height') {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? `${numeric.toString()}m` : `${String(value).replace(/\s*m$/i, '')}m`;
+    }
+    if (field === 'relationship') return String(value).replace(/_/g, ' ');
+    if (field === 'being_replaced_by' || field === 'replacing') return `Point ${value}`;
+    return String(value);
+  }
+
+  c2e2MeasuredHeightDisplay(props) {
+    return this.c2e2FieldDisplay(props, 'height');
+  }
+
+  c2e2HeightDetail(props) {
+    const height = this.c2e2RawValue(props, 'height');
+    if (this.hasValue(height)) return 'Captured survey height from the current export.';
+    const structureType = String(props.structure_type || '').trim();
+    if (structureType === 'Pol') {
+      return 'Intermediate pole records in the current Trimble survey are not expected to carry measured pole height.';
+    }
+    if (['EXpole', 'Angle', 'EXangle'].includes(structureType)) {
+      return 'Height was not measured in the current export; check survey notes before clearance reliance.';
+    }
+    return 'No measured height is recorded in the current export.';
+  }
+
+  c2e2FieldStatus(props, field, fallbackStatus = 'info') {
+    const value = this.c2e2RawValue(props, field);
+    const hasValue = this.hasValue(value);
+    if (field === 'qa_status') return this.statusToFieldStatus(String(value || fallbackStatus).toUpperCase());
+    if (field === 'issue_count') return Number(value || 0) > 0 ? 'blocker' : 'ok';
+    if (field === 'warn_count') return Number(value || 0) > 0 ? 'warning' : 'ok';
+    if (field === 'height') {
+      if (hasValue) return 'ok';
+      return ['EXpole', 'Angle', 'EXangle'].includes(String(props.structure_type || '').trim()) ? 'warning' : 'info';
+    }
+    if (field === 'asset_intent' || field === 'record_role') return hasValue ? 'ok' : 'info';
+    if (field === 'relationship' || field === 'being_replaced_by' || field === 'replacing') return hasValue ? 'warning' : 'info';
+    return hasValue ? 'ok' : 'info';
+  }
+
+  c2e2PopupRow(props, field, fallbackStatus = 'info', detail = '') {
+    const labels = this.c2e2FieldLabels();
+    return this.popupRow(
+      labels[field] || field,
+      this.c2e2FieldDisplay(props, field),
+      this.c2e2FieldStatus(props, field, fallbackStatus),
+      detail,
+    );
+  }
+
+  c2e2IdentityRows(props, assetKind) {
+    const fallbackRole = assetKind === 'proposed'
+      ? 'proposed'
+      : assetKind === 'angle'
+        ? 'angle'
+        : 'structural';
+    const safeProps = { ...props, record_role: props.record_role || fallbackRole };
+    return [
+      this.c2e2PopupRow(safeProps, 'pole_id'),
+      this.c2e2PopupRow(safeProps, 'structure_type'),
+      this.c2e2PopupRow(safeProps, 'asset_intent'),
+      this.c2e2PopupRow(safeProps, 'record_role'),
+    ];
+  }
+
+  c2e2GeometryRows(props) {
+    return [
+      this.c2e2PopupRow(props, 'easting'),
+      this.c2e2PopupRow(props, 'northing'),
+      this.c2e2PopupRow(props, 'height', 'info', this.c2e2HeightDetail(props)),
+    ];
+  }
+
+  c2e2QualityRows(props, status) {
+    return [
+      this.c2e2PopupRow(props, 'qa_status', status),
+      this.c2e2PopupRow(props, 'issue_count', 'info', (props.issue_texts || []).join(' | ')),
+      this.c2e2PopupRow(props, 'warn_count', 'info', (props.warn_texts || []).join(' | ')),
+    ];
+  }
+
+  c2e2SurveyContextRows(props) {
+    return [
+      this.c2e2PopupRow(props, 'name'),
+      this.c2e2PopupRow(props, 'material', 'info', 'Material is absent from the current Trimble controller export.'),
+    ];
+  }
+
+  c2e2RelationshipRows(props) {
+    return [
+      this.c2e2PopupRow(props, 'relationship'),
+      this.c2e2PopupRow(props, 'being_replaced_by'),
+      this.c2e2PopupRow(props, 'replacing'),
     ];
   }
 
