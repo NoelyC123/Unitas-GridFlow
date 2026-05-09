@@ -186,6 +186,38 @@ def test_scripts_handle_missing_optional_args(tmp_path, monkeypatch) -> None:
     assert "validation_runs report path: `n/a`" in validation
 
 
+def test_start_task_appends_section_when_markers_are_missing(tmp_path, monkeypatch) -> None:
+    _configure_paths(tmp_path, monkeypatch)
+    control = tmp_path / "AI_CONTROL"
+    control.mkdir(parents=True, exist_ok=True)
+    (control / "00_PROJECT_BOARD.md").write_text("# Board\n\nno markers yet\n", encoding="utf-8")
+    (control / "05_HANDOFF.md").write_text("# Handoff\n\nno markers yet\n", encoding="utf-8")
+
+    start_task.main(
+        [
+            "--task",
+            "Recovery Task",
+            "--owner",
+            "codex",
+            "--branch",
+            "codex/recovery",
+            "--summary",
+            "Re-seed markers after manual edit",
+        ]
+    )
+
+    board = (control / "00_PROJECT_BOARD.md").read_text(encoding="utf-8")
+    handoff = (control / "05_HANDOFF.md").read_text(encoding="utf-8")
+    assert "no markers yet" in board
+    assert "no markers yet" in handoff
+    assert "<!-- PROJECT_CONTROL:ACTIVE_TASK_START -->" in board
+    assert "<!-- PROJECT_CONTROL:ACTIVE_TASK_END -->" in board
+    assert "<!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->" in handoff
+    assert "<!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->" in handoff
+    assert "Task: Recovery Task" in board
+    assert "Task: Recovery Task" in handoff
+
+
 def test_modules_expose_main_functions() -> None:
     for module_name in [
         "scripts.start_task",
