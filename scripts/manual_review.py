@@ -407,6 +407,26 @@ class ManualReviewRunner:
             )
         )
 
+    def _open_first_c2e2_support_popup(self, driver: Any) -> str:
+        return driver.execute_script(
+            _eval_wrap(
+                """
+                const viewer = window.gridflowMapViewer;
+                if (!viewer) throw new Error('MapViewer hook unavailable');
+                const feature = (viewer.featureData || []).find((item) => {
+                  const kind = viewer.popupAssetKind(item.props || {});
+                  return ['existing', 'angle', 'proposed'].includes(kind) && item.marker;
+                });
+                if (!feature) throw new Error('No C2E2 support marker available for popup check');
+                feature.marker.openPopup();
+                const popup = feature.marker.getPopup && feature.marker.getPopup();
+                const content = popup && popup.getContent ? popup.getContent() : '';
+                if (!content) throw new Error('C2E2 support popup content unavailable');
+                return String(content);
+                """
+            )
+        )
+
     # -- baseline checks ---------------------------------------------------
 
     def _baseline_checks(self, driver: Any, job: JobTarget) -> None:
@@ -625,6 +645,14 @@ class ManualReviewRunner:
                 if missing:
                     raise AssertionError(f"Popup missing expected text: {', '.join(missing)}")
                 return f"{len(check.get('contains', []))} popup text assertions"
+            if check_type == "c2e2_support_popup_text_contains":
+                text = self._open_first_c2e2_support_popup(driver) or ""
+                missing = [str(item) for item in check.get("contains", []) if str(item) not in text]
+                if missing:
+                    raise AssertionError(
+                        f"C2E2 support popup missing expected text: {', '.join(missing)}"
+                    )
+                return f"{len(check.get('contains', []))} C2E2 popup text assertions"
             if check_type == "click_selector":
                 from selenium.webdriver.common.by import By
 

@@ -2616,11 +2616,11 @@ class MapViewer {
   buildPopupHtml(props, status, lat, lon) {
     const assetKind = this.popupAssetKind(props);
     const title = this.escapeHtml(props.name || props.id || 'Record');
-    const designSections = this.buildDesignDecisionSections(props, status, lat, lon);
     if (this.usesC2E2SupportPopup(assetKind)) {
       const sections = this.c2e2SupportPopupSections(assetKind, props, status, lat, lon);
-      return this.buildLegacyPointPopupHtml(assetKind, title, designSections, sections, props);
+      return this.buildC2E2SupportPopupHtml(assetKind, title, sections);
     }
+    const designSections = this.buildDesignDecisionSections(props, status, lat, lon);
     const popupContract = this.popupSchemaContractRole(assetKind);
     if (popupContract) {
       return this.buildContractPopupHtml(props, status, lat, lon, assetKind, title, designSections, popupContract);
@@ -2651,6 +2651,19 @@ class MapViewer {
         ${designSections.map(mapSection).join('')}
         ${sections.map(mapSection).join('')}
         ${this.rawTechnicalDetailsBlock(props)}
+      </div>
+    `;
+  }
+
+  buildC2E2SupportPopupHtml(assetKind, title, sections) {
+    const rendered = sections
+      .filter((section) => Array.isArray(section.rows) && section.rows.filter(Boolean).length > 0)
+      .map((section) => this.popupSection(section.title, section.rows))
+      .join('');
+    return `
+      <div class="asset-popup asset-popup-${assetKind}">
+        <div class="popup-title">${title}</div>
+        ${rendered}
       </div>
     `;
   }
@@ -3037,25 +3050,13 @@ class MapViewer {
   }
 
   c2e2SupportPopupSections(assetKind, props, status, lat, lon) {
-    const sections = [
+    return [
       { title: 'Identity and role', rows: this.c2e2IdentityRows(props, assetKind) },
       { title: 'Geometry and measured evidence', rows: this.c2e2GeometryRows(props) },
       { title: 'QA and review status', rows: this.c2e2QualityRows(props, status) },
       { title: 'Survey context', rows: this.c2e2SurveyContextRows(props) },
       { title: 'Lifecycle / relationships', rows: this.c2e2RelationshipRows(props) },
     ];
-    if (assetKind === 'proposed') {
-      sections.push({ title: 'Design Requirements', rows: this.designRequirementRows(props) });
-    }
-    sections.push(
-      { title: 'Network links', rows: this.connectivityRows(props) },
-      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
-      { title: 'Location', rows: this.locationRows(props, lat, lon) },
-      { title: 'Evidence', rows: this.evidenceRows(props) },
-      { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
-      { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
-    );
-    return sections;
   }
 
   c2e2FieldLabels() {
@@ -3142,7 +3143,15 @@ class MapViewer {
 
   c2e2HeightDetail(props) {
     const height = this.c2e2RawValue(props, 'height');
-    if (this.hasValue(height)) return 'Captured survey height from the current export.';
+    if (this.hasValue(height)) {
+      const sourceConf = props.source_confidence_detail || {};
+      const lowConfidence = String(sourceConf.confidence || props.source_confidence || '').toLowerCase() === 'low';
+      const legacyHeight = /legacy/i.test(String(props.height_source || sourceConf.provenance || ''));
+      if (lowConfidence || legacyHeight) {
+        return 'Height source: legacy map data — field verification required before clearance calculations';
+      }
+      return 'Height value shown from the current map data.';
+    }
     const structureType = String(props.structure_type || '').trim();
     if (structureType === 'Pol') {
       return 'Intermediate pole records in the current Trimble survey are not expected to carry measured pole height.';
@@ -3217,11 +3226,17 @@ class MapViewer {
   }
 
   c2e2RelationshipRows(props) {
-    return [
-      this.c2e2PopupRow(props, 'relationship'),
-      this.c2e2PopupRow(props, 'being_replaced_by'),
-      this.c2e2PopupRow(props, 'replacing'),
-    ];
+    const rows = [];
+    if (this.hasValue(this.c2e2RawValue(props, 'relationship'))) {
+      rows.push(this.c2e2PopupRow(props, 'relationship'));
+    }
+    if (this.hasValue(this.c2e2RawValue(props, 'being_replaced_by'))) {
+      rows.push(this.c2e2PopupRow(props, 'being_replaced_by'));
+    }
+    if (this.hasValue(this.c2e2RawValue(props, 'replacing'))) {
+      rows.push(this.c2e2PopupRow(props, 'replacing'));
+    }
+    return rows;
   }
 
   identityRows(props, status, fallbackType) {

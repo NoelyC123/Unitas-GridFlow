@@ -68,6 +68,10 @@ checks:
   - id: map_shell
     type: selector_visible
     selector: "#map"
+  - id: c2e2_popup
+    type: c2e2_support_popup_text_contains
+    contains:
+      - Identity and role
 """,
     )
 
@@ -77,6 +81,7 @@ checks:
     assert checks[0]["contains"] == ["Identity", "QA"]
     assert checks[1]["type"] == "route_highlight_active"
     assert checks[2]["selector"] == "#map"
+    assert checks[3]["type"] == "c2e2_support_popup_text_contains"
 
 
 def test_load_checklist_rejects_missing_id(tmp_path) -> None:

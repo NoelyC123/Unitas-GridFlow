@@ -87,7 +87,6 @@ def test_c2e2_support_popup_groups_and_truthful_missing_wording() -> None:
               'Geometry and measured evidence',
               'QA and review status',
               'Survey context',
-              'Lifecycle / relationships',
             ]) {
               assertIncludes(html, title);
             }
@@ -103,7 +102,7 @@ def test_c2e2_support_popup_groups_and_truthful_missing_wording() -> None:
             assertIncludes(html, 'Survey Note');
             assertIncludes(html, 'Material');
             assertIncludes(html, 'Not recorded in survey');
-            assertIncludes(html, 'Relationship');
+            assertExcludes(html, 'Lifecycle / relationships');
             """
         )
     )
@@ -144,13 +143,31 @@ def test_c2e2_height_wording_distinguishes_expole_angle_and_captured_height() ->
             assertIncludes(angleHtml, 'Not measured — check survey notes');
 
             const capturedHtml = viewer.buildPopupHtml(
-              { ...base, structure_type: 'EXpole', height: 9.2 },
+              {
+                ...base,
+                structure_type: 'EXpole',
+                height: 9.2,
+                height_source: 'legacy map data',
+                source_confidence_detail: {
+                  confidence: 'low',
+                  provenance: 'legacy_map_data',
+                },
+              },
               'PASS',
               54.1,
               -3.1,
             );
             assertIncludes(capturedHtml, '9.2m');
+            assertIncludes(
+              capturedHtml,
+              [
+                'Height source: legacy map data',
+                'field verification required before clearance calculations',
+              ].join(' — '),
+            );
             assertExcludes(capturedHtml, 'Not measured — check survey notes');
+            assertExcludes(capturedHtml, 'Existing pole height is missing survey evidence');
+            assertExcludes(capturedHtml, 'height is missing survey evidence');
             """
         )
     )
@@ -181,11 +198,35 @@ def test_c2e2_support_popup_does_not_render_theoretical_absent_fields() -> None:
               equipment_type: 'transformer',
               lean_direction: 'north',
               stay_type: 'box',
+              circuit_id: 'CIR-01',
+              year_installed: '1975',
+              equipment_categories: ['transformer'],
+              equipment_primary_category: 'transformer',
+              from_support_id: '29',
+              to_support_id: '30',
+              parent_support_id: '28',
+              parent_structure_id: 'S-1',
+              cable_from_asset_id: 'C-A',
+              cable_to_asset_id: 'C-B',
+              gnss_accuracy: '1m',
+              elevation: 123.4,
+              match_offset_m: 4.2,
             };
             const html = viewer.buildPopupHtml(props, 'PASS', 54.1, -3.1);
 
             for (const forbidden of [
               'Pole Class',
+              'Circuit ID',
+              'Year Installed',
+              'Equipment & pole-top',
+              'Network links',
+              'Cable from asset',
+              'Cable to asset',
+              'Parent pole',
+              'Parent structure',
+              'GNSS Accuracy',
+              'Elevation',
+              'Match Offset',
               'Voltage Carried',
               'Conductor Type',
               'Condition',
