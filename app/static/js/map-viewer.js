@@ -77,6 +77,10 @@ class MapViewer {
     this._currentReviewTargetSpan = null;
     this._directPopupSpanRef = null;
     this._reviewNavigationLocked = true;
+    this.activeFocusMode = null;
+    this.activeFocusCategory = null;
+    this.activeFocusTargetIds = [];
+    this.focusReleased = false;
     try {
       const v = localStorage.getItem('gridflow_map_span_label_mode');
       const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
@@ -827,6 +831,7 @@ class MapViewer {
         : 'No route spans available for review intelligence yet.';
     }
     this.renderReviewNavigationState();
+    this.applyReviewFocusStyles();
   }
 
   spanReviewLabel(props, index = null) {
@@ -929,6 +934,11 @@ class MapViewer {
     if (prev) prev.addEventListener('click', () => this.focusPreviousReviewTarget());
     if (next) next.addEventListener('click', () => this.focusNextReviewTarget());
     if (release) release.addEventListener('click', () => this.releaseReviewNavigationMap());
+    document.querySelectorAll('[data-review-focus-category]').forEach((button) => {
+      button.addEventListener('click', () => this.activateReviewFocusMode(button.dataset.reviewFocusCategory));
+    });
+    const clearFocus = document.getElementById('review-focus-clear');
+    if (clearFocus) clearFocus.addEventListener('click', () => this.clearReviewFocusMode());
     this.renderReviewNavigationState();
   }
 
@@ -981,22 +991,191 @@ class MapViewer {
     if (unlockedNote) {
       unlockedNote.style.display = hasSelectedTarget && this._reviewNavigationLocked === false ? '' : 'none';
     }
+    document.querySelectorAll('[data-review-focus-category]').forEach((button) => {
+      const category = button.dataset.reviewFocusCategory;
+      const focusCount = (targets[category] || []).length;
+      const active = category === this.activeFocusCategory && focusCount > 0;
+      button.disabled = focusCount < 1;
+      button.classList.toggle('gf-focus-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      button.setAttribute(
+        'title',
+        focusCount < 1
+          ? `No ${this.reviewNavigationGroupLabel(category)} found`
+          : `Focus ${this.reviewNavigationGroupLabel(category)}`,
+      );
+    });
+    const clearFocus = document.getElementById('review-focus-clear');
+    if (clearFocus) {
+      clearFocus.disabled = !this.activeFocusCategory;
+      clearFocus.setAttribute('aria-disabled', this.activeFocusCategory ? 'false' : 'true');
+    }
   }
 
   selectReviewNavigationGroup(group) {
-    if (!group) return;
+    this.activateReviewFocusMode(group);
+  }
+
+  getFocusTargetsForCategory(category) {
+    if (!category) return [];
     this._reviewNavigationTargets = this.buildReviewNavigationTargets();
-    const targets = this._reviewNavigationTargets[group] || [];
-    this._activeReviewTargetGroup = group;
+    return (this._reviewNavigationTargets[category] || []).slice();
+  }
+
+  focusTargetId(target, index = 0) {
+    if (!target) return `target-${index}`;
+    if (target.type === 'span') {
+      const props = target.spanRef?.props || {};
+      const from = props.from_point_id || props.from_design_pole_no || target.spanIndex || index;
+      const to = props.to_point_id || props.to_design_pole_no || index;
+      return `span:${from}->${to}`;
+    }
+    if (target.type === 'awareness') return `awareness:${target.id || index}`;
+    return `${target.type || 'target'}:${index}`;
+  }
+
+  activateReviewFocusMode(category, { focusFirst = true } = {}) {
+    if (!category) return;
+    const targets = this.getFocusTargetsForCategory(category);
+    this.activeFocusMode = 'review';
+    this.activeFocusCategory = category;
+    this.activeFocusTargetIds = targets.map((target, index) => this.focusTargetId(target, index));
+    this.focusReleased = false;
+    this._activeReviewTargetGroup = category;
     if (!targets.length) {
+      this.activeFocusMode = null;
+      this.activeFocusCategory = null;
+      this.activeFocusTargetIds = [];
       this._activeReviewTargetIndex = -1;
       this.renderReviewNavigationState();
+      this.applyReviewFocusStyles();
       return;
     }
     this._activeReviewTargetIndex = 0;
     this._reviewNavigationLocked = true;
     this.renderReviewNavigationState();
-    this.focusReviewTarget(targets[0]);
+    this.applyReviewFocusStyles();
+    if (focusFirst) this.focusReviewTarget(targets[0]);
+  }
+
+  clearReviewFocusMode() {
+    this.activeFocusMode = null;
+    this.activeFocusCategory = null;
+    this.activeFocusTargetIds = [];
+    this.focusReleased = false;
+    this._activeReviewTargetGroup = null;
+    this._activeReviewTargetIndex = -1;
+    this._reviewNavigationLocked = true;
+    this.clearFocusedReviewTarget();
+    this.clearCurrentReviewTargetSpan();
+    this.clearSpanRouteHighlight();
+    this.applyReviewFocusStyles();
+    this.renderReviewNavigationState();
+  }
+
+  _layerElement(layer) {
+    return typeof layer?.getElement === 'function' ? layer.getElement() : null;
+  }
+
+  _spanEndpointIds(spanRef) {
+    const props = spanRef?.props || {};
+    return new Set([
+      props.from_point_id,
+      props.to_point_id,
+      props.from_design_pole_no,
+      props.to_design_pole_no,
+    ].filter((value) => this.hasValue(value)).map((value) => String(value)));
+  }
+
+  _featureMatchesSpanTarget(fd, spanRef) {
+    const ids = this._spanEndpointIds(spanRef);
+    if (!ids.size) return false;
+    const props = fd?.props || {};
+    return [props.pole_id, props.id, props.point_id, props.design_pole_no]
+      .filter((value) => this.hasValue(value))
+      .some((value) => ids.has(String(value)));
+  }
+
+  _removeFocusClasses(el) {
+    if (!el?.classList) return;
+    el.classList.remove(
+      'gf-focus-muted',
+      'gf-focus-target',
+      'gf-focus-current-target',
+      'gf-focus-awareness',
+    );
+  }
+
+  applyReviewFocusStyles() {
+    const targets = this.activeFocusCategory
+      ? this.getFocusTargetsForCategory(this.activeFocusCategory)
+      : [];
+    const focusActive = this.activeFocusMode === 'review' && Boolean(this.activeFocusCategory);
+    const targetSpanRefs = new Set();
+    const targetMarkers = new Set();
+    const awarenessMarkers = new Set();
+
+    targets.forEach((target) => {
+      if (target.spanRef) targetSpanRefs.add(target.spanRef);
+      if (target.markerRef?.marker) {
+        targetMarkers.add(target.markerRef.marker);
+        awarenessMarkers.add(target.markerRef.marker);
+      }
+    });
+
+    if (focusActive) {
+      for (const fd of this.featureData || []) {
+        for (const spanRef of targetSpanRefs) {
+          if (this._featureMatchesSpanTarget(fd, spanRef)) targetMarkers.add(fd.marker);
+        }
+      }
+    }
+
+    for (const fd of this.featureData || []) {
+      const el = this._layerElement(fd.marker);
+      this._removeFocusClasses(el);
+      if (!focusActive || !el?.classList) continue;
+      const isTarget = targetMarkers.has(fd.marker);
+      el.classList.toggle('gf-focus-target', isTarget);
+      el.classList.toggle('gf-focus-muted', !isTarget);
+      el.classList.toggle('gf-focus-current-target', el === this._focusedReviewTarget);
+    }
+
+    for (const ref of this._spanLineRefs || []) {
+      const el = this._layerElement(ref.line);
+      this._removeFocusClasses(el);
+      if (!focusActive || !el?.classList) continue;
+      const isTarget = targetSpanRefs.has(ref);
+      el.classList.toggle('gf-focus-target', isTarget);
+      el.classList.toggle('gf-focus-muted', !isTarget);
+      el.classList.toggle(
+        'gf-focus-current-target',
+        el === this._focusedReviewTarget || el === this._currentReviewTargetSpan,
+      );
+      if (isTarget && typeof ref.line?.bringToFront === 'function') ref.line.bringToFront();
+    }
+
+    for (const ref of this._cableLineRefs || []) {
+      const el = this._layerElement(ref.line);
+      this._removeFocusClasses(el);
+      if (focusActive && el?.classList) el.classList.add('gf-focus-muted');
+    }
+
+    for (const ref of this._awarenessMarkerRefs || []) {
+      const marker = ref.marker;
+      const el = this._layerElement(marker);
+      this._removeFocusClasses(el);
+      if (!focusActive || !el?.classList) continue;
+      const isTarget = awarenessMarkers.has(marker);
+      el.classList.toggle('gf-focus-target', isTarget);
+      el.classList.toggle('gf-focus-awareness', isTarget);
+      el.classList.toggle('gf-focus-muted', !isTarget);
+      el.classList.toggle('gf-focus-current-target', el === this._focusedReviewTarget);
+    }
+
+    if (this.mapEl?.classList) {
+      this.mapEl.classList.toggle('gf-focus-active', focusActive);
+    }
   }
 
   currentReviewTargetGroup() {
@@ -1010,6 +1189,7 @@ class MapViewer {
     if (!targets.length) return;
     this._activeReviewTargetIndex = (this._activeReviewTargetIndex + 1) % targets.length;
     this._reviewNavigationLocked = true;
+    this.focusReleased = false;
     this.renderReviewNavigationState();
     this.focusReviewTarget(targets[this._activeReviewTargetIndex]);
   }
@@ -1019,6 +1199,7 @@ class MapViewer {
     if (!targets.length) return;
     this._activeReviewTargetIndex = (this._activeReviewTargetIndex - 1 + targets.length) % targets.length;
     this._reviewNavigationLocked = true;
+    this.focusReleased = false;
     this.renderReviewNavigationState();
     this.focusReviewTarget(targets[this._activeReviewTargetIndex]);
   }
@@ -1026,12 +1207,13 @@ class MapViewer {
   releaseReviewNavigationMap() {
     if (!this._activeReviewTargetGroup || this._activeReviewTargetIndex < 0) return;
     this._reviewNavigationLocked = false;
+    this.focusReleased = true;
     this.renderReviewNavigationState();
   }
 
   clearFocusedReviewTarget() {
     if (this._focusedReviewTarget?.classList) {
-      this._focusedReviewTarget.classList.remove('gf-review-target-focused');
+      this._focusedReviewTarget.classList.remove('gf-review-target-focused', 'gf-focus-current-target');
     }
     this._focusedReviewTarget = null;
   }
@@ -1041,6 +1223,7 @@ class MapViewer {
       this._currentReviewTargetSpan.classList.remove(
         'gf-current-review-target',
         'gf-current-review-target-span',
+        'gf-focus-current-target',
       );
     }
     this._currentReviewTargetSpan = null;
@@ -1050,7 +1233,7 @@ class MapViewer {
     this.clearFocusedReviewTarget();
     const el = typeof layer?.getElement === 'function' ? layer.getElement() : null;
     if (el?.classList) {
-      el.classList.add('gf-review-target-focused');
+      el.classList.add('gf-review-target-focused', 'gf-focus-current-target');
       this._focusedReviewTarget = el;
     }
   }
@@ -1060,7 +1243,7 @@ class MapViewer {
     const line = spanRef?.line;
     const el = typeof line?.getElement === 'function' ? line.getElement() : null;
     if (el?.classList) {
-      el.classList.add('gf-current-review-target', 'gf-current-review-target-span');
+      el.classList.add('gf-current-review-target', 'gf-current-review-target-span', 'gf-focus-current-target');
       this._currentReviewTargetSpan = el;
     }
     if (typeof line?.bringToFront === 'function') line.bringToFront();
@@ -1076,6 +1259,7 @@ class MapViewer {
     }
     this.markFocusedReviewTarget(spanRef.line);
     this.markCurrentReviewTargetSpan(spanRef);
+    this.applyReviewFocusStyles();
   }
 
   handleSpanPopupClose(spanRef) {
@@ -1108,6 +1292,7 @@ class MapViewer {
       this.markFocusedReviewTarget(ref.line);
       this.markCurrentReviewTargetSpan(ref);
       if (typeof ref.line.openPopup === 'function') ref.line.openPopup();
+      this.applyReviewFocusStyles();
       return;
     }
 
@@ -1120,6 +1305,7 @@ class MapViewer {
       }
       this.markFocusedReviewTarget(marker);
       if (marker && typeof marker.openPopup === 'function') marker.openPopup();
+      this.applyReviewFocusStyles();
     }
   }
 
@@ -1306,6 +1492,7 @@ class MapViewer {
     this.bindAllRecordsButton();
     this.renderLifecycleMatches();
     this.applyVisibility();
+    this.applyReviewFocusStyles();
 
     if (bounds.length === 1) {
       this.map.setView(bounds[0], 13);
@@ -1442,6 +1629,7 @@ class MapViewer {
     }
 
     this.refreshSpanListPanel({ onlyCrossingRisk: this._spanCrossingFilterOnly });
+    this.applyReviewFocusStyles();
   }
 
   spanPolylineVisual(props, focusDimOthers) {
@@ -1719,6 +1907,7 @@ class MapViewer {
           marker.addTo(this.plannerAwarenessLayer);
         }
       });
+      this.applyReviewFocusStyles();
       return;
     }
 
@@ -1730,6 +1919,7 @@ class MapViewer {
         this.map.removeLayer(marker);
       }
     });
+    this.applyReviewFocusStyles();
   }
 
   renderCableFeatures(cableFeatures) {
@@ -2146,6 +2336,7 @@ class MapViewer {
     }
 
     this.refreshSpanListPanel({ onlyCrossingRisk: this._spanCrossingFilterOnly });
+    this.applyReviewFocusStyles();
   }
 
   /**

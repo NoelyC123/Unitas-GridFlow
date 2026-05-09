@@ -1073,6 +1073,13 @@
                 <button id="review-map-release" type="button" class="gf-review-nav-button gf-review-map-release" style="display:none;" aria-pressed="false">Release map</button>
               </div>
               <div id="review-map-unlocked-note" class="gf-review-map-unlocked-note" style="display:none;">Map released. Next / Previous will refocus.</div>
+              <div class="gf-review-focus-controls" aria-label="Issue focus controls">
+                <button type="button" class="gf-review-focus-button" data-review-focus-category="blockers" aria-pressed="false">Focus blockers</button>
+                <button type="button" class="gf-review-focus-button" data-review-focus-category="review" aria-pressed="false">Focus review required</button>
+                <button type="button" class="gf-review-focus-button" data-review-focus-category="gaps" aria-pressed="false">Focus evidence gaps</button>
+                <button type="button" class="gf-review-focus-button" data-review-focus-category="awareness" aria-pressed="false">Focus planner awareness</button>
+                <button id="review-focus-clear" type="button" class="gf-review-focus-button gf-focus-clear-button" disabled aria-disabled="true">Clear focus</button>
+              </div>
             </div>
             <div class="map-control-section" aria-label="Map layer controls">
               <div class="review-focus-title">Map Layers</div>

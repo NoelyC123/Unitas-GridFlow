@@ -1,0 +1,26 @@
+name: Review focus checks
+checks:
+  - id: review_focus_controls_exist
+    description: Review focus controls exist in the review workspace.
+    type: selector_visible
+    selector: '.gf-review-focus-controls [data-review-focus-category="blockers"]'
+  - id: review_focus_blockers_activate
+    description: Design blocker focus can activate.
+    type: review_focus_category_active
+    category: blockers
+  - id: review_focus_clear_exists
+    description: Clear focus control exists.
+    type: selector_visible
+    selector: "#review-focus-clear"
+  - id: route_highlight_still_works
+    description: Route highlight still works while review focus controls are present.
+    type: route_highlight_active
+  - id: planner_awareness_toggle_still_works
+    description: Planner awareness layer toggle is visible.
+    type: selector_visible
+    selector: 'input[data-layer="plannerAwareness"]'
+  - id: popup_opens_without_crashing
+    description: C2E2 support popup opens without crashing.
+    type: c2e2_support_popup_text_contains
+    contains:
+      - Identity and role

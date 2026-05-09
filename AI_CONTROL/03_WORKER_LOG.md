@@ -83,6 +83,19 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 
 - Worker: validation
 - Branch: `claude-code/stage4-structured-capture-foundation`
+### 2026-05-09T20:40:33Z
+
+- Worker: codex
+- Branch: `codex/c2f-review-focus-issue-filtering`
+- Action: Implemented C2F review focus mode and issue filtering controls
+- Files changed: app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,validation_checklists/review_focus.yml,tests/test_review_focus_mode.py
+- Validation state: pytest and manual_review harness complete
+- Next action: n/a
+
+### 2026-05-09T20:40:39Z
+
+- Worker: validation
+- Branch: `codex/c2f-review-focus-issue-filtering`
 - Action: Recorded validation run with status `pass`.
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass

@@ -50,6 +50,88 @@
   stroke-width: 4;
 }
 
+.gf-review-focus-controls {
+  border-top: 1px solid #e5e7eb;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.gf-review-focus-button {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.2;
+  min-height: 30px;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.gf-review-focus-button:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.gf-review-focus-button.gf-focus-active {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
+}
+
+.gf-review-focus-button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.gf-focus-clear-button {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.gf-focus-muted:not(.gf-route-highlight):not(.gf-focus-current-target) {
+  opacity: 0.2 !important;
+  filter: grayscale(0.65) saturate(0.6);
+}
+
+.gridflow-span-line.gf-focus-target:not(.gf-route-highlight) {
+  stroke-width: 9 !important;
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 8px rgba(37, 99, 235, 0.78));
+}
+
+.asset-marker.gf-focus-target,
+.planner-awareness-marker.gf-focus-target {
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 8px rgba(37, 99, 235, 0.82));
+  z-index: 730 !important;
+}
+
+.gf-focus-current-target {
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 1))
+    drop-shadow(0 0 11px rgba(249, 115, 22, 0.9)) !important;
+  z-index: 760 !important;
+}
+
+.planner-awareness-marker.gf-focus-awareness {
+  stroke-width: 5;
+}
+
 .review-intelligence-panel {
   background: #ffffff;
 }

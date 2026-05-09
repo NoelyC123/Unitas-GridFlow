@@ -90,3 +90,13 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Foundation only. No app runtime files modified. No live integration. 23 new unit tests passing; full suite 855 passed; pre-commit clean.
+### 2026-05-09T20:40:39Z
+
+- Branch: `codex/c2f-review-focus-issue-filtering`
+- Commit: `unknown`
+- Jobs tested: `P008/F001`, `P010`
+- Command run: `pytest -v && pre-commit run --all-files && python scripts/manual_review.py --jobs P008/F001 P010 --suite baseline --checklist validation_checklists/review_focus.yml --overview-screenshot`
+- validation_runs report path: `validation_runs/20260509_204010/validation_report.md`
+- failures.json status: []
+- Screenshots: unknown
+- Verdict: pass

@@ -680,6 +680,32 @@ class ManualReviewRunner:
                         """
                     )
                 )
+            if check_type == "review_focus_category_active":
+                category = str(check["category"])
+                return driver.execute_script(
+                    _eval_wrap(
+                        f"""
+                        const viewer = window.gridflowMapViewer;
+                        if (!viewer) throw new Error('MapViewer hook unavailable');
+                        if (typeof viewer.activateReviewFocusMode !== 'function') {{
+                          throw new Error('Review focus mode is unavailable');
+                        }}
+                        viewer.activateReviewFocusMode({category!r});
+                        const targets = viewer.getFocusTargetsForCategory({category!r});
+                        if (!targets.length) {{
+                          throw new Error(`No review focus targets for {category}`);
+                        }}
+                        if (viewer.activeFocusCategory !== {category!r}) {{
+                          throw new Error('Review focus category did not activate');
+                        }}
+                        const focused = document.querySelectorAll('.gf-focus-target').length;
+                        if (focused < 1) {{
+                          throw new Error('No focused map targets were styled');
+                        }}
+                        return `${{targets.length}} {category} focus target(s)`;
+                        """
+                    )
+                )
             if check_type == "planner_awareness_visible":
                 return driver.execute_script(
                     _eval_wrap(

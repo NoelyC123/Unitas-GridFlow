@@ -72,6 +72,9 @@ checks:
     type: c2e2_support_popup_text_contains
     contains:
       - Identity and role
+  - id: focus_blockers
+    type: review_focus_category_active
+    category: blockers
 """,
     )
 
@@ -82,6 +85,8 @@ checks:
     assert checks[1]["type"] == "route_highlight_active"
     assert checks[2]["selector"] == "#map"
     assert checks[3]["type"] == "c2e2_support_popup_text_contains"
+    assert checks[4]["type"] == "review_focus_category_active"
+    assert checks[4]["category"] == "blockers"
 
 
 def test_load_checklist_rejects_missing_id(tmp_path) -> None:

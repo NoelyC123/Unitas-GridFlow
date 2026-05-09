@@ -7,19 +7,24 @@ Purpose: latest operational handoff for Noel and AI workers.
 - Master is stable.
 - Latest completed milestone: `project-control-center-foundation-complete`.
 - Prior stable milestone: `c2e2-popup-expansion-implementation-complete`.
-- Current active branch is `claude-code/stage4-structured-capture-foundation`.
-- This branch adds the Stage 4 structured-capture foundation: schema, validators, template generator, docs, tests, and a generated CSV template. **No app runtime files are modified.**
-- Next expected action after review: tag/merge, then plan Stage 4 integration into upload/QA/popup flows on a separate branch.
+- Current active branch is `codex/c2f-review-focus-issue-filtering`.
+- This branch implements the C2F review focus mode and issue filtering workspace.
+- Backend validation, geometry, span generation, intake, and C2E2 field truthfulness rules were not changed.
+- Manual review harness passed for `P008/F001` and `P010/F001`.
+- Next expected action after merge: review the UI workflow, then continue with the next validation-led product task.
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Stage 4 Structured Capture Foundation
-- Owner: claude-code
-- Branch: `claude-code/stage4-structured-capture-foundation`
+- Task: C2F Review Focus + Issue Filtering Workspace
+- Owner: codex
+- Branch: `codex/c2f-review-focus-issue-filtering`
 - Status: ready for review
-- Summary: Schema, validators, template generator, docs, and tests for the future Stage 4 structured-capture layer. No live integration.
-- Updated: 2026-05-09T20:32:31Z
+- Summary: Added review focus state, compact issue focus controls, focused/muted map styling, navigation integration, review focus checklist support, and tests.
+- Commit: branch commit recorded in git history; final hash is reported by Codex after commit creation.
+- Validation: `pytest tests/test_review_focus_mode.py -v`, `pytest tests/test_review_navigation_layer.py -v`, `pytest tests/test_c2e2_popup_rendering.py -v`, `pytest -v`, `pre-commit run --all-files`, and manual review harness passed.
+- Manual review report: `validation_runs/20260509_204010/validation_report.md`
+- Updated: 2026-05-09T20:41:00Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## Stage 4 Foundation — Status
@@ -51,9 +56,9 @@ Purpose: latest operational handoff for Noel and AI workers.
 
 ## Next Action
 
-- Review this Stage 4 foundation branch.
+- Review the C2F focus/filter workflow.
 - Merge/tag after review.
-- Plan Stage 4 integration on a separate branch when Noel is ready.
+- Continue with the next validation-led product task on a separate branch.
 
 ## Do Not Start On This Branch
 
@@ -61,3 +66,7 @@ Purpose: latest operational handoff for Noel and AI workers.
 - Technical docs field/architecture package
 - Lifecycle visualization feature work
 - DNO-grade rulepack implementation
+
+## Completed stable milestone
+
+- `stage4-structured-capture-foundation-complete` is already merged to master.
