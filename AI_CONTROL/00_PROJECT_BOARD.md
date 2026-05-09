@@ -11,11 +11,11 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 ## Active task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4 Structured Capture Foundation
-- Branch: `claude-code/stage4-structured-capture-foundation`
+- Task: Technical Documentation Package
+- Branch: `claude-code/technical-docs-field-architecture`
 - Owner: claude-code
 - Status: in_progress
-- Summary: Create Stage 4 schema, validators, templates, and docs for structured field capture
+- Summary: Create field reference, architecture, and API technical docs
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In progress
