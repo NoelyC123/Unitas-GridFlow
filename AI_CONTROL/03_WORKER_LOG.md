@@ -83,6 +83,11 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 
 - Worker: validation
 - Branch: `claude-code/stage4-structured-capture-foundation`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review
+
 ### 2026-05-09T20:40:33Z
 
 - Worker: codex
@@ -101,28 +106,55 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Validation state: pass
 - Next action: update handoff or proceed to review
 
-### 2026-05-09T21:08:20Z
+### 2026-05-09T21:05:00Z
 
 - Worker: claude-code
 - Branch: `claude-code/technical-docs-field-architecture`
-- Action: Started task: Technical Documentation Package. Create field reference, architecture, and API technical docs
+- Action: Started task: Technical Documentation Package. Create field reference, architecture, API, and validation workflow docs.
 - Files changed: control files pending
 - Validation state: pending
-- Next action: implement task and validate
+- Next action: Create docs/FIELD_REFERENCE_GUIDE.md, docs/ARCHITECTURE.md, docs/API_REFERENCE.md, and docs/VALIDATION_WORKFLOW.md.
 
-### 2026-05-09T21:14:00Z
+### 2026-05-09T21:12:00Z
 
 - Worker: claude-code
 - Branch: `claude-code/technical-docs-field-architecture`
-- Action: Created GridFlow technical field, architecture, API, and validation workflow docs
-- Files changed: docs/FIELD_REFERENCE_GUIDE.md,docs/ARCHITECTURE.md,docs/API_REFERENCE.md,docs/VALIDATION_WORKFLOW.md
-- Validation state: pytest and pre-commit complete
-- Next action: Update handoff and commit
+- Action: Created GridFlow technical field, architecture, API, and validation workflow docs.
+- Files changed: docs/FIELD_REFERENCE_GUIDE.md,docs/ARCHITECTURE.md,docs/API_REFERENCE.md,docs/VALIDATION_WORKFLOW.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md
+- Validation state: pytest -v passed; pre-commit run --all-files passed
+- Next action: Review, merge, and tag technical-docs-field-architecture-complete.
 
-### 2026-05-09T21:14:02Z
+### 2026-05-09T21:12:10Z
 
 - Worker: validation
 - Branch: `claude-code/technical-docs-field-architecture`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review
+
+### 2026-05-09T21:13:00Z
+
+- Worker: codex
+- Branch: `codex/c2g-lifecycle-replacement-visualization`
+- Action: Started task: C2G Lifecycle Replacement Visualization. Improve existing/proposed replacement relationship visualization in map viewer.
+- Files changed: control files pending
+- Validation state: pending
+- Next action: Implement lifecycle connector overlay, lifecycle focus controls, tests, checklist, and manual review validation.
+
+### 2026-05-09T21:15:38Z
+
+- Worker: codex
+- Branch: `codex/c2g-lifecycle-replacement-visualization`
+- Action: Implemented C2G lifecycle and replacement relationship visualization.
+- Files changed: app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,scripts/manual_review.py,validation_checklists/lifecycle_visualization.yml,tests/test_lifecycle_visualization.py,tests/test_manual_review_harness.py,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md
+- Validation state: pytest lifecycle/review/popup/navigation tests passed; pytest -v passed; pre-commit passed; manual_review harness passed with 32 passed and 0 failed
+- Next action: Rebase onto latest master after technical docs merge, rerun tests/manual_review, then merge/tag if clean.
+
+### 2026-05-09T21:15:45Z
+
+- Worker: validation
+- Branch: `codex/c2g-lifecycle-replacement-visualization`
 - Action: Recorded validation run with status `pass`.
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass

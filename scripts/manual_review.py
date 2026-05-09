@@ -706,6 +706,38 @@ class ManualReviewRunner:
                         """
                     )
                 )
+            if check_type == "lifecycle_focus_active":
+                mode = str(check.get("mode") or "replacement-pairs")
+                return driver.execute_script(
+                    _eval_wrap(
+                        f"""
+                        const viewer = window.gridflowMapViewer;
+                        if (!viewer) throw new Error('MapViewer hook unavailable');
+                        if (typeof viewer.activateLifecycleFocusMode !== 'function') {{
+                          throw new Error('Lifecycle focus mode is unavailable');
+                        }}
+                        viewer.activateLifecycleFocusMode({mode!r});
+                        const targets = viewer.getLifecycleFocusTargets({mode!r});
+                        const count = (
+                          (targets.features || []).length
+                          + (targets.connectors || []).length
+                        );
+                        if (!count) {{
+                          return `no {mode} lifecycle targets in this job`;
+                        }}
+                        if (viewer.activeLifecycleFocusMode !== {mode!r}) {{
+                          throw new Error('Lifecycle focus mode did not activate');
+                        }}
+                        const focused = document.querySelectorAll(
+                          '.gf-lifecycle-pair-highlight',
+                        ).length;
+                        if (focused < 1) {{
+                          throw new Error('No lifecycle map targets were styled');
+                        }}
+                        return `${{count}} {mode} lifecycle focus target(s)`;
+                        """
+                    )
+                )
             if check_type == "planner_awareness_visible":
                 return driver.execute_script(
                     _eval_wrap(

@@ -112,3 +112,14 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Documentation only. No app runtime files modified. Full suite: 855 passed.
+
+### 2026-05-09T21:16:02Z
+
+- Branch: `codex/c2g-lifecycle-replacement-visualization`
+- Commit: `unknown`
+- Jobs tested: `P008/F001`, `P010`
+- Command run: `pytest -v && pre-commit run --all-files && python scripts/manual_review.py --jobs P008/F001 P010 --suite baseline --checklist validation_checklists/lifecycle_visualization.yml --overview-screenshot`
+- validation_runs report path: `validation_runs/20260509_211538/validation_report.md`
+- failures.json status: []
+- Screenshots: unknown
+- Verdict: pass

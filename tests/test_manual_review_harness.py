@@ -75,6 +75,9 @@ checks:
   - id: focus_blockers
     type: review_focus_category_active
     category: blockers
+  - id: lifecycle_focus
+    type: lifecycle_focus_active
+    mode: replacement-pairs
 """,
     )
 
@@ -87,6 +90,8 @@ checks:
     assert checks[3]["type"] == "c2e2_support_popup_text_contains"
     assert checks[4]["type"] == "review_focus_category_active"
     assert checks[4]["category"] == "blockers"
+    assert checks[5]["type"] == "lifecycle_focus_active"
+    assert checks[5]["mode"] == "replacement-pairs"
 
 
 def test_load_checklist_rejects_missing_id(tmp_path) -> None:

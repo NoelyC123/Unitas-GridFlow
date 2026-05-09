@@ -81,6 +81,8 @@ class MapViewer {
     this.activeFocusCategory = null;
     this.activeFocusTargetIds = [];
     this.focusReleased = false;
+    this.activeLifecycleFocusMode = null;
+    this.activeLifecycleTargetIds = [];
     try {
       const v = localStorage.getItem('gridflow_map_span_label_mode');
       const allowed = new Set(['hover', 'critical', 'crossing', 'review', 'all']);
@@ -100,6 +102,7 @@ class MapViewer {
     this._spanLayerOrigin = 'provisional_route';
     this._usedDesignChainSpanFallback = false;
     this._replacementDrawableLineCount = 0;
+    this._lifecycleConnectorRefs = [];
   }
 
   init() {
@@ -114,6 +117,7 @@ class MapViewer {
 
     this.bindSpanLabelModeControl();
     this.bindReviewNavigationControls();
+    this.bindLifecycleFocusControls();
     this.loadData();
   }
 
@@ -361,7 +365,7 @@ class MapViewer {
     const spanN = Number(m.span_feature_count ?? this._spanFeatureList?.length ?? 0);
     const cabN = Number(m.cable_feature_count ?? 0);
     const awarenessN = Number(m.planner_awareness_count ?? 0);
-    const matchRecN = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
+    const matchRecN = this.featureData.filter((fd) => this.hasLifecycleRelationship(fd.props || {})).length;
     const angleN = this.angleHighlightCount();
 
     this._resetLayerToggle('existing', lc.existing >= 1, 'No existing pole records in this job.');
@@ -379,7 +383,7 @@ class MapViewer {
     this._resetLayerToggle(
       'matches',
       matchRecN >= 1,
-      'No suggested replacement links in record data (no replacing references).',
+      'No lifecycle replacement links in record data.',
     );
     this._resetLayerToggle(
       'plannerAwareness',
@@ -444,7 +448,7 @@ class MapViewer {
         return;
       }
       if (key === 'matches') {
-        const matchRec = this.featureData.filter((fd) => this.hasValue(fd.props.replacing)).length;
+        const matchRec = this.featureData.filter((fd) => this.hasLifecycleRelationship(fd.props || {})).length;
         const lines = this._replacementDrawableLineCount ?? 0;
         cap.textContent = `${raw} (${matchRec} rec · ${lines} on map)`;
         if (lab) {
@@ -942,6 +946,15 @@ class MapViewer {
     this.renderReviewNavigationState();
   }
 
+  bindLifecycleFocusControls() {
+    document.querySelectorAll('[data-lifecycle-focus]').forEach((button) => {
+      button.addEventListener('click', () => this.activateLifecycleFocusMode(button.dataset.lifecycleFocus));
+    });
+    const clear = document.getElementById('lifecycle-focus-clear');
+    if (clear) clear.addEventListener('click', () => this.clearLifecycleFocusMode());
+    this.applyLifecycleFocusStyles();
+  }
+
   renderReviewNavigationState() {
     const targets = this._reviewNavigationTargets || { blockers: [], review: [], gaps: [], awareness: [] };
     document.querySelectorAll('[data-review-nav-group]').forEach((card) => {
@@ -1176,6 +1189,130 @@ class MapViewer {
     if (this.mapEl?.classList) {
       this.mapEl.classList.toggle('gf-focus-active', focusActive);
     }
+  }
+
+  lifecycleFeatureKey(props = {}) {
+    const value = props.pole_id ?? props.id ?? props.point_id ?? props.design_pole_no;
+    return this.hasValue(value) ? String(value).trim() : '';
+  }
+
+  hasLifecycleRelationship(props = {}) {
+    return (
+      props.relationship === 'replacement_pair'
+      || this.hasValue(props.replacing)
+      || this.hasValue(props.being_replaced_by)
+    );
+  }
+
+  getLifecycleFocusTargets(mode = this.activeLifecycleFocusMode) {
+    const connectors = this._lifecycleConnectorRefs || [];
+    if (mode === 'replacement-pairs') {
+      const pairedFeatures = new Set();
+      connectors.forEach((ref) => {
+        if (ref.existing) pairedFeatures.add(ref.existing);
+        if (ref.proposed) pairedFeatures.add(ref.proposed);
+      });
+      for (const fd of this.featureData || []) {
+        if (this.hasLifecycleRelationship(fd.props || {})) pairedFeatures.add(fd);
+      }
+      return { features: Array.from(pairedFeatures), connectors };
+    }
+    if (mode === 'existing-assets') {
+      return {
+        features: (this.featureData || []).filter((fd) => this.isExistingPole(fd.props || {})),
+        connectors: [],
+      };
+    }
+    if (mode === 'proposed-assets') {
+      return {
+        features: (this.featureData || []).filter((fd) => this.isProposedPole(fd.props || {})),
+        connectors: [],
+      };
+    }
+    return { features: [], connectors: [] };
+  }
+
+  _removeLifecycleFocusClasses(el) {
+    if (!el?.classList) return;
+    el.classList.remove(
+      'gf-lifecycle-muted',
+      'gf-lifecycle-pair-highlight',
+      'gf-lifecycle-existing',
+      'gf-lifecycle-proposed',
+    );
+  }
+
+  applyLifecycleFocusStyles() {
+    const mode = this.activeLifecycleFocusMode;
+    const focusActive = Boolean(mode);
+    const targets = focusActive
+      ? this.getLifecycleFocusTargets(mode)
+      : { features: [], connectors: [] };
+    const targetFeatures = new Set(targets.features || []);
+    const targetConnectors = new Set(targets.connectors || []);
+
+    for (const fd of this.featureData || []) {
+      const el = this._layerElement(fd.marker);
+      this._removeLifecycleFocusClasses(el);
+      if (!focusActive || !el?.classList) continue;
+      const isTarget = targetFeatures.has(fd);
+      el.classList.toggle('gf-lifecycle-pair-highlight', isTarget);
+      el.classList.toggle('gf-lifecycle-muted', !isTarget);
+      el.classList.toggle('gf-lifecycle-existing', isTarget && this.isExistingPole(fd.props || {}));
+      el.classList.toggle('gf-lifecycle-proposed', isTarget && this.isProposedPole(fd.props || {}));
+    }
+
+    for (const ref of this._lifecycleConnectorRefs || []) {
+      const el = this._layerElement(ref.line);
+      this._removeLifecycleFocusClasses(el);
+      if (!focusActive || !el?.classList) continue;
+      const isTarget = targetConnectors.has(ref) || mode === 'replacement-pairs';
+      el.classList.toggle('gf-lifecycle-pair-highlight', isTarget);
+      el.classList.toggle('gf-lifecycle-muted', !isTarget);
+      if (isTarget && typeof ref.line?.bringToFront === 'function') ref.line.bringToFront();
+    }
+
+    for (const ref of this._spanLineRefs || []) {
+      const el = this._layerElement(ref.line);
+      this._removeLifecycleFocusClasses(el);
+      if (focusActive && el?.classList) el.classList.add('gf-lifecycle-muted');
+    }
+
+    for (const ref of this._cableLineRefs || []) {
+      const el = this._layerElement(ref.line);
+      this._removeLifecycleFocusClasses(el);
+      if (focusActive && el?.classList) el.classList.add('gf-lifecycle-muted');
+    }
+
+    document.querySelectorAll('[data-lifecycle-focus]').forEach((button) => {
+      const active = button.dataset.lifecycleFocus === mode;
+      button.classList.toggle('gf-lifecycle-focus-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    const clear = document.getElementById('lifecycle-focus-clear');
+    if (clear) {
+      clear.disabled = !focusActive;
+      clear.setAttribute('aria-disabled', focusActive ? 'false' : 'true');
+    }
+    if (this.mapEl?.classList) {
+      this.mapEl.classList.toggle('gf-lifecycle-focus-active', focusActive);
+    }
+  }
+
+  activateLifecycleFocusMode(mode) {
+    const targets = this.getLifecycleFocusTargets(mode);
+    this.activeLifecycleFocusMode = mode;
+    this.activeLifecycleTargetIds = (targets.features || [])
+      .map((fd) => this.lifecycleFeatureKey(fd.props || {}))
+      .filter(Boolean);
+    this.applyLifecycleFocusStyles();
+    return targets;
+  }
+
+  clearLifecycleFocusMode() {
+    this.activeLifecycleFocusMode = null;
+    this.activeLifecycleTargetIds = [];
+    this.applyLifecycleFocusStyles();
   }
 
   currentReviewTargetGroup() {
@@ -1493,6 +1630,7 @@ class MapViewer {
     this.renderLifecycleMatches();
     this.applyVisibility();
     this.applyReviewFocusStyles();
+    this.applyLifecycleFocusStyles();
 
     if (bounds.length === 1) {
       this.map.setView(bounds[0], 13);
@@ -1502,7 +1640,12 @@ class MapViewer {
   }
 
   renderLifecycleMatches() {
+    this.renderLifecycleRelationshipLayer();
+  }
+
+  renderLifecycleRelationshipLayer() {
     this._replacementDrawableLineCount = 0;
+    this._lifecycleConnectorRefs = [];
     if (!this.map || this.featureData.length === 0) return;
 
     if (this.lifecycleMatchLayer) {
@@ -1513,7 +1656,8 @@ class MapViewer {
     this.lifecycleMatchLayer = L.layerGroup();
     const byPoleId = new Map();
     for (const fd of this.featureData) {
-      if (this.hasValue(fd.props.pole_id)) byPoleId.set(String(fd.props.pole_id), fd);
+      const key = this.lifecycleFeatureKey(fd.props);
+      if (key) byPoleId.set(key, fd);
     }
 
     const prCountByExisting = new Map();
@@ -1523,26 +1667,32 @@ class MapViewer {
       prCountByExisting.set(ex, (prCountByExisting.get(ex) || 0) + 1);
     }
 
-    for (const fd of this.featureData) {
-      if (!this.hasValue(fd.props.replacing)) continue;
-      const existing = byPoleId.get(String(fd.props.replacing));
-      if (!existing) continue;
+    const drawnPairs = new Set();
+    const addConnector = (existing, proposed, sourceProps) => {
+      if (!existing || !proposed) return;
+      const existingKey = this.lifecycleFeatureKey(existing.props);
+      const proposedKey = this.lifecycleFeatureKey(proposed.props);
+      if (!existingKey || !proposedKey) return;
+      const pairId = `${existingKey}->${proposedKey}`;
+      if (drawnPairs.has(pairId)) return;
+      drawnPairs.add(pairId);
 
-      const line = L.polyline([[existing.lat, existing.lon], [fd.lat, fd.lon]], {
-        color: '#94a3b8',
-        weight: 1,
-        opacity: 0.55,
+      const line = L.polyline([[existing.lat, existing.lon], [proposed.lat, proposed.lon]], {
+        color: '#b45309',
+        weight: 2,
+        opacity: 0.7,
         dashArray: '5 5',
         lineCap: 'round',
+        className: 'gf-lifecycle-connector',
       });
-      const offsetLine = fd.props.match_offset_m != null
-        ? `<div class="popup-row"><strong>Offset:</strong> ${Number(fd.props.match_offset_m).toFixed(1)}m</div>`
+      const offsetLine = sourceProps.match_offset_m != null
+        ? `<div class="popup-row"><strong>Offset:</strong> ${Number(sourceProps.match_offset_m).toFixed(1)}m</div>`
         : '';
-      const clusterN = prCountByExisting.get(String(fd.props.replacing)) || 1;
+      const clusterN = prCountByExisting.get(existingKey) || 1;
       const clusterHint = clusterN > 1
-        ? `<div class="popup-row lifecycle-cluster-hint"><strong>Cluster:</strong> ${clusterN} proposed points share existing <strong>${this.escapeHtml(String(fd.props.replacing))}</strong> — confirm the intended pair on the review page.</div>`
+        ? `<div class="popup-row lifecycle-cluster-hint"><strong>Cluster:</strong> ${clusterN} proposed points share existing <strong>${this.escapeHtml(existingKey)}</strong> — confirm the intended pair on the review page.</div>`
         : '';
-      const audit = fd.props.replacement_pair_audit || {};
+      const audit = sourceProps.replacement_pair_audit || {};
       const pct = audit.confidence_pct != null ? Number(audit.confidence_pct) : null;
       const pctClass = pct == null ? '' : pct >= 75 ? 'lifecycle-conf-high' : pct >= 50 ? 'lifecycle-conf-med' : 'lifecycle-conf-low';
       const confBlock = pct != null
@@ -1550,21 +1700,43 @@ class MapViewer {
         : '';
       this.bindSmartPopup(line, `
         <div class="popup-title">Suggested Existing/Proposed Match</div>
-        <div class="popup-row"><strong>Existing:</strong> Point ${this.escapeHtml(fd.props.replacing)}</div>
-        <div class="popup-row"><strong>Proposed:</strong> Point ${this.escapeHtml(fd.props.pole_id || fd.props.id || 'Unknown')}</div>
+        <div class="popup-row"><strong>Existing:</strong> Point ${this.escapeHtml(existingKey)}</div>
+        <div class="popup-row"><strong>Proposed:</strong> Point ${this.escapeHtml(proposedKey)}</div>
         ${confBlock}
         ${offsetLine}
         ${clusterHint}
         <div class="popup-row" style="color:#64748b;font-size:0.82em;margin-top:4px;">Suggested replacement link — unconfirmed. Review pairing page to confirm.</div>
       `);
       line.addTo(this.lifecycleMatchLayer);
+      this._lifecycleConnectorRefs.push({
+        line,
+        existing,
+        proposed,
+        pairId,
+        props: sourceProps,
+      });
       this._replacementDrawableLineCount += 1;
+    };
+
+    for (const fd of this.featureData) {
+      if (!this.hasValue(fd.props.replacing)) continue;
+      addConnector(byPoleId.get(String(fd.props.replacing)), fd, fd.props);
+    }
+
+    for (const fd of this.featureData) {
+      if (!this.hasValue(fd.props.being_replaced_by)) continue;
+      addConnector(fd, byPoleId.get(String(fd.props.being_replaced_by)), fd.props);
     }
 
     const toggle = document.getElementById('lifecycle-match-toggle');
     if (!toggle || toggle.checked) {
       this.lifecycleMatchLayer.addTo(this.map);
     }
+    this.applyLifecycleFocusStyles();
+  }
+
+  buildLifecycleRelationshipConnectors() {
+    return this._lifecycleConnectorRefs || [];
   }
 
   renderGeoJsonSpanFeatures(spanFeatures) {
@@ -1630,6 +1802,7 @@ class MapViewer {
 
     this.refreshSpanListPanel({ onlyCrossingRisk: this._spanCrossingFilterOnly });
     this.applyReviewFocusStyles();
+    this.applyLifecycleFocusStyles();
   }
 
   spanPolylineVisual(props, focusDimOthers) {
@@ -2460,6 +2633,7 @@ class MapViewer {
           this.toggleLayer(this.cableLayer, input.checked);
         } else if (layerName === 'matches') {
           this.toggleLayer(this.lifecycleMatchLayer, input.checked);
+          this.applyLifecycleFocusStyles();
         } else if (layerName === 'plannerAwareness') {
           this.togglePlannerAwarenessLayer(input.checked);
         } else if (layerName === 'angle') {
@@ -2502,6 +2676,7 @@ class MapViewer {
       } else if (this.map.hasLayer(this.lifecycleMatchLayer)) {
         this.map.removeLayer(this.lifecycleMatchLayer);
       }
+      this.applyLifecycleFocusStyles();
     });
   }
 
@@ -2570,7 +2745,7 @@ class MapViewer {
       return this.featureData.filter(fd => fd.status === 'WARN');
     }
     if (value === 'replacement-proximity') {
-      return this.featureData.filter(fd => fd.props.relationship === 'replacement_pair');
+      return this.featureData.filter(fd => this.hasLifecycleRelationship(fd.props || {}));
     }
     if (value === 'missing-height') {
       return this.featureData.filter(fd => this.isExistingPole(fd.props) && !this.hasValue(fd.props.height));
@@ -3241,13 +3416,17 @@ class MapViewer {
   }
 
   c2e2SupportPopupSections(assetKind, props, status, lat, lon) {
-    return [
+    const sections = [
       { title: 'Identity and role', rows: this.c2e2IdentityRows(props, assetKind) },
       { title: 'Geometry and measured evidence', rows: this.c2e2GeometryRows(props) },
       { title: 'QA and review status', rows: this.c2e2QualityRows(props, status) },
       { title: 'Survey context', rows: this.c2e2SurveyContextRows(props) },
-      { title: 'Lifecycle / relationships', rows: this.c2e2RelationshipRows(props) },
     ];
+    const relationshipRows = this.c2e2RelationshipRows(props);
+    if (relationshipRows.length) {
+      sections.push({ title: 'Lifecycle / relationships', rows: relationshipRows });
+    }
+    return sections;
   }
 
   c2e2FieldLabels() {

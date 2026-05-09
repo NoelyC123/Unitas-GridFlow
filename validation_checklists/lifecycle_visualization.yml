@@ -1,0 +1,26 @@
+name: Lifecycle visualization checks
+checks:
+  - id: lifecycle_controls_exist
+    description: Lifecycle focus controls exist in the map workspace.
+    type: selector_visible
+    selector: '.gf-lifecycle-focus-controls [data-lifecycle-focus="replacement-pairs"]'
+  - id: lifecycle_replacement_focus_activates
+    description: Replacement pair lifecycle focus can activate when targets exist.
+    type: lifecycle_focus_active
+    mode: replacement-pairs
+  - id: lifecycle_clear_exists
+    description: Clear lifecycle focus control exists.
+    type: selector_visible
+    selector: "#lifecycle-focus-clear"
+  - id: route_highlight_still_works
+    description: Route highlight still works while lifecycle controls are present.
+    type: route_highlight_active
+  - id: review_focus_controls_still_exist
+    description: Review focus controls remain available.
+    type: selector_visible
+    selector: '.gf-review-focus-controls [data-review-focus-category="blockers"]'
+  - id: popup_opens_without_crashing
+    description: C2E2 support popup opens without crashing.
+    type: c2e2_support_popup_text_contains
+    contains:
+      - Identity and role

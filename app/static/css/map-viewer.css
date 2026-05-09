@@ -132,6 +132,95 @@
   stroke-width: 5;
 }
 
+.gf-lifecycle-focus-controls {
+  border-top: 1px solid #e5e7eb;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.gf-lifecycle-focus-button {
+  background: #f8fafc;
+  border: 1px solid #d6d3d1;
+  border-radius: 7px;
+  color: #44403c;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.2;
+  min-height: 30px;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.gf-lifecycle-focus-button:hover:not(:disabled) {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.gf-lifecycle-focus-button.gf-lifecycle-focus-active {
+  background: #ffedd5;
+  border-color: #ea580c;
+  color: #9a3412;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.16);
+}
+
+.gf-lifecycle-focus-button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.gf-lifecycle-clear-button {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.gf-lifecycle-muted:not(.gf-route-highlight):not(.gf-focus-current-target) {
+  opacity: 0.24 !important;
+  filter: grayscale(0.7) saturate(0.55);
+}
+
+.gf-lifecycle-connector {
+  stroke: #b45309;
+  stroke-dasharray: 5 5;
+}
+
+.gf-lifecycle-connector.gf-lifecycle-pair-highlight {
+  stroke: #ea580c !important;
+  stroke-width: 5 !important;
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.98))
+    drop-shadow(0 0 8px rgba(234, 88, 12, 0.72));
+}
+
+.asset-marker.gf-lifecycle-existing {
+  outline: 2px solid rgba(31, 41, 55, 0.72);
+}
+
+.asset-marker.gf-lifecycle-proposed {
+  outline: 2px solid rgba(234, 88, 12, 0.76);
+}
+
+.asset-marker.gf-lifecycle-pair-highlight {
+  opacity: 1 !important;
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 9px rgba(234, 88, 12, 0.78));
+  z-index: 735 !important;
+}
+
+.legend-line.legend-lifecycle-connector {
+  background: transparent;
+  border-top: 2px dashed #b45309;
+  height: 0;
+}
+
 .review-intelligence-panel {
   background: #ffffff;
 }

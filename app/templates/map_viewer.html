@@ -1092,8 +1092,14 @@
                 <label class="layer-toggle" data-layer-key="context"><input type="checkbox" data-layer="context"> <span class="layer-toggle-caption">Context/Crossings</span></label>
                 <label class="layer-toggle" data-layer-key="spans"><input type="checkbox" data-layer="spans" checked> <span class="layer-toggle-caption">Provisional route spans (line)</span></label>
                 <label class="layer-toggle" data-layer-key="cables"><input type="checkbox" data-layer="cables" checked> <span class="layer-toggle-caption">Underground cables (dashed)</span></label>
-                <label class="layer-toggle" data-layer-key="matches"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> <span class="layer-toggle-caption">Suggested replacement map links</span></label>
+                <label class="layer-toggle" data-layer-key="matches"><input id="lifecycle-match-toggle" type="checkbox" data-layer="matches" checked> <span class="layer-toggle-caption">Suggested replacement map links / lifecycle relationships</span></label>
                 <label class="layer-toggle" data-layer-key="plannerAwareness"><input type="checkbox" data-layer="plannerAwareness" checked> <span class="layer-toggle-caption">Planner awareness notes</span></label>
+              </div>
+              <div class="gf-lifecycle-focus-controls" aria-label="Lifecycle focus controls">
+                <button type="button" class="gf-lifecycle-focus-button" data-lifecycle-focus="replacement-pairs" aria-pressed="false">Focus replacement pairs</button>
+                <button type="button" class="gf-lifecycle-focus-button" data-lifecycle-focus="existing-assets" aria-pressed="false">Focus existing assets</button>
+                <button type="button" class="gf-lifecycle-focus-button" data-lifecycle-focus="proposed-assets" aria-pressed="false">Focus proposed assets</button>
+                <button id="lifecycle-focus-clear" type="button" class="gf-lifecycle-focus-button gf-lifecycle-clear-button" disabled aria-disabled="true">Clear lifecycle focus</button>
               </div>
               <div class="span-label-mode-row" style="margin-top:10px;">
                 <label for="span-label-mode" style="display:block;font-size:0.76rem;color:#4b5563;margin-bottom:4px;">
@@ -1172,6 +1178,10 @@
                 <div class="map-legend-item">
                   <span class="legend-line suggested-match"></span>
                   <span>Suggested Existing/Proposed Match (map evidence only)</span>
+                </div>
+                <div class="map-legend-item">
+                  <span class="legend-line legend-lifecycle-connector"></span>
+                  <span>Lifecycle replacement connector</span>
                 </div>
               </div>
               <div class="map-legend-title" style="margin-top:8px;">Asset Types (by shape)</div>
