@@ -11,11 +11,11 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 ## Active task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Project Control Center First-Use Polish
-- Branch: `codex/project-control-center-first-use-polish`
-- Owner: codex
-- Status: ready for review
-- Summary: First-use control files and validation screenshot wording polished after the foundation merge.
+- Task: Stage 4 Structured Capture Foundation
+- Branch: `claude-code/stage4-structured-capture-foundation`
+- Owner: claude-code
+- Status: in_progress
+- Summary: Create Stage 4 schema, validators, templates, and docs for structured field capture
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In progress

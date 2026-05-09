@@ -78,3 +78,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: First-use Project Control Center polish only; no app runtime files changed
+
+### 2026-05-09T20:38:13Z
+
+- Branch: `claude-code/stage4-structured-capture-foundation`
+- Commit: `unknown`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Foundation only. No app runtime files modified. No live integration. 23 new unit tests passing; full suite 855 passed; pre-commit clean.
