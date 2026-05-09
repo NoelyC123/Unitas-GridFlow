@@ -11,11 +11,11 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 ## Active task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4 Structured Capture Foundation
-- Branch: `claude-code/stage4-structured-capture-foundation`
-- Owner: claude-code
-- Status: in_progress
-- Summary: Create Stage 4 schema, validators, templates, and docs for structured field capture
+- Task: Project Control Worker Bootstrap Enforcement
+- Branch: `codex/project-control-worker-bootstrap`
+- Owner: codex
+- Status: ready for review
+- Summary: Added worker start/finish checklists, prompt templates, control status script, and control-layer docs updates
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In progress

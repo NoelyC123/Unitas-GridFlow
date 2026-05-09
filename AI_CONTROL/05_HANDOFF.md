@@ -7,25 +7,44 @@ Purpose: latest operational handoff for Noel and AI workers.
 - Master is stable.
 - Latest completed milestone: `project-control-center-foundation-complete`.
 - Prior stable milestone: `c2e2-popup-expansion-implementation-complete`.
-- Current active branch is `codex/c2f-review-focus-issue-filtering`.
-- This branch implements the C2F review focus mode and issue filtering workspace.
-- Backend validation, geometry, span generation, intake, and C2E2 field truthfulness rules were not changed.
-- Manual review harness passed for `P008/F001` and `P010/F001`.
-- Next expected action after merge: review the UI workflow, then continue with the next validation-led product task.
+- Current active branch is `codex/project-control-worker-bootstrap`.
+- This branch is control-layer only and adds worker start/finish process guidance plus a control status script.
+- No app runtime files should be touched on this branch.
+- Expected next action: review the control-layer changes, confirm validation is clean, then merge/tag if approved.
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: C2F Review Focus + Issue Filtering Workspace
+- Task: Project Control Worker Bootstrap Enforcement
 - Owner: codex
-- Branch: `codex/c2f-review-focus-issue-filtering`
+- Branch: `codex/project-control-worker-bootstrap`
 - Status: ready for review
-- Summary: Added review focus state, compact issue focus controls, focused/muted map styling, navigation integration, review focus checklist support, and tests.
-- Commit: branch commit recorded in git history; final hash is reported by Codex after commit creation.
-- Validation: `pytest tests/test_review_focus_mode.py -v`, `pytest tests/test_review_navigation_layer.py -v`, `pytest tests/test_c2e2_popup_rendering.py -v`, `pytest -v`, `pre-commit run --all-files`, and manual review harness passed.
-- Manual review report: `validation_runs/20260509_204010/validation_report.md`
-- Updated: 2026-05-09T20:41:00Z
+- Summary: Added worker start/finish checklists, prompt templates, control status script, README guidance, and worker-rule updates
+- Commit: final branch HEAD; exact SHA reported in git history and Codex handoff response
+- Validation: `pytest tests/test_control_status.py -v`, `pytest tests/test_project_control_scripts.py -v`, `pytest -v`, and `pre-commit run --all-files` passed
+- Updated: 2026-05-09T21:34:00Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
+
+## Worker Bootstrap Status
+
+- **Branch:** `codex/project-control-worker-bootstrap`
+- **Commit:** final branch HEAD; exact SHA reported in git history and Codex handoff response
+- **What changed:**
+  - `AI_CONTROL/07_WORKER_START_CHECKLIST.md` - standard pre-coding worker checklist
+  - `AI_CONTROL/08_WORKER_FINISH_CHECKLIST.md` - standard pre-handoff worker checklist
+  - `AI_CONTROL/09_WORKER_PROMPT_TEMPLATES.md` - reusable worker assignment templates
+  - `scripts/control_status.py` - read-only project control status snapshot with text and JSON output
+  - `tests/test_control_status.py` - unit tests for status output, JSON mode, git failure handling, dirty-tree warnings, and no-write behavior
+  - `README_PROJECT_CONTROL.md` - bootstrap workflow, script responsibilities, and multi-worker usage guidance
+  - `AI_CONTROL/06_WORKER_RULES.md` - explicit checklist and `control_status.py` requirements
+- **Validation status:**
+  - `pytest tests/test_control_status.py -v` - passed
+  - `pytest tests/test_project_control_scripts.py -v` - passed
+  - `pytest -v` - 861 passed, 1 skipped
+  - `pre-commit run --all-files` - passed
+  - Manual review harness not required; no UI, map, popup, or review workflow files changed
+- **Warning:** no app runtime files should be touched on this branch
+- **Next action:** review the control-layer changes, confirm the branch stays control-only, then merge/tag if approved
 
 ## Stage 4 Foundation — Status
 
@@ -56,16 +75,16 @@ Purpose: latest operational handoff for Noel and AI workers.
 
 ## Next Action
 
-- Review the C2F focus/filter workflow.
-- Merge/tag after review.
-- Continue with the next validation-led product task on a separate branch.
+- Review the worker bootstrap control changes.
+- Confirm tests and pre-commit are clean.
+- Merge/tag after review if the branch remains control-only.
 
 ## Do Not Start On This Branch
 
-- Stage 4 *integration* into the upload/QA/popup flow (separate branch).
-- Technical docs field/architecture package
-- Lifecycle visualization feature work
-- DNO-grade rulepack implementation
+- Any app runtime feature work.
+- Any UI, Flask, geometry, qa_engine, span generation, or structured-capture integration work.
+- Technical docs field/architecture package.
+- DNO-grade rulepack implementation.
 
 ## Completed stable milestone
 

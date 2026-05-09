@@ -100,3 +100,14 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - failures.json status: []
 - Screenshots: unknown
 - Verdict: pass
+
+### 2026-05-09T21:29:51Z
+
+- Branch: `codex/project-control-worker-bootstrap`
+- Commit: `unknown`
+- Jobs tested: n/a
+- Command run: `pytest tests/test_control_status.py -v && pytest tests/test_project_control_scripts.py -v && pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
