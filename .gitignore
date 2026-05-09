@@ -41,6 +41,7 @@ htmlcov/
 
 # Logs
 *.log
+validation_runs/
 
 # Type checking / misc caches
 .mypy_cache/

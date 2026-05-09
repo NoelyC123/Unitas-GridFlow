@@ -278,6 +278,36 @@ Add screenshots when useful:
 python scripts/create_validation_pack.py --run P007/F001 --screenshots-dir ~/Downloads/gridflow-screenshots --zip
 ```
 
+### Manual Browser Review Harness
+
+Run the reusable browser validation harness after feature work:
+
+```
+python3 scripts/manual_review.py --jobs P008/F001 P010 --suite baseline
+python3 scripts/manual_review.py --jobs P008/F001 P010 --suite baseline --checklist validation_checklists/c2e2_popup.yml
+```
+
+Accepted job arguments include project files (`P008/F001`), project ids with a default first file (`P010`), legacy job ids (`J16535`), and the real-job aliases `Gordon` and `Bellsprings`.
+
+The baseline suite checks app/map load, console cleanliness, review navigation, Next/Previous, route highlight, Release Map, Planner Awareness toggle, and popup readability. Optional task checklists live in `validation_checklists/`; current starters cover C2E2 popups, planner awareness, and route highlighting.
+
+Outputs are written to `validation_runs/<timestamp>/`:
+
+- `validation_report.md`
+- `console_log.txt`
+- `failures.json`
+- screenshots for failed checks only
+- one final overview screenshot per job when `--overview-screenshot` is passed
+
+Install Playwright before running the browser harness on a fresh environment:
+
+```
+python3 -m pip install playwright
+python3 -m playwright install chromium
+```
+
+Pass `--evidence-screenshot` only when passed-check screenshots are explicitly needed.
+
 ---
 
 ## Tech stack

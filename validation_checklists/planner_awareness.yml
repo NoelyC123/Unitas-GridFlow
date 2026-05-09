@@ -1,0 +1,9 @@
+name: Planner awareness checks
+checks:
+  - id: planner_awareness_toggle_visible
+    description: Planner awareness layer toggle is visible.
+    type: selector_visible
+    selector: input[data-layer="plannerAwareness"]
+  - id: planner_awareness_markers_present
+    description: Planner awareness markers are created for the loaded map.
+    type: planner_awareness_visible

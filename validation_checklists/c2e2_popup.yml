@@ -1,0 +1,15 @@
+name: C2E2 popup checks
+checks:
+  - id: c2e2_popup_core_sections
+    description: First asset popup includes core professional review sections.
+    type: popup_text_contains
+    contains:
+      - Identity
+      - QA
+      - Review
+  - id: c2e2_popup_field_labels_render
+    description: First asset popup includes practical field labels from the C2E2 popup model.
+    type: popup_text_contains
+    contains:
+      - Type
+      - Status

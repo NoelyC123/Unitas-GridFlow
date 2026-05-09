@@ -1,0 +1,9 @@
+name: Route highlight checks
+checks:
+  - id: route_highlight_can_activate
+    description: A route span can be highlighted from the browser map.
+    type: route_highlight_active
+  - id: route_highlight_class_visible
+    description: Highlighted route class is visible in the DOM.
+    type: selector_visible
+    selector: .gf-route-highlight

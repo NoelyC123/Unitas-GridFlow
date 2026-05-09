@@ -4249,5 +4249,6 @@ class MapViewer {
 
 document.addEventListener('DOMContentLoaded', () => {
   const viewer = new MapViewer();
+  window.gridflowMapViewer = viewer;
   viewer.init();
 });
