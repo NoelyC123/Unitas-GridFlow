@@ -6,45 +6,42 @@ C2E2/D Modest Popup Expansion Planning
 
 ## Goal:
 
-Plan a controlled, modest expansion of the C2/D popup data model using the real-job validation findings.
+Plan a controlled, modest expansion of the C2/D popup data model using the C2E real-job validation findings and the Package A field reality audit.
 
 ## Scope:
 
-- Add approximately 10-15 highest-value operational survey/design fields.
-- Move current popups from roughly 12 fields toward roughly 25 useful fields.
-- Do NOT jump to the full ~50-field survey research model yet.
+- Use realistic Tier 1/2 fields from `AI_CONTROL/31_REAL_JOB_FIELD_REALITY_REPORT.md`.
+- Keep the initial implementation target to roughly 10 fields that are actually parsed or derived today.
+- Defer theoretical fields absent from Trimble to Stage 4 structured capture.
 - Keep the popup practical, readable, and useful for planners/designers.
 
 ## Candidate field groups:
 
-1. Pole / support specification
-   - `pole_class`
-   - `pole_strength` or `specification`
-   - `material`
+1. Identity / role
+   - `pole_id`
+   - `structure_type`
+   - `asset_intent`
+   - `record_role`
 
-2. Condition / defects
-   - `condition`
-   - `defect_type`
-   - `defect_severity`
+2. Geometry / measured evidence
+   - `height`
 
-3. Electrical / conductor
-   - `voltage_carried`
-   - `conductor_type`
-   - `conductor_size`
-   - `phase_configuration`
+3. Quality / review
+   - `qa_status`
 
-4. Structural support
-   - `stay_present`
-   - `stay_type`
-   - `lean_direction`
-   - `lean_severity`
+4. Survey context
+   - `name` / `location`
+   - `material` only as `Not recorded in survey`
 
-5. Equipment
-   - `equipment_present`
-   - `equipment_type`
+5. Relationship
+   - `relationship`
+   - `being_replaced_by`
+   - `replacing`
 
 ## Planning rules:
 
+- Merge/read `claude-code/c2e2-support-suite` before implementation.
+- Treat `app/field_reference.py` `FIELD_DEFINITIONS` as canonical after support-suite merge.
 - Define exact fields before implementation.
 - Define user-facing labels.
 - Define missing-value wording.
@@ -54,6 +51,7 @@ Plan a controlled, modest expansion of the C2/D popup data model using the real-
 - Do not change span generation.
 - Do not change validation semantics.
 - Do not add speculative AI recommendations.
+- Do not add absent theoretical fields as if they were captured.
 - Do not use archive.
 
 ## Validation requirement after implementation:
@@ -67,3 +65,10 @@ Plan a controlled, modest expansion of the C2/D popup data model using the real-
 ## Immediate next action:
 
 Create a C2E2/D popup expansion specification before coding.
+
+Current planning docs:
+
+- `AI_CONTROL/11_C2E2_POPUP_EXPANSION_SPEC.md`
+- `AI_CONTROL/12_C2E2_FIELD_MAPPING_AUDIT.md`
+- `AI_CONTROL/13_C2E2_IMPLEMENTATION_PLAN.md`
+- `AI_CONTROL/14_C2E2_VALIDATION_MATRIX.md`
