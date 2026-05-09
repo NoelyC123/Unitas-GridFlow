@@ -4,8 +4,9 @@ Purpose: operating rules for Codex, Claude Code, Cursor, ChatGPT, and Noel when 
 
 ## Required Reading
 
-- Read `AI_CONTROL/01_CURRENT_STATE.md` and `AI_CONTROL/02_CURRENT_TASK.md` before coding.
+- Read `AI_CONTROL/01_CURRENT_STATE.md` and `AI_CONTROL/02_CURRENT_TASK.md` before coding. These are pre-existing active source-of-truth files.
 - Read `AI_CONTROL/00_PROJECT_BOARD.md` before starting a new branch.
+- Treat the new Project Control Center files as coordination helpers that complement the source-of-truth files; they do not replace them.
 
 ## Logging Rules
 

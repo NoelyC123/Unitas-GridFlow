@@ -10,6 +10,11 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Selenium manual review harness: passed
 - Jobs validated: `P008/F001`, `P010`
 - Verdict: stable for the next control-layer task
+- Milestone: `project-control-center-foundation-complete`
+- Tests: `827 passed, 13 warnings`
+- Pre-commit: passed
+- App runtime changed: no
+- Verdict: pass
 
 ## Entry Template
 
@@ -20,7 +25,7 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Command run:
 - validation_runs report path:
 - failures.json status:
-- Screenshots required:
+- Screenshots:
 - Verdict:
 
 ## Validation Runs
@@ -28,22 +33,48 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 ### 2026-05-09T19:55:00Z
 
 - Branch: `codex/project-control-center-foundation`
-- Commit: pending
+- Commit: `75eef1985c1d969c604d222552f2ae39ea8f11a3`
 - Jobs tested: not applicable
-- Command run: pending
+- Command run: `pytest tests/test_project_control_scripts.py -v`, `pytest -v`, `pre-commit run --all-files`
 - validation_runs report path: n/a
 - failures.json status: n/a
-- Screenshots required: no
-- Verdict: validation pending for Project Control Center Foundation
+- Screenshots: no
+- Verdict: superseded by final foundation validation
 
 ### 2026-05-09T20:10:49Z
 
 - Branch: `codex/project-control-center-foundation`
-- Commit: `pending`
+- Commit: `75eef1985c1d969c604d222552f2ae39ea8f11a3`
 - Jobs tested: n/a
 - Command run: `pytest tests/test_project_control_scripts.py -v && pytest -v && pre-commit run --all-files`
 - validation_runs report path: `n/a`
 - failures.json status: n/a
-- Screenshots required: no
+- Screenshots: no
 - Verdict: pass
 - Notes: Project control scripts/docs/tests only; no app runtime files changed
+
+### project-control-center-foundation-complete
+
+- Branch: `codex/project-control-center-foundation`
+- Commit: `cfe40b6195a1445a2103dfedba9d2e786e9b1e5a`
+- Jobs tested: n/a
+- Command run: `pytest -v`; `pre-commit run --all-files`
+- validation_runs report path: n/a
+- failures.json status: n/a
+- Screenshots: no
+- Tests: `827 passed, 13 warnings`
+- Pre-commit: passed
+- App runtime changed: no
+- Verdict: pass
+
+### 2026-05-09T20:24:26Z
+
+- Branch: `codex/project-control-center-first-use-polish`
+- Commit: `not-yet-committed`
+- Jobs tested: n/a
+- Command run: `pytest tests/test_project_control_scripts.py -v && pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: First-use Project Control Center polish only; no app runtime files changed

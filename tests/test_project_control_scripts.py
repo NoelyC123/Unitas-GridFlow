@@ -166,6 +166,52 @@ def test_log_validation_run_records_jobs_and_report_path(tmp_path, monkeypatch) 
     assert "`validation_runs/20260509_192248/validation_report.md`" in validation
     assert "failures.json status: []" in validation
     assert "Commit: `abc123`" in validation
+    assert "Screenshots: no" in validation
+
+
+def test_log_validation_run_infers_no_screenshots_for_empty_failures(tmp_path, monkeypatch) -> None:
+    _configure_paths(tmp_path, monkeypatch)
+
+    log_validation_run.main(
+        [
+            "--branch",
+            "codex/control",
+            "--status",
+            "pass",
+            "--command",
+            "python scripts/manual_review.py --suite baseline",
+            "--report",
+            "validation_runs/20260509_192248/validation_report.md",
+            "--failures",
+            "[]",
+        ]
+    )
+
+    validation = (tmp_path / "AI_CONTROL" / "04_VALIDATION_LOG.md").read_text(encoding="utf-8")
+    assert "Screenshots: no" in validation
+    assert "Screenshots required" not in validation
+
+
+def test_log_validation_run_records_explicit_screenshots_value(tmp_path, monkeypatch) -> None:
+    _configure_paths(tmp_path, monkeypatch)
+
+    log_validation_run.main(
+        [
+            "--branch",
+            "codex/control",
+            "--status",
+            "pass",
+            "--command",
+            "python scripts/manual_review.py --suite baseline --evidence-screenshot",
+            "--failures",
+            "[]",
+            "--screenshots",
+            "yes",
+        ]
+    )
+
+    validation = (tmp_path / "AI_CONTROL" / "04_VALIDATION_LOG.md").read_text(encoding="utf-8")
+    assert "Screenshots: yes" in validation
 
 
 def test_scripts_handle_missing_optional_args(tmp_path, monkeypatch) -> None:

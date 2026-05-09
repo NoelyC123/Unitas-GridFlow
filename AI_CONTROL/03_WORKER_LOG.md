@@ -42,3 +42,21 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: update handoff or proceed to review
+
+### 2026-05-09T20:24:26Z
+
+- Worker: validation
+- Branch: `codex/project-control-center-first-use-polish`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review
+
+### 2026-05-09T20:24:55Z
+
+- Worker: codex
+- Branch: `codex/project-control-center-first-use-polish`
+- Action: Polished Project Control Center screenshot wording, stable milestone logs, worker rules, handoff, and tests
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,AI_CONTROL/06_WORKER_RULES.md,README_PROJECT_CONTROL.md,scripts/log_validation_run.py,tests/test_project_control_scripts.py
+- Validation state: pytest tests/test_project_control_scripts.py -v passed; pytest -v passed; pre-commit passed
+- Next action: Review and merge/tag this polish branch

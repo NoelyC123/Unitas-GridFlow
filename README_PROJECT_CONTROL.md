@@ -10,7 +10,7 @@ GridFlow now has multiple AI workers, an active manual review harness, validatio
 
 ## Relationship To Manual Review Harness
 
-The manual review harness remains the browser validation gate after UI-facing work. The control center records when that harness was run, which jobs were tested, where the `validation_runs/` report lives, and whether `failures.json` was clean.
+The manual review harness remains the browser validation gate after UI-facing work. The control center records when that harness was run, which jobs were tested, where the `validation_runs/` report lives, whether `failures.json` was clean, and whether screenshots were captured.
 
 ## Files
 
@@ -58,7 +58,8 @@ python scripts/log_validation_run.py \
   --jobs P008/F001 P010 \
   --command "pytest -v && pre-commit run --all-files" \
   --report validation_runs/20260509_192248/validation_report.md \
-  --failures "[]"
+  --failures "[]" \
+  --screenshots no
 ```
 
 ## Standard Workflow
@@ -73,8 +74,9 @@ python scripts/log_validation_run.py \
 
 ## Worker Rules
 
-- Read `AI_CONTROL/01_CURRENT_STATE.md` and `AI_CONTROL/02_CURRENT_TASK.md` before coding.
+- Read `AI_CONTROL/01_CURRENT_STATE.md` and `AI_CONTROL/02_CURRENT_TASK.md` before coding. These are pre-existing active source-of-truth files.
 - Read `AI_CONTROL/00_PROJECT_BOARD.md` before starting a new branch.
+- Treat the Project Control Center files as coordination helpers that complement the source-of-truth files; they do not replace them.
 - Update `AI_CONTROL/03_WORKER_LOG.md` after meaningful work.
 - Update `AI_CONTROL/04_VALIDATION_LOG.md` after validation.
 - Update `AI_CONTROL/05_HANDOFF.md` before stopping or handing back.

@@ -23,6 +23,14 @@ def _jobs_text(jobs: list[str] | None) -> str:
     return ", ".join(f"`{job}`" for job in jobs)
 
 
+def _screenshots_value(failures: str, screenshots: str | None) -> str:
+    if screenshots:
+        return screenshots
+    if failures.strip() == "[]":
+        return "no"
+    return "unknown"
+
+
 def append_validation(
     *,
     branch: str,
@@ -32,10 +40,12 @@ def append_validation(
     jobs: list[str] | None = None,
     report: str = "n/a",
     failures: str = "not recorded",
+    screenshots: str | None = None,
     notes: str = "",
     timestamp: str | None = None,
 ) -> None:
     ts = timestamp or utc_timestamp()
+    screenshots_text = _screenshots_value(failures, screenshots)
     VALIDATION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     if not VALIDATION_LOG_PATH.exists():
         VALIDATION_LOG_PATH.write_text(
@@ -53,7 +63,7 @@ def append_validation(
             f"- Command run: `{command}`\n"
             f"- validation_runs report path: `{report}`\n"
             f"- failures.json status: {failures}\n"
-            f"- Screenshots required: {'yes' if report != 'n/a' else 'no'}\n"
+            f"- Screenshots: {screenshots_text}\n"
             f"- Verdict: {verdict}\n"
         )
         if notes:
@@ -83,6 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--jobs", nargs="*", default=None)
     parser.add_argument("--report", default="n/a")
     parser.add_argument("--failures", default="not recorded")
+    parser.add_argument("--screenshots", choices=["yes", "no", "unknown"], default=None)
     parser.add_argument("--notes", default="")
     return parser
 
@@ -97,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         jobs=args.jobs,
         report=args.report,
         failures=args.failures,
+        screenshots=args.screenshots,
         notes=args.notes,
     )
     return 0
