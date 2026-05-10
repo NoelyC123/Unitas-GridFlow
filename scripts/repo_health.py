@@ -81,13 +81,24 @@ def check_required_control_files() -> tuple[str, str]:
 
 
 def check_superseded_files() -> tuple[str, str]:
-    present = [f for f in _SUPERSEDED_FILES if (AI_CONTROL_DIR / f).exists()]
-    if present:
+    """Warn if superseded files exist without a SUPERSEDED header."""
+    missing_header = []
+    for f in _SUPERSEDED_FILES:
+        path = AI_CONTROL_DIR / f
+        if not path.exists():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if "> **SUPERSEDED" not in text and "> **HISTORICAL" not in text:
+            missing_header.append(f)
+    if missing_header:
         return _WARNING, (
-            f"Superseded files still present: {present}. "
-            "Mark with 'SUPERSEDED — see <replacement>' header to prevent misuse."
+            f"Superseded files lack SUPERSEDED/HISTORICAL header: {missing_header}. "
+            "Add a header to prevent misuse."
         )
-    return _OK, "No superseded files found."
+    return _OK, "Superseded files are marked with headers."
 
 
 def check_aicontrol_numbering_collisions() -> tuple[str, str]:

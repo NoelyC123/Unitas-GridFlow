@@ -1,3 +1,7 @@
+> **SUPERSEDED — Do not use as source of truth.**
+> This file is superseded by `05_HANDOFF.md`.
+> Retained for historical reference only. Use `05_HANDOFF.md` for current rules.
+
 # Session Handoff
 
 ## Session summary

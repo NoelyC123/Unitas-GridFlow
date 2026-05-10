@@ -118,7 +118,7 @@ def list_all_branches() -> list[str]:
     _, stdout, _ = _run(["git", "branch", "-a"])
     branches = []
     for line in stdout.splitlines():
-        name = line.strip().lstrip("* ").removeprefix("remotes/")
+        name = line.strip().lstrip("*+ ").removeprefix("remotes/")
         if " -> " in name:
             continue
         if name:

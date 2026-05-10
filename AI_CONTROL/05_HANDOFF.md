@@ -5,12 +5,12 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: GridFlow Review Operating System v3
-- Owner: codex
-- Branch: `codex/review-operating-system-v3`
-- Status: ready_for_review
-- Summary: Implemented Review Operating System v3 with advanced issue aggregation, active queue progress, filters, readiness scoring, and map review overlays. C2E2 popup scope is unchanged.
-- Updated: 2026-05-10T13:47:16Z
+- Task: Branch Retirement + Control File Deconfliction
+- Owner: claude-code
+- Branch: `claude-code/branch-retirement-control-deconfliction`
+- Status: in_progress
+- Summary: Execute DELETE_NOW branch retirement, add superseded headers, create AI_CONTROL source-of-truth index
+- Updated: 2026-05-10T14:20:34Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch May Change

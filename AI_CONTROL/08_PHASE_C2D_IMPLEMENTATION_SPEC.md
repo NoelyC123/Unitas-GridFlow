@@ -1,3 +1,7 @@
+> **HISTORICAL — Stage 2 closure document. Read-only.**
+> This document describes completed Stage 2 work. Do not update it.
+> For current project state see `01_CURRENT_STATE.md`.
+
 # Phase C2/D Implementation Specification
 
 **Owner decision:** Phase C2/D professional QA + display refinement is approved as the next implementation path.

@@ -1,3 +1,6 @@
+> **HISTORICAL — Background reference. Not actively maintained.**
+> For current project identity see `00_PROJECT_CANONICAL.md`.
+
 # Project Reference
 
 **Purpose:** Preserve historical context and wider project documentation without bloading day-to-day control files.

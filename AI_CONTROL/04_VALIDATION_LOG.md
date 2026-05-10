@@ -171,3 +171,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Browser validation confirmed Review OS controls, filters, queue interaction, navigation, Release Map, route highlight, Planner Awareness toggle, popup truthfulness, and zero console errors.
+
+### 2026-05-10T14:32:04Z
+
+- Branch: `claude-code/branch-retirement-control-deconfliction`
+- Commit: `58235a1bdcb5`
+- Jobs tested: n/a
+- Command run: `pytest -v`
+- validation_runs report path: `924 tests passed, 0 failed`
+- failures.json status: not recorded
+- Screenshots: unknown
+- Verdict: pass
+- Notes: Pre-commit clean. branch_health worktree-prefix fix validated by new test test_plus_prefix_stripped. repo_health superseded-header check validated by test_superseded_file_with_header_is_ok and test_superseded_file_without_header_is_warning.

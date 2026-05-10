@@ -20,11 +20,11 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: GridFlow Review Operating System v3
-- Branch: `codex/review-operating-system-v3`
-- Owner: codex
-- Status: ready_for_review
-- Summary: Evolve Review Workspace v2 into a planner review operating system with deeper intelligence, queues, overlays, filters, and readiness scoring
+- Task: Branch Retirement + Control File Deconfliction
+- Branch: `claude-code/branch-retirement-control-deconfliction`
+- Owner: claude-code
+- Status: in_progress
+- Summary: Execute DELETE_NOW branch retirement, add superseded headers, create AI_CONTROL source-of-truth index
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress

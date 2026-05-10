@@ -1,3 +1,7 @@
+> **HISTORICAL — C2E2 phase document. Work complete, read-only.**
+> The C2E2 popup truthfulness work is closed. Do not update this document.
+> For current popup behaviour see `11_C2E2_POPUP_EXPANSION_SPEC.md` and `35_POPUP_HTML_EXAMPLES.md`.
+
 # C2E2 Implementation Review Checklist
 
 ## Purpose

@@ -1,3 +1,7 @@
+> **SUPERSEDED — Do not use as source of truth.**
+> This file is superseded by `06_WORKER_RULES.md`.
+> Retained for historical reference only. Use `06_WORKER_RULES.md` for current rules.
+
 # Working Rules
 
 ## Core principles

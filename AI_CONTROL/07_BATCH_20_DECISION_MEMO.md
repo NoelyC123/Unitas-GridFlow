@@ -1,3 +1,6 @@
+> **HISTORICAL — Decision memo from Batch 20. Read-only.**
+> This memo is frozen; the decisions it records are reflected in the current codebase.
+
 # Batch 20 Decision Memo — Trust, Severity & Actionable Design Briefing
 
 ## Purpose

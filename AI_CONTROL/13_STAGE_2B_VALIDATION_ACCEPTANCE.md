@@ -1,3 +1,7 @@
+> **HISTORICAL — Stage 2 closure document. Read-only.**
+> This document describes completed Stage 2 work. Do not update it.
+> For current project state see `01_CURRENT_STATE.md`.
+
 # Stage 2B Validation Acceptance
 
 ## Purpose

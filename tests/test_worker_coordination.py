@@ -266,6 +266,23 @@ class TestMergeSafetyCheckMapViewerRegression:
 # ---------------------------------------------------------------------------
 
 
+class TestBranchHealthListAllBranches:
+    def test_plus_prefix_stripped(self):
+        # git branch -a outputs "+ branch-name" for worktree-checked-out branches
+        raw = "  master\n* current-branch\n+ codex/c2f-review-focus-issue-filtering\n"
+        with patch("branch_health._run", return_value=(0, raw, "")):
+            branches = bh.list_all_branches()
+        assert "codex/c2f-review-focus-issue-filtering" in branches
+        assert "+ codex/c2f-review-focus-issue-filtering" not in branches
+
+    def test_star_prefix_stripped(self):
+        raw = "* main\n  feature/abc\n"
+        with patch("branch_health._run", return_value=(0, raw, "")):
+            branches = bh.list_all_branches()
+        assert "main" in branches
+        assert "* main" not in branches
+
+
 class TestBranchHealthClassification:
     def test_known_delete_now_branch(self):
         with (
@@ -339,11 +356,23 @@ class TestRepoHealthSupersededFiles:
             level, _ = rh.check_superseded_files()
         assert level == rh._OK
 
-    def test_superseded_present_is_warning(self, tmp_path):
-        (tmp_path / rh._SUPERSEDED_FILES[0]).touch()
+    def test_superseded_file_without_header_is_warning(self, tmp_path):
+        # File exists but has no SUPERSEDED header — should warn
+        (tmp_path / rh._SUPERSEDED_FILES[0]).write_text("# Old doc\nsome content\n")
         with patch("repo_health.AI_CONTROL_DIR", tmp_path):
             level, msg = rh.check_superseded_files()
         assert level == rh._WARNING
+        assert "header" in msg.lower()
+
+    def test_superseded_file_with_header_is_ok(self, tmp_path):
+        # File exists and has a SUPERSEDED header — should pass
+        fname = rh._SUPERSEDED_FILES[0]
+        (tmp_path / fname).write_text(
+            "> **SUPERSEDED — Do not use as source of truth.**\n# Old doc\n"
+        )
+        with patch("repo_health.AI_CONTROL_DIR", tmp_path):
+            level, msg = rh.check_superseded_files()
+        assert level == rh._OK
 
 
 class TestRepoHealthNumberingCollisions:

@@ -1,3 +1,7 @@
+> **HISTORICAL — Stage 3 closure document. Read-only.**
+> This document describes completed Stage 3 work. Do not update it.
+> For current project state see `01_CURRENT_STATE.md`.
+
 # Stage 3A2 Planning Brief — Remote Access Trial
 
 ## Prepared by: Claude Desktop (Project Orchestrator)
