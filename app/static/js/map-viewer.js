@@ -77,6 +77,8 @@ class MapViewer {
     this._currentReviewTargetSpan = null;
     this._directPopupSpanRef = null;
     this._reviewNavigationLocked = true;
+    this._reviewHomeBounds = null;
+    this._reviewHomeView = null;
     this.activeFocusMode = null;
     this.activeFocusCategory = null;
     this.activeFocusTargetIds = [];
@@ -1342,9 +1344,18 @@ class MapViewer {
   }
 
   releaseReviewNavigationMap() {
-    if (!this._activeReviewTargetGroup || this._activeReviewTargetIndex < 0) return;
-    this._reviewNavigationLocked = false;
-    this.focusReleased = true;
+    this._reviewNavigationLocked = true;
+    this.focusReleased = false;
+    this.activeFocusMode = null;
+    this.activeFocusCategory = null;
+    this.activeFocusTargetIds = [];
+    this._activeReviewTargetGroup = null;
+    this._activeReviewTargetIndex = -1;
+    this.clearFocusedReviewTarget();
+    this.clearCurrentReviewTargetSpan();
+    this.clearSpanRouteHighlight();
+    this.resetReviewMapView();
+    this.applyReviewFocusStyles();
     this.renderReviewNavigationState();
   }
 
@@ -1422,9 +1433,7 @@ class MapViewer {
     if (target.type === 'span') {
       const ref = target.spanRef || this._spanLineRefs?.[target.spanIndex];
       if (!ref?.line) return;
-      if (this._reviewNavigationLocked !== false && this.map && typeof ref.line.getBounds === 'function') {
-        this.map.fitBounds(ref.line.getBounds(), { padding: [48, 48], maxZoom: 17 });
-      }
+      this.panToReviewLayer(ref.line, { maxZoom: 17 });
       this.ensureSpanRouteHighlighted(ref);
       this.markFocusedReviewTarget(ref.line);
       this.markCurrentReviewTargetSpan(ref);
@@ -1437,9 +1446,7 @@ class MapViewer {
       const marker = target.markerRef?.marker;
       if (target.spanRef) this.ensureSpanRouteHighlighted(target.spanRef);
       this.clearCurrentReviewTargetSpan();
-      if (this._reviewNavigationLocked !== false && this.map && marker && typeof marker.getLatLng === 'function') {
-        this.map.setView(marker.getLatLng(), Math.max(this.map.getZoom?.() || 15, 16));
-      }
+      this.panToReviewLayer(marker, { minZoom: 16 });
       this.markFocusedReviewTarget(marker);
       if (marker && typeof marker.openPopup === 'function') marker.openPopup();
       this.applyReviewFocusStyles();
@@ -1633,9 +1640,18 @@ class MapViewer {
     this.applyLifecycleFocusStyles();
 
     if (bounds.length === 1) {
+      this._reviewHomeBounds = null;
       this.map.setView(bounds[0], 13);
+      this._reviewHomeView = { center: bounds[0], zoom: 13 };
     } else if (bounds.length > 1) {
+      this._reviewHomeBounds = bounds.slice();
       this.map.fitBounds(bounds, { padding: [40, 40] });
+      if (typeof this.map.getCenter === 'function' && typeof this.map.getZoom === 'function') {
+        const center = this.map.getCenter();
+        this._reviewHomeView = { center: [center.lat, center.lng], zoom: this.map.getZoom() };
+      } else {
+        this._reviewHomeView = null;
+      }
     }
   }
 
@@ -1943,6 +1959,35 @@ class MapViewer {
   clearSpanRouteHighlight() {
     this._activeRouteGroupIndex = null;
     this.applySpanRouteHighlightStyles(this._spanCrossingFilterOnly);
+  }
+
+  resetReviewMapView() {
+    if (!this.map) return;
+    if (typeof this.map.closePopup === 'function') this.map.closePopup();
+    if (this._reviewHomeView && typeof this.map.setView === 'function') {
+      this.map.setView(this._reviewHomeView.center, this._reviewHomeView.zoom);
+      return;
+    }
+    if (Array.isArray(this._reviewHomeBounds) && this._reviewHomeBounds.length > 1) {
+      if (typeof this.map.fitBounds === 'function') {
+        this.map.fitBounds(this._reviewHomeBounds, { padding: [40, 40] });
+      }
+      return;
+    }
+  }
+
+  panToReviewLayer(layer, options = {}) {
+    if (!this.map || !layer || this._reviewNavigationLocked === false) return;
+    const maxZoom = options.maxZoom || 17;
+    if (typeof layer.getBounds === 'function' && typeof this.map.fitBounds === 'function') {
+      const bounds = layer.getBounds();
+      this.map.fitBounds(bounds, { padding: [48, 48], maxZoom });
+      return;
+    }
+    if (typeof layer.getLatLng === 'function' && typeof this.map.setView === 'function') {
+      const zoom = Math.max(this.map.getZoom?.() || 15, options.minZoom || 16);
+      this.map.setView(layer.getLatLng(), zoom);
+    }
   }
 
   toggleSpanRouteHighlight(spanRef) {

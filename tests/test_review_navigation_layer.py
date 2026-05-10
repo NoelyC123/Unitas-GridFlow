@@ -378,12 +378,14 @@ def test_popup_close_clears_direct_span_highlight_but_preserves_review_navigatio
 
 
 @NODE_UNAVAILABLE
-def test_release_map_pauses_refocus_until_next_or_previous() -> None:
+def test_release_map_clears_selection_and_next_previous_recentre() -> None:
     _run_node(
         _viewer_harness(
             """
             const lineA = fakeLine();
             const lineB = fakeLine();
+            lineA.bounds = 'bounds-a';
+            lineB.bounds = 'bounds-b';
             const refA = {
               props: { from_point_id: 'A', to_point_id: 'B', span_validity: 'invalid' },
               line: lineA,
@@ -405,25 +407,65 @@ def test_release_map_pauses_refocus_until_next_or_previous() -> None:
             };
             viewer._activeReviewTargetGroup = 'blockers';
             viewer._activeReviewTargetIndex = 0;
+            viewer._reviewHomeBounds = [[54.1, -3.1], [54.2, -3.2]];
+            viewer._reviewHomeView = { center: [54.15, -3.15], zoom: 12 };
             viewer.map = {
-              fitBoundsCalls: 0,
-              fitBounds() { this.fitBoundsCalls += 1; },
+              fitBoundsArgs: [],
+              setViewArgs: [],
+              closedPopups: 0,
+              fitBounds(bounds) { this.fitBoundsArgs.push(bounds); },
+              setView(center, zoom) { this.setViewArgs.push([center, zoom]); },
+              closePopup() { this.closedPopups += 1; },
             };
+
+            viewer.focusReviewTarget(targetA);
+            assert(viewer._activeRouteGroupIndex === 0, 'review target should highlight route');
+            assert(
+              lineA.classList.classes.has('gf-current-review-target-span'),
+              'selected span should be marked before release',
+            );
 
             viewer.releaseReviewNavigationMap();
             assert(
-              viewer._reviewNavigationLocked === false,
-              'release map should unlock navigation',
+              viewer._activeReviewTargetGroup === null,
+              'release map should clear active group',
             );
-            viewer.focusReviewTarget(targetA);
-            assert(viewer.map.fitBoundsCalls === 0, 'unlocked focus should not snap map back');
+            assert(viewer._activeReviewTargetIndex === -1, 'release map should clear active index');
+            assert(
+              viewer._activeRouteGroupIndex === null,
+              'release map should clear route highlight',
+            );
+            assert(
+              !lineA.classList.classes.has('gf-current-review-target-span'),
+              'release map should clear selected span class',
+            );
+            assert(
+              !lineA.classList.classes.has('gf-route-highlight'),
+              'release map should clear route highlight class',
+            );
+            assert(viewer.map.closedPopups === 1, 'release map should close open popup');
+            assert(
+              viewer.map.setViewArgs[viewer.map.setViewArgs.length - 1][0]
+                === viewer._reviewHomeView.center,
+              'release map should restore job-level centre',
+            );
 
+            viewer._activeReviewTargetGroup = 'blockers';
+            viewer._activeReviewTargetIndex = 0;
             viewer.focusNextReviewTarget();
             assert(viewer._reviewNavigationLocked === true, 'next should re-enable map focus');
-            assert(viewer.map.fitBoundsCalls === 1, 'next should navigate to selected target');
+            assert(
+              viewer.map.fitBoundsArgs[viewer.map.fitBoundsArgs.length - 1] === 'bounds-b',
+              'next should navigate to selected target bounds',
+            );
             assert(
               lineB.classList.classes.has('gf-current-review-target-span'),
               'next should move current target span',
+            );
+            viewer.focusPreviousReviewTarget();
+            assert(
+              viewer.map.fitBoundsArgs[viewer.map.fitBoundsArgs.length - 1] === 'bounds-a',
+              'previous should navigate to selected target bounds',
             );
             """
         )
