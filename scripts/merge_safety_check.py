@@ -159,7 +159,7 @@ def check_aicontrol_numbering(branch: str) -> tuple[str, str]:
 
 
 # ---------------------------------------------------------------------------
-# Stage 4A boundary checks
+# Stage 4A/4B boundary checks
 # ---------------------------------------------------------------------------
 
 # Stage 4 library files — allowed to change in Stage 4A/4B branches.
@@ -184,6 +184,38 @@ _STAGE4A_FORBIDDEN_RUNTIME_FILES = {
 _STAGE4A_FORBIDDEN_POPUP_FILES = {
     "app/field_validators.py",
 }
+
+# ---------------------------------------------------------------------------
+# Stage 4C boundary checks
+# ---------------------------------------------------------------------------
+
+# Stage 4C files — only api_intake.py and structured_capture_models.py can be modified.
+_STAGE4C_ALLOWED_FILES = {
+    "app/routes/api_intake.py",
+    "app/models/structured_capture_models.py",
+    "scripts/merge_safety_check.py",
+    "tests/test_stage4c_runtime_integration.py",
+    "tests/test_stage4c_runtime_boundary.py",
+    "tests/test_stage4c_completeness_truthfulness.py",
+    "AI_CONTROL/56_STAGE4C_RUNTIME_INTEGRATION_ARCHITECTURE.md",
+    "AI_CONTROL/57_STAGE4C_RUNTIME_BOUNDARY_RULES.md",
+    "AI_CONTROL/58_STAGE4C_UI_SURFACING_PLAN.md",
+    "AI_CONTROL/59_FIELD_PILOT_ACCEPTANCE_GATE.md",
+    "AI_CONTROL/60_STAGE4C_RISK_DRIVEN_TEST_PLAN.md",
+}
+
+# Stage 4C forbidden files — runtime must not be modified.
+_STAGE4C_FORBIDDEN_RUNTIME_FILES = {
+    "app/qa_engine.py",
+    "app/routes/api_qc.py",
+    "app/controller_intake.py",
+    "app/static/js/map-viewer.js",
+    "app/dno_rules.py",
+    "app/pdf_generator.py",
+    "app/routes/api_export.py",
+}
+
+_STAGE4C_BRANCH_PREFIXES = ("codex/stage4c", "claude-code/stage4c", "stage4c")
 
 # Stage 4 leakage tokens: their presence in added lines of non-library files
 # signals premature integration.
@@ -304,6 +336,94 @@ def check_stage4a_popup_test_coverage(branch: str) -> tuple[str, str]:
     return _OK, "Popup test coverage check passed."
 
 
+def _is_stage4c_branch(branch: str) -> bool:
+    return any(branch.lower().startswith(p) for p in _STAGE4C_BRANCH_PREFIXES)
+
+
+def check_stage4c_runtime_file_boundary(branch: str) -> tuple[str, str]:
+    """BLOCK if a Stage 4C branch touches forbidden runtime files."""
+    if not _is_stage4c_branch(branch):
+        return _OK, "Not a Stage 4C branch — runtime boundary check skipped."
+
+    _, stdout, _ = _run(["git", "diff", "--name-only", f"master...{branch}"])
+    if not stdout:
+        return _OK, "No changed files detected."
+
+    changed = set(stdout.splitlines())
+    forbidden_touched = changed & _STAGE4C_FORBIDDEN_RUNTIME_FILES
+
+    if forbidden_touched:
+        return (
+            _BLOCKING,
+            "Stage 4C branch touches forbidden runtime file(s): "
+            + ", ".join(sorted(forbidden_touched))
+            + ". Forbidden: qa_engine, api_qc, map-viewer, dno_rules, pdf_generator, export. "
+            "See AI_CONTROL/57_STAGE4C_RUNTIME_BOUNDARY_RULES.md.",
+        )
+    return _OK, "Stage 4C branch respects runtime file boundary."
+
+
+def check_stage4c_has_feature_flag(branch: str) -> tuple[str, str]:
+    """WARN if Stage 4C branch modifies api_intake.py but no feature flag check found."""
+    if not _is_stage4c_branch(branch):
+        return _OK, "Not a Stage 4C branch — feature flag check skipped."
+
+    _, stdout, _ = _run(["git", "diff", "--name-only", f"master...{branch}"])
+    if not stdout or "app/routes/api_intake.py" not in stdout:
+        return _OK, "api_intake.py not modified — feature flag check skipped."
+
+    _, diff_output, _ = _run(["git", "diff", f"master...{branch}", "app/routes/api_intake.py"])
+    if not diff_output:
+        return _OK, "No changes to api_intake.py."
+
+    has_stage4c_flag_check = (
+        "FEATURE_STAGE4C_INTAKE_ENABLED" in diff_output
+        or "feature_stage4c_intake" in diff_output
+        or "stage4c_enabled" in diff_output
+    )
+
+    if not has_stage4c_flag_check:
+        return (
+            _WARNING,
+            "api_intake.py modified but no feature flag check found. "
+            "Stage 4C intake should be gated behind FEATURE_STAGE4C_INTAKE_ENABLED. "
+            "See AI_CONTROL/57_STAGE4C_RUNTIME_BOUNDARY_RULES.md.",
+        )
+    return _OK, "api_intake.py contains Stage 4C feature flag check."
+
+
+def check_stage4c_no_stage4_imports_in_forbidden(branch: str) -> tuple[str, str]:
+    """BLOCK if forbidden files contain imports from structured_capture modules."""
+    if not _is_stage4c_branch(branch):
+        return _OK, "Not a Stage 4C branch — import scan skipped."
+
+    _, diff_output, _ = _run(["git", "diff", f"master...{branch}"])
+    if not diff_output:
+        return _OK, "Empty diff — no import risk."
+
+    violations: list[str] = []
+    current_file = ""
+    for line in diff_output.splitlines():
+        if line.startswith("diff --git"):
+            parts = line.split(" b/")
+            current_file = parts[-1] if parts else ""
+        elif line.startswith("+") and not line.startswith("+++"):
+            if current_file and current_file in _STAGE4C_FORBIDDEN_RUNTIME_FILES:
+                if "structured_capture" in line or "JobStructuredCaptureRecord" in line:
+                    violations.append(f"{current_file}: {line[:80].strip()!r}")
+
+    if violations:
+        preview = violations[:3]
+        return (
+            _BLOCKING,
+            f"Forbidden file(s) contain Stage 4C imports ({len(violations)} hit(s)). "
+            f"First 3: {preview}. "
+            "Stage 4 data must not leak into qa_engine, map-viewer, pdf_generator, etc. "
+            "See AI_CONTROL/57_STAGE4C_RUNTIME_BOUNDARY_RULES.md.",
+        )
+    return _OK, "No Stage 4C imports detected in forbidden files."
+
+
 def run_checks(branch: str, base: str = "master") -> list[dict[str, str]]:
     results: list[dict[str, str]] = []
 
@@ -342,6 +462,16 @@ def run_checks(branch: str, base: str = "master") -> list[dict[str, str]]:
 
     level, msg = check_stage4a_popup_test_coverage(branch)
     record("stage4a_popup_test_coverage", level, msg)
+
+    # Stage 4C boundary checks (only fire for Stage 4C branches)
+    level, msg = check_stage4c_runtime_file_boundary(branch)
+    record("stage4c_runtime_boundary", level, msg)
+
+    level, msg = check_stage4c_has_feature_flag(branch)
+    record("stage4c_feature_flag", level, msg)
+
+    level, msg = check_stage4c_no_stage4_imports_in_forbidden(branch)
+    record("stage4c_import_boundary", level, msg)
 
     return results
 

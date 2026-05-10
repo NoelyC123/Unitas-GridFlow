@@ -8,6 +8,35 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-10 - Stage 4C Architecture Gate + Runtime Integration Safety Design
+
+### Added
+
+- Added `AI_CONTROL/56_STAGE4C_RUNTIME_INTEGRATION_ARCHITECTURE.md` — data flow,
+  merge algorithm, no-overwrite invariant, pole_id matching, conflict handling,
+  audit logging.
+- Added `AI_CONTROL/57_STAGE4C_RUNTIME_BOUNDARY_RULES.md` — file-level boundaries,
+  feature flag requirement, data structure boundaries, leakage guard validation.
+- Added `AI_CONTROL/58_STAGE4C_UI_SURFACING_PLAN.md` — popup completeness labels,
+  conflict display, none truthfulness, Stage 4D UI architecture (future).
+- Added `AI_CONTROL/59_FIELD_PILOT_ACCEPTANCE_GATE.md` — pilot success criteria,
+  no-go conditions, result documentation, sign-off authority.
+- Added `AI_CONTROL/60_STAGE4C_RISK_DRIVEN_TEST_PLAN.md` — per-risk test cases
+  covering all 8 active risks (R01–R08), test file structure, pre-merge checklist.
+- Enhanced `scripts/merge_safety_check.py` with Stage 4C boundary checks:
+  forbidden runtime file detection, feature flag verification, Stage 4 import
+  scanning in forbidden files.
+
+### Notes
+
+- Stage 4C architecture is complete; runtime intake code is not yet implemented.
+- All 5 governance documents are ready for Noel review and sign-off.
+- merge_safety_check.py now blocks merges if Stage 4C boundaries are violated.
+- Field pilot is the critical blocker for Stage 4C gate; scheduled for 1–2 weeks
+  after Stage 4B merge.
+
+---
+
 ## 2026-05-10 - Real iPad field pilot package v1
 
 ### Added
