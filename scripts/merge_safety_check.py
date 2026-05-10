@@ -158,6 +158,152 @@ def check_aicontrol_numbering(branch: str) -> tuple[str, str]:
     return _OK, f"No AI_CONTROL numbering collisions in {len(new_docs)} doc(s)."
 
 
+# ---------------------------------------------------------------------------
+# Stage 4A boundary checks
+# ---------------------------------------------------------------------------
+
+# Stage 4 library files — allowed to change in Stage 4A/4B branches.
+_STAGE4_LIBRARY_FILES = {
+    "app/structured_capture_schema.py",
+    "app/structured_capture_validators.py",
+    "scripts/generate_structured_capture_template.py",
+    "templates/structured_capture_template.csv",
+}
+
+# Runtime files that Stage 4A/4B branches must not touch.
+_STAGE4A_FORBIDDEN_RUNTIME_FILES = {
+    "app/static/js/map-viewer.js",
+    "app/routes/api_intake.py",
+    "app/controller_intake.py",
+    "app/qa_engine.py",
+    "app/geometry_pipeline.py",
+    "app/span_generator.py",
+}
+
+# C2E2 popup files forbidden for Stage 4A/4B.
+_STAGE4A_FORBIDDEN_POPUP_FILES = {
+    "app/field_validators.py",
+}
+
+# Stage 4 leakage tokens: their presence in added lines of non-library files
+# signals premature integration.
+_STAGE4_LEAKAGE_TOKENS = [
+    "structured_capture",
+    "stage4_future_capture",
+    "lean_direction",
+    "lean_severity",
+    "pole_class",
+    "pole_strength",
+    "pole_material",
+    "capture_source",
+    "captured_by",
+    "capture_date",
+]
+
+_STAGE4A_BRANCH_PREFIXES = ("codex/stage4a", "claude-code/stage4a", "stage4a")
+
+
+def _is_stage4a_branch(branch: str) -> bool:
+    return any(branch.lower().startswith(p) for p in _STAGE4A_BRANCH_PREFIXES)
+
+
+def check_stage4a_runtime_file_boundary(branch: str) -> tuple[str, str]:
+    """BLOCK if a Stage 4A branch touches forbidden runtime or popup files."""
+    if not _is_stage4a_branch(branch):
+        return _OK, "Not a Stage 4A branch — runtime boundary check skipped."
+
+    _, stdout, _ = _run(["git", "diff", "--name-only", f"master...{branch}"])
+    if not stdout:
+        return _OK, "No changed files detected."
+
+    changed = set(stdout.splitlines())
+    all_forbidden = (changed & _STAGE4A_FORBIDDEN_RUNTIME_FILES) | (
+        changed & _STAGE4A_FORBIDDEN_POPUP_FILES
+    )
+    if all_forbidden:
+        return (
+            _BLOCKING,
+            "Stage 4A branch touches forbidden runtime file(s): "
+            + ", ".join(sorted(all_forbidden))
+            + ". Stage 4A is library-only. "
+            "Forbidden: upload routes, QA engine, geometry, map renderer, popup validators.",
+        )
+    return _OK, "Stage 4A branch respects runtime file boundary."
+
+
+def check_stage4_map_viewer_untouched(branch: str) -> tuple[str, str]:
+    """BLOCK if a Stage 4A/4B branch modifies map-viewer.js at all."""
+    if not _is_stage4a_branch(branch):
+        return _OK, "Not a Stage 4A branch — map-viewer boundary guard skipped."
+
+    _, stdout, _ = _run(["git", "diff", "--name-only", f"master...{branch}"])
+    changed = set(stdout.splitlines()) if stdout else set()
+
+    if "app/static/js/map-viewer.js" in changed:
+        return (
+            _BLOCKING,
+            "Stage 4A branch modifies app/static/js/map-viewer.js. "
+            "map-viewer.js must not be touched before Stage 4D. "
+            "Stage 4A is library-only.",
+        )
+    return _OK, "map-viewer.js is untouched in this Stage 4A branch."
+
+
+def check_stage4a_leakage_in_runtime_diff(branch: str) -> tuple[str, str]:
+    """WARN if Stage 4 leakage tokens appear in added lines of non-library files."""
+    if not _is_stage4a_branch(branch):
+        return _OK, "Not a Stage 4A branch — leakage token scan skipped."
+
+    _, diff_output, _ = _run(["git", "diff", f"master...{branch}"])
+    if not diff_output:
+        return _OK, "Empty diff — no leakage risk."
+
+    leakage_hits: list[str] = []
+    current_file = ""
+    for line in diff_output.splitlines():
+        if line.startswith("diff --git"):
+            parts = line.split(" b/")
+            current_file = parts[-1] if parts else ""
+        elif line.startswith("+") and not line.startswith("+++"):
+            if current_file and any(current_file.startswith(lf) for lf in _STAGE4_LIBRARY_FILES):
+                continue
+            for token in _STAGE4_LEAKAGE_TOKENS:
+                if token in line:
+                    leakage_hits.append(f"{current_file}: {line[:80].strip()!r}")
+                    break
+
+    if leakage_hits:
+        preview = leakage_hits[:5]
+        return (
+            _WARNING,
+            f"Stage 4 leakage token(s) in non-library diff ({len(leakage_hits)} hit(s)). "
+            f"First 5: {preview}. Verify Stage 4 is not wiring into runtime surfaces.",
+        )
+    return _OK, "No Stage 4 leakage tokens found outside library files."
+
+
+def check_stage4a_popup_test_coverage(branch: str) -> tuple[str, str]:
+    """WARN if field_reference.py changed without matching C2E2 popup test changes."""
+    _, stdout, _ = _run(["git", "diff", "--name-only", f"master...{branch}"])
+    if not stdout:
+        return _OK, "No changed files — popup test coverage check skipped."
+
+    changed = set(stdout.splitlines())
+    field_ref_changed = "app/field_reference.py" in changed
+    popup_test_changed = any(
+        "test_c2e2_popup" in f or "test_structured_capture" in f for f in changed
+    )
+
+    if field_ref_changed and not popup_test_changed:
+        return (
+            _WARNING,
+            "app/field_reference.py changed but no C2E2 popup or structured capture "
+            "tests were updated. Add tests to tests/test_c2e2_popup_fields.py or "
+            "tests/test_c2e2_popup_rendering.py to cover the change.",
+        )
+    return _OK, "Popup test coverage check passed."
+
+
 def run_checks(branch: str, base: str = "master") -> list[dict[str, str]]:
     results: list[dict[str, str]] = []
 
@@ -183,6 +329,19 @@ def run_checks(branch: str, base: str = "master") -> list[dict[str, str]]:
 
     level, msg = check_aicontrol_numbering(branch)
     record("aicontrol_numbering", level, msg)
+
+    # Stage 4A boundary checks (only fire for Stage 4A branches)
+    level, msg = check_stage4a_runtime_file_boundary(branch)
+    record("stage4a_runtime_boundary", level, msg)
+
+    level, msg = check_stage4_map_viewer_untouched(branch)
+    record("stage4a_map_viewer_boundary", level, msg)
+
+    level, msg = check_stage4a_leakage_in_runtime_diff(branch)
+    record("stage4a_leakage_tokens", level, msg)
+
+    level, msg = check_stage4a_popup_test_coverage(branch)
+    record("stage4a_popup_test_coverage", level, msg)
 
     return results
 

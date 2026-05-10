@@ -183,3 +183,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Documentation/control-only Stage 4 readiness specification. Full suite passed: 920 passed, 1 skipped. No app runtime files, tests, archive files, or review workspace behaviour changed.
+
+### 2026-05-10T15:05:14Z
+
+- Branch: `claude-code/stage4a-safety-harness-audit`
+- Commit: `857861e13a4a`
+- Jobs tested: n/a
+- Command run: `pytest -v`
+- validation_runs report path: `968 passed, 1 skipped, 15 xfailed, 0 failed`
+- failures.json status: not recorded
+- Screenshots: unknown
+- Verdict: pass
+- Notes: 15 xfails are by design (VLD-1/2/3 blockers). Leakage tests all pass. Pre-commit clean. merge_safety_check.py Stage 4A boundary checks added.

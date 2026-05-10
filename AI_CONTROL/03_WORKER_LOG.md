@@ -276,3 +276,21 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: review or proceed to merge.
+
+### 2026-05-10T15:05:09Z
+
+- Worker: claude-code
+- Branch: `claude-code/stage4a-safety-harness-audit`
+- Action: Stage 4A safety harness: 2 new test files (60 tests: 45 pass + 15 xfail by design), 3 AI_CONTROL docs, merge_safety_check.py Stage 4A boundary checks. Tests document VLD-1/2/3 blockers as xfail; leakage tests prove Stage 4 is currently isolated from runtime (map-viewer, api_intake, qa_engine, C2E2 popup, templates). Full suite: 968 pass, 15 xfail, pre-commit clean.
+- Files changed: tests/test_stage4a_safety_boundary.py, tests/test_structured_capture_leakage.py, scripts/merge_safety_check.py, AI_CONTROL/46_STAGE4A_SAFETY_AUDIT.md, AI_CONTROL/47_STAGE4A_VALIDATION_HARNESS.md, AI_CONTROL/48_STAGE4A_RUNTIME_LEAKAGE_GUARD.md
+- Validation state: 968 tests passing, 15 xfailed by design, pre-commit clean
+- Next action: Codex to fix VLD-1/2/3 on codex/stage4a-library-correctness-fixes. xfail tests in test_stage4a_safety_boundary.py will flip to PASS once each blocker is fixed.
+
+### 2026-05-10T15:05:14Z
+
+- Worker: validation
+- Branch: `claude-code/stage4a-safety-harness-audit`
+- Action: Recorded validation run with status `PASS`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review
