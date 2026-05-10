@@ -8,6 +8,36 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-10 - Real Field Pilot Readiness + Stage 4C Decision Gate Audit
+
+### Added
+
+- Added `AI_CONTROL/61_REAL_FIELD_PILOT_READINESS_AUDIT.md` — comprehensive readiness
+  assessment: template, data dictionary, validation instructions, evidence protocol,
+  field checklist, risk coverage, Stage 4C gate readiness, operator clarity. Verdict: GO WITH CAUTIONS.
+- Added `AI_CONTROL/62_FIELD_DAY_OPERATING_CHECKLIST.md` — practical day-of guide
+  (before leaving, on site, per-pole capture, after survey, validation, stop conditions).
+- Added `AI_CONTROL/63_FIELD_PILOT_SUCCESS_METRICS.md` — quantitative thresholds
+  (rows, validation%, pole_id match%, completeness distribution, evidence coverage,
+  defect limits, template usability, Stage 4C GO/NO-GO gates).
+- Added `AI_CONTROL/64_FIELD_PILOT_RISK_CONTROL_MATRIX.md` — R01–R08 control mapping
+  (field control, validation control, evidence control, go/no-go impact per risk).
+- Added `AI_CONTROL/65_STAGE4C_DECISION_BOARD_TEMPLATE.md` — post-pilot fill-in form
+  (pilot summary, validation stats, evidence stats, defects, risks, recommendation,
+  final decision with Noel sign-off).
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` with new task and scope.
+
+### Notes
+
+- Readiness audit confirms all field-pilot documentation is complete and operational.
+- Field day checklist is portable (can be printed or loaded on iPad).
+- Success metrics define objective pass/fail criteria; no subjective judgments required.
+- Risk matrix shows all 8 active risks (R01–R08) have pre-pilot or validation controls.
+- Decision board ties pilot results to Stage 4C gate criteria in document 50.
+- Noel has explicit go/no-go authority post-pilot; Stage 4C blocked until decision is signed.
+
+---
+
 ## 2026-05-10 - Stage 4C Architecture Gate + Runtime Integration Safety Design
 
 ### Added
