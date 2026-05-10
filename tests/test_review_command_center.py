@@ -1,4 +1,4 @@
-"""Frontend checks for the Review Workspace v2 command center."""
+"""Frontend checks for the Review Workspace command center."""
 
 from __future__ import annotations
 
@@ -74,6 +74,7 @@ def _viewer_harness(extra_js: str) -> str:
             getBounds() {{ return {{ getCenter() {{ return [54.1, -3.1]; }} }}; }},
             openPopup() {{ this.popupOpened = true; }},
             bringToFront() {{ this.front = true; }},
+            setStyle(style) {{ this.style = style; }},
             getElement() {{ return element; }},
           }};
         }}
@@ -106,6 +107,9 @@ def test_review_command_center_static_surface_present() -> None:
         "Route / Span Checks",
         "Lifecycle / Replacement Checks",
         "Evidence quality",
+        "Review operating system",
+        "Active issue queue",
+        "Unresolved only",
     ]:
         assert text in html
 
@@ -118,17 +122,30 @@ def test_review_command_center_static_surface_present() -> None:
         "review-missing-height-count",
         "review-material-missing-count",
         "review-low-confidence-count",
+        "review-readiness-score",
+        "review-progress-count",
+        "review-remaining-blockers",
+        "review-active-issue-queue",
+        "review-filter-unresolved",
     ]:
         assert element_id in html
 
     assert 'data-review-nav-group="route"' in html
     assert 'data-review-command-action="lifecycle"' in html
+    for filter_name in ["severity", "category", "lifecycle", "evidence", "confidence", "route"]:
+        assert f'data-review-filter="{filter_name}"' in html
 
     for css_class in [
         ".gf-review-decision-banner",
         ".gf-review-queue",
         ".gf-review-queue-item",
         ".gf-evidence-quality",
+        ".gf-review-os-panel",
+        ".gf-review-filter-grid",
+        ".gf-active-issue-item",
+        ".gf-review-risk-high",
+        ".gf-review-risk-medium",
+        ".gf-review-risk-muted",
         ".severity-blocker",
         ".severity-review",
         ".severity-info",
@@ -144,6 +161,12 @@ def test_review_command_center_static_surface_present() -> None:
         "designReadinessDecision",
         "routeReviewTargets",
         "lifecycleReviewTargets",
+        "computeReviewOperatingSystemState",
+        "buildReviewIssueModel",
+        "matchesReviewOpsFilters",
+        "markCurrentReviewIssueReviewed",
+        "applyReviewOperatingSystemOverlays",
+        "jumpToReviewIssue",
     ]:
         assert method in js
 
@@ -249,6 +272,106 @@ def test_review_command_center_uses_existing_map_signals_only() -> None:
               viewer.severityClass('warning') === 'severity-warning',
               'WARNING severity class should be supported',
             );
+            assert(state.ops.total >= 3, 'operating issue model should aggregate targets');
+            assert(
+              state.ops.filteredIssues.length === state.ops.total,
+              'default filters show all issues',
+            );
+            assert(state.ops.remainingBlockers === 1, 'remaining blocker should be counted');
+            assert(state.ops.readinessScore < 100, 'open review issues reduce readiness score');
+            assert(
+              state.ops.breakdowns.severity.BLOCKER === 1,
+              'severity breakdown should count blockers',
+            );
+            assert(
+              state.ops.breakdowns.lifecycleRisk.replacement === 1,
+              'lifecycle risk should count pairs',
+            );
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_review_operating_system_filters_progress_and_overlays() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const blockerLine = fakeLine();
+            const reviewLine = fakeLine();
+            const lifecycleMarker = fakeMarker();
+            viewer.featureData = [
+              {
+                marker: lifecycleMarker,
+                props: {
+                  id: 'PR1',
+                  pole_id: 'PR1',
+                  structure_type: 'PRpole',
+                  asset_intent: 'proposed',
+                  material: 'wood',
+                  relationship: 'replacement_pair',
+                  replacing: 'EX1',
+                },
+              },
+            ];
+            viewer._spanLineRefs = [
+              {
+                props: {
+                  from_point_id: 'EX1',
+                  to_point_id: 'PR1',
+                  span_validity: 'invalid',
+                  missing_fields: ['height'],
+                },
+                line: blockerLine,
+                routeGroupIndex: 0,
+              },
+              {
+                props: {
+                  from_point_id: 'PR1',
+                  to_point_id: 'P2',
+                  crossing_risk_level: 'medium',
+                  geometry_trust: 'low',
+                },
+                line: reviewLine,
+                routeGroupIndex: 0,
+              },
+            ];
+            viewer._reviewNavigationTargets = viewer.buildReviewNavigationTargets();
+            viewer._reviewOpsFilters.severity = 'BLOCKER';
+            let ops = viewer.computeReviewOperatingSystemState();
+            assert(ops.filteredIssues.length === 1, 'severity filter should isolate blocker issue');
+            const blockerIssue = ops.filteredIssues[0];
+            assert(blockerIssue.severity === 'BLOCKER', 'filtered issue should be blocker');
+
+            viewer.applyReviewOperatingSystemOverlays(ops);
+            assert(
+              blockerLine.getElement().classList.contains('gf-review-risk-high'),
+              'blocker span should receive high-risk overlay',
+            );
+            assert(
+              reviewLine.getElement().classList.contains('gf-review-risk-muted'),
+              'non-filtered review span should be muted',
+            );
+
+            viewer._activeReviewTargetGroup = blockerIssue.groups[0];
+            const blockerGroupTargets = viewer._reviewNavigationTargets[blockerIssue.groups[0]];
+            viewer._activeReviewTargetIndex = blockerGroupTargets.findIndex((target, index) => (
+              viewer.targetIssueId(target, index) === blockerIssue.id
+            ));
+            viewer.markCurrentReviewIssueReviewed();
+            viewer._reviewOpsFilters.unresolvedOnly = true;
+            ops = viewer.computeReviewOperatingSystemState();
+            assert(ops.reviewed === 1, 'reviewed issue count should update');
+            assert(
+              ops.filteredIssues.every((issue) => !issue.reviewed),
+              'unresolved-only filter should hide reviewed issues',
+            );
+
+            viewer.clearReviewedReviewIssues();
+            ops = viewer.computeReviewOperatingSystemState();
+            assert(ops.reviewed === 0, 'clearing reviewed state should reset progress');
+            viewer.jumpToReviewIssue(blockerIssue.id);
+            assert(viewer._focusedReviewTarget, 'quick-jump should focus a map target');
             """
         )
     )

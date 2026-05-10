@@ -231,3 +231,30 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py
 - Validation state: `pytest -v` passed; `pre-commit run --all-files` passed; browser validation passed for P008/F001 and P010/F001
 - Next action: review, merge, tag, and update Control Center files on master.
+
+### 2026-05-10T13:37:26Z
+
+- Worker: codex
+- Branch: `codex/review-operating-system-v3`
+- Action: Started task: GridFlow Review Operating System v3. Evolve Review Workspace v2 into a planner review operating system with deeper intelligence, queues, overlays, filters, and readiness scoring
+- Files changed: control files pending
+- Validation state: pending
+- Next action: implement task and validate
+
+### 2026-05-10T13:47:16Z
+
+- Worker: codex
+- Branch: `codex/review-operating-system-v3`
+- Action: Implemented Review Operating System v3 with advanced issue aggregation, queue progress, filters, readiness scoring, and map review overlays
+- Files changed: app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md
+- Validation state: pytest -v passed; pre-commit passed; browser validation passed on P008/F001 and P010/F001
+- Next action: n/a
+
+### 2026-05-10T13:47:16Z
+
+- Worker: validation
+- Branch: `codex/review-operating-system-v3`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review

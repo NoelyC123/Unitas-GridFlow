@@ -1120,6 +1120,101 @@
                   <div><span>Field verification required</span><strong id="review-low-confidence-count">0</strong></div>
                 </div>
               </div>
+              <div class="gf-review-os-panel" aria-label="Review operating system">
+                <div class="gf-review-os-title">Review operating system</div>
+                <div class="gf-review-score-grid">
+                  <div class="gf-review-score-card">
+                    <span>Readiness score</span>
+                    <strong id="review-readiness-score">0%</strong>
+                    <div class="gf-score-track"><i id="review-readiness-score-bar"></i></div>
+                  </div>
+                  <div class="gf-review-score-card">
+                    <span>Review progress</span>
+                    <strong><b id="review-progress-count">0/0</b> · <b id="review-progress-percent">0%</b></strong>
+                    <div class="gf-score-track"><i id="review-progress-bar"></i></div>
+                  </div>
+                  <div class="gf-review-score-card">
+                    <span>Remaining blockers</span>
+                    <strong id="review-remaining-blockers">0</strong>
+                    <small id="review-complete-estimate">No issues loaded</small>
+                  </div>
+                </div>
+                <div class="gf-review-filter-grid" aria-label="Advanced review filters">
+                  <label>Severity
+                    <select data-review-filter="severity" aria-label="Filter by severity">
+                      <option value="all">All</option>
+                      <option value="BLOCKER">BLOCKER</option>
+                      <option value="REVIEW">REVIEW</option>
+                      <option value="INFO">INFO</option>
+                    </select>
+                  </label>
+                  <label>Category
+                    <select data-review-filter="category" aria-label="Filter by category">
+                      <option value="all">All</option>
+                      <option value="DATA">Evidence</option>
+                      <option value="GEOMETRY">Geometry</option>
+                      <option value="CLEARANCE">Clearance</option>
+                      <option value="LIFECYCLE">Lifecycle</option>
+                      <option value="AWARENESS">Awareness</option>
+                    </select>
+                  </label>
+                  <label>Lifecycle
+                    <select data-review-filter="lifecycle" aria-label="Filter by lifecycle risk">
+                      <option value="all">All</option>
+                      <option value="replacement">Replacement pair</option>
+                      <option value="linked-route">Linked route</option>
+                      <option value="none">None</option>
+                    </select>
+                  </label>
+                  <label>Evidence
+                    <select data-review-filter="evidence" aria-label="Filter by evidence quality">
+                      <option value="all">All</option>
+                      <option value="gap">Gap</option>
+                      <option value="partial">Partial</option>
+                      <option value="verify">Verify</option>
+                      <option value="ok">OK</option>
+                    </select>
+                  </label>
+                  <label>Confidence
+                    <select data-review-filter="confidence" aria-label="Filter by confidence">
+                      <option value="all">All</option>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="normal">Normal</option>
+                    </select>
+                  </label>
+                  <label>Route
+                    <select data-review-filter="route" aria-label="Filter by route risk">
+                      <option value="all">All</option>
+                      <option value="geometry">Geometry</option>
+                      <option value="clearance">Clearance</option>
+                      <option value="span-review">Span review</option>
+                      <option value="none">None</option>
+                    </select>
+                  </label>
+                  <label class="gf-review-checkbox"><input id="review-filter-unresolved" type="checkbox" data-review-filter="unresolvedOnly"> Unresolved only</label>
+                </div>
+                <div class="gf-review-breakdowns" aria-label="Issue aggregation summaries">
+                  <div><span>Severity</span><strong id="review-breakdown-severity">None</strong></div>
+                  <div><span>Issue category</span><strong id="review-breakdown-category">None</strong></div>
+                  <div><span>Lifecycle risk</span><strong id="review-breakdown-lifecycle">None</strong></div>
+                  <div><span>Evidence confidence</span><strong id="review-breakdown-evidence">None</strong></div>
+                  <div><span>Route/span risk</span><strong id="review-breakdown-route">None</strong></div>
+                  <div><span>Replacement impact</span><strong id="review-breakdown-replacement">None</strong></div>
+                  <div><span>Confidence</span><strong id="review-breakdown-confidence">None</strong></div>
+                </div>
+                <div class="gf-active-issue-header">
+                  <span>Active issue queue</span>
+                  <strong id="review-active-queue-count">0</strong>
+                </div>
+                <div id="review-active-issue-queue" class="gf-active-issue-queue">
+                  <div class="gf-active-issue-empty">Issue queue loads with map review data.</div>
+                </div>
+                <div class="gf-review-resolution-controls">
+                  <button id="review-mark-reviewed" type="button" class="gf-review-nav-button" disabled>Mark selected reviewed</button>
+                  <button id="review-clear-reviewed" type="button" class="gf-review-nav-button">Clear reviewed state</button>
+                </div>
+              </div>
               <div id="review-nav-controls" class="gf-review-nav-controls" aria-live="polite">
                 <button id="review-nav-prev" type="button" class="gf-review-nav-button">Previous</button>
                 <span id="review-nav-status" class="gf-review-target-count">Select a review category</span>

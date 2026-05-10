@@ -448,6 +448,251 @@
   font-size: 0.9rem;
 }
 
+.gf-review-os-panel {
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-radius: 7px;
+  margin-top: 10px;
+  padding: 8px;
+}
+
+.gf-review-os-title,
+.gf-active-issue-header {
+  align-items: center;
+  color: #0f172a;
+  display: flex;
+  font-size: 0.74rem;
+  font-weight: 800;
+  justify-content: space-between;
+}
+
+.gf-active-issue-header {
+  margin-top: 9px;
+}
+
+.gf-active-issue-header strong {
+  background: #e0f2fe;
+  border-radius: 999px;
+  color: #075985;
+  min-width: 1.6rem;
+  padding: 2px 7px;
+  text-align: center;
+}
+
+.gf-review-score-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 7px;
+}
+
+.gf-review-score-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  min-width: 0;
+  padding: 6px 7px;
+}
+
+.gf-review-score-card span,
+.gf-review-score-card small {
+  color: #64748b;
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.gf-review-score-card strong {
+  color: #0f172a;
+  display: block;
+  font-size: 0.84rem;
+  margin-top: 2px;
+}
+
+.gf-review-score-card b {
+  font-weight: 800;
+}
+
+.gf-score-track {
+  background: #e2e8f0;
+  border-radius: 999px;
+  height: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.gf-score-track i {
+  background: #2563eb;
+  display: block;
+  height: 100%;
+  transition: width 0.2s ease;
+  width: 0%;
+}
+
+.gf-review-filter-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.gf-review-filter-grid label {
+  color: #475569;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.62rem;
+  font-weight: 800;
+  gap: 3px;
+}
+
+.gf-review-filter-grid select {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 0.7rem;
+  min-width: 0;
+  padding: 4px 6px;
+}
+
+.gf-review-filter-grid .gf-review-checkbox {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  flex-direction: row;
+  grid-column: 1 / -1;
+  padding: 5px 7px;
+}
+
+.gf-review-breakdowns {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.gf-review-breakdowns div {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 5px 7px;
+}
+
+.gf-review-breakdowns span {
+  color: #64748b;
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+.gf-review-breakdowns strong {
+  color: #1f2937;
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  margin-top: 1px;
+}
+
+.gf-active-issue-queue {
+  display: grid;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.gf-active-issue-item {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #94a3b8;
+  border-radius: 6px;
+  color: #0f172a;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 6px 7px;
+  text-align: left;
+}
+
+.gf-active-issue-item.severity-blocker {
+  border-left-color: #dc2626;
+}
+
+.gf-active-issue-item.severity-warning,
+.gf-active-issue-item.severity-review {
+  border-left-color: #d97706;
+}
+
+.gf-active-issue-item.severity-info {
+  border-left-color: #2563eb;
+}
+
+.gf-active-issue-item span {
+  min-width: 0;
+}
+
+.gf-active-issue-item strong,
+.gf-active-issue-item small {
+  display: block;
+}
+
+.gf-active-issue-item small {
+  color: #64748b;
+  font-size: 0.64rem;
+  line-height: 1.25;
+  margin-top: 2px;
+}
+
+.gf-active-issue-item em {
+  color: #475569;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.gf-active-issue-empty {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 5px 0;
+}
+
+.gf-review-resolution-controls {
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.gf-review-resolution-controls .gf-review-nav-button {
+  flex: 1;
+}
+
+.gf-review-risk-muted {
+  opacity: 0.2 !important;
+}
+
+.gf-review-risk-low {
+  filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.35));
+}
+
+.gf-review-risk-medium {
+  filter: drop-shadow(0 0 5px rgba(217, 119, 6, 0.55));
+  opacity: 0.95;
+}
+
+.gf-review-risk-high {
+  filter: drop-shadow(0 0 7px rgba(220, 38, 38, 0.75));
+  opacity: 1;
+}
+
+.gf-review-risk-awareness {
+  filter: drop-shadow(0 0 6px rgba(8, 145, 178, 0.65));
+}
+
+.gf-review-risk-lifecycle {
+  filter: drop-shadow(0 0 6px rgba(126, 34, 206, 0.6));
+}
+
 .gf-review-nav-card {
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
