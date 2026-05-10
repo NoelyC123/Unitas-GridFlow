@@ -5,23 +5,19 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Stage 4 Readiness Specification
-- Owner: codex
-- Branch: `codex/stage4-readiness-specification`
-- Status: ready_for_review
-- Summary: Created Stage 4 readiness specification, blocker fix plan, and go/no-go checklist. Documentation/control only; no Stage 4 runtime implementation was added.
+- Task: READY FOR NEXT TASK
+- Owner: none
+- Branch: `none`
+- Status: idle
+- Last completed: `branch-retirement-control-deconfliction-complete`, `stage4-readiness-specification-complete`
+- Next recommended task: Stage 4A library correctness fixes
 - Updated: 2026-05-10T14:20:40Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch May Change
 
-- `AI_CONTROL/43_STAGE4_READINESS_SPECIFICATION.md`
-- `AI_CONTROL/44_STAGE4_BLOCKER_FIX_PLAN.md`
-- `AI_CONTROL/45_STAGE4_GO_NO_GO_CHECKLIST.md`
-- `AI_CONTROL/03_WORKER_LOG.md`
-- `AI_CONTROL/04_VALIDATION_LOG.md`
-- `AI_CONTROL/05_HANDOFF.md`
-- `CHANGELOG.md`
+- No active branch is currently assigned.
+- Next branch should be opened only after Noel assigns the next task.
 
 ## Validation Plan
 
@@ -38,7 +34,7 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 
 ## Next Action
 
-Review, merge, tag if desired, then open Stage 4A library correctness fixes only.
+Start the next explicit task. Recommended next task: Stage 4A library correctness fixes.
 
 ## Do Not Start
 

@@ -20,18 +20,19 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Branch Retirement + Control File Deconfliction
-- Branch: `claude-code/branch-retirement-control-deconfliction`
-- Owner: claude-code
-- Status: in_progress
-- Summary: Execute DELETE_NOW branch retirement, add superseded headers, create AI_CONTROL source-of-truth index
+- Task: READY FOR NEXT TASK
+- Branch: `none`
+- Owner: none
+- Status: idle
+- Last completed: `branch-retirement-control-deconfliction-complete`, `stage4-readiness-specification-complete`
+- Next recommended task: Stage 4A library correctness fixes
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| GridFlow Review Operating System v3 | `codex/review-operating-system-v3` | codex | Frontend / review workspace | ready_for_review |
+| None | `none` | none | n/a | idle |
 
 ## Review / Validation
 
@@ -45,6 +46,8 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Done
 
+- Branch retirement and control file deconfliction closed and tagged.
+- Stage 4 readiness specification closed and tagged.
 - C2E2 popup scope reduction closed and tagged.
 - C2E2 map navigation follow-ups closed and tagged.
 - C2F review focus + issue filtering closed and tagged.
@@ -56,7 +59,8 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Backlog / Next Candidates
 
-- Stage 4 structured capture integration planning or implementation, only after a new explicit task prompt.
+- Stage 4A library correctness fixes.
+- Stage 4 structured capture runtime integration, only after Stage 4A and Stage 4B are complete.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.
