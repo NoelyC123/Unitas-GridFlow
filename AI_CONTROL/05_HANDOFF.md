@@ -5,45 +5,45 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Branch Retirement + Control File Deconfliction
-- Owner: claude-code
-- Branch: `claude-code/branch-retirement-control-deconfliction`
-- Status: in_progress
-- Summary: Execute DELETE_NOW branch retirement, add superseded headers, create AI_CONTROL source-of-truth index
-- Updated: 2026-05-10T14:20:34Z
+- Task: Stage 4 Readiness Specification
+- Owner: codex
+- Branch: `codex/stage4-readiness-specification`
+- Status: ready_for_review
+- Summary: Created Stage 4 readiness specification, blocker fix plan, and go/no-go checklist. Documentation/control only; no Stage 4 runtime implementation was added.
+- Updated: 2026-05-10T14:20:40Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch May Change
 
-- `app/static/js/map-viewer.js`
-- `app/static/css/map-viewer.css`
-- `app/templates/map_viewer.html`
-- `tests/test_review_*.py`
-- Required Control Center files and `CHANGELOG.md` if needed
+- `AI_CONTROL/43_STAGE4_READINESS_SPECIFICATION.md`
+- `AI_CONTROL/44_STAGE4_BLOCKER_FIX_PLAN.md`
+- `AI_CONTROL/45_STAGE4_GO_NO_GO_CHECKLIST.md`
+- `AI_CONTROL/03_WORKER_LOG.md`
+- `AI_CONTROL/04_VALIDATION_LOG.md`
+- `AI_CONTROL/05_HANDOFF.md`
+- `CHANGELOG.md`
 
 ## Validation Plan
 
 - `pytest -v`
 - `pre-commit run --all-files`
-- Browser validation:
-  - `/map/view/project/P008/F001`
-  - `/map/view/project/P010/F001`
+- Browser validation: not required for this docs/control-only task
 
 ## Current Validation State
 
-- `pytest -v`: passed, 869 passed, 1 skipped, 13 existing warnings.
+- `pytest -v`: passed, 920 passed, 1 skipped.
 - `pre-commit run --all-files`: passed.
-- Browser validation: passed on `/map/view/project/P008/F001` and `/map/view/project/P010/F001`; Review OS controls, filters, queue interaction, navigation, Release Map, route highlight, Planner Awareness toggle, popup truthfulness, and console clean all verified.
-- Manual review report: n/a, Browser validation used for this UI task.
+- Browser validation: not required; docs/control-only task.
+- Manual review report: n/a.
 
 ## Next Action
 
-Review, merge, tag, and update Control Center files on master.
+Review, merge, tag if desired, then open Stage 4A library correctness fixes only.
 
 ## Do Not Start
 
 - C2E2 popup field changes.
-- Stage 4 implementation.
+- Stage 4 runtime implementation.
 - Backend QA, geometry, span generation, or intake changes.
 - Archive edits.
 - Branch deletion or merge operations.

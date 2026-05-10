@@ -8,6 +8,25 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-10 - Stage 4 readiness specification
+
+### Added
+
+- Added `AI_CONTROL/43_STAGE4_READINESS_SPECIFICATION.md` documenting the
+  current Stage 4 readiness boundary and the three known blockers:
+  `none` blank-token handling, missing row identity, and structured-capture
+  source registration.
+- Added `AI_CONTROL/44_STAGE4_BLOCKER_FIX_PLAN.md` with the safe fix order,
+  acceptance tests, and stop conditions for Stage 4A through Stage 4D.
+- Added `AI_CONTROL/45_STAGE4_GO_NO_GO_CHECKLIST.md` to separate go/no-go
+  criteria for library fixes, validation hardening, runtime integration, and UI
+  surfacing.
+
+### Notes
+
+- Documentation/control only. No app runtime code, tests, archive files, or
+  review workspace behaviour changed.
+
 ## 2026-05-05 - C2D-AD validation readiness consolidation
 
 ### Changed
