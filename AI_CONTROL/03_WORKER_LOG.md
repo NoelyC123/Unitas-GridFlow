@@ -339,3 +339,39 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: update handoff or proceed to review
+
+### 2026-05-10T16:07:53Z
+
+- Worker: codex
+- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Action: Started task: Stage 4B Structured Capture Validation Preview. Build pre-runtime structured capture validation and import preview system
+- Files changed: control files pending
+- Validation state: pending
+- Next action: implement task and validate
+
+### 2026-05-10T16:18:23Z
+
+- Worker: codex
+- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Action: Implemented Stage 4B structured-capture validation and import preview system
+- Files changed: app/structured_capture_schema.py,app/structured_capture_validators.py,templates/structured_capture_template.csv,tests/test_stage4b_validation_preview.py,tests/test_structured_capture_schema.py,tests/test_structured_capture_validators.py,tests/test_structured_capture_leakage.py
+- Validation state: pytest -v and pre-commit run --all-files passed; repo_health and merge_safety report warning-only while branch is uncommitted
+- Next action: n/a
+
+### 2026-05-10T16:18:23Z
+
+- Worker: validation
+- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review
+
+### 2026-05-10T16:20:42Z
+
+- Worker: validation
+- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review

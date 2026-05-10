@@ -110,7 +110,43 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         description="Optional file/job segment identifier carried for provenance and audit.",
         aliases=("file", "folder_id", "survey_file"),
     ),
+    _field(
+        "structure_type",
+        label="Structure type",
+        group="row_identity",
+        type_="enum",
+        allowed_values=(
+            "Pol",
+            "EXpole",
+            "Angle",
+            "PRpole",
+            "PRangle",
+            "Stay",
+            "Context",
+            "unknown",
+        ),
+        description="Captured feature/structure type used for validation preview only.",
+        aliases=("feature_code", "code"),
+    ),
+    _field(
+        "asset_intent",
+        label="Asset intent",
+        group="row_identity",
+        type_="enum",
+        allowed_values=("existing", "proposed", "replacement", "context", "unknown"),
+        description="Captured lifecycle/design intent used for validation preview only.",
+        aliases=("role", "asset_role"),
+    ),
     # 2. Pole specification --------------------------------------------------
+    _field(
+        "material",
+        label="Material",
+        group="pole_specification",
+        type_="enum",
+        allowed_values=("wood", "concrete", "steel", "composite", "fibreglass", "unknown"),
+        description="Captured support material using the Stage 4 validation vocabulary.",
+        aliases=("captured_material",),
+    ),
     _field(
         "pole_class",
         label="Pole class",
@@ -135,6 +171,30 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         allowed_values=("wood", "concrete", "steel", "composite", "unknown"),
         description="Construction material of the pole shaft.",
         aliases=("material",),
+    ),
+    _field(
+        "measured_height_m",
+        label="Measured height",
+        group="pole_specification",
+        type_="float",
+        unit="m",
+        description="Structured measured support height in metres.",
+        aliases=("measured_height", "height_m", "height"),
+    ),
+    _field(
+        "height_source",
+        label="Height source",
+        group="pole_specification",
+        type_="enum",
+        allowed_values=(
+            "measured_rtk",
+            "measured_tape",
+            "measured_rangefinder",
+            "legacy_record",
+            "estimated",
+            "unknown",
+        ),
+        description="Source/provenance of the structured height value.",
     ),
     _field(
         "specification",
@@ -176,6 +236,21 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         group="condition_defects",
         type_="string",
         description="Surveyor or designer free-text notes about the defect.",
+    ),
+    _field(
+        "access_notes",
+        label="Access notes",
+        group="condition_defects",
+        type_="string",
+        description="Free-text notes on access constraints relevant to follow-up survey/design.",
+    ),
+    _field(
+        "survey_notes",
+        label="Survey notes",
+        group="condition_defects",
+        type_="string",
+        description="Free-text structured capture notes for validation preview.",
+        aliases=("notes", "remarks"),
     ),
     # 4. Electrical / conductor ---------------------------------------------
     _field(
@@ -221,6 +296,15 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         allowed_values=PRESENCE_VALUES,
         description="Whether a stay/support wire is present at this pole.",
         aliases=("has_stay",),
+    ),
+    _field(
+        "stay_required",
+        label="Stay required",
+        group="structural_support",
+        type_="boolean_enum",
+        allowed_values=PRESENCE_VALUES,
+        description="Whether structured capture says a stay is required.",
+        aliases=("requires_stay",),
     ),
     _field(
         "stay_type",
@@ -316,6 +400,47 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         description="Where this row of structured capture data originated.",
     ),
     _field(
+        "source",
+        label="Source",
+        group="capture_metadata",
+        type_="enum",
+        allowed_values=(
+            "structured_capture",
+            "surveyor_tablet",
+            "surveyor_paper",
+            "office_audit",
+            "designer_input",
+            "historical_record",
+            "unknown",
+        ),
+        description="Library-level provenance source for validation preview.",
+        aliases=("provenance",),
+    ),
+    _field(
+        "evidence_status",
+        label="Evidence status",
+        group="capture_metadata",
+        type_="enum",
+        allowed_values=(
+            "measured",
+            "observed",
+            "legacy_record",
+            "estimated",
+            "not_recorded",
+            "verification_required",
+            "unknown",
+        ),
+        description="Validation-preview status for the captured evidence.",
+    ),
+    _field(
+        "photo_reference",
+        label="Photo reference",
+        group="capture_metadata",
+        type_="string",
+        description="Optional photo/file reference if safely captured outside runtime storage.",
+        aliases=("photo_ref", "photo_id"),
+    ),
+    _field(
         "captured_by",
         label="Captured by",
         group="capture_metadata",
@@ -358,7 +483,7 @@ def _build_alias_map() -> dict[str, str]:
         canonical = definition["field_name"]
         mapping[canonical.lower()] = canonical
         for alias in definition["aliases"]:
-            mapping[alias] = canonical
+            mapping.setdefault(alias, canonical)
     return mapping
 
 

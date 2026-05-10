@@ -8,6 +8,34 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-10 - Stage 4B structured-capture validation preview
+
+### Added
+
+- Added pre-runtime structured-capture import preview validation with row,
+  field, header, duplicate identity, summary count, and safe-to-merge verdict
+  output.
+- Added Stage 4B test coverage for clean rows, missing/unsafe/duplicate
+  `pole_id`, valid and invalid `"none"` values, invalid height, missing
+  metadata, unknown source, contradictory evidence, and template/header
+  alignment.
+
+### Changed
+
+- Expanded the Stage 4 schema and CSV template around identity, structure type,
+  asset intent, measured height, height source, material, condition, stays,
+  equipment, access/survey notes, evidence status, source, and photo reference.
+- Hardened structured-capture field validation with raw value, normalised value,
+  validity, severity, reason, recommendation, source, row id, and pole id
+  metadata.
+- Added row classifications for `merge-ready`, `valid but not merge-ready`,
+  `review-required`, `invalid`, and `blocked`.
+
+### Notes
+
+- Stage 4B remains pre-runtime only. No upload/intake pipeline, QA engine, map
+  rendering, Review OS, C2E2 popup, or live job output integration was added.
+
 ## 2026-05-10 - Stage 4A library correctness fixes
 
 ### Changed

@@ -5,46 +5,43 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Stage 4A Library Correctness Fixes
+- Task: Stage 4B Structured Capture Validation Preview
 - Owner: codex
-- Branch: `codex/stage4a-library-correctness-fixes`
-- Status: merge_commit_pending
-- Summary: Fixed Stage 4A library blockers and aligned the safety harness after merge.
-- Updated: 2026-05-10T16:04:35Z
+- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Status: ready_for_review
+- Summary: Built pre-runtime structured capture validation and import preview system; no runtime/UI Stage 4 integration added.
+- Updated: 2026-05-10T16:18:30Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Changed
 
-- Added Stage 4 row identity fields (`pole_id`, `project_id`, `file_id`) to the structured capture schema and regenerated the CSV template header.
-- Changed structured capture blank handling so `"none"` is no longer globally treated as blank.
-- Preserved `"none"` as a valid explicit value for `stay_type`, `equipment_type`, `lean_direction`, and `lean_severity`.
-- Added deterministic `pole_id` identity extraction, merge-readiness flags, duplicate `pole_id` detection, and per-field validation result metadata.
-- Registered `structured_capture` as a valid library-level field source/provenance type.
-- Added regression tests proving Stage 4 is not live-integrated into C2E2 popups, Review OS, or `map-viewer.js`.
-- Removed strict xfail markers from Stage 4A safety-boundary tests now that VLD-1, VLD-2, and VLD-3 are fixed.
-- Hardened `pole_id` validation so blank, placeholder, and unknown identity values are rejected with field-level reason and recommendation metadata.
+- Expanded the Stage 4 schema and CSV template around identity, structure type, asset intent, measured height, height source, material, condition, stays, equipment, evidence, notes, source, and photo reference fields.
+- Added field-level structured validation metadata: raw value, normalised value, valid/invalid, severity, reason, recommendation, source, row id, and pole id.
+- Added row-level status classification: `merge-ready`, `valid but not merge-ready`, `review-required`, `invalid`, and `blocked`.
+- Added pre-runtime import preview output with header validation, duplicate `pole_id` detection, summary counts, warnings, errors, field results, row results, and safe-to-merge verdict.
+- Added Stage 4B tests covering clean rows, missing/unsafe/duplicate `pole_id`, valid and invalid `"none"` values, invalid height, missing required metadata, unknown source, contradictory evidence, and template/schema alignment.
+- Preserved Stage 4 runtime isolation: no upload/intake, QA, map rendering, Review OS, C2E2 popup, or live job-output integration was added.
 
 ## Validation Plan
 
 - `pytest -v`
 - `pre-commit run --all-files`
 - `python scripts/repo_health.py`
-- `python scripts/merge_safety_check.py`
-- Browser validation: not required; Stage 4A is library-only and not wired into runtime UI.
+- `python scripts/merge_safety_check.py codex/stage4b-structured-capture-validation-preview`
+- Browser validation: not required; Stage 4B is validation/preview-only and not wired into runtime UI.
 
 ## Current Validation State
 
-- `pytest -v tests/test_stage4a_safety_boundary.py`: passed, 43 passed.
-- `pytest -v`: passed, 992 passed.
+- `pytest -v`: passed, 1035 passed.
 - `pre-commit run --all-files`: passed.
-- `python scripts/repo_health.py`: pending final committed-tree run.
-- `python scripts/merge_safety_check.py codex/stage4a-library-correctness-fixes`: pending final committed-tree run.
+- `python scripts/repo_health.py`: warning-only; known numbering collisions plus unrelated untracked local control files.
+- `python scripts/merge_safety_check.py codex/stage4b-structured-capture-validation-preview`: safe to merge.
 - Browser validation: not required; no runtime/UI integration.
 - Manual review report: n/a.
 
 ## Next Action
 
-Commit the merge, rerun repo health and merge safety from the committed tree, then tag Stage 4A complete if clean. Next implementation phase should be Stage 4B schema/field validation only if Noel explicitly starts it.
+Review/merge this Stage 4B branch if clean. Stage 4C runtime integration should not start until this branch is reviewed and a go/no-go decision is recorded.
 
 ## Do Not Start
 

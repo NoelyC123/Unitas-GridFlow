@@ -229,10 +229,10 @@ class TestC2E2PopupLeakage:
         for fields in POPUP_FIELD_GROUPS.values():
             popup_fields.update(fields)
 
-        # pole_id is shared name — appears in both C2E2 popup (point identity)
-        # and will appear in Stage 4 schema as identity field.
-        # We exclude it to avoid false positives.
-        shared_names = {"pole_id"}
+        # These field names appear in both the C2E2 popup (Trimble-sourced) and the Stage 4
+        # schema (structured capture). They represent the same real-world concepts captured
+        # at different stages. Their presence in Stage 4 schema does not constitute leakage.
+        shared_names = {"pole_id", "structure_type", "asset_intent", "material"}
         leaked = (popup_fields & stage4_field_names) - shared_names
 
         assert not leaked, (

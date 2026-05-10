@@ -31,16 +31,23 @@ EXPECTED_FIELDS = {
     "pole_id",
     "project_id",
     "file_id",
+    "structure_type",
+    "asset_intent",
     # pole specification
+    "material",
     "pole_class",
     "pole_strength",
     "pole_material",
+    "measured_height_m",
+    "height_source",
     "specification",
     # condition / defects
     "condition",
     "defect_type",
     "defect_severity",
     "defect_notes",
+    "access_notes",
+    "survey_notes",
     # electrical / conductor
     "voltage_carried",
     "conductor_type",
@@ -48,6 +55,7 @@ EXPECTED_FIELDS = {
     "phase_configuration",
     # structural support
     "stay_present",
+    "stay_required",
     "stay_type",
     "stay_condition",
     "lean_direction",
@@ -59,6 +67,9 @@ EXPECTED_FIELDS = {
     "equipment_notes",
     # capture metadata
     "capture_source",
+    "source",
+    "evidence_status",
+    "photo_reference",
     "captured_by",
     "capture_date",
     "confidence_level",
@@ -80,16 +91,24 @@ def test_template_headers_include_key_fields() -> None:
     headers = get_stage4_template_headers()
     for key in (
         "pole_class",
+        "structure_type",
+        "asset_intent",
+        "measured_height_m",
+        "height_source",
+        "material",
         "condition",
         "voltage_carried",
         "stay_present",
+        "stay_required",
         "equipment_type",
         "capture_source",
+        "source",
+        "evidence_status",
         "captured_by",
         "capture_date",
     ):
         assert key in headers, f"{key} missing from template headers"
-    assert headers[:3] == ["pole_id", "project_id", "file_id"]
+    assert headers[:5] == ["pole_id", "project_id", "file_id", "structure_type", "asset_intent"]
     # headers must be unique and stable
     assert len(headers) == len(set(headers))
 
@@ -107,13 +126,28 @@ def test_required_fields_returned() -> None:
 
 def test_get_fields_by_group_works() -> None:
     identity = {d["field_name"] for d in get_stage4_fields_by_group("row_identity")}
-    assert {"pole_id", "project_id", "file_id"} <= identity
+    assert {"pole_id", "project_id", "file_id", "structure_type", "asset_intent"} <= identity
 
     pole_spec = {d["field_name"] for d in get_stage4_fields_by_group("pole_specification")}
-    assert {"pole_class", "pole_strength", "pole_material", "specification"} <= pole_spec
+    assert {
+        "material",
+        "pole_class",
+        "pole_strength",
+        "pole_material",
+        "measured_height_m",
+        "height_source",
+        "specification",
+    } <= pole_spec
 
     metadata = {d["field_name"] for d in get_stage4_fields_by_group("capture_metadata")}
-    assert {"capture_source", "captured_by", "capture_date"} <= metadata
+    assert {
+        "capture_source",
+        "source",
+        "evidence_status",
+        "photo_reference",
+        "captured_by",
+        "capture_date",
+    } <= metadata
 
     with pytest.raises(ValueError):
         get_stage4_fields_by_group("not_a_real_group")

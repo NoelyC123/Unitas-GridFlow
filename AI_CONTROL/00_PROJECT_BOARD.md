@@ -20,25 +20,27 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4A Library Correctness Fixes
-- Branch: `codex/stage4a-library-correctness-fixes`
+- Task: Stage 4B Structured Capture Validation Preview
+- Branch: `codex/stage4b-structured-capture-validation-preview`
 - Owner: codex
-- Status: merge_commit_pending
-- Summary: Fix Stage 4 structured capture library correctness blockers without runtime integration
+- Status: ready_for_review
+- Summary: Build pre-runtime structured capture validation and import preview system
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| None | `none` | none | n/a | idle |
+| Stage 4B Structured Capture Validation Preview | `codex/stage4b-structured-capture-validation-preview` | codex | Stage 4 library foundation | ready for review |
 
 ## Review / Validation
 
-- `pytest -v`: passed, 992 passed.
+- Stage 4B targeted tests: passed.
+- `pytest -v`: passed, 1035 passed including local golden-sample fixtures.
 - `pre-commit run --all-files`: passed.
-- Stage 4A safety boundary: passed; no XPASS(strict), no xfail markers remain.
-- Browser validation: not required for Stage 4A library-only changes.
+- `python scripts/repo_health.py`: warning-only due known numbering collisions and unrelated untracked local control files.
+- `python scripts/merge_safety_check.py codex/stage4b-structured-capture-validation-preview`: safe to merge.
+- Browser validation: not required for Stage 4B validation/preview-only changes.
 
 ## Blocked
 
@@ -56,11 +58,11 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Technical documentation field/architecture package closed and tagged.
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 - GridFlow Control Center v1.0 closed and tagged.
+- Stage 4A library correctness fixes closed and tagged.
 
 ## Backlog / Next Candidates
 
-- Stage 4B structured capture schema/field validation, only after Stage 4A is merged and tagged.
-- Stage 4 structured capture runtime integration, only after Stage 4A and Stage 4B are complete.
+- Stage 4C controlled runtime integration, only after Stage 4B is merged and tagged and the go/no-go gate is approved.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.

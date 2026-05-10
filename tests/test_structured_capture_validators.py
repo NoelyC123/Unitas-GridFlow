@@ -147,14 +147,21 @@ def test_completeness_classification() -> None:
         "condition": "fair",
         "defect_type": "split",
         "defect_severity": "medium",
+        "defect_notes": "old wood rot",
         "voltage_carried": "11kV",
         "conductor_type": "covered",
+        "conductor_size": "95",
         "phase_configuration": "three",
         "stay_present": "yes",
+        "stay_required": "no",
         "stay_type": "down",
         "stay_condition": "good",
+        "lean_direction": "none",
+        "lean_severity": "none",
         "equipment_present": "no",
+        "equipment_type": "none",
         "confidence_level": "medium",
+        "verification_required": "no",
     }
     assert classify_stage4_completeness(rich) == "complete"
 
