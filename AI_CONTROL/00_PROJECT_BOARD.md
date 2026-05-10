@@ -20,12 +20,12 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: GridFlow Control Center v1.0
-- Branch: `codex/gridflow-control-center-v1`
-- Owner: codex
-- Lane: Control Center / documentation
-- Status: ready_for_review
-- Summary: Build the full markdown-based AI worker operating system and make it the single source of truth for worker coordination.
+- Task: Post-C2E2 Repository Audit + Branch Retirement + Control Risk Review
+- Branch: `claude-code/post-c2e2-repository-control-audit`
+- Owner: claude-code
+- Lane: Governance / audit (no app code, no tests, no merges)
+- Status: ready for review
+- Summary: 7 new audit docs (AI_CONTROL/36–42) covering master state, branch inventory, retirement plan, control-file freshness, validation evidence, worker coordination, and next-phase readiness.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
