@@ -171,3 +171,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Browser validation confirmed Review OS controls, filters, queue interaction, navigation, Release Map, route highlight, Planner Awareness toggle, popup truthfulness, and zero console errors.
+
+### 2026-05-10T14:20:40Z
+
+- Branch: `codex/stage4-readiness-specification`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: n/a
+- Screenshots: no
+- Verdict: pass
+- Notes: Documentation/control-only Stage 4 readiness specification. Full suite passed: 920 passed, 1 skipped. No app runtime files, tests, archive files, or review workspace behaviour changed.

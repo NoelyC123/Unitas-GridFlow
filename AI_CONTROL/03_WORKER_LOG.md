@@ -258,3 +258,21 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: update handoff or proceed to review
+
+### 2026-05-10T14:20:40Z
+
+- Worker: codex
+- Branch: `codex/stage4-readiness-specification`
+- Action: Created Stage 4 readiness specification, blocker fix plan, and go/no-go checklist for structured capture implementation readiness.
+- Files changed: AI_CONTROL/43_STAGE4_READINESS_SPECIFICATION.md,AI_CONTROL/44_STAGE4_BLOCKER_FIX_PLAN.md,AI_CONTROL/45_STAGE4_GO_NO_GO_CHECKLIST.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed; `pre-commit run --all-files` passed
+- Next action: review, merge, tag if desired, then start Stage 4A library correctness fixes only.
+
+### 2026-05-10T14:20:40Z
+
+- Worker: validation
+- Branch: `codex/stage4-readiness-specification`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: review or proceed to merge.
