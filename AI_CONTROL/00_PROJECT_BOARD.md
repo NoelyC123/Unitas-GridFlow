@@ -17,11 +17,11 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 ## Active task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Project Control Worker Bootstrap Enforcement
-- Branch: `codex/project-control-worker-bootstrap`
+- Task: Stage 4 Structured Capture Integration Plan
+- Branch: `codex/stage4-structured-capture-integration-plan`
 - Owner: codex
-- Status: merging into master (post-merge tag fix required)
-- Summary: Added worker start/finish checklists, prompt templates, control status script, README guidance, and worker-rule updates
+- Status: in_progress
+- Summary: Plan how Stage 4 structured capture CSV data will merge with Trimble job data
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In progress
@@ -30,7 +30,7 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 
 ## Review / validation
 
-- Project Control Worker Bootstrap merging now; post-merge tag correction pending.
+- Stage 4 integration plan in progress; validation pending.
 
 ## Blocked
 
@@ -52,7 +52,7 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 ## Backlog / next candidates
 
 - DNO-grade rulepack planning
-- Stage 4 *integration* into upload/QA/popup flow
+- Stage 4 *implementation* into upload/QA/popup flow after planning review
 - PoleCAD export
 - Electrical asset / line / cable interaction layer
 - Lifecycle visualization follow-up enhancements
