@@ -147,3 +147,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Control Center documentation only. No app runtime files modified. Full suite: 866 passed, 13 existing warnings.
+
+### 2026-05-10T13:03:20Z
+
+- Branch: `codex/review-workspace-v2-command-center`
+- Commit: `pending`
+- Jobs tested: `P008/F001`, `P010/F001`
+- Command run: `pytest -v && pre-commit run --all-files && Browser validation on /map/view/project/P008/F001 and /map/view/project/P010/F001`
+- validation_runs report path: `n/a`
+- failures.json status: n/a
+- Screenshots: no
+- Verdict: pass
+- Notes: Full suite passed: 868 passed, 1 skipped, 13 existing warnings. Browser validation confirmed review summary, grouped queue, plausible counts, focus/navigation controls, route access, planner awareness toggle, clean C2E2 popup, and clean console on both jobs.

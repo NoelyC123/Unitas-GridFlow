@@ -213,3 +213,21 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/01_CURRENT_STATE.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,AI_CONTROL/06_WORKER_LANES.md,AI_CONTROL/07_TASK_TEMPLATE.md,AI_CONTROL/08_COMPLETION_REPORT_TEMPLATE.md,AI_CONTROL/09_MERGE_GATE_CHECKLIST.md,AI_CONTROL/10_VALIDATION_EVIDENCE_PROTOCOL.md,AI_CONTROL/11_BRANCH_RETIREMENT_PROTOCOL.md,AI_CONTROL/12_OPEN_FOLLOWUPS.md,AI_CONTROL/13_C2E2_CLOSEOUT.md,AI_CONTROL/14_CONTROL_CENTER_USER_GUIDE.md,AI_CONTROL/15_WORKER_PROMPT_LIBRARY.md,AI_CONTROL/16_CONFLICT_AND_ROLLBACK_PROTOCOL.md,WORKFLOW_SYSTEM.md,CHANGELOG.md
 - Validation state: `pytest -v` passed; `pre-commit run --all-files` passed
 - Next action: review, merge, tag, update master control files, and retire branch.
+
+### 2026-05-10T12:49:10Z
+
+- Worker: codex
+- Branch: `codex/review-workspace-v2-command-center`
+- Action: Started Review Workspace v2 command center task and added design-readiness summary, grouped review queue, evidence quality indicators, and focused frontend tests.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/05_HANDOFF.md,app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py
+- Validation state: focused frontend tests in progress; full pytest, pre-commit, and browser validation pending
+- Next action: run full validation, browser-check P008/F001 and P010/F001, update validation log and handoff, then commit.
+
+### 2026-05-10T13:03:20Z
+
+- Worker: codex
+- Branch: `codex/review-workspace-v2-command-center`
+- Action: Completed Review Workspace v2 command center implementation and browser validation.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py
+- Validation state: `pytest -v` passed; `pre-commit run --all-files` passed; browser validation passed for P008/F001 and P010/F001
+- Next action: review, merge, tag, and update Control Center files on master.

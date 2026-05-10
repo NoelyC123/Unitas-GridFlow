@@ -20,25 +20,25 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: GridFlow Control Center v1.0
-- Branch: `codex/gridflow-control-center-v1`
+- Task: Review Workspace v2 — Design-Readiness Command Center
+- Branch: `codex/review-workspace-v2-command-center`
 - Owner: codex
-- Lane: Control Center / documentation
+- Lane: Frontend / review workspace
 - Status: ready_for_review
-- Summary: Build the full markdown-based AI worker operating system and make it the single source of truth for worker coordination.
+- Summary: Upgrade the map review workspace with design-readiness summary, grouped review queue, evidence indicators, and job-level decision state without changing C2E2 popup scope.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| GridFlow Control Center v1.0 | `codex/gridflow-control-center-v1` | codex | Control Center | ready_for_review |
+| Review Workspace v2 — Design-Readiness Command Center | `codex/review-workspace-v2-command-center` | codex | Frontend / review workspace | ready_for_review |
 
 ## Review / Validation
 
-- `pytest -v`: passed, 866 tests, 13 existing warnings.
+- `pytest -v`: passed, 868 passed, 1 skipped, 13 existing warnings.
 - `pre-commit run --all-files`: passed.
-- Browser/manual review harness is not required for this branch because no UI, map, popup, route, or review workflow runtime files are in scope.
+- Browser validation on `P008/F001` and `P010/F001`: passed; console clean.
 
 ## Blocked
 
@@ -53,6 +53,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Stage 4 structured capture foundation closed and tagged; runtime integration remains a future branch.
 - Technical documentation field/architecture package closed and tagged.
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
+- GridFlow Control Center v1.0 closed and tagged.
 
 ## Backlog / Next Candidates
 

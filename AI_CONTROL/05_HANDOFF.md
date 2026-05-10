@@ -5,42 +5,54 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: GridFlow Control Center v1.0
+- Task: Review Workspace v2 — Design-Readiness Command Center
 - Owner: codex
-- Branch: `codex/gridflow-control-center-v1`
+- Branch: `codex/review-workspace-v2-command-center`
 - Status: ready_for_review
-- Summary: Created the full markdown-based AI worker operating system for GridFlow. Validation passed.
-- Updated: 2026-05-10T13:45:00Z
+- Summary: Implemented a focused design-readiness command center around existing map/job review data. C2E2 popup scope is unchanged.
+- Updated: 2026-05-10T13:03:20Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch May Change
 
-- Only the allowed Control Center markdown files and root workflow/changelog docs.
-- No app runtime files.
-- No tests unless formatting-only changes are forced by tooling.
-- No archive files.
+- `app/static/js/map-viewer.js`
+- `app/static/css/map-viewer.css`
+- `app/templates/map_viewer.html`
+- `tests/test_review_*.py`
+- Required Control Center files and `CHANGELOG.md` if needed
 
 ## Validation Plan
 
-- `pytest -v`: passed, 866 tests, 13 existing warnings.
+- `pytest -v`
+- `pre-commit run --all-files`
+- Browser validation:
+  - `/map/view/project/P008/F001`
+  - `/map/view/project/P010/F001`
+
+## Current Validation State
+
+- `pytest -v`: passed, 868 passed, 1 skipped, 13 existing warnings.
 - `pre-commit run --all-files`: passed.
-- Manual browser validation is not required because this branch does not change UI/runtime behavior.
+- Browser validation: passed on `/map/view/project/P008/F001` and `/map/view/project/P010/F001`; console clean.
+- Manual review report: n/a, Browser validation used for this UI task.
 
 ## Next Action
 
-Review, merge, tag, update master control files, and retire `codex/gridflow-control-center-v1`. After merge, update `00_PROJECT_BOARD.md`, `01_CURRENT_STATE.md`, `02_CURRENT_TASK.md`, `03_WORKER_LOG.md`, `04_VALIDATION_LOG.md`, and `05_HANDOFF.md` on master to record the merge/tag state.
+Review, merge, tag, and update Control Center files on master.
 
 ## Do Not Start
 
-- Stage 4 runtime integration.
-- DNO rulepack implementation.
-- Map, popup, QA, geometry, span, or intake changes.
+- C2E2 popup field changes.
+- Stage 4 implementation.
+- Backend QA, geometry, span generation, or intake changes.
+- Archive edits.
 - Branch deletion or merge operations.
 
 ## Stable Milestones To Preserve
 
 - `c2e2-popup-scope-reduction-complete`
 - `c2e2-map-navigation-followups-complete`
+- `gridflow-control-center-v1-complete`
 - `project-control-center-foundation-complete`
 - `project-control-center-first-use-polish-complete`
 - `stage4-structured-capture-foundation-complete`
