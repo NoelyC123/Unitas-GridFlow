@@ -231,3 +231,21 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py
 - Validation state: `pytest -v` passed; `pre-commit run --all-files` passed; browser validation passed for P008/F001 and P010/F001
 - Next action: review, merge, tag, and update Control Center files on master.
+
+### 2026-05-10T13:30:58Z
+
+- Worker: claude-code
+- Branch: `claude-code/worker-coordination-hardening`
+- Action: Started task: Worker Coordination Hardening + Automated Control System. Build automated safety checks for startup, merge, branch health, and repo governance per AI_CONTROL/41 and 42 recommendations
+- Files changed: control files pending
+- Validation state: pending
+- Next action: implement task and validate
+
+### 2026-05-10T13:41:09Z
+
+- Worker: claude-code
+- Branch: `claude-code/worker-coordination-hardening`
+- Action: Implemented worker coordination hardening: 4 new safety scripts, start_task dirty-tree refusal, governance doc updates, 51 tests
+- Files changed: scripts/worker_safety_check.py, scripts/merge_safety_check.py, scripts/branch_health.py, scripts/repo_health.py, scripts/start_task.py, AI_CONTROL/06_WORKER_RULES.md, 07, 08 checklists, tests/test_worker_coordination.py
+- Validation state: 920 passed, 13 warnings; pre-commit all pass
+- Next action: Merge to master; execute branch retirement DELETE_NOW list

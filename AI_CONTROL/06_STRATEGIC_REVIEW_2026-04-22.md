@@ -1,5 +1,9 @@
 # Strategic Review — 2026-04-22
 
+> **SUPERSEDED — Do not use as source of truth.**
+> This document is superseded by `08_OHL_SURVEY_OPERATIONAL_STANDARD.md` and
+> `09_PROJECT_ORIGIN_AND_FIELD_NOTES.md`. Retained for historical context only.
+
 ## Purpose
 
 This document summarises the final conclusions from the external AI review process for Unitas-GridFlow.

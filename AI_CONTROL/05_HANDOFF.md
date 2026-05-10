@@ -5,12 +5,12 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Review Workspace v2 — Design-Readiness Command Center
-- Owner: codex
-- Branch: `codex/review-workspace-v2-command-center`
-- Status: ready_for_review
-- Summary: Implemented a focused design-readiness command center around existing map/job review data. C2E2 popup scope is unchanged.
-- Updated: 2026-05-10T13:03:20Z
+- Task: Worker Coordination Hardening + Automated Control System
+- Owner: claude-code
+- Branch: `claude-code/worker-coordination-hardening`
+- Status: in_progress
+- Summary: Build automated safety checks for startup, merge, branch health, and repo governance per AI_CONTROL/41 and 42 recommendations
+- Updated: 2026-05-10T13:30:58Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch May Change

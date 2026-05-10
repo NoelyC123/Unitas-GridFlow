@@ -38,3 +38,42 @@ Purpose: operating rules for Codex, Claude Code, Cursor, ChatGPT, and Noel when 
 - Treat the worker log as append-only operational history.
 - Treat the handoff file as the latest working instruction for the next worker.
 - Noel remains the merge and product-control point.
+
+## Coordination Protocol (from AI_CONTROL/41 — mandatory)
+
+**Single-writer marked sections.**
+The `<!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->` and
+`<!-- PROJECT_CONTROL:ACTIVE_TASK_START -->` marker blocks are
+single-writer per master baseline. Two agents must not both hold those
+blocks at the same time — the second agent rebases first.
+
+**Dirty-tree before start.**
+`start_task.py` will refuse to run if `git status` has uncommitted edits
+to AI_CONTROL files. Run `git restore AI_CONTROL/` or commit those
+changes before starting a new task. Run
+`python3 scripts/worker_safety_check.py --branch <branch>` before
+calling `start_task.py`.
+
+**File-numbering check.**
+Before creating a new AI_CONTROL document, confirm the numeric slot is
+free: `ls AI_CONTROL/<N>_*`. Better: use the namespace prefix scheme
+(`PCS_`, `PRD_`, `DOM_`, `STG_`, `AUD_`) for all new docs to avoid
+collisions entirely.
+
+**Pre-merge baseline check.**
+Any merge into master must include this summary in the merge commit
+message so the reviewer can see which side advanced where:
+
+```sh
+git rev-list --left-right --count master...<branch>
+git log master..<branch> --oneline | head
+git log <branch>..master --oneline | head
+```
+
+Run `python3 scripts/merge_safety_check.py <branch>` before any merge.
+
+**Map-viewer guard.**
+Any task whose spec says "do not change `app/static/js/map-viewer.js`"
+must verify pre-commit:
+`git diff master -- app/static/js/map-viewer.js | wc -l` must be `0`.
+Or use: `python3 scripts/worker_safety_check.py --forbid-map-viewer`

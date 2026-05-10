@@ -20,12 +20,11 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Review Workspace v2 — Design-Readiness Command Center
-- Branch: `codex/review-workspace-v2-command-center`
-- Owner: codex
-- Lane: Frontend / review workspace
-- Status: ready_for_review
-- Summary: Upgrade the map review workspace with design-readiness summary, grouped review queue, evidence indicators, and job-level decision state without changing C2E2 popup scope.
+- Task: Worker Coordination Hardening + Automated Control System
+- Branch: `claude-code/worker-coordination-hardening`
+- Owner: claude-code
+- Status: in_progress
+- Summary: Build automated safety checks for startup, merge, branch health, and repo governance per AI_CONTROL/41 and 42 recommendations
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress

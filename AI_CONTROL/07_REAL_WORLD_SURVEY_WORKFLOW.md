@@ -1,5 +1,9 @@
 # 07_REAL_WORLD_SURVEY_WORKFLOW.md
 
+> **SUPERSEDED — Do not use as source of truth.**
+> This document is superseded by `08_OHL_SURVEY_OPERATIONAL_STANDARD.md` and
+> `09_PROJECT_ORIGIN_AND_FIELD_NOTES.md`. Retained for historical context only.
+
 # Unitas-GridFlow — Real-World Survey Workflow Reference
 
 ## Purpose of this document

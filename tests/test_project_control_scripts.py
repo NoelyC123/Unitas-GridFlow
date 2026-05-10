@@ -13,6 +13,9 @@ def _configure_paths(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(start_task, "PROJECT_BOARD_PATH", control / "00_PROJECT_BOARD.md")
     monkeypatch.setattr(start_task, "WORKER_LOG_PATH", control / "03_WORKER_LOG.md")
     monkeypatch.setattr(start_task, "HANDOFF_PATH", control / "05_HANDOFF.md")
+    # Tests run against a tmp_path tree — always simulate a clean working tree
+    # so the dirty-tree refusal in start_task.main() does not block test runs.
+    monkeypatch.setattr(start_task, "_git_ai_control_dirty", lambda: [])
     monkeypatch.setattr(log_worker_update, "AI_CONTROL_DIR", control)
     monkeypatch.setattr(log_worker_update, "WORKER_LOG_PATH", control / "03_WORKER_LOG.md")
     monkeypatch.setattr(log_validation_run, "AI_CONTROL_DIR", control)

@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -12,6 +14,42 @@ AI_CONTROL_DIR = REPO_ROOT / "AI_CONTROL"
 PROJECT_BOARD_PATH = AI_CONTROL_DIR / "00_PROJECT_BOARD.md"
 WORKER_LOG_PATH = AI_CONTROL_DIR / "03_WORKER_LOG.md"
 HANDOFF_PATH = AI_CONTROL_DIR / "05_HANDOFF.md"
+
+
+def _git_ai_control_dirty() -> list[str]:
+    """Return lines from git status that touch AI_CONTROL files."""
+    try:
+        result = subprocess.run(
+            ["git", "status", "--short"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return []
+    return [line for line in result.stdout.splitlines() if "AI_CONTROL/" in line]
+
+
+def refuse_if_dirty_control_files() -> None:
+    """Abort with a clear message if AI_CONTROL files have uncommitted edits.
+
+    Prevents a new agent from inheriting a previous agent's in-progress
+    control-file edits and accidentally committing them under the wrong task.
+    (See AI_CONTROL/41_WORKER_COORDINATION_RISK_REVIEW.md, Incident 1.)
+    """
+    dirty = _git_ai_control_dirty()
+    if dirty:
+        lines = "\n".join(f"  {line}" for line in dirty)
+        print(
+            "ERROR: AI_CONTROL files have uncommitted changes:\n"
+            f"{lines}\n\n"
+            "Run `git restore AI_CONTROL/` or commit those changes before "
+            "starting a new task.  This check prevents stale control-file "
+            "edits from being attributed to the wrong task.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 def utc_timestamp() -> str:
@@ -130,6 +168,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    refuse_if_dirty_control_files()
     ts = utc_timestamp()
     append_worker_log(
         worker=args.owner,
