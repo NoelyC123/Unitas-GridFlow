@@ -201,6 +201,183 @@ def test_c2e2_support_popup_does_not_render_theoretical_absent_fields() -> None:
     )
 
 
+@NODE_UNAVAILABLE
+def test_c2e2_support_popup_omits_unavailable_export_fields() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const props = {
+              id: '77',
+              pole_id: '77',
+              structure_type: 'EXpole',
+              asset_intent: 'existing_support',
+              record_role: 'structural',
+              easting: 305000,
+              northing: 405000,
+              height: 9.5,
+              qa_status: 'PASS',
+              issue_count: 0,
+              warn_count: 0,
+              // Fields the current Trimble export does not provide. The
+              // C2E2 popup must NOT render any of these — neither as a
+              // value nor as a "MISSING" / "not recorded" placeholder.
+              from_support_id: 'A',
+              to_support_id: 'B',
+              parent_pole_id: 'P1',
+              parent_structure_id: 'S1',
+              cable_from_asset_id: 'CF',
+              cable_to_asset_id: 'CT',
+              survey_job_ref: 'J123',
+              surveyor: 'Jane',
+              survey_date: '2026-01-01',
+              equipment_used: 'TrimbleR12',
+              survey_limitations: 'overhead canopy',
+              gnss_accuracy: '0.05m H, 0.1m V',
+              gnss_accuracy_summary: '0.05m / 0.1m',
+            };
+            const html = viewer.buildPopupHtml(props, 'PASS', 54.1, -3.1);
+
+            // Whole sections that must be absent.
+            for (const sectionTitle of [
+              'Network links',
+              'Survey metadata',
+              'Lifecycle / Design',
+            ]) {
+              assertExcludes(html, sectionTitle);
+            }
+
+            // Specific row labels that must be absent everywhere in the popup.
+            for (const forbidden of [
+              'From support',
+              'To support',
+              'Parent pole',
+              'Parent structure',
+              'Cable from asset',
+              'Cable to asset',
+              'Job / scheme ref',
+              'Surveyor',
+              'Surveyed By',
+              'Survey date',
+              'Survey Date',
+              'Survey equipment',
+              'Survey limitations',
+              'GNSS / accuracy',
+              'GNSS Accuracy',
+            ]) {
+              assertExcludes(html, forbidden);
+            }
+
+            // The "MISSING" / "not recorded" placeholder strings these
+            // fields normally render must not appear either.
+            for (const placeholder of [
+              'not recorded in export',
+              'not recorded - positional confidence unknown',
+              'not recorded in current export',
+            ]) {
+              assertExcludes(html, placeholder);
+            }
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_c2e2_support_popup_skips_elevation_when_missing_and_renders_when_captured() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const base = {
+              id: '88',
+              pole_id: '88',
+              structure_type: 'EXpole',
+              asset_intent: 'existing_support',
+              record_role: 'structural',
+              easting: 306000,
+              northing: 406000,
+              height: 9.0,
+              qa_status: 'PASS',
+              issue_count: 0,
+              warn_count: 0,
+            };
+
+            const missing = viewer.buildPopupHtml(
+              { ...base, elevation: null },
+              'PASS',
+              54.2,
+              -3.2,
+            );
+            assertExcludes(missing, 'Elevation');
+
+            const empty = viewer.buildPopupHtml(
+              { ...base, elevation: '' },
+              'PASS',
+              54.2,
+              -3.2,
+            );
+            assertExcludes(empty, 'Elevation');
+
+            const present = viewer.buildPopupHtml(
+              { ...base, elevation: 24.5 },
+              'PASS',
+              54.2,
+              -3.2,
+            );
+            assertIncludes(present, 'Elevation');
+            assertIncludes(present, '24.5m');
+            """
+        )
+    )
+
+
+@NODE_UNAVAILABLE
+def test_c2e2_support_popup_keeps_truthful_sections() -> None:
+    _run_node(
+        _viewer_harness(
+            """
+            const props = {
+              id: '99',
+              pole_id: '99',
+              structure_type: 'Pol',
+              asset_intent: 'existing_support',
+              record_role: 'structural',
+              easting: 307000,
+              northing: 407000,
+              height: null,
+              qa_status: 'PASS',
+              issue_count: 0,
+              warn_count: 0,
+              material: null,
+              source_confidence_detail: {
+                provenance: 'field_observed_rtk',
+                confidence: 'high',
+                geometry_trust: 'high',
+              },
+            };
+            const html = viewer.buildPopupHtml(props, 'PASS', 54.3, -3.3);
+
+            for (const kept of [
+              'Identity and role',
+              'Geometry and measured evidence',
+              'QA and review status',
+              'Survey context',
+              'Lifecycle / relationships',
+              'Location',
+              // The section title contains an ampersand which is
+              // HTML-escaped in the rendered output.
+              'Source &amp; Confidence',
+            ]) {
+              assertIncludes(html, kept);
+            }
+
+            // Truthful height wording for an intermediate pole.
+            assertIncludes(html, 'Not measured (intermediate pole)');
+            // Truthful material wording.
+            assertIncludes(html, 'Not recorded in survey');
+            """
+        )
+    )
+
+
 def test_c2e2_static_methods_and_navigation_hooks_remain_present() -> None:
     js = MAP_JS.read_text(encoding="utf-8")
 

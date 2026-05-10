@@ -3037,6 +3037,11 @@ class MapViewer {
   }
 
   c2e2SupportPopupSections(assetKind, props, status, lat, lon) {
+    // C2E2 truthfulness scope: only sections backed by current Trimble
+    // export fields or GridFlow-derived values are kept. Network links,
+    // survey metadata, the legacy "Evidence" survey-detail block, and the
+    // duplicate "Lifecycle / Design" section render fields the current
+    // export does not carry, so they are deliberately omitted.
     const sections = [
       { title: 'Identity and role', rows: this.c2e2IdentityRows(props, assetKind) },
       { title: 'Geometry and measured evidence', rows: this.c2e2GeometryRows(props) },
@@ -3048,14 +3053,29 @@ class MapViewer {
       sections.push({ title: 'Design Requirements', rows: this.designRequirementRows(props) });
     }
     sections.push(
-      { title: 'Network links', rows: this.connectivityRows(props) },
-      { title: 'Survey metadata', rows: this.surveyMetadataRows(props) },
-      { title: 'Location', rows: this.locationRows(props, lat, lon) },
-      { title: 'Evidence', rows: this.evidenceRows(props) },
+      { title: 'Location', rows: this.c2e2LocationRows(props, lat, lon) },
       { title: 'Source & Confidence', rows: this.sourceConfidenceRows(props) },
-      { title: 'Lifecycle / Design', rows: this.lifecycleRows(props) },
     );
     return sections;
+  }
+
+  c2e2LocationRows(props, lat, lon) {
+    // Slim location rows for C2E2: Easting/Northing + Lat/Lon are always
+    // present; Elevation is only rendered when actually captured; GNSS
+    // accuracy is intentionally not duplicated here (it lives once, in
+    // the Source & Confidence geometry trust output).
+    const rows = [
+      this.popupRow(
+        'Easting / Northing',
+        props.easting ? `${props.easting}, ${props.northing}` : 'not recorded in export',
+        props.easting ? 'ok' : 'info',
+      ),
+      this.popupRow('Lat / Lon', `${lat.toFixed(5)}, ${lon.toFixed(5)}`, 'ok'),
+    ];
+    if (props.elevation != null && props.elevation !== '') {
+      rows.push(this.popupRow('Elevation', `${props.elevation}m`, 'ok'));
+    }
+    return rows;
   }
 
   c2e2FieldLabels() {
