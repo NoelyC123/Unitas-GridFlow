@@ -2,10 +2,9 @@
 
 This file has two jobs:
 
-1. **xfail tests** — document the three known Stage 4A blockers (VLD-1, VLD-2,
-   VLD-3) as explicit failing assertions. Each is marked xfail(strict=True) so
-   the harness *errors* if a blocker is silently fixed without updating this
-   file. Codex must satisfy every xfail test to clear the Stage 4A merge gate.
+1. **Stage 4A fixed-blocker tests** — document the three Stage 4A blockers
+   (VLD-1, VLD-2, VLD-3) as explicit passing assertions now that the library
+   fixes have landed.
 
 2. **Library isolation tests** — pass on current master and must continue to
    pass after Stage 4A. They verify that Stage 4 library modules have no
@@ -24,8 +23,8 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-# sys is intentionally not imported here — inline imports are used inside test
-# bodies so xfail tests remain runnable even if the module is missing.
+# sys is intentionally not imported here — inline imports keep this safety
+# harness cheap to collect.
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -134,7 +133,7 @@ def test_structured_capture_schema_source_constant() -> None:
 
 
 # ---------------------------------------------------------------------------
-# VLD-1: "none" blank-token handling  (xfail until Codex fixes VLD-1)
+# VLD-1: "none" blank-token handling
 # ---------------------------------------------------------------------------
 #
 # Current bug: "none" is in _BLANK_TOKENS so is_blank("none") returns True.
@@ -151,13 +150,6 @@ def test_structured_capture_schema_source_constant() -> None:
 #   condition:       ("good", "fair", "poor", "unsafe", "unknown")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "VLD-1: 'none' is currently in _BLANK_TOKENS so is_blank('none') returns True. "
-        "Codex must remove 'none' from _BLANK_TOKENS to fix this."
-    ),
-)
 def test_vld1_none_is_not_blank() -> None:
     """'none' must NOT be treated as a blank/unspecified value."""
     from app.structured_capture_validators import is_blank
@@ -168,10 +160,6 @@ def test_vld1_none_is_not_blank() -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-1: 'none' for stay_type normalises to None (blank) instead of 'none' (valid enum).",
-)
 def test_vld1_stay_type_none_is_valid_enum() -> None:
     """stay_type='none' must validate as a valid enum member and normalise to 'none'."""
     from app.structured_capture_validators import validate_allowed_value
@@ -184,10 +172,6 @@ def test_vld1_stay_type_none_is_valid_enum() -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-1: 'none' for equipment_type normalises to None instead of 'none'.",
-)
 def test_vld1_equipment_type_none_is_valid_enum() -> None:
     """equipment_type='none' must validate as a valid enum member."""
     from app.structured_capture_validators import validate_allowed_value
@@ -197,10 +181,6 @@ def test_vld1_equipment_type_none_is_valid_enum() -> None:
     assert result["normalised"].get("equipment_type") == "none"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-1: 'none' for lean_direction normalises to None instead of 'none'.",
-)
 def test_vld1_lean_direction_none_is_valid_enum() -> None:
     """lean_direction='none' must validate as a valid enum member."""
     from app.structured_capture_validators import validate_allowed_value
@@ -210,10 +190,6 @@ def test_vld1_lean_direction_none_is_valid_enum() -> None:
     assert result["normalised"].get("lean_direction") == "none"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-1: 'none' for lean_severity normalises to None instead of 'none'.",
-)
 def test_vld1_lean_severity_none_is_valid_enum() -> None:
     """lean_severity='none' must validate as a valid enum member."""
     from app.structured_capture_validators import validate_allowed_value
@@ -223,14 +199,6 @@ def test_vld1_lean_severity_none_is_valid_enum() -> None:
     assert result["normalised"].get("lean_severity") == "none"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "VLD-1 side-effect: today is_blank('none')=True so condition='none' returns "
-        "valid=True (treated as blank, not invalid enum). After VLD-1 fix, is_blank('none')=False "
-        "so the enum check runs and condition correctly rejects 'none'."
-    ),
-)
 def test_vld1_condition_does_not_allow_none_as_valid_enum() -> None:
     """'none' is not in condition's allowed_values — it must be rejected after VLD-1 fix.
 
@@ -249,13 +217,6 @@ def test_vld1_condition_does_not_allow_none_as_valid_enum() -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "VLD-1: normalise_stage4_row currently normalises stay_type='none' to None "
-        "(is_blank erases it). After fix, normalised stay_type must be the string 'none'."
-    ),
-)
 def test_vld1_normalise_does_not_erase_none_enum_values() -> None:
     """normalise_stage4_row must preserve explicit 'none' enum values as the string 'none'.
 
@@ -300,10 +261,6 @@ def test_true_blank_tokens_remain_blank_after_vld1_fix(token: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-1: 'None', 'NONE', ' none ' are currently treated as blank.",
-)
 @pytest.mark.parametrize("variant", ["None", "NONE", " none ", "NONE "])
 def test_vld1_none_case_variants_treated_as_enum_for_allowed_field(variant: str) -> None:
     """Mixed-case and whitespace variants of 'none' must resolve to the 'none' enum member."""
@@ -317,17 +274,10 @@ def test_vld1_none_case_variants_treated_as_enum_for_allowed_field(variant: str)
 
 
 # ---------------------------------------------------------------------------
-# VLD-2: row identity / pole_id  (xfail until Codex fixes VLD-2)
+# VLD-2: row identity / pole_id
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "VLD-2: pole_id does not exist in the Stage 4 schema yet. "
-        "Codex must add pole_id as a required identity field."
-    ),
-)
 def test_vld2_pole_id_field_exists_in_schema() -> None:
     """pole_id must be a registered Stage 4 field."""
     from app.structured_capture_schema import get_stage4_field_definition
@@ -340,10 +290,6 @@ def test_vld2_pole_id_field_exists_in_schema() -> None:
     assert definition["field_name"] == "pole_id"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-2: pole_id is absent from get_stage4_template_headers().",
-)
 def test_vld2_pole_id_in_template_headers() -> None:
     """pole_id must appear in the CSV template headers."""
     from app.structured_capture_schema import get_stage4_template_headers
@@ -354,10 +300,6 @@ def test_vld2_pole_id_in_template_headers() -> None:
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="VLD-2: validate_required_fields does not require pole_id yet.",
-)
 def test_vld2_missing_pole_id_fails_required_field_check() -> None:
     """A row with all metadata but no pole_id must fail required-field validation."""
     from app.structured_capture_validators import validate_required_fields
@@ -385,16 +327,8 @@ def test_vld2_missing_pole_id_fails_required_field_check() -> None:
 def test_vld2_blank_or_unknown_pole_id_is_rejected(bad_id: str) -> None:
     """Blank or 'unknown' pole_id must not pass as a valid value.
 
-    This test currently passes but for the WRONG reason: pole_id does not exist
-    in the Stage 4 schema yet, so validate_allowed_value returns valid=False
-    with "Unknown Stage 4 field: 'pole_id'".
-
-    After VLD-2 fix (pole_id added to schema), the test must continue to pass
-    but the error message will change to reflect proper identity validation
-    (e.g. "blank pole_id is not a valid identity key").
-
-    If this test starts failing after VLD-2 work, it means blank pole_id values
-    are being accepted as valid identity keys — a merge-safety regression.
+    This verifies blank/placeholder pole_id values are rejected for identity
+    validation rather than accepted as merge keys.
     """
     from app.structured_capture_validators import validate_allowed_value
 
@@ -403,30 +337,34 @@ def test_vld2_blank_or_unknown_pole_id_is_rejected(bad_id: str) -> None:
         f"pole_id={bad_id!r} was accepted. "
         "Blank and unknown pole_id values cannot serve as merge keys."
     )
+    assert any("unsafe or missing row identity" in err for err in result["errors"])
+    assert result["field_results"], "pole_id identity failures must include field-level evidence"
+    field_result = result["field_results"][0]
+    assert field_result["field_name"] == "pole_id"
+    assert field_result["reason"] == "unsafe or missing row identity"
+    assert (
+        field_result["recommendation"] == "provide stable pole_id before merge/runtime integration"
+    )
 
 
 # ---------------------------------------------------------------------------
-# VLD-3: structured_capture source registration  (xfail until Codex fixes VLD-3)
+# VLD-3: structured_capture source registration
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "VLD-3: 'structured_capture' is not in field_reference.py's source vocabulary. "
-        "Codex must register it before any popup/API/report surface uses it."
-    ),
-)
 def test_vld3_structured_capture_registered_as_source() -> None:
     """field_reference must recognise 'structured_capture' as a valid source label."""
-    from app.field_reference import FIELD_DEFINITIONS
-
-    all_sources = {defn.get("source") for defn in FIELD_DEFINITIONS.values()}
-    assert "structured_capture" in all_sources, (
-        f"'structured_capture' not in field_reference sources. "
-        f"Current sources: {sorted(s for s in all_sources if s)}. "
-        "Register structured_capture before any popup path can use it."
+    from app.field_reference import (
+        FIELD_SOURCE_STRUCTURED_CAPTURE,
+        STRUCTURED_CAPTURE_FIELDS,
+        VALID_FIELD_SOURCES,
+        is_valid_field_source,
     )
+
+    assert FIELD_SOURCE_STRUCTURED_CAPTURE == "structured_capture"
+    assert "structured_capture" in VALID_FIELD_SOURCES
+    assert is_valid_field_source("structured_capture")
+    assert STRUCTURED_CAPTURE_FIELDS == frozenset()
 
 
 def test_vld3_existing_source_labels_unchanged() -> None:

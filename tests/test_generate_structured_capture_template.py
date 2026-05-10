@@ -39,6 +39,7 @@ def test_include_descriptions_mode_writes_useful_content(tmp_path: Path) -> None
     assert text.startswith("# GridFlow Stage 4 structured capture template")
     # mentions every group label
     for label in (
+        "Row identity",
         "Pole specification",
         "Condition / defects",
         "Electrical / conductor",
@@ -48,7 +49,7 @@ def test_include_descriptions_mode_writes_useful_content(tmp_path: Path) -> None
     ):
         assert label in text
     # mentions each required field name
-    for required_field in ("capture_source", "captured_by", "capture_date"):
+    for required_field in ("pole_id", "capture_source", "captured_by", "capture_date"):
         assert required_field in text
 
     # CSV header row still parses cleanly when comment lines are stripped

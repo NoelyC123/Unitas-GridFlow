@@ -17,6 +17,7 @@ from app.structured_capture_schema import (
 )
 
 EXPECTED_GROUPS = {
+    "row_identity",
     "pole_specification",
     "condition_defects",
     "electrical_conductor",
@@ -26,6 +27,10 @@ EXPECTED_GROUPS = {
 }
 
 EXPECTED_FIELDS = {
+    # row identity
+    "pole_id",
+    "project_id",
+    "file_id",
     # pole specification
     "pole_class",
     "pole_strength",
@@ -84,12 +89,14 @@ def test_template_headers_include_key_fields() -> None:
         "capture_date",
     ):
         assert key in headers, f"{key} missing from template headers"
+    assert headers[:3] == ["pole_id", "project_id", "file_id"]
     # headers must be unique and stable
     assert len(headers) == len(set(headers))
 
 
 def test_required_fields_returned() -> None:
     required = get_stage4_required_fields()
+    assert "pole_id" in required
     assert "capture_source" in required
     assert "captured_by" in required
     assert "capture_date" in required
@@ -99,6 +106,9 @@ def test_required_fields_returned() -> None:
 
 
 def test_get_fields_by_group_works() -> None:
+    identity = {d["field_name"] for d in get_stage4_fields_by_group("row_identity")}
+    assert {"pole_id", "project_id", "file_id"} <= identity
+
     pole_spec = {d["field_name"] for d in get_stage4_fields_by_group("pole_specification")}
     assert {"pole_class", "pole_strength", "pole_material", "specification"} <= pole_spec
 
@@ -113,6 +123,7 @@ def test_aliases_resolve() -> None:
     # canonical and alias both resolve via is_stage4_field / get_definition
     assert is_stage4_field("pole_class")
     assert is_stage4_field("class")  # alias for pole_class
+    assert is_stage4_field("Point")  # alias for pole_id
     assert is_stage4_field("voltage")  # alias for voltage_carried
     assert not is_stage4_field("totally_invented_field")
 
@@ -123,6 +134,10 @@ def test_aliases_resolve() -> None:
     case_alias = get_stage4_field_definition("Has_Stay")
     assert case_alias is not None
     assert case_alias["field_name"] == "stay_present"
+
+    pole_alias = get_stage4_field_definition("support_id")
+    assert pole_alias is not None
+    assert pole_alias["field_name"] == "pole_id"
 
 
 def test_all_fields_have_stage4_future_capture_status() -> None:

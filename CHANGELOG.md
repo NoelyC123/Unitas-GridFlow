@@ -8,6 +8,35 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-10 - Stage 4A library correctness fixes
+
+### Changed
+
+- Aligned the Stage 4A safety harness after merging the safety-audit tests and
+  library fixes: removed strict xfail markers from fixed VLD-1/VLD-2/VLD-3
+  checks.
+- Added Stage 4 structured-capture row identity fields (`pole_id`, `project_id`,
+  `file_id`) and regenerated the CSV template header to include them.
+- Updated structured-capture validators so `"none"` is no longer globally
+  destroyed as a blank token; it remains valid for explicit none-capable fields
+  and invalid for fields that do not allow it.
+- Added deterministic `pole_id` identity extraction, merge-readiness reporting,
+  duplicate `pole_id` detection, and per-field validation result metadata.
+- Hardened `pole_id` validation so blank, placeholder, and unknown identity
+  values cannot pass as merge-ready row identities.
+- Registered `structured_capture` as a valid library-level field source without
+  adding Stage 4 fields to live popups or Review OS.
+
+### Tests
+
+- Added Stage 4A library correctness and non-integration regression coverage.
+- Preserved C2E2 popup scope and Review OS regression coverage.
+
+### Notes
+
+- No runtime upload integration, C2E2 popup surfacing, Review OS surfacing, map
+  rendering, QA, geometry, span generation, or intake behaviour changed.
+
 ## 2026-05-10 - Stage 4 readiness specification
 
 ### Added

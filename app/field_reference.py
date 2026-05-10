@@ -10,6 +10,27 @@ No side effects. No imports from other app modules.
 
 from __future__ import annotations
 
+FIELD_SOURCE_SURVEY = "survey"
+FIELD_SOURCE_DERIVED = "derived"
+FIELD_SOURCE_TRIMBLE_ATTR = "trimble_attr"
+FIELD_SOURCE_STRUCTURED_CAPTURE = "structured_capture"
+
+VALID_FIELD_SOURCES: frozenset[str] = frozenset(
+    {
+        FIELD_SOURCE_SURVEY,
+        FIELD_SOURCE_DERIVED,
+        FIELD_SOURCE_TRIMBLE_ATTR,
+        FIELD_SOURCE_STRUCTURED_CAPTURE,
+    }
+)
+
+FIELD_SOURCE_LABELS: dict[str, str] = {
+    FIELD_SOURCE_SURVEY: "Survey",
+    FIELD_SOURCE_DERIVED: "GridFlow derived",
+    FIELD_SOURCE_TRIMBLE_ATTR: "Trimble attribute",
+    FIELD_SOURCE_STRUCTURED_CAPTURE: "Stage 4 structured capture",
+}
+
 # ---------------------------------------------------------------------------
 # Field groups for popup layout
 # ---------------------------------------------------------------------------
@@ -59,7 +80,7 @@ POPUP_GROUP_ORDER: list[str] = [
 #   label           str   Display label in popup
 #   aliases         list  Alternative column names accepted on intake
 #   missing_wording str   Default text when value is None/empty
-#   source          str   'survey' | 'derived' | 'trimble_attr'
+#   source          str   'survey' | 'derived' | 'trimble_attr' | 'structured_capture'
 #   always_present  bool  True if guaranteed non-null after processing
 #   unit            str|None  Physical unit for display
 #   trimble_attr    str|None  Trimble attribute key (e.g. 'HEIGHT', 'REMARK')
@@ -300,6 +321,12 @@ DERIVED_FIELDS: frozenset[str] = frozenset(
     name for name, defn in FIELD_DEFINITIONS.items() if defn["source"] == "derived"
 )
 
+# Registered provenance source for Stage 4 library work. No Stage 4 fields are
+# added to FIELD_DEFINITIONS or POPUP_FIELD_GROUPS until runtime integration.
+STRUCTURED_CAPTURE_FIELDS: frozenset[str] = frozenset(
+    name for name, defn in FIELD_DEFINITIONS.items() if defn["source"] == "structured_capture"
+)
+
 
 # ---------------------------------------------------------------------------
 # Helper functions
@@ -309,6 +336,20 @@ DERIVED_FIELDS: frozenset[str] = frozenset(
 def get_field_definition(field_name: str) -> dict | None:
     """Return the field definition dict for field_name, or None if unknown."""
     return FIELD_DEFINITIONS.get(field_name)
+
+
+def is_valid_field_source(source: str | None) -> bool:
+    """Return True if ``source`` is a registered field provenance type."""
+
+    return isinstance(source, str) and source.strip() in VALID_FIELD_SOURCES
+
+
+def get_field_source_label(source: str | None) -> str:
+    """Return the display label for a registered provenance source."""
+
+    if not isinstance(source, str):
+        return "Unknown source"
+    return FIELD_SOURCE_LABELS.get(source.strip(), "Unknown source")
 
 
 def get_all_aliases(field_name: str) -> list[str]:

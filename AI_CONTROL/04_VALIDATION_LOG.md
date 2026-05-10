@@ -195,3 +195,27 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: unknown
 - Verdict: pass
 - Notes: 15 xfails are by design (VLD-1/2/3 blockers). Leakage tests all pass. Pre-commit clean. merge_safety_check.py Stage 4A boundary checks added.
+
+### 2026-05-10T15:02:02Z
+
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Commit: `unknown`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python scripts/repo_health.py && python scripts/merge_safety_check.py codex/stage4a-library-correctness-fixes`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: pytest passed with 931 passed, 1 skipped; browser/manual review not required because Stage 4A is not live-integrated
+
+### 2026-05-10T16:04:50Z
+
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Commit: `unknown`
+- Jobs tested: n/a
+- Command run: `pytest -v tests/test_stage4a_safety_boundary.py && pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Safety harness xfail markers removed; no XPASS(strict); VLD-2 placeholder pole_id tests pass; full suite 992 passed
