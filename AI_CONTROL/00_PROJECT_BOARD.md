@@ -20,27 +20,26 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4B Structured Capture Validation Preview
-- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Task: Real iPad Field Pilot Package v1
+- Branch: `codex/real-ipad-field-pilot-package-v1`
 - Owner: codex
 - Status: ready_for_review
-- Summary: Build pre-runtime structured capture validation and import preview system
+- Summary: Built the real-world iPad field pilot docs, template, fixtures, and validation package on top of Stage 4B
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Stage 4B Structured Capture Validation Preview | `codex/stage4b-structured-capture-validation-preview` | codex | Stage 4 library foundation | ready for review |
+| Real iPad Field Pilot Package v1 | `codex/real-ipad-field-pilot-package-v1` | codex | Stage 4 field pilot operating pack | ready for review |
 
 ## Review / Validation
 
-- Stage 4B targeted tests: passed.
-- `pytest -v`: passed, 1035 passed including local golden-sample fixtures.
+- `pytest -v`: passed, 1042 passed, 1 skipped.
 - `pre-commit run --all-files`: passed.
-- `python scripts/repo_health.py`: warning-only due known numbering collisions and unrelated untracked local control files.
-- `python scripts/merge_safety_check.py codex/stage4b-structured-capture-validation-preview`: safe to merge.
-- Browser validation: not required for Stage 4B validation/preview-only changes.
+- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
+- `python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1`: safe to merge.
+- Browser validation: not required for this docs/template/test-only Stage 4 package.
 
 ## Blocked
 
@@ -55,6 +54,8 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - C2F review focus + issue filtering closed and tagged.
 - C2G lifecycle replacement visualization closed and tagged.
 - Stage 4 structured capture foundation closed and tagged; runtime integration remains a future branch.
+- Stage 4B structured capture validation preview complete; runtime integration remains blocked pending pilot evidence.
+- Stage 4B/4C safety pilot harness complete; Stage 4C remains blocked pending a real pilot result.
 - Technical documentation field/architecture package closed and tagged.
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 - GridFlow Control Center v1.0 closed and tagged.

@@ -375,3 +375,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: update handoff or proceed to review
+
+### 2026-05-10T17:06:35Z
+
+- Worker: codex
+- Branch: `codex/real-ipad-field-pilot-package-v1`
+- Action: Built the real iPad field pilot package with an iPad-friendly template, operator docs, pilot fixtures, and Stage 4B-backed validation tests
+- Files changed: templates/structured_capture_ipad_pilot_template.csv,docs/STAGE4_REAL_FIELD_PILOT_GUIDE.md,docs/STAGE4_FIELD_DATA_DICTIONARY.md,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_EVIDENCE_FOLDER_PROTOCOL.md,docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md,tests/fixtures/stage4/pilot_valid_sample.csv,tests/fixtures/stage4/pilot_invalid_sample.csv,tests/fixtures/stage4/pilot_duplicate_identity_sample.csv,tests/test_stage4_pilot_package.py,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed; `pre-commit run --all-files` passed; repo_health and merge_safety warning-only before commit because branch changes were uncommitted
+- Next action: commit branch and rerun repo_health plus merge_safety on the committed tree

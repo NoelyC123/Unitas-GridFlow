@@ -8,6 +8,23 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-10 - Real iPad field pilot package v1
+
+### Added
+
+- Added a field-ready iPad pilot template at
+  `templates/structured_capture_ipad_pilot_template.csv` with the full Stage 4B
+  header set reordered for on-site capture.
+- Added field-pilot operating docs covering survey scope, field dictionary,
+  validation workflow, evidence naming, and result recording.
+- Added pilot fixture CSVs for clean, invalid, and duplicate-identity field
+  scenarios plus a dedicated `tests/test_stage4_pilot_package.py` suite.
+
+### Notes
+
+- This branch is still pre-runtime only. No Stage 4 upload route, popup,
+  Review OS, QA, intake, or map-viewer integration was added.
+
 ## 2026-05-10 - Stage 4B structured-capture validation preview
 
 ### Added

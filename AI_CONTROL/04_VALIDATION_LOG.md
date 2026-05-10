@@ -243,3 +243,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: pytest passed 1035 tests including local golden-sample fixtures; pre-commit passed; repo health/merge safety to rerun after commit
+
+### 2026-05-10T17:06:35Z
+
+- Branch: `codex/real-ipad-field-pilot-package-v1`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Field pilot package only; no app runtime files modified. `pytest -v` passed with 1042 passed, 1 skipped. `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions. `python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1` is safe to merge.

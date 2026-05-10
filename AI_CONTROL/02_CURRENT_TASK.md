@@ -4,30 +4,33 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Stage 4B Structured Capture Validation Preview
-- Branch: `codex/stage4b-structured-capture-validation-preview`
+- Task: Real iPad Field Pilot Package v1
+- Branch: `codex/real-ipad-field-pilot-package-v1`
 - Owner: codex
-- Lane: Stage 4 library foundation
+- Lane: Stage 4 field pilot operating pack
 - Status: ready_for_review
 - Requested by: Noel
-- Runtime changes allowed: no live app integration; validation/schema/preview only
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python scripts/repo_health.py`; `python scripts/merge_safety_check.py codex/stage4b-structured-capture-validation-preview`
-- Validation result: `pytest -v` passed, 1035 passed; `pre-commit run --all-files` passed; repo health and merge safety warning-only before commit because the tree was dirty/uncommitted
+- Runtime changes allowed: no live app integration; docs/templates/fixtures/tests only
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python scripts/repo_health.py`; `python scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1`
+- Validation result: `pytest -v` passed with 1042 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1` is safe to merge
 - Browser validation required: no; Stage 4B is not live-integrated into UI/runtime
 - Popup scope changes allowed: no
 
 ## Goal
 
-Build a complete pre-runtime structured-capture validation and import-preview system that can validate CSV-style Stage 4 rows before any future runtime merge is allowed.
+Build the practical end-to-end iPad field pilot package Noel can use to capture
+10 to 20 supports and validate the resulting CSV through the existing Stage 4B
+preview rules.
 
 ## Scope
 
-- Harden the Stage 4 schema around identity, lifecycle intent, height, material, condition, stay/equipment, evidence, notes, source, and photo-reference fields.
-- Add field-level validation metadata: raw value, normalised value, validity, severity, reason, recommendation, source, row id, and pole id.
-- Add row-level classification: `merge-ready`, `valid but not merge-ready`, `review-required`, `invalid`, and `blocked`.
-- Add file/import preview validation for headers, unknown/missing columns, duplicate pole IDs, summary counts, warnings, errors, and safe preview verdict.
-- Regenerate the structured-capture CSV template from the hardened schema.
-- Add Stage 4B tests and preserve Stage 4A, C2E2 popup, Review OS, and runtime leakage regression coverage.
+- Create a real-world field pilot guide, field dictionary, validation instructions,
+  evidence-folder protocol, and result-summary template.
+- Create an iPad-friendly structured capture pilot template aligned with the
+  Stage 4B schema.
+- Add pilot fixture CSVs covering valid, invalid, and duplicate-identity field use.
+- Add tests proving the pilot package aligns with Stage 4B validation rules and
+  stays runtime/UI isolated.
 - Update Control Center logs, handoff, and changelog.
 
 ## Out Of Scope
@@ -36,18 +39,18 @@ Build a complete pre-runtime structured-capture validation and import-preview sy
 - Stage 4 fields in popups or Review OS.
 - Backend QA, geometry, span generation, intake, or map rendering changes.
 - Stage 4C runtime integration.
-- Stage 4D browser/review workspace surfacing.
 - Archive files.
 
 ## Acceptance Criteria
 
-- Clean structured-capture rows produce a safe pre-runtime import preview.
-- Missing, unsafe, or duplicate `pole_id` values block preview merge readiness.
-- Invalid enums, invalid heights, missing required metadata, unknown sources, and contradictory evidence are classified with clear reasons and recommendations.
-- Template headers align with the schema.
-- Stage 4 remains isolated from live upload/intake, QA, map rendering, Review OS, and C2E2 popups.
-- `pytest -v`, `pre-commit run --all-files`, `repo_health.py`, and `merge_safety_check.py` pass or report only known non-blocking warnings.
+- Noel can use the docs and pilot template on an iPad without runtime help.
+- Pilot CSV fixtures validate exactly as intended under Stage 4B rules.
+- ISO date rules and explicit-`none` rules are clear and test-covered.
+- The pilot package does not add runtime/UI Stage 4 integration.
+- `pytest -v`, `pre-commit run --all-files`, `repo_health.py`, and
+  `merge_safety_check.py` pass or report only known non-blocking warnings.
 
 ## Current Next Action
 
-Commit the completed Stage 4B branch, rerun repo health and merge safety from the committed tree, then hand back for review.
+Hand back for review and real-world field execution. Stage 4C remains blocked
+until Noel records a real pilot result and go/no-go decision.
