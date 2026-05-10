@@ -1037,8 +1037,26 @@
             <div id="filter-note" style="font-size:0.82rem;color:#6b7280;text-align:center;margin-top:6px;min-height:1.2em;"></div>
             <div id="frame-summary" style="display:none;font-size:0.78rem;color:#6b7280;text-align:center;margin-top:2px;"></div>
             <div class="workspace-panel review-intelligence-panel" aria-label="Review workspace summary">
-              <div class="workspace-panel-title">Review workspace</div>
-              <div id="review-intelligence-note" class="workspace-panel-note">Span-level review intelligence loads with the map route data.</div>
+              <div class="workspace-panel-title">Design-readiness command center</div>
+              <div id="review-intelligence-note" class="workspace-panel-note">Review signals load from the current job, route, planner awareness, and lifecycle map data.</div>
+              <div id="review-decision-banner" class="gf-review-decision-banner gf-review-decision-review" aria-live="polite">
+                <div id="review-decision-label" class="gf-review-decision-label">Partially ready — review required</div>
+                <div id="review-decision-detail" class="gf-review-decision-detail">Review state is derived from existing GridFlow issue and evidence signals.</div>
+              </div>
+              <div class="gf-review-summary-strip" aria-label="Job-level review summary">
+                <div class="gf-review-summary-item">
+                  <span class="gf-review-summary-label">Total records</span>
+                  <strong id="review-total-records">0</strong>
+                </div>
+                <div class="gf-review-summary-item">
+                  <span class="gf-review-summary-label">Mapped records</span>
+                  <strong id="review-mapped-records">0</strong>
+                </div>
+                <div class="gf-review-summary-item">
+                  <span class="gf-review-summary-label">Route/span issues</span>
+                  <strong id="review-route-issue-count">0</strong>
+                </div>
+              </div>
               <div class="workspace-kpi-grid review-intelligence-grid">
                 <div class="workspace-kpi review-intelligence-kpi review-intelligence-kpi-fail gf-review-nav-card gf-review-card-disabled" data-review-nav-group="blockers" role="button" tabindex="0" aria-disabled="true">
                   <div class="workspace-kpi-label">Design blockers</div>
@@ -1064,6 +1082,42 @@
                   <div class="workspace-kpi-label">Readiness verdict</div>
                   <div id="workspace-readiness-verdict" class="workspace-kpi-value status-warn">PARTIALLY READY</div>
                   <div class="workspace-kpi-detail">Derived from current span status and evidence signals.</div>
+                </div>
+              </div>
+              <div class="gf-review-queue" aria-label="Review queue">
+                <div class="gf-review-queue-title">Review queue</div>
+                <button type="button" class="gf-review-queue-item gf-review-nav-card gf-review-card-disabled" data-review-nav-group="blockers" aria-disabled="true">
+                  <span><strong>Design Blockers</strong><small>Resolve before design use.</small></span>
+                  <span id="review-queue-blockers-count" class="gf-review-queue-count severity-blocker">0</span>
+                </button>
+                <button type="button" class="gf-review-queue-item gf-review-nav-card gf-review-card-disabled" data-review-nav-group="review" aria-disabled="true">
+                  <span><strong>Review Required</strong><small>Practitioner review before sign-off.</small></span>
+                  <span id="review-queue-review-count" class="gf-review-queue-count severity-review">0</span>
+                </button>
+                <button type="button" class="gf-review-queue-item gf-review-nav-card gf-review-card-disabled" data-review-nav-group="gaps" aria-disabled="true">
+                  <span><strong>Evidence Gaps</strong><small>Missing or unconfirmed field evidence.</small></span>
+                  <span id="review-queue-gaps-count" class="gf-review-queue-count severity-warning">0</span>
+                </button>
+                <button type="button" class="gf-review-queue-item gf-review-nav-card gf-review-card-disabled" data-review-nav-group="awareness" aria-disabled="true">
+                  <span><strong>Planner Awareness</strong><small>Context notes linked to review.</small></span>
+                  <span id="review-queue-awareness-count" class="gf-review-queue-count severity-info">0</span>
+                </button>
+                <button type="button" class="gf-review-queue-item gf-review-nav-card gf-review-card-disabled" data-review-nav-group="route" aria-disabled="true">
+                  <span><strong>Route / Span Checks</strong><small>Geometry, clearance, and route confidence signals.</small></span>
+                  <span id="review-queue-route-count" class="gf-review-queue-count severity-review">0</span>
+                </button>
+                <button type="button" class="gf-review-queue-item gf-review-card-disabled" data-review-command-action="lifecycle" aria-disabled="true">
+                  <span><strong>Lifecycle / Replacement Checks</strong><small>Existing/proposed relationship records.</small></span>
+                  <span id="review-queue-lifecycle-count" class="gf-review-queue-count severity-info">0</span>
+                </button>
+              </div>
+              <div class="gf-evidence-quality" aria-label="Evidence quality indicators">
+                <div class="gf-evidence-quality-title">Evidence quality</div>
+                <div class="gf-evidence-quality-grid">
+                  <div><span>Measured heights</span><strong id="review-measured-height-count">0</strong></div>
+                  <div><span>Missing height</span><strong id="review-missing-height-count">0</strong></div>
+                  <div><span>Missing material</span><strong id="review-material-missing-count">0</strong></div>
+                  <div><span>Field verification required</span><strong id="review-low-confidence-count">0</strong></div>
                 </div>
               </div>
               <div id="review-nav-controls" class="gf-review-nav-controls" aria-live="polite">

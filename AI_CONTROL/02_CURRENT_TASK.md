@@ -4,47 +4,50 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: GridFlow Control Center v1.0
-- Branch: `codex/gridflow-control-center-v1`
+- Task: Review Workspace v2 — Design-Readiness Command Center
+- Branch: `codex/review-workspace-v2-command-center`
 - Owner: codex
-- Lane: Control Center / documentation
+- Lane: Frontend / review workspace
 - Status: ready_for_review
 - Requested by: Noel
-- Runtime changes allowed: no
+- Runtime changes allowed: yes, limited to review/map UI files named in the prompt
 - Tests required: `pytest -v`; `pre-commit run --all-files`
-- Validation result: passed, 866 tests, 13 existing warnings; pre-commit passed
-- Browser validation required: no, because this branch is docs/control only
+- Validation result: passed, 868 passed, 1 skipped, 13 existing warnings; pre-commit passed
+- Browser validation required: yes, on `/map/view/project/P008/F001` and `/map/view/project/P010/F001`
+- Browser validation result: passed on both jobs; console clean
+- Popup scope changes allowed: no
 
 ## Goal
 
-Build the full project-control layer that becomes the single source of truth for all AI workers and replaces copy/paste coordination between ChatGPT, Codex, Claude Code, Claude Desktop, and Cursor.
+Upgrade GridFlow's review workspace into a professional design-readiness command center that helps a planner or designer see what is ready, blocked, needs review, or lacks evidence without changing the C2E2 popup field model.
 
 ## Scope
 
-Create or update the v1 Control Center files:
-
-- Project board and current state/task trackers.
-- Worker lane definitions.
-- Task ownership, branch naming, handoff, completion report, validation evidence, merge gate, branch retirement, follow-up, C2E2 closeout, user guide, prompt library, conflict and rollback protocols.
-- Root workflow and changelog notes.
+- Add a visible review summary and job-level design-readiness decision state.
+- Group the review queue by design blockers, review required, evidence gaps, planner awareness, route/span checks, and lifecycle/replacement checks.
+- Surface existing evidence quality signals, including measured height, missing height, missing material, and low-confidence or field-verification-required data.
+- Preserve existing Next / Previous, Release Map, route highlight, planner awareness toggle, review category navigation, map layer toggles, and C2E2 popup truthfulness.
+- Update Control Center files for this task.
 
 ## Out Of Scope
 
-- App code.
-- Tests, except if formatting hooks require no-op formatting.
+- C2E2 popup field scope or section changes.
+- Stage 4 structured capture.
+- Survey data model changes.
+- Backend QA, geometry, span generation, or intake changes.
 - Archive files.
-- Stage 4 implementation.
-- Branch deletion, merges, or PR merges.
+- Fake or inferred survey/evidence fields.
 
 ## Acceptance Criteria
 
-- All required protocol files exist and are internally consistent.
-- ChatGPT, Codex, Claude Code, Claude Desktop, Cursor, and Noel each have explicit rules.
-- One-task-at-a-time, no overlapping branch, no stale branch merge, no archive, browser validation, screenshot/evidence, post-merge control update, and failed-validation rules are documented.
-- C2E2 closeout is recorded truthfully.
-- `pytest -v` passes.
-- `pre-commit run --all-files` passes.
+- Review workspace gives a clear design-readiness overview.
+- Review queue is grouped by real planning concerns using existing map/job metadata only.
+- Evidence gaps and blockers are visible without requiring screenshots.
+- Existing map controls still work.
+- C2E2 popup scope remains unchanged.
+- Tests and pre-commit pass.
+- Browser validation passes for `P008/F001` and `P010/F001`.
 
 ## Current Next Action
 
-Commit the v1 docs and hand back for review. After merge, update the board/task/handoff/logs on master and retire this branch.
+Review, merge, tag, and update Control Center files on master after merge.

@@ -214,20 +214,20 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Validation state: `pytest -v` passed; `pre-commit run --all-files` passed
 - Next action: review, merge, tag, update master control files, and retire branch.
 
-### 2026-05-10T12:36:46Z
+### 2026-05-10T12:49:10Z
 
-- Worker: claude-code
-- Branch: `claude-code/post-c2e2-repository-control-audit`
-- Action: Wrote post-C2E2 repository / control / validation / coordination audit (docs 36-42)
-- Files changed: AI_CONTROL/36_POST_C2E2_REPOSITORY_AUDIT.md,AI_CONTROL/37_BRANCH_INVENTORY.md,AI_CONTROL/38_BRANCH_RETIREMENT_PLAN.md,AI_CONTROL/39_CONTROL_FILE_AUDIT.md,AI_CONTROL/40_VALIDATION_AUDIT.md,AI_CONTROL/41_WORKER_COORDINATION_RISK_REVIEW.md,AI_CONTROL/42_NEXT_PHASE_READINESS.md,AI_CONTROL/05_HANDOFF.md
-- Validation state: pytest 866 passed; pre-commit clean
-- Next action: Update handoff and commit
+- Worker: codex
+- Branch: `codex/review-workspace-v2-command-center`
+- Action: Started Review Workspace v2 command center task and added design-readiness summary, grouped review queue, evidence quality indicators, and focused frontend tests.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/05_HANDOFF.md,app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py
+- Validation state: focused frontend tests in progress; full pytest, pre-commit, and browser validation pending
+- Next action: run full validation, browser-check P008/F001 and P010/F001, update validation log and handoff, then commit.
 
-### 2026-05-10T12:36:49Z
+### 2026-05-10T13:03:20Z
 
-- Worker: validation
-- Branch: `claude-code/post-c2e2-repository-control-audit`
-- Action: Recorded validation run with status `pass`.
-- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
-- Validation state: pass
-- Next action: update handoff or proceed to review
+- Worker: codex
+- Branch: `codex/review-workspace-v2-command-center`
+- Action: Completed Review Workspace v2 command center implementation and browser validation.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,app/static/js/map-viewer.js,app/static/css/map-viewer.css,app/templates/map_viewer.html,tests/test_review_command_center.py
+- Validation state: `pytest -v` passed; `pre-commit run --all-files` passed; browser validation passed for P008/F001 and P010/F001
+- Next action: review, merge, tag, and update Control Center files on master.
