@@ -135,3 +135,27 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Worker bootstrap control-layer changes only; no app runtime files modified.
+
+### 2026-05-10T13:45:00Z
+
+- Branch: `codex/gridflow-control-center-v1`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: n/a
+- Screenshots: no
+- Verdict: pass
+- Notes: Control Center documentation only. No app runtime files modified. Full suite: 866 passed, 13 existing warnings.
+
+### 2026-05-10T12:36:49Z
+
+- Branch: `claude-code/post-c2e2-repository-control-audit`
+- Commit: `unknown`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Audit only. No app code, tests, or merges. 7 new AI_CONTROL docs (36-42); numbers chosen to avoid colliding with existing Stage 3 closure docs at 20-27.

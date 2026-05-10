@@ -1,109 +1,104 @@
 # GridFlow Current Handoff
 
-Purpose: latest operational handoff for Noel and AI workers.
+Purpose: latest handoff for the next worker or Noel. This file must be updated before any worker stops.
 
-## Summary
-
-- Master is stable.
-- Latest completed milestones: `project-control-worker-bootstrap-complete`, `c2g-lifecycle-replacement-visualization-complete`, `technical-docs-field-architecture-complete`, `stage4-structured-capture-foundation-complete`, `c2f-review-focus-issue-filtering-complete`, `project-control-center-first-use-polish-complete`, `project-control-center-foundation-complete`, `c2e2-popup-expansion-implementation-complete`.
-- Project Control Worker Bootstrap Enforcement is being merged into master in this commit. The `project-control-worker-bootstrap-complete` tag was created before the merge commit landed and must be re-pointed at the merge commit (delete + recreate).
-- Backend QA, geometry, span generation, intake, Stage 4 schema/validators, and C2E2 field truthfulness rules were not changed by the bootstrap branch.
-- Next expected action: complete the merge commit, validate on master, push, and re-create the bootstrap tag at the merge commit.
-
-## Active Task
+## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Project Control Worker Bootstrap Enforcement
-- Owner: codex
-- Branch: `codex/project-control-worker-bootstrap`
-- Status: merged into master (tag re-point pending)
-- Summary: Added worker start/finish checklists, prompt templates, control status script, README guidance, and worker-rule updates. Merged into master after C2G and technical-docs landed.
-- Updated: 2026-05-10T00:00:00Z
+- Task: Post-C2E2 Repository Audit + Branch Retirement + Control Risk Review
+- Owner: claude-code
+- Branch: `claude-code/post-c2e2-repository-control-audit`
+- Status: ready for review
+- Summary: 7 new audit docs (AI_CONTROL/36–42). No app/test/merge changes. Identifies 3 highest-risk stale branches and recommends a sequencing for the next product phase.
+- Updated: 2026-05-10T15:00:00Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
-## Worker Bootstrap Status
+## Post-C2E2 Audit — Status
 
-- **Branch:** `codex/project-control-worker-bootstrap` (merged into master)
-- **Milestone tag:** `project-control-worker-bootstrap-complete` (re-point pending)
-- **What changed:**
-  - `AI_CONTROL/07_WORKER_START_CHECKLIST.md` — standard pre-coding worker checklist
-  - `AI_CONTROL/08_WORKER_FINISH_CHECKLIST.md` — standard pre-handoff worker checklist
-  - `AI_CONTROL/09_WORKER_PROMPT_TEMPLATES.md` — reusable worker assignment templates
-  - `scripts/control_status.py` — read-only project control status snapshot with text and JSON output
-  - `tests/test_control_status.py` — unit tests for status output, JSON mode, git failure handling, dirty-tree warnings, and no-write behaviour
-  - `README_PROJECT_CONTROL.md` — bootstrap workflow, script responsibilities, and multi-worker usage guidance
-  - `AI_CONTROL/06_WORKER_RULES.md` — explicit checklist and `control_status.py` requirements
+- **Branch:** `claude-code/post-c2e2-repository-control-audit`
+- **Commit:** pending (filled in by post-commit follow-up)
+- **Audit docs created (numbered 36–42 to avoid colliding with the existing Stage 3 closure docs at slots 20–27):**
+  - `AI_CONTROL/36_POST_C2E2_REPOSITORY_AUDIT.md` — top-level audit + headline findings.
+  - `AI_CONTROL/37_BRANCH_INVENTORY.md` — every branch with merged status, ahead/behind, high-risk-file touches.
+  - `AI_CONTROL/38_BRANCH_RETIREMENT_PLAN.md` — six-bucket action plan (DELETE_NOW / DELETE_AFTER_CONFIRM / KEEP_AS_REFERENCE / DO_NOT_TOUCH / MANUAL_INSPECTION / CHERRY_PICK_ONLY).
+  - `AI_CONTROL/39_CONTROL_FILE_AUDIT.md` — per-file freshness classification + namespace-prefix proposal.
+  - `AI_CONTROL/40_VALIDATION_AUDIT.md` — automated tests, harness runs, open bugs (VLD-1 through VLD-5).
+  - `AI_CONTROL/41_WORKER_COORDINATION_RISK_REVIEW.md` — concrete coordination incidents + protocol changes.
+  - `AI_CONTROL/42_NEXT_PHASE_READINESS.md` — go/no-go per workstream + sequenced next-action list.
+- **Headline findings:**
+  1. Master is at the cleanest state observed in 30 days (`f2587ed`, 866 tests passing, pre-commit clean).
+  2. Five branches are unmerged. The highest-risk one is `claude-code/c2e2-support-suite` — master has subsumed it and gone *stricter*; a literal merge would regress master. `codex/c2d-struct-inference` and `codex/stage4-structured-capture-integration-plan` are the other two flagged.
+  3. The numeric-prefix system in `AI_CONTROL/` is breaking down (this audit had to renumber `20–26` → `36–42`).
+  4. `P005/F001` has not been run through the manual review harness in any 2026-05 entry.
+  5. Stage 4 library has 3 known bugs (`"none"` blank-token collision, missing `pole_id`, no `source: "structured_capture"`) — *not* in the runtime path today, but blockers for Stage 4 integration.
+- **What is NOT changed:**
+  - No app code, no tests, no merges, no branch deletions, no tag changes.
+  - No `_archive/` files.
+  - No git history rewrites.
 - **Validation status:**
-  - `pytest tests/test_control_status.py -v` — passed
-  - `pytest tests/test_project_control_scripts.py -v` — passed
-  - `pytest -v` — passed (pre-merge: 861 passed, 1 skipped)
-  - `pre-commit run --all-files` — passed
-  - Manual review harness not required; no UI, map, popup, or review workflow files changed
-- **Constraint:** no app runtime files were touched on this branch
-- **Next action:** complete merge commit, push master, delete the pre-merge `project-control-worker-bootstrap-complete` tag locally and on origin, recreate it at the merge commit, and push the corrected tag
-
-## C2G Lifecycle Replacement Visualization — Status
-
-- **Branch:** `codex/c2g-lifecycle-replacement-visualization` (merged)
-- **Milestone:** `c2g-lifecycle-replacement-visualization-complete`
-- **What changed:**
-  - Added explicit lifecycle focus state and controls for replacement pairs, existing assets, and proposed assets.
-  - Upgraded replacement relationship connectors to use explicit `replacing` / `being_replaced_by` data only.
-  - Added lifecycle connector/focus styling and a compact map key entry.
-  - Kept C2E2 popup truthfulness intact and omitted empty lifecycle relationship sections.
-  - Added `validation_checklists/lifecycle_visualization.yml` and lifecycle-focused frontend tests.
-- **Validation status:**
-  - `pytest tests/test_lifecycle_visualization.py -v` — 4 passed.
-  - `pytest tests/test_review_focus_mode.py -v` — 3 passed.
-  - `pytest tests/test_c2e2_popup_rendering.py -v` — 4 passed.
-  - `pytest tests/test_review_navigation_layer.py -v` — 9 passed.
-  - `pytest -v` — 858 passed, 1 skipped, 13 warnings.
-  - `pre-commit run --all-files` — all hooks pass.
-  - Manual review harness passed: `validation_runs/20260509_211538/validation_report.md`.
-  - `validation_runs/20260509_211538/failures.json` — `[]`.
-
-## Technical Documentation Package — Status
-
-- **Branch:** `claude-code/technical-docs-field-architecture` (merged)
-- **Milestone:** `technical-docs-field-architecture-complete`
-- **Docs created:**
-  - `docs/FIELD_REFERENCE_GUIDE.md` — every per-pole field by truth category (Trimble / GridFlow-derived / Stage 4 / not-truthful-today). Grounded in the C2E2 Field Reality Audit.
-  - `docs/ARCHITECTURE.md` — purpose, full data-flow diagram, major backend + frontend modules, manual review harness, project control center, branch/worker workflow, extension points (Stage 4 integration, DNO rulepacks, PoleCAD export, lifecycle viz, electrical asset layer).
-  - `docs/API_REFERENCE.md` — function/class signatures and side effects across `app/controller_intake.py`, `app/routes/api_intake.py`, `app/qa_engine.py`, `app/geometry_pipeline.py`, `app/field_reference.py`, `app/field_validators.py`, the Stage 4 modules, and every script under `scripts/`.
-  - `docs/VALIDATION_WORKFLOW.md` — when to run pytest / pre-commit / manual review harness, recommended jobs, screenshot policy, control-script logging, common-failure triage table, the role of human visual review.
-- **Validation status:**
-  - `pytest -v` — 855 passed.
+  - `pytest -v` — 866 passed, 13 warnings.
   - `pre-commit run --all-files` — all hooks pass.
   - Manual review harness not required (no UI changes).
+- **Next action (in order):**
+  1. Review the seven audit docs.
+  2. Tag a `post-c2e2-stable-2026-05-10` baseline.
+  3. Open a "Worker Coordination Hardening" branch to encode the protocol changes.
+  4. Open a "Branch Retirement" task to execute the DELETE_NOW list from doc 38.
+  5. Open a "Stage 4 Library Fixes" task to address the three integration blockers.
+  6. Open a "P005/F001 Harness Baseline" task before any customer-facing validation.
 
-## Stage 4 Foundation — Status
+## Active Source-of-Truth Recommendation
 
-- **Branch:** `claude-code/stage4-structured-capture-foundation` (merged)
-- **Milestone:** `stage4-structured-capture-foundation-complete`
-- Schema, validators, template generator, docs, and tests for the Stage 4 structured-capture layer — library code only, not wired into runtime.
+A future agent should read **only these** before starting product work, in order:
 
-## Next Action
+1. `AI_CONTROL/00_PROJECT_CANONICAL.md`
+2. `AI_CONTROL/01_CURRENT_STATE.md`
+3. `AI_CONTROL/02_CURRENT_TASK.md`
+4. `AI_CONTROL/00_PROJECT_BOARD.md`
+5. `AI_CONTROL/05_HANDOFF.md`
+6. `AI_CONTROL/06_WORKER_RULES.md` + `07_WORKER_START_CHECKLIST.md`
+7. `AI_CONTROL/31_REAL_JOB_FIELD_REALITY_REPORT.md`
+8. The four `docs/*.md` developer references (architecture, API, field reference, validation workflow).
 
-- Complete this merge commit cleanly (conflict markers removed, all tests green).
-- Push master to origin.
-- Delete the existing `project-control-worker-bootstrap-complete` tag locally and on origin (it was created before the merge commit).
-- Recreate the tag pointing at the merge commit and push it.
-- Pick up the next validation-led product task on a separate branch.
+A future agent should **not** read:
+
+- `06_STRATEGIC_REVIEW_2026-04-22.md` (explicitly superseded per CLAUDE.md)
+- `07_REAL_WORLD_SURVEY_WORKFLOW.md` (explicitly superseded)
+- `03_WORKING_RULES.md` (use `06_WORKER_RULES.md`)
+- `04_SESSION_HANDOFF.md` (use `05_HANDOFF.md`)
+
+See [39_CONTROL_FILE_AUDIT.md](39_CONTROL_FILE_AUDIT.md) for the full per-file classification.
+
+## What This Branch May Change
+
+- Only the seven new `AI_CONTROL/36–42` audit docs and the standard control-log files (`00_PROJECT_BOARD.md`, `03_WORKER_LOG.md`, `04_VALIDATION_LOG.md`, `05_HANDOFF.md`).
+- No app runtime files.
+- No tests.
+- No `_archive/` files.
+
+## Validation Plan
+
+- `pytest -v`: 866 passed, 13 existing warnings.
+- `pre-commit run --all-files`: all hooks pass.
+- Manual browser validation is not required because this branch does not change UI/runtime behavior.
 
 ## Do Not Start On This Branch
 
-- Any app runtime feature work.
-- UI, Flask, geometry, qa_engine, span generation, or structured-capture integration work.
-- Stage 4 *integration* into the upload/QA/popup flow (separate branch).
-- DNO-grade rulepack implementation.
+- Branch retirement / deletion (separate scoped task).
+- Stage 4 runtime integration (blocked on three library fixes).
+- Re-attempting the `claude-code/c2e2-support-suite` merge mechanically.
+- DNO rulepack implementation.
+- Map, popup, QA, geometry, span, or intake changes.
 
-## Completed Stable Milestones
+## Stable Milestones To Preserve
 
-- `project-control-worker-bootstrap-complete` — merging now (tag re-point pending).
-- `c2g-lifecycle-replacement-visualization-complete` — merged to master.
-- `technical-docs-field-architecture-complete` — merged to master.
-- `stage4-structured-capture-foundation-complete` — merged to master.
-- `c2f-review-focus-issue-filtering-complete` — merged to master.
-- `project-control-center-first-use-polish-complete` — merged to master.
-- `project-control-center-foundation-complete` — merged to master.
-- `c2e2-popup-expansion-implementation-complete` — merged to master.
+- `c2e2-map-navigation-followups-complete`
+- `c2e2-popup-scope-reduction-complete`
+- `c2e2-popup-expansion-implementation-complete`
+- `project-control-center-foundation-complete`
+- `project-control-center-first-use-polish-complete`
+- `stage4-structured-capture-foundation-complete`
+- `c2f-review-focus-issue-filtering-complete`
+- `technical-docs-field-architecture-complete`
+- `c2g-lifecycle-replacement-visualization-complete`
+- `project-control-worker-bootstrap-complete`
