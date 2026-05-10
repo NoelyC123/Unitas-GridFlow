@@ -34,6 +34,7 @@ SOURCE = "structured_capture"
 
 # Canonical group identifiers and their human-friendly labels.
 GROUPS: dict[str, str] = {
+    "row_identity": "Row identity",
     "pole_specification": "Pole specification",
     "condition_defects": "Condition / defects",
     "electrical_conductor": "Electrical / conductor",
@@ -83,7 +84,33 @@ CONFIDENCE_VALUES: tuple[str, ...] = ("high", "medium", "low", "unknown")
 
 
 _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
-    # 1. Pole specification --------------------------------------------------
+    # 1. Row identity -------------------------------------------------------
+    _field(
+        "pole_id",
+        label="Pole ID",
+        group="row_identity",
+        type_="string",
+        required=True,
+        description="Stable support identifier used to match structured capture to Trimble data.",
+        aliases=("point", "point_id", "support_id", "structure_id", "asset_id"),
+    ),
+    _field(
+        "project_id",
+        label="Project ID",
+        group="row_identity",
+        type_="string",
+        description="Optional project identifier carried for provenance and audit.",
+        aliases=("project", "job_id", "job"),
+    ),
+    _field(
+        "file_id",
+        label="File ID",
+        group="row_identity",
+        type_="string",
+        description="Optional file/job segment identifier carried for provenance and audit.",
+        aliases=("file", "folder_id", "survey_file"),
+    ),
+    # 2. Pole specification --------------------------------------------------
     _field(
         "pole_class",
         label="Pole class",
@@ -117,7 +144,7 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         description="DNO or manufacturer specification reference for this pole.",
         aliases=("spec", "spec_ref"),
     ),
-    # 2. Condition / defects ------------------------------------------------
+    # 3. Condition / defects ------------------------------------------------
     _field(
         "condition",
         label="Overall condition",
@@ -150,7 +177,7 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         type_="string",
         description="Surveyor or designer free-text notes about the defect.",
     ),
-    # 3. Electrical / conductor ---------------------------------------------
+    # 4. Electrical / conductor ---------------------------------------------
     _field(
         "voltage_carried",
         label="Voltage carried",
@@ -185,7 +212,7 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         description="Phase configuration carried at this pole.",
         aliases=("phases",),
     ),
-    # 4. Structural support -------------------------------------------------
+    # 5. Structural support -------------------------------------------------
     _field(
         "stay_present",
         label="Stay present",
@@ -227,7 +254,7 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         allowed_values=LEAN_SEVERITY_VALUES,
         description="Severity of any observed pole lean.",
     ),
-    # 5. Equipment / pole-top ----------------------------------------------
+    # 6. Equipment / pole-top ----------------------------------------------
     _field(
         "equipment_present",
         label="Equipment present",
@@ -271,7 +298,7 @@ _FIELD_DEFINITIONS: tuple[dict[str, Any], ...] = (
         type_="string",
         description="Free-text notes about pole-top equipment.",
     ),
-    # 6. Capture metadata --------------------------------------------------
+    # 7. Capture metadata --------------------------------------------------
     _field(
         "capture_source",
         label="Capture source",

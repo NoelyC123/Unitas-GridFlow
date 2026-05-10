@@ -20,12 +20,11 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: READY FOR NEXT TASK
-- Branch: `none`
-- Owner: none
-- Status: idle
-- Last completed: `branch-retirement-control-deconfliction-complete`, `stage4-readiness-specification-complete`
-- Next recommended task: Stage 4A library correctness fixes
+- Task: Stage 4A Library Correctness Fixes
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Owner: codex
+- Status: validation_complete_pending_commit
+- Summary: Fix Stage 4 structured capture library correctness blockers without runtime integration
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
@@ -59,7 +58,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Backlog / Next Candidates
 
-- Stage 4A library correctness fixes.
+- Stage 4B structured capture schema/field validation, only after Stage 4A is merged and tagged.
 - Stage 4 structured capture runtime integration, only after Stage 4A and Stage 4B are complete.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.

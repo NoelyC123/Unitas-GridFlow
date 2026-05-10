@@ -276,3 +276,30 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: review or proceed to merge.
+
+### 2026-05-10T14:52:39Z
+
+- Worker: codex
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Action: Started task: Stage 4A Library Correctness Fixes. Fix Stage 4 structured capture library correctness blockers without runtime integration
+- Files changed: control files pending
+- Validation state: pending
+- Next action: implement task and validate
+
+### 2026-05-10T15:01:31Z
+
+- Worker: codex
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Action: Implemented Stage 4A structured capture library correctness fixes without runtime integration
+- Files changed: app/structured_capture_schema.py,app/structured_capture_validators.py,app/field_reference.py,templates/structured_capture_template.csv,tests/test_stage4_library_correctness.py,tests/test_structured_capture_schema.py,tests/test_structured_capture_validators.py,tests/test_generate_structured_capture_template.py,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: pytest -v and pre-commit passed before final control-log validation
+- Next action: Run repo health, merge safety, final pytest/pre-commit, then commit
+
+### 2026-05-10T15:02:02Z
+
+- Worker: validation
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review

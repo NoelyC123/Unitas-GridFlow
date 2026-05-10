@@ -183,3 +183,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Documentation/control-only Stage 4 readiness specification. Full suite passed: 920 passed, 1 skipped. No app runtime files, tests, archive files, or review workspace behaviour changed.
+
+### 2026-05-10T15:02:02Z
+
+- Branch: `codex/stage4a-library-correctness-fixes`
+- Commit: `unknown`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python scripts/repo_health.py && python scripts/merge_safety_check.py codex/stage4a-library-correctness-fixes`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: pytest passed with 931 passed, 1 skipped; browser/manual review not required because Stage 4A is not live-integrated
