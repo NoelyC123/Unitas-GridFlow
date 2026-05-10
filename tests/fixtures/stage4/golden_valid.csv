@@ -1,0 +1,11 @@
+pole_id,capture_source,captured_by,capture_date,condition,voltage_carried,stay_present,stay_type,lean_direction,lean_severity,equipment_present,equipment_type,confidence_level
+P008-001,office_audit,N. Collins,2026-05-09,,,,,,,,,
+P008-002,office_audit,N. Collins,2026-05-09,good,11kV,yes,down,none,none,no,none,high
+P008-003,office_audit,N. Collins,2026-05-09,fair,11kV,yes,flying,,slight,no,none,medium
+P008-004,office_audit,N. Collins,2026-05-09,,11kv,,,,,,,
+P008-005,office_audit,N. Collins,2026-05-09,,,,none,none,none,no,none,
+P008-006,office_audit,N. Collins,2026-05-09,,,,,none,,,,
+P008-007,office_audit,N. Collins,2026-05-09,,,,,,,no,none,
+P008-008,office_audit,N. Collins,2026-05-09,,,yes,,,,,,
+P008-009,office_audit,N. Collins,2026-05-09,,,,,,,,,,high
+P008-010,office_audit,N. Collins,2026-05-09,good,11kV,yes,down,none,none,no,none,high

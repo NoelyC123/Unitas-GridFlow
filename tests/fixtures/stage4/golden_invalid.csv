@@ -1,0 +1,10 @@
+pole_id,capture_source,captured_by,capture_date,condition,voltage_carried,stay_type
+,office_audit,N. Collins,2026-05-09,,,
+n/a,office_audit,N. Collins,2026-05-09,,,
+unknown,office_audit,N. Collins,2026-05-09,,,
+P008-004,,N. Collins,2026-05-09,,,
+P008-005,office_audit,N. Collins,2026-05-09,excellent,,
+P008-006,office_audit,N. Collins,2026-05-09,,,flying_down
+P008-007,office_audit,N. Collins,10/05/2026,,,
+P008-008,office_audit,N. Collins,2026-05-09,,999kV,
+P008-009,office_audit,N. Collins,2026-05-09,none,,
