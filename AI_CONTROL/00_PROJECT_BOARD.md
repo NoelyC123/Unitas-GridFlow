@@ -1,10 +1,14 @@
-# GridFlow Project Board
+# GridFlow Control Center Board
 
-Purpose: high-level operational board for coordinating Noel, Codex, Claude Code, Cursor, and ChatGPT work without branch confusion or duplicated effort.
+Purpose: single operational board for ChatGPT, Codex, Claude Code, Claude Desktop, Cursor, and Noel.
 
-## Current stable milestone
+This board is the first file to read after `01_CURRENT_STATE.md`. It records the active task, branch ownership, validation state, open follow-ups, and merge readiness. Older control files that are not listed in the v1 file set are historical unless a current task explicitly names them.
 
+## Current Stable Milestones
+
+- `c2e2-popup-scope-reduction-complete`
 - `c2e2-popup-expansion-implementation-complete`
+- `c2e2-map-navigation-followups-complete`
 - `project-control-center-foundation-complete`
 - `project-control-center-first-use-polish-complete`
 - `stage4-structured-capture-foundation-complete`
@@ -12,25 +16,29 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 - `technical-docs-field-architecture-complete`
 - `c2g-lifecycle-replacement-visualization-complete`
 - `project-control-worker-bootstrap-complete`
-- Latest stable validation: full pytest passing, pre-commit passing, Selenium manual review harness passing on `P008/F001` and `P010` for the most recent UI-touching milestone.
 
-## Active task
+## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Project Control Worker Bootstrap Enforcement
-- Branch: `codex/project-control-worker-bootstrap`
+- Task: GridFlow Control Center v1.0
+- Branch: `codex/gridflow-control-center-v1`
 - Owner: codex
-- Status: merging into master (post-merge tag fix required)
-- Summary: Added worker start/finish checklists, prompt templates, control status script, README guidance, and worker-rule updates
+- Lane: Control Center / documentation
+- Status: ready_for_review
+- Summary: Build the full markdown-based AI worker operating system and make it the single source of truth for worker coordination.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
-## In progress
+## In Progress
 
-- None recorded.
+| Task | Branch | Owner | Lane | Status |
+| --- | --- | --- | --- | --- |
+| GridFlow Control Center v1.0 | `codex/gridflow-control-center-v1` | codex | Control Center | ready_for_review |
 
-## Review / validation
+## Review / Validation
 
-- Project Control Worker Bootstrap merging now; post-merge tag correction pending.
+- `pytest -v`: passed, 866 tests, 13 existing warnings.
+- `pre-commit run --all-files`: passed.
+- Browser/manual review harness is not required for this branch because no UI, map, popup, route, or review workflow runtime files are in scope.
 
 ## Blocked
 
@@ -38,21 +46,22 @@ Purpose: high-level operational board for coordinating Noel, Codex, Claude Code,
 
 ## Done
 
-- C2E2 popup expansion complete.
-- Reusable Selenium manual review harness complete.
-- Validation output folder `validation_runs/` established.
-- Project Control Center Foundation complete and tagged `project-control-center-foundation-complete`.
-- Project Control Center First-Use Polish complete and tagged `project-control-center-first-use-polish-complete`.
-- Stage 4 structured capture foundation complete and tagged `stage4-structured-capture-foundation-complete`.
-- C2F review focus + issue filtering workspace complete and tagged `c2f-review-focus-issue-filtering-complete`.
-- Technical Documentation Package complete and tagged `technical-docs-field-architecture-complete`.
-- C2G lifecycle + replacement visualization complete and tagged `c2g-lifecycle-replacement-visualization-complete`.
-- Project Control Worker Bootstrap Enforcement merging now; tag `project-control-worker-bootstrap-complete` to be re-pointed at the merge commit.
+- C2E2 popup scope reduction closed and tagged.
+- C2E2 map navigation follow-ups closed and tagged.
+- C2F review focus + issue filtering closed and tagged.
+- C2G lifecycle replacement visualization closed and tagged.
+- Stage 4 structured capture foundation closed and tagged; runtime integration remains a future branch.
+- Technical documentation field/architecture package closed and tagged.
+- Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 
-## Backlog / next candidates
+## Backlog / Next Candidates
 
-- DNO-grade rulepack planning
-- Stage 4 *integration* into upload/QA/popup flow
-- PoleCAD export
-- Electrical asset / line / cable interaction layer
-- Lifecycle visualization follow-up enhancements
+- Stage 4 structured capture integration planning or implementation, only after a new explicit task prompt.
+- DNO-grade rulepack planning.
+- PoleCAD export planning.
+- Electrical asset / line / cable interaction layer.
+- Lifecycle visualization follow-up enhancements.
+
+## Operating Rule
+
+Only one active implementation task may be open at a time. A second branch may exist only for review, audit, or emergency rollback work and must not overlap the active branch scope.

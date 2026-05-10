@@ -186,3 +186,30 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: update handoff or proceed to review
+
+### 2026-05-10T13:30:00Z
+
+- Worker: codex
+- Branch: `codex/gridflow-control-center-v1`
+- Action: Created GridFlow Control Center v1.0 docs and root workflow pointer.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/01_CURRENT_STATE.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md,AI_CONTROL/06_WORKER_LANES.md,AI_CONTROL/07_TASK_TEMPLATE.md,AI_CONTROL/08_COMPLETION_REPORT_TEMPLATE.md,AI_CONTROL/09_MERGE_GATE_CHECKLIST.md,AI_CONTROL/10_VALIDATION_EVIDENCE_PROTOCOL.md,AI_CONTROL/11_BRANCH_RETIREMENT_PROTOCOL.md,AI_CONTROL/12_OPEN_FOLLOWUPS.md,AI_CONTROL/13_C2E2_CLOSEOUT.md,AI_CONTROL/14_CONTROL_CENTER_USER_GUIDE.md,AI_CONTROL/15_WORKER_PROMPT_LIBRARY.md,AI_CONTROL/16_CONFLICT_AND_ROLLBACK_PROTOCOL.md,WORKFLOW_SYSTEM.md,CHANGELOG.md
+- Validation state: pending
+- Next action: run `pytest -v` and `pre-commit run --all-files`, then update validation log and handoff.
+
+### 2026-05-10T12:30:21Z
+
+- Worker: claude-code
+- Branch: `claude-code/post-c2e2-repository-control-audit`
+- Action: Started task: Post-C2E2 Repository Audit + Branch Retirement + Control Risk Review. Audit master/branches/control-files/validation/coordination after C2E2 closeout
+- Files changed: control files pending
+- Validation state: pending
+- Next action: implement task and validate
+
+### 2026-05-10T13:45:00Z
+
+- Worker: codex
+- Branch: `codex/gridflow-control-center-v1`
+- Action: Completed GridFlow Control Center v1.0 docs and validation.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/01_CURRENT_STATE.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,AI_CONTROL/06_WORKER_LANES.md,AI_CONTROL/07_TASK_TEMPLATE.md,AI_CONTROL/08_COMPLETION_REPORT_TEMPLATE.md,AI_CONTROL/09_MERGE_GATE_CHECKLIST.md,AI_CONTROL/10_VALIDATION_EVIDENCE_PROTOCOL.md,AI_CONTROL/11_BRANCH_RETIREMENT_PROTOCOL.md,AI_CONTROL/12_OPEN_FOLLOWUPS.md,AI_CONTROL/13_C2E2_CLOSEOUT.md,AI_CONTROL/14_CONTROL_CENTER_USER_GUIDE.md,AI_CONTROL/15_WORKER_PROMPT_LIBRARY.md,AI_CONTROL/16_CONFLICT_AND_ROLLBACK_PROTOCOL.md,WORKFLOW_SYSTEM.md,CHANGELOG.md
+- Validation state: `pytest -v` passed; `pre-commit run --all-files` passed
+- Next action: review, merge, tag, update master control files, and retire branch.

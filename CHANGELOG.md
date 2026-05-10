@@ -2486,6 +2486,24 @@ No application code or test changes.
 
 ---
 
+## 2026-05-10
+
+### Added
+
+- GridFlow Control Center v1.0 markdown operating system for AI worker coordination.
+- New canonical protocols for worker lanes, task prompts, completion reports, merge gates, validation evidence, branch retirement, open follow-ups, C2E2 closeout, user guide, prompt library, and conflict/rollback response.
+- Root `WORKFLOW_SYSTEM.md` now points to the Control Center v1.0 files as the active workflow.
+
+### Changed
+
+- `AI_CONTROL/00_PROJECT_BOARD.md`, `01_CURRENT_STATE.md`, `02_CURRENT_TASK.md`, and `05_HANDOFF.md` now reflect the Control Center v1.0 operating model.
+- C2E2 popup scope reduction and map-navigation follow-ups are recorded as closed/tagged milestones.
+
+### Validation
+
+- `pytest -v`: passed, 866 tests, 13 existing warnings.
+- `pre-commit run --all-files`: passed.
+
 ## 2026-04-20
 
 ### Added
