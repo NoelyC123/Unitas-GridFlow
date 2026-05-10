@@ -19,16 +19,27 @@ The manual review harness remains the browser validation gate after UI-facing wo
 - `AI_CONTROL/04_VALIDATION_LOG.md`: validation evidence log for tests, pre-commit, manual review harness runs, reports, failures, and verdicts.
 - `AI_CONTROL/05_HANDOFF.md`: latest operational handoff for the next worker.
 - `AI_CONTROL/06_WORKER_RULES.md`: coordination rules for Codex, Claude Code, Cursor, ChatGPT, and Noel.
+- `AI_CONTROL/07_WORKER_START_CHECKLIST.md`: standard pre-coding checklist for every worker.
+- `AI_CONTROL/08_WORKER_FINISH_CHECKLIST.md`: standard pre-handoff checklist for every worker.
+- `AI_CONTROL/09_WORKER_PROMPT_TEMPLATES.md`: reusable assignment templates for implementation, review, validation, and docs tasks.
 - `scripts/start_task.py`: records the start of an active task and updates marked handoff/board sections.
 - `scripts/log_worker_update.py`: appends worker progress updates.
 - `scripts/log_validation_run.py`: appends validation evidence and a short worker-log entry.
+- `scripts/control_status.py`: prints a concise snapshot of branch, git status, active task, handoff, validation, and worker-rule reminders.
 
 ## Script Examples
+
+Check current control status:
+
+```bash
+python3 scripts/control_status.py
+python3 scripts/control_status.py --json
+```
 
 Start a task:
 
 ```bash
-python scripts/start_task.py \
+python3 scripts/start_task.py \
   --task "Project Control Center Foundation" \
   --owner codex \
   --branch codex/project-control-center-foundation \
@@ -39,7 +50,7 @@ python scripts/start_task.py \
 Log progress:
 
 ```bash
-python scripts/log_worker_update.py \
+python3 scripts/log_worker_update.py \
   --worker codex \
   --branch codex/project-control-center-foundation \
   --summary "Created control files and helper scripts" \
@@ -51,7 +62,7 @@ python scripts/log_worker_update.py \
 Log validation:
 
 ```bash
-python scripts/log_validation_run.py \
+python3 scripts/log_validation_run.py \
   --branch codex/project-control-center-foundation \
   --commit abc123 \
   --status pass \
@@ -62,15 +73,45 @@ python scripts/log_validation_run.py \
   --screenshots no
 ```
 
-## Standard Workflow
+## Worker Bootstrap Workflow
+
+Every worker should enter through the same control path so branch ownership, validation expectations, and handoff state are visible to the next person.
+
+## Before Coding
 
 1. Create or switch to the task branch.
-2. Run `scripts/start_task.py`.
-3. Implement the scoped work.
-4. Run tests and, after UI work, `scripts/manual_review.py`.
-5. Run `scripts/log_validation_run.py`.
-6. Update `AI_CONTROL/05_HANDOFF.md`.
-7. Merge/tag through Noel’s control process.
+2. Read `AI_CONTROL/01_CURRENT_STATE.md`, `AI_CONTROL/02_CURRENT_TASK.md`, `AI_CONTROL/00_PROJECT_BOARD.md`, `AI_CONTROL/05_HANDOFF.md`, and `AI_CONTROL/06_WORKER_RULES.md`.
+3. Read `AI_CONTROL/07_WORKER_START_CHECKLIST.md`.
+4. Run `python3 scripts/control_status.py` to confirm branch, active task, handoff, validation, and warnings.
+5. Run `python3 scripts/start_task.py` when taking ownership of a new task on the branch.
+6. Confirm allowed files, forbidden files, and whether `python3 scripts/manual_review.py` is required.
+
+## After Coding
+
+1. Read `AI_CONTROL/08_WORKER_FINISH_CHECKLIST.md`.
+2. Run task-specific tests, then `pytest -v`, then `pre-commit run --all-files`.
+3. Run `python3 scripts/manual_review.py` if UI, map, popup, or review workflow changed.
+4. Run `python3 scripts/log_worker_update.py` to record implementation progress.
+5. Run `python3 scripts/log_validation_run.py` to record the validation evidence.
+6. Update `AI_CONTROL/05_HANDOFF.md` with branch, status, validation, and next action.
+7. Hand the branch back through Noel’s review and merge process.
+
+## Script Responsibilities
+
+- `scripts/start_task.py`: use at task start to update the visible active-task markers on the board and handoff.
+- `scripts/log_worker_update.py`: use after meaningful implementation or documentation progress.
+- `scripts/log_validation_run.py`: use after tests, pre-commit, or manual review runs so validation evidence is captured separately from general progress notes.
+- `scripts/control_status.py`: use at the start of work, and again before handoff if branch/task state looks uncertain.
+
+## Multi-Worker Support
+
+The control center supports multiple workers by separating responsibilities:
+
+- the board shows the visible active task
+- the worker log preserves append-only progress history
+- the validation log captures objective evidence
+- the handoff file tells the next worker what to do next
+- the start/finish checklists keep the entry and exit process consistent across Codex, Claude Code, Cursor, ChatGPT, and Noel
 
 ## Worker Rules
 

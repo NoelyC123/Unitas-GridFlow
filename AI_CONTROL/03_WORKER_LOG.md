@@ -159,3 +159,30 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/04_VALIDATION_LOG.md
 - Validation state: pass
 - Next action: update handoff or proceed to review
+
+### 2026-05-09T21:24:34Z
+
+- Worker: codex
+- Branch: `codex/project-control-worker-bootstrap`
+- Action: Started task: Project Control Worker Bootstrap Enforcement. Add worker start/finish checklists, prompt templates, and control status script
+- Files changed: control files pending
+- Validation state: pending
+- Next action: implement task and validate
+
+### 2026-05-09T21:29:51Z
+
+- Worker: codex
+- Branch: `codex/project-control-worker-bootstrap`
+- Action: Added worker bootstrap checklists, prompt templates, and control status script
+- Files changed: AI_CONTROL/07_WORKER_START_CHECKLIST.md,AI_CONTROL/08_WORKER_FINISH_CHECKLIST.md,AI_CONTROL/09_WORKER_PROMPT_TEMPLATES.md,scripts/control_status.py,tests/test_control_status.py,README_PROJECT_CONTROL.md,AI_CONTROL/06_WORKER_RULES.md,AI_CONTROL/05_HANDOFF.md
+- Validation state: pytest and pre-commit complete
+- Next action: Update handoff and commit
+
+### 2026-05-09T21:29:51Z
+
+- Worker: validation
+- Branch: `codex/project-control-worker-bootstrap`
+- Action: Recorded validation run with status `pass`.
+- Files changed: AI_CONTROL/04_VALIDATION_LOG.md
+- Validation state: pass
+- Next action: update handoff or proceed to review
