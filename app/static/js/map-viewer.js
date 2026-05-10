@@ -86,6 +86,17 @@ class MapViewer {
     this._reviewNavigationLocked = true;
     this._reviewHomeBounds = null;
     this._reviewHomeView = null;
+    this._reviewedIssueIds = new Set();
+    this._reviewIssueModel = [];
+    this._reviewOpsFilters = {
+      severity: 'all',
+      category: 'all',
+      lifecycle: 'all',
+      evidence: 'all',
+      confidence: 'all',
+      route: 'all',
+      unresolvedOnly: false,
+    };
     this.activeFocusMode = null;
     this.activeFocusCategory = null;
     this.activeFocusTargetIds = [];
@@ -127,6 +138,8 @@ class MapViewer {
     this.bindSpanLabelModeControl();
     this.bindReviewNavigationControls();
     this.bindLifecycleFocusControls();
+    this.bindReviewOperatingSystemControls();
+    this.loadReviewProgressState();
     this.loadData();
   }
 
@@ -910,6 +923,214 @@ class MapViewer {
       }));
   }
 
+  reviewProgressStorageKey() {
+    return `gridflow_review_progress:${this.jobId || 'unknown'}`;
+  }
+
+  loadReviewProgressState() {
+    try {
+      const raw = localStorage.getItem(this.reviewProgressStorageKey());
+      const ids = JSON.parse(raw || '[]');
+      this._reviewedIssueIds = new Set(Array.isArray(ids) ? ids.map(String) : []);
+    } catch {
+      this._reviewedIssueIds = new Set();
+    }
+  }
+
+  saveReviewProgressState() {
+    try {
+      localStorage.setItem(
+        this.reviewProgressStorageKey(),
+        JSON.stringify(Array.from(this._reviewedIssueIds || [])),
+      );
+    } catch {
+      // Review progress is local convenience state; failure should not block map use.
+    }
+  }
+
+  targetIssueId(target, fallback = 0) {
+    return this.focusTargetId(target, fallback).replace(/\s+/g, '_');
+  }
+
+  targetIssueCategory(target) {
+    const category = String(target?.category || '').toUpperCase();
+    if (category) return category;
+    if (target?.type === 'awareness') return 'AWARENESS';
+    if (target?.type === 'feature') return 'LIFECYCLE';
+    return 'DATA';
+  }
+
+  targetConfidenceLevel(target) {
+    const props = target?.spanRef?.props
+      || target?.featureRef?.props
+      || target?.markerRef?.item
+      || {};
+    const trust = String(
+      props.geometry_trust
+      || props.source_confidence
+      || props.source_confidence_level
+      || props.source_confidence_detail?.geometry_trust
+      || '',
+    ).toLowerCase();
+    if (['low', 'legacy', 'unverified'].some((needle) => trust.includes(needle))) return 'low';
+    if (['medium', 'derived', 'provisional'].some((needle) => trust.includes(needle))) return 'medium';
+    return 'normal';
+  }
+
+  targetLifecycleRisk(target) {
+    if (target?.type === 'feature' || target?.category === 'LIFECYCLE') return 'replacement';
+    const props = target?.spanRef?.props || {};
+    if (this._spanEndpointHasReplacementHint(props.from_point_id, props.to_point_id)) {
+      return 'linked-route';
+    }
+    return 'none';
+  }
+
+  targetEvidenceQuality(target) {
+    const category = this.targetIssueCategory(target);
+    if (category === 'DATA') return 'gap';
+    const props = target?.featureRef?.props || {};
+    if (props && !this.hasValue(props.material)) return 'partial';
+    return this.targetConfidenceLevel(target) === 'low' ? 'verify' : 'ok';
+  }
+
+  targetRouteRisk(target) {
+    const category = this.targetIssueCategory(target);
+    if (category === 'GEOMETRY') return 'geometry';
+    if (category === 'CLEARANCE') return 'clearance';
+    if (target?.type === 'span') return 'span-review';
+    return 'none';
+  }
+
+  targetReplacementImpact(target) {
+    const lifecycle = this.targetLifecycleRisk(target);
+    if (lifecycle === 'replacement') return 'direct';
+    if (lifecycle === 'linked-route') return 'indirect';
+    return 'none';
+  }
+
+  mergeReviewIssue(existing, next) {
+    const groups = new Set([...(existing.groups || []), ...(next.groups || [])]);
+    const severity = this.strongestSpanIssueSeverity(existing.severity, next.severity);
+    return {
+      ...existing,
+      groups: Array.from(groups),
+      severity,
+      category: existing.category || next.category,
+      reason: existing.reason || next.reason,
+      lifecycleRisk: existing.lifecycleRisk !== 'none' ? existing.lifecycleRisk : next.lifecycleRisk,
+      evidenceQuality: existing.evidenceQuality !== 'ok' ? existing.evidenceQuality : next.evidenceQuality,
+      confidence: existing.confidence !== 'normal' ? existing.confidence : next.confidence,
+      routeRisk: existing.routeRisk !== 'none' ? existing.routeRisk : next.routeRisk,
+      replacementImpact: existing.replacementImpact !== 'none'
+        ? existing.replacementImpact
+        : next.replacementImpact,
+    };
+  }
+
+  buildReviewIssueModel() {
+    const model = new Map();
+    const targets = this._reviewNavigationTargets || {};
+    Object.entries(targets).forEach(([group, groupTargets]) => {
+      (groupTargets || []).forEach((target, index) => {
+        const id = this.targetIssueId(target, index);
+        const issue = {
+          id,
+          target,
+          groups: [group],
+          label: target.label || this.reviewNavigationGroupLabel(group),
+          severity: this.severityLabel(target.severity),
+          category: this.targetIssueCategory(target),
+          reason: target.reason || 'Review signal present',
+          lifecycleRisk: this.targetLifecycleRisk(target),
+          evidenceQuality: this.targetEvidenceQuality(target),
+          confidence: this.targetConfidenceLevel(target),
+          routeRisk: this.targetRouteRisk(target),
+          replacementImpact: this.targetReplacementImpact(target),
+          reviewed: this._reviewedIssueIds.has(id),
+        };
+        model.set(id, model.has(id) ? this.mergeReviewIssue(model.get(id), issue) : issue);
+      });
+    });
+    return Array.from(model.values()).sort((a, b) => (
+      this.reviewIssueWeight(b) - this.reviewIssueWeight(a)
+    ));
+  }
+
+  reviewIssueWeight(issue) {
+    const severityWeight = { BLOCKER: 100, WARNING: 70, REVIEW: 60, INFO: 20, PASS: 0 };
+    let weight = severityWeight[this.severityLabel(issue?.severity)] ?? 0;
+    if (issue?.category === 'DATA') weight += 12;
+    if (issue?.routeRisk !== 'none') weight += 10;
+    if (issue?.lifecycleRisk !== 'none') weight += 8;
+    if (issue?.confidence !== 'normal') weight += 8;
+    if (issue?.reviewed) weight -= 40;
+    return weight;
+  }
+
+  countBy(items, key) {
+    return (items || []).reduce((acc, item) => {
+      const value = item?.[key] || 'none';
+      acc[value] = (acc[value] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
+  matchesReviewOpsFilters(issue) {
+    const f = this._reviewOpsFilters || {};
+    if (f.unresolvedOnly && issue.reviewed) return false;
+    if (f.severity !== 'all' && this.severityLabel(issue.severity) !== f.severity) return false;
+    if (f.category !== 'all' && issue.category !== f.category) return false;
+    if (f.lifecycle !== 'all' && issue.lifecycleRisk !== f.lifecycle) return false;
+    if (f.evidence !== 'all' && issue.evidenceQuality !== f.evidence) return false;
+    if (f.confidence !== 'all' && issue.confidence !== f.confidence) return false;
+    if (f.route !== 'all' && issue.routeRisk !== f.route) return false;
+    return true;
+  }
+
+  computeReviewOperatingSystemState(summary = null) {
+    const issues = this.buildReviewIssueModel();
+    this._reviewIssueModel = issues;
+    const filteredIssues = issues.filter((issue) => this.matchesReviewOpsFilters(issue));
+    const reviewed = issues.filter((issue) => issue.reviewed).length;
+    const blockers = issues.filter((issue) => this.severityLabel(issue.severity) === 'BLOCKER');
+    const remainingBlockers = blockers.filter((issue) => !issue.reviewed).length;
+    const evidence = this.computeEvidenceQualitySummary();
+    const currentSummary = summary
+      || this.computeReviewSummary((this._spanLineRefs || []).map((ref) => ref.props || {}));
+    const penalty = (
+      remainingBlockers * 22
+      + (currentSummary.review || 0) * 7
+      + (currentSummary.gaps || 0) * 8
+      + Math.min(evidence.fieldVerification || 0, 8) * 4
+      + issues.filter((issue) => issue.lifecycleRisk !== 'none' && !issue.reviewed).length * 3
+    );
+    const completionBonus = issues.length ? Math.round((reviewed / issues.length) * 10) : 10;
+    const remaining = Math.max(0, issues.length - reviewed);
+    const readinessScore = Math.max(0, Math.min(100, 100 - penalty + completionBonus));
+    return {
+      issues,
+      filteredIssues,
+      reviewed,
+      total: issues.length,
+      progressPercent: issues.length ? Math.round((reviewed / issues.length) * 100) : 100,
+      remainingBlockers,
+      readinessScore,
+      reviewCompleteEstimate: remainingBlockers === 0 && filteredIssues.length === 0
+        ? 'Complete'
+        : `${remaining} issue${remaining === 1 ? '' : 's'} remaining`,
+      breakdowns: {
+        severity: this.countBy(issues, 'severity'),
+        category: this.countBy(issues, 'category'),
+        lifecycleRisk: this.countBy(issues, 'lifecycleRisk'),
+        evidenceQuality: this.countBy(issues, 'evidenceQuality'),
+        routeRisk: this.countBy(issues, 'routeRisk'),
+        replacementImpact: this.countBy(issues, 'replacementImpact'),
+        confidence: this.countBy(issues, 'confidence'),
+      },
+    };
+  }
+
   computeReviewCommandCenterState(summary = null) {
     const currentSummary = summary || this.computeReviewSummary((this._spanLineRefs || []).map((ref) => ref.props || {}));
     const targets = this._reviewNavigationTargets || this.buildReviewNavigationTargets();
@@ -927,11 +1148,13 @@ class MapViewer {
       route: routeTargets.length,
       lifecycle: lifecycleTargets.length,
     };
+    const ops = this.computeReviewOperatingSystemState(currentSummary);
     return {
       totalRecords,
       mappedRecords,
       queue,
       evidence,
+      ops,
       readiness: this.designReadinessDecision(currentSummary, queue, evidence),
     };
   }
@@ -981,6 +1204,12 @@ class MapViewer {
       ['review-missing-height-count', state.evidence.missingHeights],
       ['review-material-missing-count', state.evidence.missingMaterials],
       ['review-low-confidence-count', state.evidence.fieldVerification],
+      ['review-readiness-score', `${state.ops.readinessScore}%`],
+      ['review-progress-count', `${state.ops.reviewed}/${state.ops.total}`],
+      ['review-progress-percent', `${state.ops.progressPercent}%`],
+      ['review-remaining-blockers', state.ops.remainingBlockers],
+      ['review-active-queue-count', state.ops.filteredIssues.length],
+      ['review-complete-estimate', state.ops.reviewCompleteEstimate],
     ];
     textUpdates.forEach(([id, value]) => {
       const el = document.getElementById(id);
@@ -1008,6 +1237,187 @@ class MapViewer {
       button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
       button.disabled = disabled;
     });
+    this.renderReviewOperatingSystem(state.ops);
+    this.applyReviewOperatingSystemOverlays(state.ops);
+  }
+
+  breakdownText(map, labels = {}) {
+    const entries = Object.entries(map || {}).filter(([, count]) => count > 0);
+    if (!entries.length) return 'None';
+    return entries
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => `${labels[key] || key}: ${count}`)
+      .join(' · ');
+  }
+
+  renderReviewOperatingSystem(ops) {
+    if (!ops) return;
+    const progressBar = document.getElementById('review-progress-bar');
+    if (progressBar) progressBar.style.width = `${ops.progressPercent}%`;
+    const scoreBar = document.getElementById('review-readiness-score-bar');
+    if (scoreBar) scoreBar.style.width = `${ops.readinessScore}%`;
+
+    const breakdownUpdates = [
+      ['review-breakdown-severity', ops.breakdowns.severity],
+      ['review-breakdown-category', ops.breakdowns.category],
+      ['review-breakdown-lifecycle', ops.breakdowns.lifecycleRisk],
+      ['review-breakdown-evidence', ops.breakdowns.evidenceQuality],
+      ['review-breakdown-route', ops.breakdowns.routeRisk],
+      ['review-breakdown-replacement', ops.breakdowns.replacementImpact],
+      ['review-breakdown-confidence', ops.breakdowns.confidence],
+    ];
+    breakdownUpdates.forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = this.breakdownText(value);
+    });
+
+    const queue = document.getElementById('review-active-issue-queue');
+    if (queue) {
+      const items = ops.filteredIssues.slice(0, 8);
+      queue.innerHTML = items.length
+        ? items.map((issue) => `
+          <button type="button" class="gf-active-issue-item ${this.severityClass(issue.severity)}"
+                  data-review-issue-id="${this.escapeHtml(issue.id)}">
+            <span>
+              <strong>${this.escapeHtml(issue.label)}</strong>
+              <small>${this.escapeHtml(issue.reason)}</small>
+            </span>
+            <em>${issue.reviewed ? 'Reviewed' : this.escapeHtml(this.severityLabel(issue.severity))}</em>
+          </button>
+        `).join('')
+        : '<div class="gf-active-issue-empty">No issues match the active filters.</div>';
+      queue.querySelectorAll('[data-review-issue-id]').forEach((button) => {
+        button.addEventListener('click', () => this.jumpToReviewIssue(button.dataset.reviewIssueId));
+      });
+    }
+
+    const markReviewed = document.getElementById('review-mark-reviewed');
+    if (markReviewed) markReviewed.disabled = !this.currentReviewIssue();
+    const unresolved = document.getElementById('review-filter-unresolved');
+    if (unresolved) unresolved.checked = Boolean(this._reviewOpsFilters.unresolvedOnly);
+  }
+
+  currentReviewIssue() {
+    const targets = this.currentReviewTargetGroup();
+    const target = targets[this._activeReviewTargetIndex];
+    if (!target) return null;
+    const id = this.targetIssueId(target, this._activeReviewTargetIndex);
+    return (this._reviewIssueModel || []).find((issue) => issue.id === id) || null;
+  }
+
+  jumpToReviewIssue(issueId) {
+    const issue = (this._reviewIssueModel || []).find((item) => item.id === issueId);
+    if (!issue) return;
+    const groups = issue.groups || [];
+    const group = groups.find((name) => (this._reviewNavigationTargets?.[name] || []).length)
+      || groups[0];
+    const targets = (this._reviewNavigationTargets || {})[group] || [];
+    const index = targets.findIndex((target, idx) => this.targetIssueId(target, idx) === issue.id);
+    if (group && index >= 0) {
+      this.activeFocusMode = 'review';
+      this.activeFocusCategory = group;
+      this._activeReviewTargetGroup = group;
+      this._activeReviewTargetIndex = index;
+      this._reviewNavigationLocked = true;
+      this.focusReviewTarget(targets[index]);
+      this.renderReviewNavigationState();
+      return;
+    }
+    this.focusReviewTarget(issue.target);
+  }
+
+  markCurrentReviewIssueReviewed() {
+    const issue = this.currentReviewIssue();
+    if (!issue) return;
+    this._reviewedIssueIds.add(issue.id);
+    this.saveReviewProgressState();
+    this.renderReviewIntelligenceSummary();
+  }
+
+  clearReviewedReviewIssues() {
+    this._reviewedIssueIds.clear();
+    this.saveReviewProgressState();
+    this.renderReviewIntelligenceSummary();
+  }
+
+  bindReviewOperatingSystemControls() {
+    document.querySelectorAll('[data-review-filter]').forEach((input) => {
+      const key = input.dataset.reviewFilter;
+      const update = () => {
+        if (input.type === 'checkbox') this._reviewOpsFilters[key] = input.checked;
+        else this._reviewOpsFilters[key] = input.value || 'all';
+        this.renderReviewIntelligenceSummary();
+      };
+      input.addEventListener('change', update);
+    });
+    const markReviewed = document.getElementById('review-mark-reviewed');
+    if (markReviewed) markReviewed.addEventListener('click', () => this.markCurrentReviewIssueReviewed());
+    const clearReviewed = document.getElementById('review-clear-reviewed');
+    if (clearReviewed) clearReviewed.addEventListener('click', () => this.clearReviewedReviewIssues());
+  }
+
+  _removeReviewRiskClasses(el) {
+    if (!el?.classList) return;
+    el.classList.remove(
+      'gf-review-risk-muted',
+      'gf-review-risk-low',
+      'gf-review-risk-medium',
+      'gf-review-risk-high',
+      'gf-review-risk-awareness',
+      'gf-review-risk-lifecycle',
+    );
+  }
+
+  reviewRiskClass(issue) {
+    if (this.severityLabel(issue?.severity) === 'BLOCKER') return 'gf-review-risk-high';
+    if (issue?.confidence === 'low' || issue?.evidenceQuality === 'gap') {
+      return 'gf-review-risk-medium';
+    }
+    if (this.severityLabel(issue?.severity) === 'REVIEW') return 'gf-review-risk-medium';
+    return 'gf-review-risk-low';
+  }
+
+  applyReviewOperatingSystemOverlays(ops = null) {
+    const state = ops || this.computeReviewOperatingSystemState();
+    const visibleIssues = new Set((state.filteredIssues || []).map((issue) => issue.id));
+    const issueBySpan = new Map();
+    const issueByMarker = new Map();
+    (state.issues || []).forEach((issue) => {
+      if (issue.target?.spanRef) issueBySpan.set(issue.target.spanRef, issue);
+      if (issue.target?.featureRef?.marker) issueByMarker.set(issue.target.featureRef.marker, issue);
+      if (issue.target?.markerRef?.marker) issueByMarker.set(issue.target.markerRef.marker, issue);
+    });
+
+    for (const ref of this._spanLineRefs || []) {
+      const el = this._layerElement(ref.line);
+      this._removeReviewRiskClasses(el);
+      const issue = issueBySpan.get(ref);
+      if (!issue || !el?.classList) continue;
+      const visible = visibleIssues.has(issue.id);
+      el.classList.toggle('gf-review-risk-muted', !visible);
+      if (visible) el.classList.add(this.reviewRiskClass(issue));
+    }
+
+    for (const fd of this.featureData || []) {
+      const el = this._layerElement(fd.marker);
+      this._removeReviewRiskClasses(el);
+      const issue = issueByMarker.get(fd.marker);
+      if (!issue || !el?.classList) continue;
+      const visible = visibleIssues.has(issue.id);
+      el.classList.toggle('gf-review-risk-muted', !visible);
+      if (visible) {
+        el.classList.add(this.reviewRiskClass(issue));
+        if (issue.lifecycleRisk !== 'none') el.classList.add('gf-review-risk-lifecycle');
+      }
+    }
+
+    for (const ref of this._awarenessMarkerRefs || []) {
+      const el = this._layerElement(ref.marker);
+      const issue = issueByMarker.get(ref.marker);
+      if (issue && visibleIssues.has(issue.id) && el?.classList) {
+        el.classList.add('gf-review-risk-awareness');
+      }
+    }
   }
 
   renderReviewIntelligenceSummary() {
@@ -1673,6 +2083,7 @@ class MapViewer {
       this.markCurrentReviewTargetSpan(ref);
       if (typeof ref.line.openPopup === 'function') ref.line.openPopup();
       this.applyReviewFocusStyles();
+      this.renderReviewCommandCenter();
       return;
     }
 
@@ -1684,6 +2095,7 @@ class MapViewer {
       this.markFocusedReviewTarget(marker);
       if (marker && typeof marker.openPopup === 'function') marker.openPopup();
       this.applyReviewFocusStyles();
+      this.renderReviewCommandCenter();
       return;
     }
 
@@ -1695,6 +2107,7 @@ class MapViewer {
       this.markFocusedReviewTarget(marker);
       if (typeof marker.openPopup === 'function') marker.openPopup();
       this.applyReviewFocusStyles();
+      this.renderReviewCommandCenter();
     }
   }
 

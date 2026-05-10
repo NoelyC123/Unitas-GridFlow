@@ -159,3 +159,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Full suite passed: 868 passed, 1 skipped, 13 existing warnings. Browser validation confirmed review summary, grouped queue, plausible counts, focus/navigation controls, route access, planner awareness toggle, clean C2E2 popup, and clean console on both jobs.
+
+### 2026-05-10T13:47:16Z
+
+- Branch: `codex/review-operating-system-v3`
+- Commit: `unknown`
+- Jobs tested: `P008/F001`, `P010/F001`
+- Command run: `pytest -v && pre-commit run --all-files && Browser validation on /map/view/project/P008/F001 and /map/view/project/P010/F001`
+- validation_runs report path: `n/a`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Browser validation confirmed Review OS controls, filters, queue interaction, navigation, Release Map, route highlight, Planner Awareness toggle, popup truthfulness, and zero console errors.

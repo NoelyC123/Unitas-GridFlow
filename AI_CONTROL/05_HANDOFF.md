@@ -5,12 +5,12 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Worker Coordination Hardening + Automated Control System
-- Owner: claude-code
-- Branch: `claude-code/worker-coordination-hardening`
-- Status: in_progress
-- Summary: Build automated safety checks for startup, merge, branch health, and repo governance per AI_CONTROL/41 and 42 recommendations
-- Updated: 2026-05-10T13:30:58Z
+- Task: GridFlow Review Operating System v3
+- Owner: codex
+- Branch: `codex/review-operating-system-v3`
+- Status: ready_for_review
+- Summary: Implemented Review Operating System v3 with advanced issue aggregation, active queue progress, filters, readiness scoring, and map review overlays. C2E2 popup scope is unchanged.
+- Updated: 2026-05-10T13:47:16Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch May Change
@@ -31,9 +31,9 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 
 ## Current Validation State
 
-- `pytest -v`: passed, 868 passed, 1 skipped, 13 existing warnings.
+- `pytest -v`: passed, 869 passed, 1 skipped, 13 existing warnings.
 - `pre-commit run --all-files`: passed.
-- Browser validation: passed on `/map/view/project/P008/F001` and `/map/view/project/P010/F001`; console clean.
+- Browser validation: passed on `/map/view/project/P008/F001` and `/map/view/project/P010/F001`; Review OS controls, filters, queue interaction, navigation, Release Map, route highlight, Planner Awareness toggle, popup truthfulness, and console clean all verified.
 - Manual review report: n/a, Browser validation used for this UI task.
 
 ## Next Action

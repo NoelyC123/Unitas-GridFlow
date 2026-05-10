@@ -20,22 +20,22 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Worker Coordination Hardening + Automated Control System
-- Branch: `claude-code/worker-coordination-hardening`
-- Owner: claude-code
-- Status: in_progress
-- Summary: Build automated safety checks for startup, merge, branch health, and repo governance per AI_CONTROL/41 and 42 recommendations
+- Task: GridFlow Review Operating System v3
+- Branch: `codex/review-operating-system-v3`
+- Owner: codex
+- Status: ready_for_review
+- Summary: Evolve Review Workspace v2 into a planner review operating system with deeper intelligence, queues, overlays, filters, and readiness scoring
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Review Workspace v2 — Design-Readiness Command Center | `codex/review-workspace-v2-command-center` | codex | Frontend / review workspace | ready_for_review |
+| GridFlow Review Operating System v3 | `codex/review-operating-system-v3` | codex | Frontend / review workspace | ready_for_review |
 
 ## Review / Validation
 
-- `pytest -v`: passed, 868 passed, 1 skipped, 13 existing warnings.
+- `pytest -v`: passed, 869 passed, 1 skipped, 13 existing warnings.
 - `pre-commit run --all-files`: passed.
 - Browser validation on `P008/F001` and `P010/F001`: passed; console clean.
 
