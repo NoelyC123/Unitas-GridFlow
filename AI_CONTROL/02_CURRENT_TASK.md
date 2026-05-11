@@ -4,32 +4,30 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Field Pilot Command Center v1
-- Branch: `codex/field-pilot-command-center-v1`
+- Task: Record P_REAL_001_MINI Mini Pilot Result
+- Branch: `codex/p-real-001-mini-result-record`
 - Owner: codex
 - Lane: Stage 4 field pilot execution
 - Status: ready_for_review
 - Requested by: Noel
-- Runtime changes allowed: no live app integration; command-center polish, docs, ignored local-data paths, fixtures, and tests only
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py codex/field-pilot-command-center-v1`; run `scripts/validate_stage4_pilot.py` on valid, invalid, duplicate, and golden dry-run fixtures
-- Validation result: `pytest -v` passed with 1062 passed, 2 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/field-pilot-command-center-v1` is safe to merge; dry-run CLI coverage now includes pilot, duplicate, and golden fixtures with stable JSON/Markdown reports
+- Runtime changes allowed: no live app integration; control/docs/changelog updates only; no real photos, real CSV, or local validation outputs may be committed
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`
+- Validation result: `pytest -v` passed with 1068 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record` is safe to merge; tracked record created from the local `P_REAL_001_MINI` final pilot result without committing `real_pilot_data/` or `validation_runs/`
 - Browser validation required: no; Stage 4B is not live-integrated into UI/runtime
 - Popup scope changes allowed: no
 
 ## Goal
 
-Turn the field-pilot validator into a full operator-facing command center with
-clear terminal verdicts, stronger Markdown/JSON reporting, evidence-folder
-edge-case handling, and dry-run coverage against the synthetic pilot fixtures.
+Create a tracked, non-sensitive project record of the `P_REAL_001_MINI` local
+mini-pilot result so the project can retain the verdict, warning profile, and
+Stage 4C gate outcome without committing raw evidence or local-only reports.
 
 ## Scope
 
-- Upgrade `validate_stage4_pilot.py` with operator-facing PASS/PARTIAL/NO-GO output.
-- Stabilize JSON report keys for future automation.
-- Improve Markdown report sections so Noel can use them directly after field capture.
-- Harden evidence-folder handling for missing, empty, malformed, duplicate, and multi-reference cases.
-- Extend dry-run coverage across pilot and golden CSV fixtures.
-- Update operator docs, control files, and changelog.
+- Add `AI_CONTROL/70_P_REAL_001_MINI_FIELD_PILOT_RESULT.md`.
+- Record the mini-pilot row counts, evidence-cleanup result, warning profile, and gate verdict.
+- Update board, task tracker, worker log, validation log, handoff, and changelog.
+- Keep all raw pilot evidence, CSV data, and local validation reports ignored and untracked.
 
 ## Out Of Scope
 
@@ -37,20 +35,20 @@ edge-case handling, and dry-run coverage against the synthetic pilot fixtures.
 - Stage 4 fields in popups or Review OS.
 - Backend QA, geometry, span generation, intake, or map rendering changes.
 - Stage 4C runtime integration.
+- Real evidence or report commits.
 - Archive files.
 
 ## Acceptance Criteria
 
-- Noel has one command to validate a real pilot CSV after capture.
-- The CLI writes terminal, JSON, and Markdown output without touching live job outputs.
-- Evidence folder filename/reference checks report missing, empty, duplicate, invalid, multi-reference, and unreferenced cases.
-- Real pilot raw data and local validation outputs are git-ignored by default.
-- The execution system does not add runtime/UI Stage 4 integration.
+- The project has a tracked control-layer record of the mini-pilot outcome.
+- The tracked record contains no raw photos, raw CSV payload, or local validation artefacts.
+- Stage 4C remains explicitly blocked and the next recommended pilot is recorded.
 - `pytest -v`, `pre-commit run --all-files`, `repo_health.py`, and
   `merge_safety_check.py` pass or report only known non-blocking warnings.
 
 ## Current Next Action
 
-Review/merge this branch, then run the command center against Noel's real local
-pilot CSV and evidence folder. Stage 4C remains blocked until Noel records the
-pilot result and a manual go/no-go decision.
+Review/merge this control-record branch, then plan the next controlled pilot
+against a real GridFlow/Trimble job baseline with exact `pole_id` matching.
+Stage 4C remains blocked until that stronger pilot result and Noel's manual
+go/no-go decision exist.

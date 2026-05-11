@@ -22,18 +22,18 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Field Pilot Command Center v1
-- Branch: `codex/field-pilot-command-center-v1`
+- Task: Record P_REAL_001_MINI Mini Pilot Result
+- Branch: `codex/p-real-001-mini-result-record`
 - Owner: codex
 - Status: ready_for_review
-- Summary: Upgraded the pilot validator into an operator-facing command center with dry-run coverage, clearer reports, evidence edge-case handling, and stable JSON output
+- Summary: Added a tracked non-sensitive control record for the real local mini pilot result while keeping raw evidence, CSV data, and validation artefacts ignored
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Field Pilot Command Center v1 | `codex/field-pilot-command-center-v1` | codex | Stage 4 field pilot execution | ready for review |
+| Record P_REAL_001_MINI Mini Pilot Result | `codex/p-real-001-mini-result-record` | codex | Stage 4 field pilot execution | ready for review |
 
 ## Review / Validation
 
@@ -46,9 +46,13 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Evidence audit: 33 photos, 100% reference coverage, 0 missing/0 orphaned/0 duplicates/0 invalid patterns
 - Independent audit verdict: Successful rehearsal; next controlled pilot required before Stage 4C GO
 
-**Active Task (Field Pilot Command Center v1):**
-- Ready for review/merge on `codex/field-pilot-command-center-v1`
-- Browser validation: not required for this local-only Stage 4 execution system.
+**Tracked result record (`codex/p-real-001-mini-result-record`):**
+- `pytest -v`: passed, 1068 passed, 1 skipped.
+- `pre-commit run --all-files`: passed.
+- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
+- `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`: safe to merge.
+- Tracked record added from the local-only `P_REAL_001_MINI` final pilot result without committing `real_pilot_data/` or `validation_runs/`.
+- Browser validation: not required for this control-only result branch.
 
 ## Blocked
 
@@ -74,6 +78,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Stage 4B/4C safety pilot harness complete; Stage 4C remains blocked pending a real pilot result.
 - Real iPad field pilot package complete; raw-data handling is now extended by the execution-system branch.
 - Real Field Pilot Execution System v1 complete on master; this branch adds operator workflow polish on top.
+- `P_REAL_001_MINI` mini pilot completed as a successful workflow shakedown; tracked non-sensitive result record added on this branch.
 - Technical documentation field/architecture package closed and tagged.
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 - GridFlow Control Center v1.0 closed and tagged.
@@ -82,7 +87,8 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Backlog / Next Candidates
 
-- Stage 4C controlled runtime integration, only after a real pilot result is recorded and the go/no-go gate is approved.
+- Stage 4C controlled runtime integration, only after a controlled pilot against a real GridFlow/Trimble baseline is recorded and the go/no-go gate is approved.
+- Controlled baseline pilot with exact `pole_id` matching and stronger access/closer capture.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.

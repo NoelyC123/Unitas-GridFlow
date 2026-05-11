@@ -8,6 +8,36 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - P_REAL_001_MINI mini-pilot result record
+
+### Added
+
+- Added `AI_CONTROL/70_P_REAL_001_MINI_FIELD_PILOT_RESULT.md` as a tracked,
+  non-sensitive record of the local mini-pilot outcome.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `02_CURRENT_TASK.md`,
+  `03_WORKER_LOG.md`, `04_VALIDATION_LOG.md`, and `05_HANDOFF.md` to record the
+  mini-pilot verdict and keep Stage 4C explicitly blocked pending a stronger
+  controlled baseline pilot.
+
+### Validation
+
+- `pytest -v`: passed, 1068 passed, 1 skipped.
+- `pre-commit run --all-files`: passed.
+- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions
+  only.
+- `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`:
+  safe to merge.
+
+### Notes
+
+- No real photos committed.
+- No real CSV committed.
+- No local validation reports committed.
+- `P_REAL_001_MINI` is recorded as a successful workflow shakedown with a Stage
+  4C gate result of `PARTIAL / RE-PILOT REQUIRED`.
 ## 2026-05-11 - P_REAL_001_MINI Independent Gate Audit + Next Controlled Pilot Plan
 
 ### Added

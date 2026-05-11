@@ -291,6 +291,17 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Workbook-conversion tooling only; no app runtime, popup, Review OS, or live job-output files modified. Added a standard-library XLSX rehearsal converter and tests. Full suite passed with 1068 passed, 1 skipped. The real workbook at `/mnt/data/survey_records_sorted_tabs.xlsx` was not accessible in this environment, so real-sheet analysis and real conversion execution remain a local follow-up.
+### 2026-05-11T15:46:54Z
+
+- Branch: `codex/p-real-001-mini-result-record`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`
+- validation_runs report path: `local-only: validation_runs/stage4_pilots/P_REAL_001_MINI_FINAL/pilot_validation_report.md`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Control-record update only. Real photos, the real CSV, and local validation outputs were not committed. The tracked result records a successful mini-pilot shakedown with 10 valid rows, 2 merge-ready rows, 8 review-required rows, and a Stage 4C gate result of `PARTIAL / RE-PILOT REQUIRED`.
 
 ### 2026-05-11T16:30:00Z
 
