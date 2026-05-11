@@ -113,11 +113,20 @@ After the field session:
 
 - save the CSV as UTF-8
 - name it `pilot_real_<jobid>.csv`
-- place it in `tests/fixtures/stage4/`
+- place it in `real_pilot_data/<pilot-name>/csv/`
+- place photos in `real_pilot_data/<pilot-name>/photos/`
 - run the validation steps in
   [STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md](/Users/noelcollins/Unitas-GridFlow/docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md)
 - complete the result summary template in
   [STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md](/Users/noelcollins/Unitas-GridFlow/docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md)
+- keep the raw CSV, photos, and operator reports local unless Noel explicitly
+  approves a redacted artifact for Git
+
+The command-center result should be read like this:
+
+- `PASS`: the pilot result is strong enough for Noel to review as Stage 4C evidence
+- `PARTIAL / RE-PILOT REQUIRED`: usable evidence exists, but more cleanup or capture is needed
+- `NO-GO`: the pilot package or export needs fixing before any Stage 4C discussion
 
 ## Stage 4C status
 

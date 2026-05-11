@@ -37,6 +37,36 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - Field pilot command center v1
+
+### Added
+
+- Upgraded `scripts/validate_stage4_pilot.py` from a basic execution helper to
+  a command-center style operator workflow with PASS / PARTIAL / NO-GO
+  headlines, top-issue summaries, next-action guidance, and stable JSON keys.
+
+- Added dry-run coverage for pilot and golden Stage 4 fixtures through
+  `tests/test_stage4_field_pilot_execution.py`.
+
+### Changed
+
+- Markdown pilot reports now include an executive summary, explicit Stage 4C
+  gate implication, evidence status, recommended fixes, next actions, and
+  "what must not happen yet" guidance.
+
+- Evidence-folder checking now reports missing folders, empty folders,
+  duplicate filenames, invalid filename patterns, unreferenced photos, and
+  multi-reference rows more clearly.
+
+- Real field pilot docs now explain dry-run usage, command interpretation, and
+  commit boundaries for raw pilot data and local reports.
+
+### Notes
+
+- No Stage 4C runtime integration added.
+- No map-viewer, C2E2 popup, or Review OS changes.
+- Real pilot raw data remains git-ignored by default.
+
 ## 2026-05-11 - Real field pilot execution system v1
 
 ### Added

@@ -393,3 +393,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: scripts/validate_stage4_pilot.py,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_EVIDENCE_FOLDER_PROTOCOL.md,docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md,tests/test_stage4_field_pilot_execution.py,tests/fixtures/stage4/evidence/*,.gitignore,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: `pytest -v` passed with 1049 passed, 2 skipped; `pre-commit run --all-files` passed; repo_health warning-only before commit; merge_safety to rerun on committed branch
 - Next action: commit branch and rerun repo health plus merge safety on the committed tree
+
+### 2026-05-11T12:20:00Z
+
+- Worker: codex
+- Branch: `codex/field-pilot-command-center-v1`
+- Action: Upgraded the Stage 4 pilot validator into an operator-facing command center with dry-run coverage, stable JSON keys, stronger evidence-folder handling, and clearer terminal/Markdown workflow output
+- Files changed: scripts/validate_stage4_pilot.py,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_EVIDENCE_FOLDER_PROTOCOL.md,docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md,docs/STAGE4_REAL_FIELD_PILOT_GUIDE.md,tests/test_stage4_field_pilot_execution.py,.gitignore,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed with 1062 passed, 2 skipped; `pre-commit run --all-files` passed; repo_health and merge_safety pending final post-update run
+- Next action: run repo_health, merge_safety, final dry-run CLI sweep, then commit if clean

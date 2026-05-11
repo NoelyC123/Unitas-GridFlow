@@ -5,22 +5,22 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Real Field Pilot Execution System v1
+- Task: Field Pilot Command Center v1
 - Owner: codex
-- Branch: `codex/real-field-pilot-execution-system-v1`
+- Branch: `codex/field-pilot-command-center-v1`
 - Status: ready_for_review
-- Summary: Built the local Stage 4 pilot validation CLI, evidence-folder checker, report output, git-ignore protection, and execution-system tests without runtime/UI integration.
-- Updated: 2026-05-11T10:29:43Z
+- Summary: Upgraded the pilot validator into an operator-facing command center with dry-run coverage, clearer terminal verdicts, stable JSON/Markdown reports, and stronger evidence-folder edge-case handling.
+- Updated: 2026-05-11T12:10:00Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Changed
 
-- Adds `scripts/validate_stage4_pilot.py` as the single-command local execution path for pilot CSV validation.
-- Adds evidence-folder filename/reference checks for missing referenced photos, duplicate names, invalid naming patterns, unreferenced photos, and pole_id/photo mismatches.
-- Adds JSON and Markdown pilot reports under local `validation_runs/stage4_pilots/`.
-- Protects `real_pilot_data/` and `validation_runs/stage4_pilots/` from accidental Git commits.
-- Updates the pilot validation instructions, evidence protocol, and result template around the local execution workflow.
-- Adds execution-system tests on top of the existing Stage 4B preview validator.
+- Upgrades `scripts/validate_stage4_pilot.py` into an operator-facing command center.
+- Adds PASS / PARTIAL / NO-GO terminal headlines, top-issue summaries, next-action guidance, and explicit report paths.
+- Stabilizes JSON output for future automation while retaining compatibility keys.
+- Improves Markdown reporting with executive summary, gate implication, evidence status, recommended fixes, next actions, and do-not-start warnings.
+- Hardens evidence-folder checks for missing folders, empty folders, duplicate filenames, invalid filename formats, unreferenced photos, pole_id mismatches, and multiple references in one row.
+- Extends dry-run validation coverage across pilot and golden fixtures.
 - Preserves Stage 4 runtime isolation: no upload/intake, QA, map rendering, Review OS, C2E2 popup, or live job-output integration.
 
 ## Validation Plan
@@ -28,24 +28,23 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - `pytest -v`
 - `pre-commit run --all-files`
 - `python scripts/repo_health.py`
-- `python scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`
-- `python scripts/validate_stage4_pilot.py` on valid and invalid pilot fixtures
+- `python scripts/merge_safety_check.py codex/field-pilot-command-center-v1`
+- `python scripts/validate_stage4_pilot.py` on pilot and golden dry-run fixtures
 - Browser validation: not required; Stage 4B is validation/preview-only and not wired into runtime UI.
 
 ## Current Validation State
 
-- `pytest -v`: passed, 1049 passed, 2 skipped.
+- `pytest -v`: passed, 1062 passed, 2 skipped.
 - `pre-commit run --all-files`: passed.
 - `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
-- `python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`: safe to merge.
-- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_valid_sample.csv`: reports written; recommendation `PARTIAL / RE-PILOT REQUIRED`.
-- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_invalid_sample.csv`: reports written; recommendation `NO-GO`.
+- `python3.13 scripts/merge_safety_check.py codex/field-pilot-command-center-v1`: safe to merge.
+- `python3.13 scripts/validate_stage4_pilot.py` dry-run suite covers `pilot_valid_sample.csv`, `pilot_invalid_sample.csv`, `pilot_duplicate_identity_sample.csv`, `golden_valid.csv`, `golden_invalid.csv`, `golden_duplicates.csv`, and `golden_known_bad.csv`.
 - Browser validation: not required; no runtime/UI integration.
 - Manual review report: n/a.
 
 ## Next Action
 
-Review/merge this execution-system branch if clean, then run the CLI against
+Review/merge this command-center branch if clean, then run the CLI against
 Noel's real local pilot CSV and evidence folder before any Stage 4C work is
 considered.
 
@@ -73,3 +72,4 @@ considered.
 - `stage4-readiness-specification-complete`
 - `branch-retirement-control-deconfliction-complete`
 - `stage4c-architecture-gate-complete`
+- `real-field-pilot-execution-system-v1-complete`

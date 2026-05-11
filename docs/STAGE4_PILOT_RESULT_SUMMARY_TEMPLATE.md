@@ -43,6 +43,7 @@ python3.13 scripts/validate_stage4_pilot.py \
 
 Summary:
 
+- Terminal headline (`PASS` / `PARTIAL` / `NO-GO`):
 - Header validation:
 - Merge-ready rows:
 - Review-required rows:
@@ -52,6 +53,7 @@ Summary:
 - Missing `pole_id` issues:
 - Evidence/photo coverage:
 - Stage 4C recommendation:
+- Next action from command output:
 
 Report paths:
 
@@ -98,6 +100,19 @@ Choose one:
 - `NO-GO` — fix Stage 4B package issues before any Stage 4C work
 
 Reason:
+
+## What Noel should do next
+
+- Immediate next action from the command-center report:
+- Evidence folder follow-up needed:
+- CSV correction needed:
+- Re-pilot needed:
+
+## What must not happen yet
+
+- Do not start Stage 4C runtime integration from this pilot alone.
+- Do not commit raw field photos or raw pilot CSVs by default.
+- Do not treat a `PARTIAL` result as approval for live runtime surfacing.
 
 ## Sign-off
 

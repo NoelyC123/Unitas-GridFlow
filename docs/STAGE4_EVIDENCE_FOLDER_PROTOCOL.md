@@ -52,6 +52,8 @@ Examples:
 Keep the same filename in the CSV `photo_reference` column.
 
 The validator checks filenames only. It does not open or process image content.
+If one row genuinely needs more than one photo reference, separate them with
+`;` in the `photo_reference` cell.
 
 ## Minimum photo guidance
 
@@ -66,6 +68,8 @@ The validator checks filenames only. It does not open or process image content.
 - Every photo must map to exactly one `pole_id`.
 - Every note about a specific support should mention that `pole_id`.
 - Do not use generic names like `IMG_1024.jpg` in the CSV.
+- If multiple photos are listed in one row, each filename must still follow the
+  same `<pole_id>_<sequence>_<view>.jpg` pattern.
 
 ## Missing photos
 
@@ -75,6 +79,10 @@ If no photo was captured:
 - explain the reason in `survey_notes` or `access_notes` if it matters
 - do not invent a file reference
 - expect the validator report to show lower evidence/reference coverage
+
+If the validator says the evidence folder is `missing` or `empty`, treat that
+as an operator workflow problem first. Fix the folder path or copy the field
+photos into the folder before trying to interpret coverage.
 
 ## Uncertain evidence
 
@@ -101,6 +109,12 @@ Without explicit approval, do not commit:
 - raw pilot CSVs
 - real field photos
 - local validation output under `validation_runs/stage4_pilots/`
+
+The command center is designed so these local-only paths remain git-ignored by
+default:
+
+- `real_pilot_data/`
+- `validation_runs/stage4_pilots/`
 
 Only explicitly approved redacted reports or synthetic fixtures should be added
 to Git.

@@ -51,6 +51,27 @@ The command prints a terminal summary and writes:
 - `validation_runs/stage4_pilots/<pilot-name>/pilot_validation_report.json`
 - `validation_runs/stage4_pilots/<pilot-name>/pilot_validation_report.md`
 
+## Dry-run examples
+
+Validate a known-good sample:
+
+```bash
+python3.13 scripts/validate_stage4_pilot.py \
+  --csv tests/fixtures/stage4/pilot_valid_sample.csv \
+  --pilot-name SAMPLE_VALID \
+  --evidence-dir tests/fixtures/stage4/evidence/valid \
+  --out /tmp/stage4_sample_valid
+```
+
+Validate a known-bad sample:
+
+```bash
+python3.13 scripts/validate_stage4_pilot.py \
+  --csv tests/fixtures/stage4/pilot_invalid_sample.csv \
+  --pilot-name SAMPLE_INVALID \
+  --out /tmp/stage4_sample_invalid
+```
+
 ## Repo validation checks
 
 Run the package tests first:
@@ -65,7 +86,7 @@ Then run the full repo checks required for this branch:
 pytest -v
 pre-commit run --all-files
 python scripts/repo_health.py
-python scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1
+python scripts/merge_safety_check.py codex/field-pilot-command-center-v1
 ```
 
 ## What to inspect
@@ -80,6 +101,30 @@ Look for these outcomes:
 - the evidence section clearly reports missing referenced photos, unreferenced
   photos, duplicate names, and invalid filename patterns
 - runtime isolation tests remain green
+- the terminal summary clearly shows `PASS`, `PARTIAL`, or `NO-GO`
+- the report gives a clear next action and a Stage 4C gate implication
+
+## How to read the command output
+
+The terminal summary is the operator quick read:
+
+- verdict headline
+- row counts
+- blocker counts
+- evidence status
+- top issues
+- next action
+- JSON and Markdown report paths
+
+The Markdown report is the detailed operator record:
+
+- executive summary
+- pilot verdict
+- Stage 4C gate implication
+- row and field issue detail
+- evidence/photo findings
+- recommended fixes
+- what Noel should do next
 
 ## Pass / fail interpretation
 
@@ -89,6 +134,12 @@ Treat the pilot as operationally successful only if:
 - invalid rows are explainable and fixable
 - the template was usable in the field without repeated guesswork
 - Noel can explain every warning or review-required result
+
+Interpret the final decision like this:
+
+- `PASS` / `GO`: good enough for Noel to review as real Stage 4C input, but still not automatic approval
+- `PARTIAL / RE-PILOT REQUIRED`: useful evidence exists, but more capture or cleanup is needed
+- `NO-GO`: fix the CSV/evidence/template problems before any Stage 4C discussion
 
 Treat the pilot as a NO-GO for Stage 4C if:
 
@@ -110,6 +161,9 @@ under:
 - missing fields
 - unnecessary fields
 
+If the command returns `NO-GO` because the CSV could not be loaded, record that
+as an execution failure first. Do not treat it as row-level pilot evidence.
+
 ## Do not commit by default
 
 Keep these local-only unless Noel explicitly approves a redacted artifact:
@@ -118,6 +172,19 @@ Keep these local-only unless Noel explicitly approves a redacted artifact:
 - `validation_runs/stage4_pilots/`
 
 Committed test fixtures remain synthetic only.
+
+Do commit only:
+
+- synthetic fixtures
+- docs
+- tests
+- explicitly approved redacted examples
+
+Do not commit:
+
+- real photos
+- raw field CSVs
+- automatic local operator reports
 
 ## Runtime boundary
 

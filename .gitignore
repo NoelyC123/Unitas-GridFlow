@@ -59,7 +59,7 @@ CHATGPT_UPLOAD_BUNDLES/
 CLAUDE_APP_UPLOAD_BUNDLES/
 CLAUDE_REVIEW_BUNDLES/
 
-# Local real survey validation files
+# Local real survey validation files (never commit raw field pilot data by default)
 validation_data/
 real_pilot_data/
 

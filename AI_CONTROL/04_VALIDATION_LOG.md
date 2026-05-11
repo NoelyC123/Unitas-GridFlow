@@ -267,3 +267,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Local execution-system changes only; no app runtime files modified. Full suite passed with 1049 passed, 2 skipped. Valid pilot fixture report returned `PARTIAL / RE-PILOT REQUIRED`; invalid pilot fixture report returned `NO-GO`.
+
+### 2026-05-11T12:20:00Z
+
+- Branch: `codex/field-pilot-command-center-v1`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py codex/field-pilot-command-center-v1 && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/pilot_valid_sample.csv --pilot-name P_REAL_001 --evidence-dir tests/fixtures/stage4/evidence/valid --out /tmp/fpcc_valid && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/pilot_invalid_sample.csv --pilot-name P_REAL_BAD --out /tmp/fpcc_invalid && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/pilot_duplicate_identity_sample.csv --pilot-name P_REAL_DUP --out /tmp/fpcc_dup && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/golden_valid.csv --pilot-name GOLDEN_VALID --out /tmp/fpcc_golden_valid && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/golden_invalid.csv --pilot-name GOLDEN_INVALID --out /tmp/fpcc_golden_invalid && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/golden_duplicates.csv --pilot-name GOLDEN_DUP --out /tmp/fpcc_golden_dup && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/golden_known_bad.csv --pilot-name GOLDEN_BAD --out /tmp/fpcc_golden_bad`
+- validation_runs report path: `/tmp/fpcc_valid/pilot_validation_report.md`, `/tmp/fpcc_invalid/pilot_validation_report.md`, `/tmp/fpcc_dup/pilot_validation_report.md`, `/tmp/fpcc_golden_valid/pilot_validation_report.md`, `/tmp/fpcc_golden_invalid/pilot_validation_report.md`, `/tmp/fpcc_golden_dup/pilot_validation_report.md`, `/tmp/fpcc_golden_bad/pilot_validation_report.md`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Command-center polish only; no app runtime files modified. Full suite passed with 1062 passed, 2 skipped. Dry-run outputs now show operator-facing PASS/PARTIAL/NO-GO headlines, next-action guidance, and stable JSON/Markdown structure.
