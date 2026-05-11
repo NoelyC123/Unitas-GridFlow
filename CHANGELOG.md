@@ -8,6 +8,64 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - P_REAL_001_MINI mini-pilot result record
+
+### Added
+
+- Added `AI_CONTROL/70_P_REAL_001_MINI_FIELD_PILOT_RESULT.md` as a tracked,
+  non-sensitive record of the local mini-pilot outcome.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `02_CURRENT_TASK.md`,
+  `03_WORKER_LOG.md`, `04_VALIDATION_LOG.md`, and `05_HANDOFF.md` to record the
+  mini-pilot verdict and keep Stage 4C explicitly blocked pending a stronger
+  controlled baseline pilot.
+
+### Validation
+
+- `pytest -v`: passed, 1068 passed, 1 skipped.
+- `pre-commit run --all-files`: passed.
+- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions
+  only.
+- `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`:
+  safe to merge.
+
+### Notes
+
+- No real photos committed.
+- No real CSV committed.
+- No local validation reports committed.
+- `P_REAL_001_MINI` is recorded as a successful workflow shakedown with a Stage
+  4C gate result of `PARTIAL / RE-PILOT REQUIRED`.
+
+## 2026-05-11 - P_REAL_001_MINI Independent Gate Audit + Next Controlled Pilot Plan
+
+### Added
+
+- Added `AI_CONTROL/71_P_REAL_001_MINI_INDEPENDENT_GATE_AUDIT.md` — independent
+  audit of P_REAL_001_MINI mini field pilot. Verdict: successful shakedown/
+  rehearsal (PARTIAL / re-pilot required). Evidence audit confirms 100%
+  reference coverage (0 missing, 0 orphaned, 0 duplicates). Stage 4C remains
+  blocked pending next controlled pilot.
+
+- Added `AI_CONTROL/72_STAGE4C_NEXT_CONTROLLED_PILOT_PLAN.md` — defines
+  requirements for the next 30–50 pole controlled pilot against a real Trimble
+  baseline. Specifies success criteria, exact validation commands, decision
+  thresholds (GO / CONDITIONAL GO / NO-GO / STOP), and failure re-pilot rules.
+
+### Notes
+
+- P_REAL_001_MINI proves the Stage 4 pilot workflow and validator are sound.
+- Mini pilot achieved 100% evidence linking after normalization; validator
+  correctly classified 2 merge-ready and 8 review-required rows.
+- Real pilot CSV and photos remain git-ignored; audit findings documented
+  without exposing sensitive field data.
+- Stage 4C runtime integration gate remains explicitly CLOSED. Next controlled
+  pilot is the blocking dependency.
+
+---
+
 ## 2026-05-10 - Stage 4C Architecture Gate + Runtime Integration Safety Design
 
 ### Added

@@ -411,3 +411,20 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: scripts/convert_stage4_workbook_to_pilot_csv.py,tests/test_stage4_workbook_conversion.py,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_REAL_FIELD_PILOT_GUIDE.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: `pytest -v tests/test_stage4_workbook_conversion.py` passed with 5 passed; full `pytest -v` passed with 1068 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only; merge-safety rerun required after commit because the branch was still identical to `master` before commit.
 - Next action: commit the branch, rerun `merge_safety_check.py`, and execute the converter against Noel's real workbook locally once `/mnt/data/survey_records_sorted_tabs.xlsx` is available.
+### 2026-05-11T15:46:54Z
+
+- Worker: codex
+- Branch: `codex/p-real-001-mini-result-record`
+- Action: Recorded the `P_REAL_001_MINI` mini-pilot outcome in a tracked non-sensitive control record without committing raw evidence, the real CSV, or local validation outputs.
+- Files changed: AI_CONTROL/70_P_REAL_001_MINI_FIELD_PILOT_RESULT.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed with 1068 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record` safe to merge
+- Next action: review and merge this control-record branch; keep Stage 4C blocked and plan a controlled baseline pilot with exact `pole_id` matching.
+
+### 2026-05-11T16:30:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/p-real-001-mini-independent-gate-audit`
+- Action: P_REAL_001_MINI independent gate audit: reviewed pilot validation report, pilot summary, and evidence audit; created governance documents 71 and 72 defining mini-pilot verdict (successful rehearsal) and next controlled-pilot requirements
+- Files changed: AI_CONTROL/71_P_REAL_001_MINI_INDEPENDENT_GATE_AUDIT.md,AI_CONTROL/72_STAGE4C_NEXT_CONTROLLED_PILOT_PLAN.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: pending full validation suite
+- Next action: run pytest/pre-commit/repo_health/merge_safety and commit
