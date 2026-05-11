@@ -402,3 +402,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: scripts/validate_stage4_pilot.py,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_EVIDENCE_FOLDER_PROTOCOL.md,docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md,docs/STAGE4_REAL_FIELD_PILOT_GUIDE.md,tests/test_stage4_field_pilot_execution.py,.gitignore,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: `pytest -v` passed with 1062 passed, 2 skipped; `pre-commit run --all-files` passed; repo_health and merge_safety pending final post-update run
 - Next action: run repo_health, merge_safety, final dry-run CLI sweep, then commit if clean
+
+### 2026-05-11T13:25:00Z
+
+- Worker: codex
+- Branch: `codex/convert-existing-survey-workbook-stage4-pilot`
+- Action: Added a standard-library XLSX-to-Stage-4 converter, rehearsal-dataset docs, and workbook-conversion tests so an existing survey workbook can be validated through the Stage 4 pilot workflow without committing the original workbook.
+- Files changed: scripts/convert_stage4_workbook_to_pilot_csv.py,tests/test_stage4_workbook_conversion.py,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_REAL_FIELD_PILOT_GUIDE.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v tests/test_stage4_workbook_conversion.py` passed with 5 passed; full `pytest -v` passed with 1068 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only; merge-safety rerun required after commit because the branch was still identical to `master` before commit.
+- Next action: commit the branch, rerun `merge_safety_check.py`, and execute the converter against Noel's real workbook locally once `/mnt/data/survey_records_sorted_tabs.xlsx` is available.

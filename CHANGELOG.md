@@ -67,6 +67,30 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - No map-viewer, C2E2 popup, or Review OS changes.
 - Real pilot raw data remains git-ignored by default.
 
+## 2026-05-11 - Existing survey workbook to Stage 4 rehearsal conversion
+
+### Added
+
+- Added `scripts/convert_stage4_workbook_to_pilot_csv.py`, a standard-library
+  XLSX converter that selects `Raw Capture` when present or otherwise chooses
+  the best matching workbook sheet for the Stage 4 pilot schema.
+- Added `tests/test_stage4_workbook_conversion.py` covering worksheet
+  selection, template-header output, Stage 4 preview validation, missing-sheet
+  handling, and git-ignore protection for local pilot data paths.
+
+### Changed
+
+- Updated Stage 4 pilot docs with a rehearsal workflow for converting an
+  existing survey workbook into a local Stage 4 pilot CSV before the live iPad
+  pilot.
+
+### Notes
+
+- The original workbook remains local-only evidence and is not committed by
+  this workflow.
+- This rehearsal path helps check field coverage and naming fit, but it does
+  not replace a fresh iPad pilot for capture UX and evidence handling.
+
 ## 2026-05-11 - Real field pilot execution system v1
 
 ### Added

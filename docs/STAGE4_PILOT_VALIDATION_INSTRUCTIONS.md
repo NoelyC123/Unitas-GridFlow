@@ -186,6 +186,37 @@ Do not commit:
 - raw field CSVs
 - automatic local operator reports
 
+## Using an existing survey workbook as a rehearsal dataset
+
+If Noel already has a workbook export such as `survey_records_sorted_tabs.xlsx`,
+use it as a rehearsal dataset before the fresh iPad pilot. Keep the workbook
+local under:
+
+`real_pilot_data/<pilot-name>/source/survey_records_sorted_tabs.xlsx`
+
+Convert the most relevant sheet to a Stage 4 pilot CSV:
+
+```bash
+python3.13 scripts/convert_stage4_workbook_to_pilot_csv.py \
+  --xlsx real_pilot_data/P011_EXISTING/source/survey_records_sorted_tabs.xlsx \
+  --sheet "Raw Capture" \
+  --out real_pilot_data/P011_EXISTING/csv/pilot_existing_P011.csv
+```
+
+Then validate it with the existing pilot validator:
+
+```bash
+python3.13 scripts/validate_stage4_pilot.py \
+  --csv real_pilot_data/P011_EXISTING/csv/pilot_existing_P011.csv \
+  --pilot-name P011_EXISTING \
+  --evidence-dir real_pilot_data/P011_EXISTING/evidence \
+  --out validation_runs/stage4_pilots/P011_EXISTING
+```
+
+Treat this as rehearsal evidence only. It is useful for checking field
+coverage, naming consistency, and validator fit, but it does not replace a
+fresh iPad pilot for capture UX, photo workflow, and live operator friction.
+
 ## Runtime boundary
 
 Do not treat a passing pilot CSV as approval for Stage 4C. Runtime integration

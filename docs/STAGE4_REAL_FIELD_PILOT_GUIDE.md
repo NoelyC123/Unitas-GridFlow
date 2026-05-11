@@ -128,6 +128,30 @@ The command-center result should be read like this:
 - `PARTIAL / RE-PILOT REQUIRED`: usable evidence exists, but more cleanup or capture is needed
 - `NO-GO`: the pilot package or export needs fixing before any Stage 4C discussion
 
+## Using an existing workbook before the live pilot
+
+An existing workbook can be used as a rehearsal dataset before Noel goes into
+the field with the iPad template.
+
+Use this workflow:
+
+1. Keep the original workbook local under
+   `real_pilot_data/<pilot-name>/source/`.
+2. Convert the best matching sheet with
+   `scripts/convert_stage4_workbook_to_pilot_csv.py`.
+3. Run `scripts/validate_stage4_pilot.py` on the converted CSV.
+4. Review the missing, extra, and matched fields before the live pilot.
+
+This helps answer:
+
+- whether existing captured columns line up with the Stage 4B schema
+- whether `photo_reference` values already follow the expected naming pattern
+- which fields still need cleaner operator guidance
+
+This does not prove the live pilot workflow. A real iPad capture session is
+still required to validate field-entry friction, truthfulness under live
+capture, and evidence-folder discipline.
+
 ## Stage 4C status
 
 Stage 4C remains blocked until:

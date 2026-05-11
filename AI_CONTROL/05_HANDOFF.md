@@ -42,6 +42,14 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - Browser validation: not required; no runtime/UI integration.
 - Manual review report: n/a.
 
+## Feature Branch Note
+
+- Branch under review: `codex/convert-existing-survey-workbook-stage4-pilot`
+- Status: workbook-conversion tooling implemented and validated; ready for review after commit
+- Summary: Adds `scripts/convert_stage4_workbook_to_pilot_csv.py`, workbook-conversion tests, and rehearsal-dataset guidance so an existing survey workbook can be converted into a Stage 4 pilot CSV without committing the source workbook.
+- Validation: `pytest -v tests/test_stage4_workbook_conversion.py` passed with 5 passed; full `pytest -v` passed with 1068 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only for known numbering collisions and local modified files before commit.
+- Local blocker: `/mnt/data/survey_records_sorted_tabs.xlsx` was not accessible in this environment, so the real workbook could not be inspected or converted here.
+
 ## Next Action
 
 Review/merge this command-center branch if clean, then run the CLI against
