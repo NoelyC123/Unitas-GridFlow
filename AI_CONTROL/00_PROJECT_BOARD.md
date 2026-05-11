@@ -21,39 +21,40 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `pre-pilot-cleanroom-release-readiness-audit-complete`
 - `p-real-001-mini-independent-gate-audit-complete`
 - `stage4c-controlled-baseline-pilot-prep-complete`
+- `controlled-pilot-field-pack-v1-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4C Controlled Baseline Pilot Preparation Pack
-- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
+- Task: Controlled Pilot Field Pack v1
+- Branch: `claude-code/controlled-pilot-field-pack-v1`
 - Owner: claude-code
 - Status: ready_for_validation
-- Summary: Created 3 governance documents (73–75) defining exact pole_id matching protocol, controlled pilot requirements, and decision template for next real baseline pilot. Updated 6 control files and ready for full validation suite.
+- Summary: Created 3 operator-facing field pack documents (80–82) for Noel's field capture after Codex selects baseline candidate. Includes simple field-day procedure, photo/evidence rules, and post-pilot decision notes. Updated 6 control files.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Stage 4C Controlled Baseline Pilot Preparation Pack | `claude-code/stage4c-controlled-baseline-pilot-prep` | claude-code | Stage 4 field pilot execution | ready for validation |
+| Controlled Pilot Field Pack v1 | `claude-code/controlled-pilot-field-pack-v1` | claude-code | Stage 4 field pilot execution | ready for validation |
 
 ## Review / Validation
 
-**Prep Pack Branch (`claude-code/stage4c-controlled-baseline-pilot-prep`):**
+**Field Pack Branch (`claude-code/controlled-pilot-field-pack-v1`):**
 
-- Documents 73–75 created: controlled baseline pilot prep, pole_id match protocol, decision template
+- Documents 80–82 created: simple field-day procedure, photo/evidence rules, post-pilot decision notes
 - Control files updated: 00, 02, 03, 04, 05, CHANGELOG
 - Validation pending: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py`
 - Expected: 1050+ passed, 1 skipped; pre-commit clean; repo_health warning-only; merge_safety_check safe
 - Real pilot data protection: `real_pilot_data/` and `validation_runs/` remain git-ignored
 - Browser validation: not required; control/docs only, no runtime UI changes
-- Merge recommendation: ready to merge after validation passes
 
-**Prior Audit Branches (ready for merge or merged):**
+**Prior Branches (merged or ready):**
 
+- Stage 4C Controlled Baseline Pilot Preparation Pack (docs 73–75): complete specification for controlled baseline pilot
 - P_REAL_001_MINI Independent Gate Audit (docs 71–72): verdict = successful shakedown, NO-GO for Stage 4C
-- Pre-Pilot Cleanroom Audit (docs 66–69): verdict = READY WITH CAUTIONS for field trial; critical finding: docs 61–65 on unmerged branches
+- Pre-Pilot Cleanroom Audit (docs 66–69): verdict = READY WITH CAUTIONS for field trial
 
 ## Blocked
 
@@ -88,6 +89,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Pre-pilot cleanroom audit complete: worktree/branch cleanup plan, release readiness verdict, and pre-pilot release note created; critical finding: docs 61–65 unmerged.
 - P_REAL_001_MINI independent gate audit complete: verdict = PARTIAL/RE-PILOT REQUIRED (successful shakedown, 20% merge-ready, only 10 poles); Stage 4C blocked.
 - Stage 4C controlled baseline pilot preparation pack complete: docs 73–75 created defining exact pole_id matching protocol and controlled pilot requirements for next 30–50 pole real baseline pilot.
+- Controlled pilot field pack v1 complete: docs 80–82 created providing Noel with simple field-day procedure, photo/evidence rules, and post-pilot decision notes for execution after Codex selects baseline candidate.
 
 ## Backlog / Next Candidates
 

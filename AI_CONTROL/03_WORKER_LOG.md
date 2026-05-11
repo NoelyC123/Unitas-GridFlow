@@ -437,3 +437,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/73_STAGE4C_CONTROLLED_BASELINE_PILOT_PREP.md,AI_CONTROL/74_STAGE4C_BASELINE_POLE_ID_MATCH_PROTOCOL.md,AI_CONTROL/75_STAGE4C_CONTROLLED_PILOT_DECISION_TEMPLATE.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: ready for pytest/pre-commit/repo_health/merge_safety
 - Next action: run full validation suite and commit branch
+
+### 2026-05-11T17:00:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/controlled-pilot-field-pack-v1`
+- Action: Created Controlled Pilot Field Pack v1 (docs 80–82) with simple field-day procedure, photo/evidence rules, and post-pilot decision notes for Noel; updated 6 control files with field-pack task context
+- Files changed: AI_CONTROL/80_CONTROLLED_PILOT_FIELD_PACK_V1.md,AI_CONTROL/81_CONTROLLED_PILOT_PHOTO_AND_EVIDENCE_RULES.md,AI_CONTROL/82_CONTROLLED_PILOT_OPERATOR_DECISION_NOTES.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: ready for pytest/pre-commit/repo_health/merge_safety
+- Next action: run full validation suite and commit branch
