@@ -21,44 +21,49 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `pre-pilot-cleanroom-release-readiness-audit-complete`
 - `p-real-001-mini-independent-gate-audit-complete`
 - `stage4c-controlled-baseline-pilot-prep-complete`
+- `existing-survey-baseline-candidate-audit-complete`
+- `controlled-pilot-field-pack-v1-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Audit Existing Survey Files for Stage 4C Controlled Baseline Pilot Suitability
-- Branch: `codex/audit-existing-files-for-stage4c-baseline-pilot`
-- Owner: codex
-- Status: validated_ready_for_merge
-- Summary: Audited the requested baseline candidate paths and broader tracked CSV inventory. This checkout contains no auditable real survey/job baseline CSVs, so Noel still needs an accessible real Trimble export before the controlled baseline pilot can start.
+- Task: P_CONTROLLED_001 controlled baseline pilot setup
+- Branch: `master`
+- Owner: Noel / next worker
+- Status: ready_to_start
+- Summary: The clean-worktree baseline audit (doc 79) completed and found no tracked candidate files in that audit worktree. This local main checkout does contain local upload and baseline CSVs, and controlled pilot field-pack docs 80–82 are now available. Next step: select the local baseline CSV for `P_CONTROLLED_001` and build/run the controlled baseline pilot helper. Stage 4C runtime integration remains blocked.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Existing survey baseline candidate audit | `codex/audit-existing-files-for-stage4c-baseline-pilot` | codex | Stage 4 field pilot execution | validated, ready for merge |
+| P_CONTROLLED_001 controlled baseline pilot setup | `master` | Noel / next worker | Stage 4 field pilot execution | ready to start |
 
 ## Review / Validation
 
-**Baseline Audit Branch (`codex/audit-existing-files-for-stage4c-baseline-pilot`):**
+**Existing baseline candidate audit (doc 79):**
 
-- Added `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md`
-- Audited all named candidate paths plus the broader tracked CSV inventory in this checkout
-- Result: no eligible real survey/job baseline CSVs are present under `uploads/projects/`, `uploads/jobs/`, or `validation_data/`
-- Best candidate in this checkout: none available
-- Next acquisition target: real `P008/F001` or `P009/F001` Trimble export with exact `pole_id` values and enough support rows for a controlled pilot
-- Validation passed: `pytest -v` (1067 passed, 2 skipped), `pre-commit run --all-files`, `python3.13 scripts/repo_health.py` (warning-only for known numbering collisions), `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot` (safe to merge)
-- Browser validation: not required; control/docs only, no runtime UI changes
+- `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` preserved the clean-audit result from a separate worktree
+- That audit found no tracked candidate files under `uploads/projects/`, `uploads/jobs/`, or `validation_data/` in the clean audit worktree
+- That result remains valid as provenance for the earlier control-only branch
 
-**Prior Audit Branches (ready for merge or merged):**
+**Current local main checkout reality:**
 
-- P_REAL_001_MINI Independent Gate Audit (docs 71–72): verdict = successful shakedown, NO-GO for Stage 4C
-- Pre-Pilot Cleanroom Audit (docs 66–69): verdict = READY WITH CAUTIONS for field trial; critical finding: docs 61–65 on unmerged branches
+- Candidate upload and baseline CSVs do exist locally in this checkout
+- Those local CSVs remain excluded from governance commits and must not be added during control-layer merges
+- `P_REAL_001_MINI` remains only a successful workflow shakedown, not Stage 4C approval evidence
+
+**Controlled Pilot Field Pack v1 (docs 80–82):**
+
+- Documents 80–82 are now present: field-day procedure, photo/evidence rules, and operator decision notes
+- These docs are ready for Noel once the local baseline CSV for `P_CONTROLLED_001` is selected
+- Browser validation is not required; this is control/docs only
 
 ## Blocked
 
-- Stage 4C runtime integration (pending next controlled pilot approval)
-- Stage 4C controlled baseline pilot execution (blocked until Noel provides an accessible real Trimble baseline CSV)
+- Stage 4C runtime integration (pending controlled baseline pilot approval)
+- Stage 4C controlled baseline pilot execution (blocked until the local `P_CONTROLLED_001` baseline CSV is selected and the helper/validation flow is run with exact `pole_id` matching)
 
 ## In Review / Audit
 
@@ -89,12 +94,14 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Pre-pilot cleanroom audit complete: worktree/branch cleanup plan, release readiness verdict, and pre-pilot release note created; critical finding: docs 61–65 unmerged.
 - P_REAL_001_MINI independent gate audit complete: verdict = PARTIAL/RE-PILOT REQUIRED (successful shakedown, 20% merge-ready, only 10 poles); Stage 4C blocked.
 - Stage 4C controlled baseline pilot preparation pack complete: docs 73–75 created defining exact pole_id matching protocol and controlled pilot requirements for next 30–50 pole real baseline pilot.
+- Existing survey baseline candidate audit complete: doc 79 recorded that the separate clean audit worktree did not contain tracked candidate baseline files.
+- Controlled pilot field pack v1 complete: docs 80–82 created providing Noel with simple field-day procedure, photo/evidence rules, and post-pilot decision notes for execution after baseline selection.
 
 ## Backlog / Next Candidates
 
-- Stage 4C controlled runtime integration, only after a controlled pilot against a real GridFlow/Trimble baseline is recorded and the go/no-go gate is approved.
+- Use a local baseline CSV for `P_CONTROLLED_001` and build/run the controlled baseline pilot helper with exact `pole_id` matching.
 - Controlled baseline pilot with exact `pole_id` matching and stronger access/closer capture.
-- Accessible real baseline CSV audit refresh once Noel provides `P008/F001`, `P009/F001`, or another real Trimble export in the worktree.
+- Stage 4C controlled runtime integration, only after a controlled pilot against a real GridFlow/Trimble baseline is recorded and the go/no-go gate is approved.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.

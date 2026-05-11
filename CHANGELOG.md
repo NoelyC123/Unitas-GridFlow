@@ -33,6 +33,48 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - Preferred next acquisition target: real `P008/F001` or `P009/F001` Trimble
   export with exact `pole_id` values.
 
+## 2026-05-11 - Controlled Pilot Field Pack v1
+
+### Added
+
+- Added `AI_CONTROL/80_CONTROLLED_PILOT_FIELD_PACK_V1.md` — simple field-day
+  procedure for Noel, independent of baseline selection. Covers pre-field checklist,
+  per-pole capture workflow (identify, fill template, take photos, organize locally),
+  end-of-day organization, validation commands, and stop conditions.
+
+- Added `AI_CONTROL/81_CONTROLLED_PILOT_PHOTO_AND_EVIDENCE_RULES.md` — detailed
+  photo requirements per pole (context, ID/plate, equipment, base), naming protocol
+  (`<pole_id>_<evidence_type>_<sequence>.jpg`), file format handling (JPG/HEIC/PNG),
+  handling special situations (vegetation, unknown pole_id), orphan/unreferenced
+  photo prevention, evidence acceptance checklist, privacy/safety notes.
+
+- Added `AI_CONTROL/82_CONTROLLED_PILOT_OPERATOR_DECISION_NOTES.md` — post-field
+  notes template for Noel (friction log, unknown-field log, access log, pole_id
+  mismatch notes, confidence assessment, GO/CONDITIONAL GO/NO-GO decision criteria).
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `02_CURRENT_TASK.md`,
+  `03_WORKER_LOG.md`, `04_VALIDATION_LOG.md`, `05_HANDOFF.md` to record the
+  field-pack task completion and maintain control-layer consistency.
+
+### Validation
+
+- `pytest -v`: pending (expected 1050+ passed, 1 skipped).
+- `pre-commit run --all-files`: pending (expected clean).
+- `python3.13 scripts/repo_health.py`: pending (expected warning-only).
+- `python3.13 scripts/merge_safety_check.py claude-code/controlled-pilot-field-pack-v1`: pending (expected safe).
+
+### Notes
+
+- Field pack is independent of baseline selection; docs 80–82 are usable after
+  Codex selects P_CONTROLLED_001 baseline candidate.
+- Docs 73–75 (prep, protocol, template) provide specification; docs 80–82 provide
+  operator guidance for field execution and decision notes.
+- All raw pilot data workspace remains git-ignored; zero real evidence committed.
+- Stage 4C runtime integration remains blocked pending Noel's controlled pilot
+  execution and GO verdict on decision template.
+
 ## 2026-05-11 - P_REAL_001_MINI mini-pilot result record
 
 ### Added

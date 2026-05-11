@@ -438,11 +438,20 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Validation state: ready for pytest/pre-commit/repo_health/merge_safety
 - Next action: run full validation suite and commit branch
 
+### 2026-05-11T17:00:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/controlled-pilot-field-pack-v1`
+- Action: Created Controlled Pilot Field Pack v1 (docs 80–82) with simple field-day procedure, photo/evidence rules, and post-pilot decision notes for Noel; updated 6 control files with field-pack task context
+- Files changed: AI_CONTROL/80_CONTROLLED_PILOT_FIELD_PACK_V1.md,AI_CONTROL/81_CONTROLLED_PILOT_PHOTO_AND_EVIDENCE_RULES.md,AI_CONTROL/82_CONTROLLED_PILOT_OPERATOR_DECISION_NOTES.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: ready for pytest/pre-commit/repo_health/merge_safety
+- Next action: run full validation suite and commit branch
+
 ### 2026-05-11T19:01:10Z
 
 - Worker: codex
 - Branch: `codex/audit-existing-files-for-stage4c-baseline-pilot`
-- Action: Audited the requested real baseline candidate CSV paths and the broader tracked CSV inventory for Stage 4C controlled-pilot suitability. Found no eligible tracked real survey/job baseline CSVs in this checkout, documented the result in `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md`, and recorded the required next acquisition target.
+- Action: Audited the requested real baseline candidate CSV paths and the broader tracked CSV inventory for Stage 4C controlled-pilot suitability. Found no eligible tracked real survey/job baseline CSVs in that separate clean audit worktree, documented the result in `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md`, and recorded the required next acquisition target.
 - Files changed: AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: pending `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, and `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`
 - Next action: validate the audit branch, merge the control record, and have Noel provide an accessible real Trimble baseline CSV for a follow-up suitability audit.

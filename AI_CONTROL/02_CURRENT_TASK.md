@@ -4,32 +4,33 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Audit Existing Survey Files for Stage 4C Controlled Baseline Pilot Suitability
-- Branch: `codex/audit-existing-files-for-stage4c-baseline-pilot`
-- Owner: codex
+- Task: P_CONTROLLED_001 controlled baseline pilot setup
+- Branch: `master`
+- Owner: Noel / next worker
 - Lane: Stage 4 field pilot execution
-- Status: validated_ready_for_merge
+- Status: ready_to_start
 - Requested by: Noel
-- Runtime changes allowed: no live app integration; control/docs only; no real evidence may be committed
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`
-- Validation result: pass (`pytest -v`: 1067 passed, 2 skipped; `pre-commit run --all-files`: passed; `python3.13 scripts/repo_health.py`: warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`: safe to merge)
+- Runtime changes allowed: no live app integration; control/helper only; no real evidence may be committed
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py <next branch>`
+- Validation result: governance and audit merge pending completion on `master`; Stage 4C remains blocked
 - Browser validation required: no; control/docs only, no runtime UI changes
 - Popup scope changes allowed: no
 
 ## Goal
 
-Audit the real survey/job CSV files already present in the repository checkout
-and determine whether any existing file is suitable as the baseline for the
-next Stage 4C controlled pilot. If no suitable tracked file exists, record that
-explicitly and state what Noel needs to provide.
+Use a real local baseline CSV already present in this checkout to prepare
+`P_CONTROLLED_001`, then build/run the controlled baseline pilot helper with
+exact `pole_id` matching and the field-pack/operator documents now merged.
 
 ## Scope
 
-- Inspect the named priority candidate CSV paths first.
-- Scan all other tracked real survey/job CSVs in the checkout, excluding mock/template/fixture/archive data.
-- Create `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md`.
-- Update control files with the audit result.
-- Run full validation suite and prepare branch for merge.
+- Use the preserved clean-worktree audit result in `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` as provenance for the earlier control-only branch.
+- Select a local candidate baseline CSV from this main checkout for `P_CONTROLLED_001`.
+- Use docs 73–75 and 80–82 together for execution planning:
+  - docs 73–75: baseline pilot prep, exact `pole_id` protocol, formal decision template
+  - docs 80–82: operator field-day procedure, photo/evidence rules, operator decision notes
+- Build/run the controlled baseline pilot helper on a separate follow-on branch.
+- Keep `uploads/`, `real_pilot_data/`, and `validation_runs/` out of governance commits.
 
 ## Out Of Scope
 
@@ -42,19 +43,24 @@ explicitly and state what Noel needs to provide.
 
 ## Acceptance Criteria
 
-- `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` records path-level, header-level, and aggregate-level audit findings without exposing row contents.
-- Each named priority candidate is classified as `SUITABLE`, `POSSIBLE FALLBACK`, `NOT SUITABLE`, or `UNKNOWN / NEEDS MANUAL REVIEW`.
-- Best baseline candidate is identified, or the document explicitly states that none are available in this checkout.
-- Control files are updated to reflect the audit result and Stage 4C remains blocked pending a real accessible baseline.
+- Baseline audit and field-pack governance docs are merged cleanly on `master`.
+- `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` remains as the clean-audit provenance record.
+- Docs 80–82 are available for Noel and the next worker.
+- Project state reflects that:
+  - the clean audit worktree had no tracked candidate files
+  - this local main checkout does contain local candidate upload/baseline CSVs
+  - `P_REAL_001_MINI` remains only a successful shakedown
+  - Stage 4C runtime integration remains blocked
 - `pytest -v` passes.
 - `pre-commit run --all-files` passes clean.
 - `python3.13 scripts/repo_health.py` reports warning-only (known collisions only).
-- `python3.13 scripts/merge_safety_check.py` confirms safe to merge.
-- `real_pilot_data/` and `validation_runs/` remain git-ignored with zero real evidence committed.
+- `python3.13 scripts/merge_safety_check.py` confirms safe to merge for the governance branch being merged.
+- `real_pilot_data/`, `validation_runs/`, and local `uploads/` CSVs remain uncommitted.
 
 ## Current Next Action
 
-1. Merge the audit record.
-2. Noel provides an accessible real Trimble baseline CSV, preferably `P008/F001` or `P009/F001`.
-3. Re-run the candidate audit against the actual file.
-4. Execute the controlled baseline pilot only after a real baseline file is confirmed suitable.
+1. Complete the current governance merge on `master`.
+2. Use a local baseline CSV for `P_CONTROLLED_001`.
+3. Build/run the controlled baseline pilot helper on a new follow-on branch.
+4. Execute the controlled baseline pilot with exact `pole_id` matching.
+5. Keep Stage 4C runtime integration blocked until the controlled pilot verdict is recorded.
