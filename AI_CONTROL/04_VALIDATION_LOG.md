@@ -326,3 +326,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pending (expected pass with 1050+ tests, 1 skipped)
 - Notes: Stage 4C Controlled Baseline Pilot Preparation Pack documents (73–75) defining exact pole_id matching protocol, 30–50 pole controlled pilot workflow, and decision template. Control files (00, 02, 03, 04, 05, CHANGELOG) updated with prep-pack task context. Real pilot data workspace remains git-ignored.
+
+### 2026-05-11T19:01:10Z
+
+- Branch: `codex/audit-existing-files-for-stage4c-baseline-pilot`
+- Commit: `ec1ccfd`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`
+- validation_runs report path: n/a (audit/control only; no runtime outputs)
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Audit-only branch. The requested baseline candidate paths under `uploads/projects/`, `uploads/jobs/`, and `validation_data/` are not present in this checkout, and no other eligible tracked real survey/job CSVs were found outside excluded mock/template/fixture/archive paths. `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` records that Noel must provide an accessible real Trimble baseline CSV before the controlled pilot can proceed. Validation result: `pytest -v` passed with 1067 passed, 2 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only; `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot` safe to merge.

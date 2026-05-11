@@ -8,6 +8,31 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - Existing survey baseline candidate audit
+
+### Added
+
+- Added `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` to record
+  the Stage 4C controlled-pilot baseline audit for the requested candidate CSV
+  paths and the broader tracked CSV inventory.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `AI_CONTROL/02_CURRENT_TASK.md`,
+  `AI_CONTROL/03_WORKER_LOG.md`, `AI_CONTROL/04_VALIDATION_LOG.md`, and
+  `AI_CONTROL/05_HANDOFF.md` to reflect that the named baseline files are not
+  present in this checkout and that Stage 4C remains blocked pending an
+  accessible real Trimble baseline CSV.
+
+### Notes
+
+- Audit-only task; no runtime files changed.
+- No real evidence committed.
+- No `real_pilot_data/` or `validation_runs/` content committed.
+- Best candidate in this checkout: none available.
+- Preferred next acquisition target: real `P008/F001` or `P009/F001` Trimble
+  export with exact `pole_id` values.
+
 ## 2026-05-11 - P_REAL_001_MINI mini-pilot result record
 
 ### Added

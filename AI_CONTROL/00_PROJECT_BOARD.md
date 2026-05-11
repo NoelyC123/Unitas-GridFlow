@@ -25,30 +25,30 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4C Controlled Baseline Pilot Preparation Pack
-- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
-- Owner: claude-code
-- Status: ready_for_validation
-- Summary: Created 3 governance documents (73–75) defining exact pole_id matching protocol, controlled pilot requirements, and decision template for next real baseline pilot. Updated 6 control files and ready for full validation suite.
+- Task: Audit Existing Survey Files for Stage 4C Controlled Baseline Pilot Suitability
+- Branch: `codex/audit-existing-files-for-stage4c-baseline-pilot`
+- Owner: codex
+- Status: validated_ready_for_merge
+- Summary: Audited the requested baseline candidate paths and broader tracked CSV inventory. This checkout contains no auditable real survey/job baseline CSVs, so Noel still needs an accessible real Trimble export before the controlled baseline pilot can start.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Stage 4C Controlled Baseline Pilot Preparation Pack | `claude-code/stage4c-controlled-baseline-pilot-prep` | claude-code | Stage 4 field pilot execution | ready for validation |
+| Existing survey baseline candidate audit | `codex/audit-existing-files-for-stage4c-baseline-pilot` | codex | Stage 4 field pilot execution | validated, ready for merge |
 
 ## Review / Validation
 
-**Prep Pack Branch (`claude-code/stage4c-controlled-baseline-pilot-prep`):**
+**Baseline Audit Branch (`codex/audit-existing-files-for-stage4c-baseline-pilot`):**
 
-- Documents 73–75 created: controlled baseline pilot prep, pole_id match protocol, decision template
-- Control files updated: 00, 02, 03, 04, 05, CHANGELOG
-- Validation pending: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py`
-- Expected: 1050+ passed, 1 skipped; pre-commit clean; repo_health warning-only; merge_safety_check safe
-- Real pilot data protection: `real_pilot_data/` and `validation_runs/` remain git-ignored
+- Added `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md`
+- Audited all named candidate paths plus the broader tracked CSV inventory in this checkout
+- Result: no eligible real survey/job baseline CSVs are present under `uploads/projects/`, `uploads/jobs/`, or `validation_data/`
+- Best candidate in this checkout: none available
+- Next acquisition target: real `P008/F001` or `P009/F001` Trimble export with exact `pole_id` values and enough support rows for a controlled pilot
+- Validation passed: `pytest -v` (1067 passed, 2 skipped), `pre-commit run --all-files`, `python3.13 scripts/repo_health.py` (warning-only for known numbering collisions), `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot` (safe to merge)
 - Browser validation: not required; control/docs only, no runtime UI changes
-- Merge recommendation: ready to merge after validation passes
 
 **Prior Audit Branches (ready for merge or merged):**
 
@@ -58,6 +58,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Blocked
 
 - Stage 4C runtime integration (pending next controlled pilot approval)
+- Stage 4C controlled baseline pilot execution (blocked until Noel provides an accessible real Trimble baseline CSV)
 
 ## In Review / Audit
 
@@ -93,6 +94,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 - Stage 4C controlled runtime integration, only after a controlled pilot against a real GridFlow/Trimble baseline is recorded and the go/no-go gate is approved.
 - Controlled baseline pilot with exact `pole_id` matching and stronger access/closer capture.
+- Accessible real baseline CSV audit refresh once Noel provides `P008/F001`, `P009/F001`, or another real Trimble export in the worktree.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.

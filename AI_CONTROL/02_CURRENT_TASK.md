@@ -4,31 +4,31 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Stage 4C Controlled Baseline Pilot Preparation Pack
-- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
-- Owner: claude-code
+- Task: Audit Existing Survey Files for Stage 4C Controlled Baseline Pilot Suitability
+- Branch: `codex/audit-existing-files-for-stage4c-baseline-pilot`
+- Owner: codex
 - Lane: Stage 4 field pilot execution
-- Status: ready_for_validation
-- Requested by: Noel (implicit from Stage 4C gate requirements)
+- Status: validated_ready_for_merge
+- Requested by: Noel
 - Runtime changes allowed: no live app integration; control/docs only; no real evidence may be committed
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py claude-code/stage4c-controlled-baseline-pilot-prep`
-- Validation result: pending (expected: 1050+ passed, 1 skipped; pre-commit clean; repo_health warning-only; merge_safety_check safe)
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`
+- Validation result: pass (`pytest -v`: 1067 passed, 2 skipped; `pre-commit run --all-files`: passed; `python3.13 scripts/repo_health.py`: warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`: safe to merge)
 - Browser validation required: no; control/docs only, no runtime UI changes
 - Popup scope changes allowed: no
 
 ## Goal
 
-Create a complete governance package for the next Stage 4C controlled baseline
-pilot (30–50 real poles with Trimble baseline). Define exact pole_id matching
-rules, pilot workflow, and decision template so Noel has all specifications
-needed to execute the real pilot that will determine Stage 4C merge readiness.
+Audit the real survey/job CSV files already present in the repository checkout
+and determine whether any existing file is suitable as the baseline for the
+next Stage 4C controlled pilot. If no suitable tracked file exists, record that
+explicitly and state what Noel needs to provide.
 
 ## Scope
 
-- Create `AI_CONTROL/73_STAGE4C_CONTROLLED_BASELINE_PILOT_PREP.md` — full preparation guide for 30–50 pole pilot.
-- Create `AI_CONTROL/74_STAGE4C_BASELINE_POLE_ID_MATCH_PROTOCOL.md` — exact pole_id matching rules and decision thresholds.
-- Create `AI_CONTROL/75_STAGE4C_CONTROLLED_PILOT_DECISION_TEMPLATE.md` — template for recording pilot results and verdicts.
-- Update control files: 00_PROJECT_BOARD, 02_CURRENT_TASK, 03_WORKER_LOG, 04_VALIDATION_LOG, 05_HANDOFF, CHANGELOG.
+- Inspect the named priority candidate CSV paths first.
+- Scan all other tracked real survey/job CSVs in the checkout, excluding mock/template/fixture/archive data.
+- Create `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md`.
+- Update control files with the audit result.
 - Run full validation suite and prepare branch for merge.
 
 ## Out Of Scope
@@ -42,23 +42,19 @@ needed to execute the real pilot that will determine Stage 4C merge readiness.
 
 ## Acceptance Criteria
 
-- All three governance documents (73–75) are created and consistent with Stage 4C architecture docs.
-- Documents define complete workflow for 30–50 pole controlled baseline pilot.
-- Exact pole_id matching protocol established with decision thresholds (≥80% GO, 75–80% CONDITIONAL GO, <75% NO-GO).
-- Decision template includes all required verification steps (row counts, match rates, attribute verification, operator friction assessment, risk assessment).
-- All 6 control files updated to reflect prep-pack task completion.
-- `pytest -v` passes with 1050+ tests, 1 skipped.
+- `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` records path-level, header-level, and aggregate-level audit findings without exposing row contents.
+- Each named priority candidate is classified as `SUITABLE`, `POSSIBLE FALLBACK`, `NOT SUITABLE`, or `UNKNOWN / NEEDS MANUAL REVIEW`.
+- Best baseline candidate is identified, or the document explicitly states that none are available in this checkout.
+- Control files are updated to reflect the audit result and Stage 4C remains blocked pending a real accessible baseline.
+- `pytest -v` passes.
 - `pre-commit run --all-files` passes clean.
 - `python3.13 scripts/repo_health.py` reports warning-only (known collisions only).
 - `python3.13 scripts/merge_safety_check.py` confirms safe to merge.
 - `real_pilot_data/` and `validation_runs/` remain git-ignored with zero real evidence committed.
-- Branch ready for merge to master.
 
 ## Current Next Action
 
-1. Run full validation suite on prep-pack branch (pytest, pre-commit, repo_health, merge_safety_check).
-2. Commit and push branch with summary of 3 documents + 6 control file updates.
-3. Merge to master when validation passes.
-4. Noel executes controlled baseline pilot per docs 73–75 specifications.
-5. Noel records results on decision template (doc 75) and signs GO/CONDITIONAL GO/NO-GO/STOP verdict.
-6. GO verdict authorizes Stage 4C runtime implementation task.
+1. Merge the audit record.
+2. Noel provides an accessible real Trimble baseline CSV, preferably `P008/F001` or `P009/F001`.
+3. Re-run the candidate audit against the actual file.
+4. Execute the controlled baseline pilot only after a real baseline file is confirmed suitable.
