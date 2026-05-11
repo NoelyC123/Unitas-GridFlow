@@ -7,14 +7,18 @@ rules. They do not merge any data into GridFlow runtime outputs.
 
 ## Save location
 
-After the field session, save the pilot file as:
+After the field session, keep the raw CSV out of Git and save it under:
 
-`tests/fixtures/stage4/pilot_real_<jobid>.csv`
+`real_pilot_data/<pilot-name>/csv/pilot_real_<jobid>.csv`
 
 Examples:
 
-- `tests/fixtures/stage4/pilot_real_P008_F001.csv`
-- `tests/fixtures/stage4/pilot_real_P010.csv`
+- `real_pilot_data/P_REAL_001/csv/pilot_real_P008_F001.csv`
+- `real_pilot_data/P_REAL_002/csv/pilot_real_P010.csv`
+
+Synthetic committed fixtures remain under `tests/fixtures/stage4/`. Real pilot
+raw data should not be committed unless Noel explicitly approves a redacted
+example.
 
 ## File preparation rules
 
@@ -27,19 +31,32 @@ Before validating:
 5. Use `structured_capture` in the `source` column.
 6. Use `none` only where explicitly allowed by the field dictionary.
 
-## Validation commands
+## One-command pilot validation
 
-Run the package-specific tests first:
+Run the pilot validator after capture:
 
 ```bash
-pytest -v tests/test_stage4_pilot_package.py
+python3.13 scripts/validate_stage4_pilot.py \
+  --csv real_pilot_data/P_REAL_001/csv/pilot_real_P008_F001.csv \
+  --pilot-name P_REAL_001 \
+  --evidence-dir real_pilot_data/P_REAL_001/photos \
+  --out validation_runs/stage4_pilots/P_REAL_001
 ```
 
-If a real pilot CSV has been saved in `tests/fixtures/stage4/`, run the
-real-pilot check directly:
+If your environment exposes `python` rather than `python3.13`, the same script
+can be run as `python scripts/validate_stage4_pilot.py ...`.
+
+The command prints a terminal summary and writes:
+
+- `validation_runs/stage4_pilots/<pilot-name>/pilot_validation_report.json`
+- `validation_runs/stage4_pilots/<pilot-name>/pilot_validation_report.md`
+
+## Repo validation checks
+
+Run the package tests first:
 
 ```bash
-pytest -v tests/test_stage4_pilot_package.py -k real_pilot
+pytest -v tests/test_stage4_pilot_package.py tests/test_stage4_field_pilot_execution.py
 ```
 
 Then run the full repo checks required for this branch:
@@ -48,7 +65,7 @@ Then run the full repo checks required for this branch:
 pytest -v
 pre-commit run --all-files
 python scripts/repo_health.py
-python scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1
+python scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1
 ```
 
 ## What to inspect
@@ -60,6 +77,8 @@ Look for these outcomes:
 - no invalid rows caused by slash dates or bad enum values
 - explicit `none` values only appear in allowed fields
 - duplicate `pole_id` rows are detected when present
+- the evidence section clearly reports missing referenced photos, unreferenced
+  photos, duplicate names, and invalid filename patterns
 - runtime isolation tests remain green
 
 ## Pass / fail interpretation
@@ -85,10 +104,20 @@ Record failures in
 under:
 
 - validation result
+- report output paths
 - issues found
 - field workflow friction
 - missing fields
 - unnecessary fields
+
+## Do not commit by default
+
+Keep these local-only unless Noel explicitly approves a redacted artifact:
+
+- `real_pilot_data/`
+- `validation_runs/stage4_pilots/`
+
+Committed test fixtures remain synthetic only.
 
 ## Runtime boundary
 

@@ -7,11 +7,12 @@ any runtime storage or live upload behaviour.
 
 ## Folder structure
 
-Store field evidence outside runtime job outputs using this structure:
+Store field evidence outside runtime job outputs and outside Git using this
+local-only structure:
 
 ```text
-field_pilot/
-  <jobid>/
+real_pilot_data/
+  <pilot-name>/
     csv/
       pilot_real_<jobid>.csv
     photos/
@@ -26,10 +27,14 @@ field_pilot/
 Example:
 
 ```text
-field_pilot/P008_F001/
+real_pilot_data/P_REAL_001/
   csv/pilot_real_P008_F001.csv
   photos/P008-001/P008-001_01_context.jpg
 ```
+
+`real_pilot_data/` is git-ignored. Do not move real field photos or raw CSVs
+into `tests/fixtures/` or any tracked path unless Noel explicitly approves a
+redacted example for regression use.
 
 ## Photo naming
 
@@ -45,6 +50,8 @@ Examples:
 - `P008-014_02_stay.jpg`
 
 Keep the same filename in the CSV `photo_reference` column.
+
+The validator checks filenames only. It does not open or process image content.
 
 ## Minimum photo guidance
 
@@ -67,6 +74,7 @@ If no photo was captured:
 - leave `photo_reference` blank
 - explain the reason in `survey_notes` or `access_notes` if it matters
 - do not invent a file reference
+- expect the validator report to show lower evidence/reference coverage
 
 ## Uncertain evidence
 
@@ -85,6 +93,17 @@ Do not capture or store:
 - unrelated assets not tied to the pilot route
 - videos
 - cloud-storage links as the only reference
+
+## What may be committed
+
+Without explicit approval, do not commit:
+
+- raw pilot CSVs
+- real field photos
+- local validation output under `validation_runs/stage4_pilots/`
+
+Only explicitly approved redacted reports or synthetic fixtures should be added
+to Git.
 
 ## Safety and privacy notes
 

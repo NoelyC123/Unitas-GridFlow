@@ -255,3 +255,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Field pilot package only; no app runtime files modified. `pytest -v` passed with 1042 passed, 1 skipped. `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions. `python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1` is safe to merge.
+
+### 2026-05-11T10:29:43Z
+
+- Branch: `codex/real-field-pilot-execution-system-v1`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1 && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/pilot_valid_sample.csv --pilot-name P_REAL_001 --evidence-dir tests/fixtures/stage4/evidence/valid --out /tmp/stage4_pilot_valid_report && python3.13 scripts/validate_stage4_pilot.py --csv tests/fixtures/stage4/pilot_invalid_sample.csv --pilot-name P_REAL_BAD --out /tmp/stage4_pilot_invalid_report`
+- validation_runs report path: `/tmp/stage4_pilot_valid_report/pilot_validation_report.md`, `/tmp/stage4_pilot_invalid_report/pilot_validation_report.md`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Local execution-system changes only; no app runtime files modified. Full suite passed with 1049 passed, 2 skipped. Valid pilot fixture report returned `PARTIAL / RE-PILOT REQUIRED`; invalid pilot fixture report returned `NO-GO`.

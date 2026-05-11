@@ -34,7 +34,11 @@ Use this after the real iPad field pilot.
 Paste the key output from:
 
 ```bash
-pytest -v tests/test_stage4_pilot_package.py -k real_pilot
+python3.13 scripts/validate_stage4_pilot.py \
+  --csv real_pilot_data/<pilot-name>/csv/pilot_real_<jobid>.csv \
+  --pilot-name <pilot-name> \
+  --evidence-dir real_pilot_data/<pilot-name>/photos \
+  --out validation_runs/stage4_pilots/<pilot-name>
 ```
 
 Summary:
@@ -45,6 +49,14 @@ Summary:
 - Blocked rows:
 - Invalid rows:
 - Duplicate `pole_id` issues:
+- Missing `pole_id` issues:
+- Evidence/photo coverage:
+- Stage 4C recommendation:
+
+Report paths:
+
+- JSON:
+- Markdown:
 
 ## Issues found
 
@@ -82,6 +94,7 @@ List anything present in the pilot template that did not add real value:
 Choose one:
 
 - `GO` — pilot pack usable, Stage 4C planning can start when separately approved
+- `PARTIAL / RE-PILOT REQUIRED` — useful pilot evidence collected, but more capture or cleanup is needed before Stage 4C review
 - `NO-GO` — fix Stage 4B package issues before any Stage 4C work
 
 Reason:

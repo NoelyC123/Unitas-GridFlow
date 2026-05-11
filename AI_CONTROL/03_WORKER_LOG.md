@@ -384,3 +384,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: templates/structured_capture_ipad_pilot_template.csv,docs/STAGE4_REAL_FIELD_PILOT_GUIDE.md,docs/STAGE4_FIELD_DATA_DICTIONARY.md,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_EVIDENCE_FOLDER_PROTOCOL.md,docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md,tests/fixtures/stage4/pilot_valid_sample.csv,tests/fixtures/stage4/pilot_invalid_sample.csv,tests/fixtures/stage4/pilot_duplicate_identity_sample.csv,tests/test_stage4_pilot_package.py,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: `pytest -v` passed; `pre-commit run --all-files` passed; repo_health and merge_safety warning-only before commit because branch changes were uncommitted
 - Next action: commit branch and rerun repo_health plus merge_safety on the committed tree
+
+### 2026-05-11T10:29:43Z
+
+- Worker: codex
+- Branch: `codex/real-field-pilot-execution-system-v1`
+- Action: Built the real field pilot execution system with a local validation CLI, evidence-folder checker, ignored raw-data workflow, and report-generation tests
+- Files changed: scripts/validate_stage4_pilot.py,docs/STAGE4_PILOT_VALIDATION_INSTRUCTIONS.md,docs/STAGE4_EVIDENCE_FOLDER_PROTOCOL.md,docs/STAGE4_PILOT_RESULT_SUMMARY_TEMPLATE.md,tests/test_stage4_field_pilot_execution.py,tests/fixtures/stage4/evidence/*,.gitignore,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed with 1049 passed, 2 skipped; `pre-commit run --all-files` passed; repo_health warning-only before commit; merge_safety to rerun on committed branch
+- Next action: commit branch and rerun repo health plus merge safety on the committed tree

@@ -43,6 +43,7 @@ htmlcov/
 *.log
 validation_runs/*
 !validation_runs/.gitkeep
+validation_runs/stage4_pilots/
 
 # Type checking / misc caches
 .mypy_cache/
@@ -60,6 +61,7 @@ CLAUDE_REVIEW_BUNDLES/
 
 # Local real survey validation files
 validation_data/
+real_pilot_data/
 
 # Local practitioner review evidence (private, large, and screenshot-heavy)
 Unitas GridFlow Full Tool Review 28th April 2026/

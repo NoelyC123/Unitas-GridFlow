@@ -16,30 +16,33 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `technical-docs-field-architecture-complete`
 - `c2g-lifecycle-replacement-visualization-complete`
 - `project-control-worker-bootstrap-complete`
+- `stage4c-architecture-gate-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Real iPad Field Pilot Package v1
-- Branch: `codex/real-ipad-field-pilot-package-v1`
+- Task: Real Field Pilot Execution System v1
+- Branch: `codex/real-field-pilot-execution-system-v1`
 - Owner: codex
 - Status: ready_for_review
-- Summary: Built the real-world iPad field pilot docs, template, fixtures, and validation package on top of Stage 4B
+- Summary: Built the local pilot-validation CLI, evidence-folder checker, ignored local-data workflow, and execution-system tests for Noel's real Stage 4 pilot
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Real iPad Field Pilot Package v1 | `codex/real-ipad-field-pilot-package-v1` | codex | Stage 4 field pilot operating pack | ready for review |
+| Real Field Pilot Execution System v1 | `codex/real-field-pilot-execution-system-v1` | codex | Stage 4 field pilot execution | ready for review |
 
 ## Review / Validation
 
-- `pytest -v`: passed, 1042 passed, 1 skipped.
+- `pytest -v`: passed, 1049 passed, 2 skipped.
 - `pre-commit run --all-files`: passed.
 - `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
-- `python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1`: safe to merge.
-- Browser validation: not required for this docs/template/test-only Stage 4 package.
+- `python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`: safe to merge.
+- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_valid_sample.csv`: JSON/Markdown reports written; recommendation `PARTIAL / RE-PILOT REQUIRED`.
+- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_invalid_sample.csv`: JSON/Markdown reports written; recommendation `NO-GO`.
+- Browser validation: not required for this local-only Stage 4 execution system.
 
 ## Blocked
 
@@ -56,6 +59,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Stage 4 structured capture foundation closed and tagged; runtime integration remains a future branch.
 - Stage 4B structured capture validation preview complete; runtime integration remains blocked pending pilot evidence.
 - Stage 4B/4C safety pilot harness complete; Stage 4C remains blocked pending a real pilot result.
+- Real iPad field pilot package complete; raw-data handling is now extended by the execution-system branch.
 - Technical documentation field/architecture package closed and tagged.
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 - GridFlow Control Center v1.0 closed and tagged.
@@ -63,7 +67,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Backlog / Next Candidates
 
-- Stage 4C controlled runtime integration, only after Stage 4B is merged and tagged and the go/no-go gate is approved.
+- Stage 4C controlled runtime integration, only after a real pilot result is recorded and the go/no-go gate is approved.
 - DNO-grade rulepack planning.
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.

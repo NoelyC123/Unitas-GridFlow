@@ -4,33 +4,33 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Real iPad Field Pilot Package v1
-- Branch: `codex/real-ipad-field-pilot-package-v1`
+- Task: Real Field Pilot Execution System v1
+- Branch: `codex/real-field-pilot-execution-system-v1`
 - Owner: codex
-- Lane: Stage 4 field pilot operating pack
+- Lane: Stage 4 field pilot execution
 - Status: ready_for_review
 - Requested by: Noel
-- Runtime changes allowed: no live app integration; docs/templates/fixtures/tests only
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python scripts/repo_health.py`; `python scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1`
-- Validation result: `pytest -v` passed with 1042 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/real-ipad-field-pilot-package-v1` is safe to merge
+- Runtime changes allowed: no live app integration; local pilot validation, docs, ignored local-data paths, fixtures, and tests only
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python scripts/repo_health.py`; `python scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`; run `scripts/validate_stage4_pilot.py` on valid and invalid pilot fixtures
+- Validation result: `pytest -v` passed with 1049 passed, 2 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1` is safe to merge; CLI runs produced JSON/Markdown reports for valid and invalid pilot fixtures
 - Browser validation required: no; Stage 4B is not live-integrated into UI/runtime
 - Popup scope changes allowed: no
 
 ## Goal
 
-Build the practical end-to-end iPad field pilot package Noel can use to capture
-10 to 20 supports and validate the resulting CSV through the existing Stage 4B
-preview rules.
+Build the practical execution system Noel will use after field capture to
+validate a real pilot CSV, inspect evidence filenames, generate reports, and
+record whether Stage 4C remains blocked, partial, or ready for manual review.
 
 ## Scope
 
-- Create a real-world field pilot guide, field dictionary, validation instructions,
-  evidence-folder protocol, and result-summary template.
-- Create an iPad-friendly structured capture pilot template aligned with the
-  Stage 4B schema.
-- Add pilot fixture CSVs covering valid, invalid, and duplicate-identity field use.
-- Add tests proving the pilot package aligns with Stage 4B validation rules and
-  stays runtime/UI isolated.
+- Create a standalone `validate_stage4_pilot.py` CLI for CSV validation,
+  evidence-folder checking, and JSON/Markdown report output.
+- Add evidence-fixture coverage for clean and problematic filename/reference sets.
+- Protect local raw pilot data and validation outputs from accidental Git commits.
+- Update pilot validation docs and result template around the new local workflow.
+- Add execution-system tests proving report generation, evidence checks, git-ignore
+  protection, and runtime-output isolation.
 - Update Control Center logs, handoff, and changelog.
 
 ## Out Of Scope
@@ -43,14 +43,16 @@ preview rules.
 
 ## Acceptance Criteria
 
-- Noel can use the docs and pilot template on an iPad without runtime help.
-- Pilot CSV fixtures validate exactly as intended under Stage 4B rules.
-- ISO date rules and explicit-`none` rules are clear and test-covered.
-- The pilot package does not add runtime/UI Stage 4 integration.
+- Noel has one command to validate a real pilot CSV after capture.
+- The CLI writes terminal, JSON, and Markdown output without touching live job outputs.
+- Evidence folder filename/reference checks report missing, duplicate, invalid, and unreferenced photos.
+- Real pilot raw data and local validation outputs are git-ignored by default.
+- The execution system does not add runtime/UI Stage 4 integration.
 - `pytest -v`, `pre-commit run --all-files`, `repo_health.py`, and
   `merge_safety_check.py` pass or report only known non-blocking warnings.
 
 ## Current Next Action
 
-Hand back for review and real-world field execution. Stage 4C remains blocked
-until Noel records a real pilot result and go/no-go decision.
+Review/merge this branch, then use the CLI against Noel's real local pilot CSV
+and evidence folder. Stage 4C remains blocked until Noel records the pilot
+result and go/no-go decision.

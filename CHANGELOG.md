@@ -37,6 +37,31 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - Real field pilot execution system v1
+
+### Added
+
+- Added `scripts/validate_stage4_pilot.py` as the local execution CLI for real
+  Stage 4 pilot CSV validation, JSON/Markdown report generation, and
+  filename-based evidence-folder checks.
+- Added execution-system tests for CLI output, evidence findings, git-ignore
+  protection, and live-output isolation.
+- Added committed evidence fixtures for clean and problematic filename/reference
+  sets used by the execution-system tests.
+
+### Changed
+
+- Updated the pilot validation instructions, evidence protocol, and result
+  summary template around a local-only workflow using `real_pilot_data/` and
+  `validation_runs/stage4_pilots/`.
+- Added git-ignore protection for local raw pilot data and local pilot
+  validation output.
+
+### Notes
+
+- Stage 4C remains blocked until Noel records a real pilot result and a manual
+  GO / NO-GO decision.
+
 ## 2026-05-10 - Real iPad field pilot package v1
 
 ### Added
