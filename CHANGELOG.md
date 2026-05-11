@@ -8,6 +8,48 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - Stage 4C controlled pilot baseline helper v1
+
+### Added
+
+- Added `scripts/prepare_stage4_controlled_pilot.py` to support the
+  local-only controlled baseline workflow in two modes:
+  - prepare mode extracts exact baseline `pole_id` candidates and writes a
+    Stage 4 starter capture CSV plus Markdown notes
+  - match mode compares a completed pilot CSV back to the baseline using
+    exact `pole_id` matching only
+
+- Added `docs/STAGE4_CONTROLLED_BASELINE_PILOT_OPERATOR_GUIDE.md` with Noel's
+  operator workflow for prepare mode, match mode, blocking conditions, and
+  the Stage 4C boundary.
+
+- Added `tests/test_stage4_controlled_pilot_baseline.py` covering:
+  - raw controller baseline extraction
+  - headered baseline extraction
+  - duplicate baseline blocking
+  - exact match behavior
+  - missing/duplicate pilot `pole_id` blocking
+  - preservation of original `pole_id` values in reports
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `AI_CONTROL/02_CURRENT_TASK.md`,
+  `AI_CONTROL/03_WORKER_LOG.md`, `AI_CONTROL/04_VALIDATION_LOG.md`, and
+  `AI_CONTROL/05_HANDOFF.md` to record the helper branch, the local
+  `P_CONTROLLED_001` baseline availability, and the current blocked Stage 4C
+  state.
+
+### Notes
+
+- The helper was verified against the local baseline at
+  `real_pilot_data/P_CONTROLLED_001/baseline/baseline.csv` without committing
+  it.
+- Current local extraction result: raw controller export, `57` scanned rows,
+  `40` candidate support rows, identity source `column 0 (point number)`,
+  structure/type source `column 4 (feature code)`.
+- No runtime/UI integration was added.
+- `real_pilot_data/`, `uploads/`, and `validation_runs/` remain local-only.
+
 ## 2026-05-11 - Existing survey baseline candidate audit
 
 ### Added

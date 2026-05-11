@@ -350,3 +350,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Audit-only branch. The requested baseline candidate paths under `uploads/projects/`, `uploads/jobs/`, and `validation_data/` were not present in that separate clean audit worktree, and no other eligible tracked real survey/job CSVs were found there outside excluded mock/template/fixture/archive paths. `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` records that Noel must provide or surface an accessible real Trimble baseline CSV before the controlled pilot can proceed.
+
+### 2026-05-11T20:40:07Z
+
+- Branch: `codex/stage4c-controlled-pilot-baseline-helper-v1`
+- Commit: `pending`
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py codex/stage4c-controlled-pilot-baseline-helper-v1 && git status --ignored --short real_pilot_data validation_runs uploads`
+- validation_runs report path: `local-only: real_pilot_data/P_CONTROLLED_001/notes/baseline_pole_id_extract.md`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Helper-only branch. The local baseline at `real_pilot_data/P_CONTROLLED_001/baseline/baseline.csv` was available and extracted successfully without being committed. Current local extraction result: raw controller export, `57` scanned rows, `40` candidate support rows, exact identity source `column 0 (point number)`, structure/type source `column 4 (feature code)`. Full validation passed with `1075 passed, 1 skipped`; repo health is warning-only for known numbering collisions plus the expected dirty-worktree warning before commit; merge-safety remains warning-only until the branch has a commit to compare. Stage 4C runtime integration remains blocked.

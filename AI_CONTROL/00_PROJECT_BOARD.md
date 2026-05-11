@@ -27,18 +27,18 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_CONTROLLED_001 controlled baseline pilot setup
-- Branch: `master`
-- Owner: Noel / next worker
-- Status: ready_to_start
-- Summary: The clean-worktree baseline audit (doc 79) completed and found no tracked candidate files in that audit worktree. This local main checkout does contain local upload and baseline CSVs, and controlled pilot field-pack docs 80–82 are now available. Next step: select the local baseline CSV for `P_CONTROLLED_001` and build/run the controlled baseline pilot helper. Stage 4C runtime integration remains blocked.
+- Task: Stage 4C controlled pilot baseline helper v1
+- Branch: `codex/stage4c-controlled-pilot-baseline-helper-v1`
+- Owner: codex
+- Status: ready_for_review
+- Summary: Built a helper that inspects the local `P_CONTROLLED_001` baseline CSV, extracts exact `pole_id` candidates, generates a Stage 4 starter capture CSV, and compares completed pilot rows back to baseline with exact-match-only rules. The local baseline currently yields `57` scanned rows and `40` candidate support rows from a raw controller export. `real_pilot_data/`, `uploads/`, and `validation_runs/` remain excluded from commits. Stage 4C runtime integration remains blocked.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| P_CONTROLLED_001 controlled baseline pilot setup | `master` | Noel / next worker | Stage 4 field pilot execution | ready to start |
+| Stage 4C controlled pilot baseline helper v1 | `codex/stage4c-controlled-pilot-baseline-helper-v1` | codex | Stage 4 field pilot execution | ready for review |
 
 ## Review / Validation
 
@@ -54,6 +54,13 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Those local CSVs remain excluded from governance commits and must not be added during control-layer merges
 - `P_REAL_001_MINI` remains only a successful workflow shakedown, not Stage 4C approval evidence
 
+**Controlled baseline helper v1:**
+
+- `scripts/prepare_stage4_controlled_pilot.py` now supports prepare mode and exact-match compare mode
+- Prepare mode extracted `40` candidate support rows from the local `P_CONTROLLED_001` baseline after scanning `57` raw controller rows
+- Exact match rules are strict: only whitespace and case normalisation are allowed; duplicates and missing/unsafe `pole_id` values are blocking
+- Starter output uses the current Stage 4 header set and leaves unconfirmed technical fields blank or `unknown`
+
 **Controlled Pilot Field Pack v1 (docs 80–82):**
 
 - Documents 80–82 are now present: field-day procedure, photo/evidence rules, and operator decision notes
@@ -63,7 +70,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Blocked
 
 - Stage 4C runtime integration (pending controlled baseline pilot approval)
-- Stage 4C controlled baseline pilot execution (blocked until the local `P_CONTROLLED_001` baseline CSV is selected and the helper/validation flow is run with exact `pole_id` matching)
+- Stage 4C controlled baseline pilot execution (blocked until Noel uses the extracted baseline set, completes the controlled pilot capture, validates it, and records the exact-match decision outcome)
 
 ## In Review / Audit
 
@@ -99,7 +106,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Backlog / Next Candidates
 
-- Use a local baseline CSV for `P_CONTROLLED_001` and build/run the controlled baseline pilot helper with exact `pole_id` matching.
+- Run the new controlled baseline helper against Noel's local `P_CONTROLLED_001` field capture and produce the exact-match decision report.
 - Controlled baseline pilot with exact `pole_id` matching and stronger access/closer capture.
 - Stage 4C controlled runtime integration, only after a controlled pilot against a real GridFlow/Trimble baseline is recorded and the go/no-go gate is approved.
 - DNO-grade rulepack planning.

@@ -455,3 +455,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: pending `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, and `python3.13 scripts/merge_safety_check.py codex/audit-existing-files-for-stage4c-baseline-pilot`
 - Next action: validate the audit branch, merge the control record, and have Noel provide an accessible real Trimble baseline CSV for a follow-up suitability audit.
+
+### 2026-05-11T20:40:07Z
+
+- Worker: codex
+- Branch: `codex/stage4c-controlled-pilot-baseline-helper-v1`
+- Action: Built the Stage 4C controlled pilot baseline helper with prepare mode, exact-match compare mode, a Noel operator guide, and focused tests. Verified the local `P_CONTROLLED_001` baseline is a raw controller export with `57` scanned rows and `40` candidate support rows extracted using point number as the exact identity source.
+- Files changed: scripts/prepare_stage4_controlled_pilot.py,docs/STAGE4_CONTROLLED_BASELINE_PILOT_OPERATOR_GUIDE.md,tests/test_stage4_controlled_pilot_baseline.py,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v tests/test_stage4_controlled_pilot_baseline.py` passed with 7 passed; full `pytest -v` passed with 1075 passed, 1 skipped; `pre-commit run --all-files` passed; repo_health warning-only; merge_safety pending post-commit rerun
+- Next action: confirm ignored local evidence paths remain uncommitted, commit the helper branch, and rerun merge_safety on the committed branch state.
