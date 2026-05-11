@@ -8,6 +8,33 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - P_REAL_001_MINI Independent Gate Audit + Next Controlled Pilot Plan
+
+### Added
+
+- Added `AI_CONTROL/71_P_REAL_001_MINI_INDEPENDENT_GATE_AUDIT.md` — independent
+  audit of P_REAL_001_MINI mini field pilot. Verdict: successful shakedown/
+  rehearsal (PARTIAL / re-pilot required). Evidence audit confirms 100%
+  reference coverage (0 missing, 0 orphaned, 0 duplicates). Stage 4C remains
+  blocked pending next controlled pilot.
+
+- Added `AI_CONTROL/72_STAGE4C_NEXT_CONTROLLED_PILOT_PLAN.md` — defines
+  requirements for the next 30–50 pole controlled pilot against a real Trimble
+  baseline. Specifies success criteria, exact validation commands, decision
+  thresholds (GO / CONDITIONAL GO / NO-GO / STOP), and failure re-pilot rules.
+
+### Notes
+
+- P_REAL_001_MINI proves the Stage 4 pilot workflow and validator are sound.
+- Mini pilot achieved 100% evidence linking after normalization; validator
+  correctly classified 2 merge-ready and 8 review-required rows.
+- Real pilot CSV and photos remain git-ignored; audit findings documented
+  without exposing sensitive field data.
+- Stage 4C runtime integration gate remains explicitly CLOSED. Next controlled
+  pilot is the blocking dependency.
+
+---
+
 ## 2026-05-10 - Stage 4C Architecture Gate + Runtime Integration Safety Design
 
 ### Added

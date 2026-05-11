@@ -11,6 +11,7 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - Status: ready_for_review
 - Summary: Upgraded the pilot validator into an operator-facing command center with dry-run coverage, clearer terminal verdicts, stable JSON/Markdown reports, and stronger evidence-folder edge-case handling.
 - Updated: 2026-05-11T12:10:00Z
+- Audit Note: P_REAL_001_MINI mini pilot executed; independent gate audit (doc 71) confirms successful rehearsal; Stage 4C remains blocked pending next controlled pilot (doc 72). Real pilot data git-ignored; 2 new governance docs created.
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Changed

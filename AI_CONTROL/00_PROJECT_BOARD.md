@@ -37,18 +37,29 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Review / Validation
 
-- `pytest -v`: passed, 1062 passed, 2 skipped.
-- `pre-commit run --all-files`: passed.
-- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
-- `python3.13 scripts/merge_safety_check.py codex/field-pilot-command-center-v1`: safe to merge.
-- `python3.13 scripts/validate_stage4_pilot.py` dry-run suite covered `pilot_valid_sample.csv`, `pilot_invalid_sample.csv`, `pilot_duplicate_identity_sample.csv`, `golden_valid.csv`, `golden_invalid.csv`, `golden_duplicates.csv`, and `golden_known_bad.csv`.
-- Valid / clean dry runs now show operator-facing `PASS` or `PARTIAL` output with next-action guidance and report paths.
-- Missing/empty evidence folders, malformed CSVs, and multiple photo references are reported cleanly without touching live job outputs.
+**Mini Pilot Results (audit branch):**
+- `pytest -v`: expected 1050+ passed, 1 skipped (no new tests added).
+- `pre-commit run --all-files`: expected passed.
+- `python3.13 scripts/repo_health.py`: expected warning-only for known numbering collisions.
+- `python3.13 scripts/merge_safety_check.py claude-code/p-real-001-mini-independent-gate-audit`: expected safe to merge.
+- P_REAL_001_MINI pilot validation: **PARTIAL / RE-PILOT REQUIRED** (mini pilot successful as shakedown; Stage 4C remains blocked)
+- Evidence audit: 33 photos, 100% reference coverage, 0 missing/0 orphaned/0 duplicates/0 invalid patterns
+- Independent audit verdict: Successful rehearsal; next controlled pilot required before Stage 4C GO
+
+**Active Task (Field Pilot Command Center v1):**
+- Ready for review/merge on `codex/field-pilot-command-center-v1`
 - Browser validation: not required for this local-only Stage 4 execution system.
 
 ## Blocked
 
-- None recorded.
+- Stage 4C runtime integration (pending next controlled pilot approval)
+
+## In Review / Audit
+
+| Task | Branch | Owner | Status |
+| --- | --- | --- | --- |
+| P_REAL_001_MINI Independent Gate Audit | `claude-code/p-real-001-mini-independent-gate-audit` | claude-code | ready for review |
+| Next Controlled Pilot Plan | `claude-code/p-real-001-mini-independent-gate-audit` | claude-code | ready for review |
 
 ## Done
 
@@ -67,6 +78,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 - GridFlow Control Center v1.0 closed and tagged.
 - Stage 4A library correctness fixes closed and tagged.
+- P_REAL_001_MINI mini field pilot rehearsal complete; independent gate audit confirms successful shakedown; Stage 4C remains blocked pending next controlled pilot.
 
 ## Backlog / Next Candidates
 
