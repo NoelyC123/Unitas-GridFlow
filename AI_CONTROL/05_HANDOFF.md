@@ -5,24 +5,22 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Stage 4C controlled pilot baseline helper v1
-- Owner: codex
-- Branch: `codex/stage4c-controlled-pilot-baseline-helper-v1`
+- Task: P_CONTROLLED_001 Readiness Gate (docs 83–85)
+- Owner: claude-code
+- Branch: `claude-code/p-controlled-001-readiness-gate`
 - Status: ready_for_review
-- Summary: A new helper now reads the local `P_CONTROLLED_001` baseline CSV, extracts exact baseline `pole_id` candidates, writes a Stage 4 starter capture CSV, and compares completed pilot rows back to baseline using exact-match-only rules. The current local baseline is a raw controller export with `57` scanned rows and `40` candidate support rows. Real pilot evidence paths, `uploads/`, and validation output paths remain excluded from commit. Stage 4C remains blocked.
-- Updated: 2026-05-11T20:40:07Z
-- Audit Note: After validation and merge, Noel should use the generated starter CSV and extract report, complete the controlled field capture, then run exact-match compare mode against the completed pilot CSV. Do not commit `real_pilot_data/`, `validation_runs/`, local `uploads/` CSVs, photos, or runtime changes from this handoff state.
+- Summary: Three formal governance documents (83–85) now establish baseline readiness verdict (READY FOR FIELD WORK), per-pole field decision logic with 34-row full option and 15-row fallback, and quantitative/qualitative acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready, GO/CONDITIONAL GO/NO-GO/STOP verdicts). Control files updated. Real pilot data, validation outputs remain git-ignored. Stage 4C remains blocked pending Noel's field execution and signed verdict on decision template (doc 75).
+- Updated: 2026-05-11T20:55:00Z
+- Audit Note: After validation and merge, Noel should use docs 80–84 to execute field capture, run validator, fill doc 82 notes, assess results against doc 85 criteria, and sign verdict on doc 75. Signed verdict gates Stage 4C authorization.
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Adds
 
-- `AI_CONTROL/79_EXISTING_SURVEY_BASELINE_CANDIDATE_AUDIT.md` remains the clean-audit provenance record: that separate audit worktree did not contain tracked candidate baseline files.
-- `AI_CONTROL/80_CONTROLLED_PILOT_FIELD_PACK_V1.md` is now present and ready: field-day procedure, pre-field checklist, per-pole capture flow, end-of-day organization, and validation commands.
-- `AI_CONTROL/81_CONTROLLED_PILOT_PHOTO_AND_EVIDENCE_RULES.md` is now present and ready: evidence/photo requirements, naming protocol, special-situation handling, and acceptance checklist.
-- `AI_CONTROL/82_CONTROLLED_PILOT_OPERATOR_DECISION_NOTES.md` is now present and ready: operator friction log, unknown-field log, access log, mismatch notes, confidence notes, and decision guidance.
-- `scripts/prepare_stage4_controlled_pilot.py` adds prepare mode and exact-match compare mode for the controlled baseline workflow.
-- `docs/STAGE4_CONTROLLED_BASELINE_PILOT_OPERATOR_GUIDE.md` gives Noel the operator-facing workflow for prepare mode and match mode.
-- `P_REAL_001_MINI` remains a successful workflow shakedown only. It does not approve Stage 4C runtime integration.
+- `AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md`: baseline readiness verdict (READY FOR FIELD WORK), pre-field checks, required local inputs, readiness checklist, expected field outputs, what happens after field work, critical reminders.
+- `AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md`: pole selection strategy, per-pole targets, decision logic at each pole, template filling guidance, photo capture, photo organization, full 34-row option, fallback 15-row option, stop conditions.
+- `AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md`: quantitative acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready), qualitative criteria (≥4 confidence, ≤1 friction), GO/CONDITIONAL GO/NO-GO/STOP verdict logic, approval workflow with gate auditor review.
+- All 6 control files (00, 02, 03, 04, 05, CHANGELOG) updated with readiness gate context.
+- Real pilot data, validation outputs remain git-ignored.
 
 ## Local Checkout Reality
 
@@ -37,25 +35,27 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - `pytest -v`
 - `pre-commit run --all-files`
 - `python3.13 scripts/repo_health.py`
-- `python3.13 scripts/merge_safety_check.py codex/stage4c-controlled-pilot-baseline-helper-v1`
+- `python3.13 scripts/merge_safety_check.py claude-code/p-controlled-001-readiness-gate`
 - `git status --ignored --short real_pilot_data validation_runs uploads`
 - Browser validation: not required; control/docs only, no runtime UI changes.
 - Manual review report: n/a.
 
 ## Current Validation State
 
-- Helper implementation complete; focused baseline-helper tests passed.
-- Full validation passed: `pytest -v`, `pre-commit run --all-files`, and `python3.13 scripts/repo_health.py` completed. `merge_safety_check.py` remains warning-only until the branch commit exists.
-- Local baseline extract produced starter CSV and extract notes under ignored local paths.
-- Stage 4C runtime integration remains blocked.
+- Three governance documents (83–85) created and complete.
+- Control files updated with readiness gate context.
+- Validation suite ready to run: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, and `python3.13 scripts/merge_safety_check.py` pending.
+- Real pilot data, validation outputs remain git-ignored.
+- Stage 4C remains blocked pending field execution and Noel's signed verdict.
 
 ## Next Action
 
-1. Complete full validation on `codex/stage4c-controlled-pilot-baseline-helper-v1`.
-2. Merge this helper branch after review.
-3. Use the generated starter CSV and extract notes to execute the controlled baseline pilot.
-4. Run exact-match compare mode against the completed pilot CSV.
-5. Keep Stage 4C runtime integration blocked until the controlled pilot verdict is recorded.
+1. Complete full validation suite on `claude-code/p-controlled-001-readiness-gate`.
+2. Verify real_pilot_data/, validation_runs/, uploads/ remain git-ignored.
+3. Commit and push readiness gate branch.
+4. Deliver final report with branch, commit hash, files changed, readiness verdict, field checklist, post-field gate criteria, and validation results.
+5. Noel executes field capture using docs 80–84; runs validator; fills doc 82 notes; assesses against doc 85 criteria; signs doc 75 verdict.
+6. Signed verdict gates Stage 4C authorization.
 
 ## Do Not Start
 
@@ -87,3 +87,4 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - `stage4c-controlled-baseline-pilot-prep-complete`
 - `existing-survey-baseline-candidate-audit-complete`
 - `controlled-pilot-field-pack-v1-complete`
+- `p-controlled-001-readiness-gate-complete`

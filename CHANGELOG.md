@@ -8,6 +8,61 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - P_CONTROLLED_001 Readiness Gate (docs 83–85)
+
+### Added
+
+- Added `AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md` — baseline readiness
+  verdict (READY FOR FIELD WORK), pre-field checks, required local inputs, readiness
+  checklist, expected field outputs, what happens after field work, critical reminders
+  about exact pole_id matching and git-ignore protection.
+
+- Added `AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md` — per-pole
+  decision targets for Noel, pole selection strategy (34-row full option, 15-row fallback),
+  per-pole targets (pole_id accuracy, evidence status, photo count, condition assessment),
+  decision logic at each pole, template filling guidance, stop conditions, checklist for
+  both full and fallback options.
+
+- Added `AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md` — formal
+  post-field acceptance gate with quantitative criteria (≥80% exact match, ≥90% valid,
+  ≥50% merge-ready, 0 blocked), qualitative criteria (≥4 operator confidence, ≤1 friction
+  points, <5% unknowns, <10% access issues), verdict logic (GO/CONDITIONAL GO/NO-GO/STOP),
+  and approval workflow with independent gate auditor review.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md` to record active task as P_CONTROLLED_001
+  Readiness Gate, add milestone, update In Progress and In Review sections, document
+  completion in Done section.
+
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` to define goal (create 3 governance docs),
+  scope (create docs 83–85, update 6 control files), acceptance criteria (all docs
+  created, validation complete), and next action (run validation, commit, deliver report).
+
+- Updated `AI_CONTROL/03_WORKER_LOG.md` with new entry documenting readiness gate
+  task start, files changed, validation state (pending), and next actions.
+
+- Updated `AI_CONTROL/04_VALIDATION_LOG.md` with new entry documenting validation
+  plan and expected results (1050+ tests, pre-commit clean, merge-safety pending).
+
+- Updated `AI_CONTROL/05_HANDOFF.md` to record active handoff for next worker,
+  document what branch adds, validation plan, current validation state, next actions,
+  and add milestone to stable milestones list.
+
+### Notes
+
+- Three governance documents (83–85) complete the readiness gate framework for Noel's
+  field capture execution.
+- Readiness verdict: READY FOR FIELD WORK (conditional on pre-field checks).
+- Per-pole targets cover pole_id accuracy, evidence status, photo coverage, condition
+  assessment, verification flags, and notes.
+- Acceptance criteria clear: ≥80% exact match (GO threshold), with CONDITIONAL GO
+  at 75–80%, NO-GO below 75%.
+- All control files (00, 02, 03, 04, 05, CHANGELOG) updated with task context.
+- Real pilot data, validation outputs remain git-ignored.
+- Stage 4C remains blocked pending field execution and Noel's signed verdict on
+  decision template (doc 75).
+
 ## 2026-05-11 - Stage 4C controlled pilot baseline helper v1
 
 ### Added

@@ -362,3 +362,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Helper-only branch. The local baseline at `real_pilot_data/P_CONTROLLED_001/baseline/baseline.csv` was available and extracted successfully without being committed. Current local extraction result: raw controller export, `57` scanned rows, `40` candidate support rows, exact identity source `column 0 (point number)`, structure/type source `column 4 (feature code)`. Full validation passed with `1075 passed, 1 skipped`; repo health is warning-only for known numbering collisions plus the expected dirty-worktree warning before commit; merge-safety remains warning-only until the branch has a commit to compare. Stage 4C runtime integration remains blocked.
+
+### 2026-05-11T20:55:00Z
+
+- Branch: `claude-code/p-controlled-001-readiness-gate`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py claude-code/p-controlled-001-readiness-gate && git status --ignored --short real_pilot_data validation_runs uploads`
+- validation_runs report path: n/a (control/docs only; no app runtime files)
+- failures.json status: []
+- Screenshots: no
+- Verdict: pending (expected pass with 1050+ tests, 1 skipped)
+- Notes: P_CONTROLLED_001 Readiness Gate documents (83–85) establishing baseline readiness verdict (READY FOR FIELD WORK), per-pole field targets with 34-row full and 15-row fallback options, and post-field acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready, GO/CONDITIONAL GO/NO-GO/STOP verdicts). Control files (00, 02, 03, 04, 05, CHANGELOG) updated with readiness-gate task context. Real pilot data workspace remains git-ignored. Stage 4C remains blocked pending field execution and Noel's signed verdict.

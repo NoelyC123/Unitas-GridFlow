@@ -464,3 +464,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: scripts/prepare_stage4_controlled_pilot.py,docs/STAGE4_CONTROLLED_BASELINE_PILOT_OPERATOR_GUIDE.md,tests/test_stage4_controlled_pilot_baseline.py,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: `pytest -v tests/test_stage4_controlled_pilot_baseline.py` passed with 7 passed; full `pytest -v` passed with 1075 passed, 1 skipped; `pre-commit run --all-files` passed; repo_health warning-only; merge_safety pending post-commit rerun
 - Next action: confirm ignored local evidence paths remain uncommitted, commit the helper branch, and rerun merge_safety on the committed branch state.
+
+### 2026-05-11T20:55:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/p-controlled-001-readiness-gate`
+- Action: Created P_CONTROLLED_001 Readiness Gate (docs 83–85) establishing baseline readiness verdict, per-pole field targets with 34-row full and 15-row fallback options, and post-field acceptance criteria; updated 6 control files with readiness-gate task context
+- Files changed: AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md,AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md,AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: ready for pytest/pre-commit/repo_health/merge_safety
+- Next action: run full validation suite, verify git-ignore protection, commit branch, and deliver final report
