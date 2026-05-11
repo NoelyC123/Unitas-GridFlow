@@ -17,32 +17,33 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `c2g-lifecycle-replacement-visualization-complete`
 - `project-control-worker-bootstrap-complete`
 - `stage4c-architecture-gate-complete`
+- `pre-pilot-cleanroom-release-readiness-audit-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Real Field Pilot Execution System v1
-- Branch: `codex/real-field-pilot-execution-system-v1`
-- Owner: codex
+- Task: Pre-Pilot Cleanroom Release Readiness Audit
+- Branch: `claude-code/pre-pilot-cleanroom-v2`
+- Owner: claude-code
 - Status: ready_for_review
-- Summary: Built the local pilot-validation CLI, evidence-folder checker, ignored local-data workflow, and execution-system tests for Noel's real Stage 4 pilot
+- Summary: Comprehensive cleanroom audit of repository state before field pilot: 14 worktrees classified, 30+ branches surveyed, control files verified current, pilot artefacts confirmed complete, runtime isolation verified, 4 governance documents created (66–69), 6 control files updated.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Real Field Pilot Execution System v1 | `codex/real-field-pilot-execution-system-v1` | codex | Stage 4 field pilot execution | ready for review |
+| Pre-Pilot Cleanroom Release Readiness Audit | `claude-code/pre-pilot-cleanroom-v2` | claude-code | Stage 4 field pilot execution | ready for review |
 
 ## Review / Validation
 
 - `pytest -v`: passed, 1049 passed, 2 skipped.
 - `pre-commit run --all-files`: passed.
 - `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
-- `python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`: safe to merge.
-- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_valid_sample.csv`: JSON/Markdown reports written; recommendation `PARTIAL / RE-PILOT REQUIRED`.
-- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_invalid_sample.csv`: JSON/Markdown reports written; recommendation `NO-GO`.
-- Browser validation: not required for this local-only Stage 4 execution system.
+- `python3.13 scripts/merge_safety_check.py claude-code/pre-pilot-cleanroom-v2`: safe to merge.
+- Cleanroom audit findings: 14 worktrees catalogued, 30+ branches classified, runtime isolation verified, pilot artefacts complete.
+- Critical finding: Decision-gate documents (61–65) exist on unmerged branches; recommend merge before field pilot.
+- Browser validation: not required; governance documents and control files only.
 
 ## Blocked
 
@@ -64,6 +65,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Project Control Center foundation, polish, and worker bootstrap closed and tagged.
 - GridFlow Control Center v1.0 closed and tagged.
 - Stage 4A library correctness fixes closed and tagged.
+- Pre-pilot cleanroom audit completed; all 4 governance documents (66–69) and 6 control file updates delivered.
 
 ## Backlog / Next Candidates
 

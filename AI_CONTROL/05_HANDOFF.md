@@ -5,49 +5,48 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Real Field Pilot Execution System v1
-- Owner: codex
-- Branch: `codex/real-field-pilot-execution-system-v1`
+- Task: Pre-Pilot Cleanroom Release Readiness Audit
+- Owner: claude-code
+- Branch: `claude-code/pre-pilot-cleanroom-v2`
 - Status: ready_for_review
-- Summary: Built the local Stage 4 pilot validation CLI, evidence-folder checker, report output, git-ignore protection, and execution-system tests without runtime/UI integration.
-- Updated: 2026-05-11T10:29:43Z
+- Summary: Comprehensive cleanroom audit across worktrees (14), branches (30+), control files, pilot artefacts, and runtime isolation. 4 governance documents created (66–69); 6 control files updated; critical finding: decision-gate docs (61–65) on unmerged branches; verdict: READY WITH CAUTIONS.
+- Updated: 2026-05-11T11:15:00Z
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Changed
 
-- Adds `scripts/validate_stage4_pilot.py` as the single-command local execution path for pilot CSV validation.
-- Adds evidence-folder filename/reference checks for missing referenced photos, duplicate names, invalid naming patterns, unreferenced photos, and pole_id/photo mismatches.
-- Adds JSON and Markdown pilot reports under local `validation_runs/stage4_pilots/`.
-- Protects `real_pilot_data/` and `validation_runs/stage4_pilots/` from accidental Git commits.
-- Updates the pilot validation instructions, evidence protocol, and result template around the local execution workflow.
-- Adds execution-system tests on top of the existing Stage 4B preview validator.
-- Preserves Stage 4 runtime isolation: no upload/intake, QA, map rendering, Review OS, C2E2 popup, or live job-output integration.
+- Creates 4 governance documents: 66 (cleanroom audit), 67 (cleanup plan), 68 (readiness verdict), 69 (release note).
+- Updates project board (00) to reflect new active task and audit completion milestone.
+- Updates current task (02) with cleanroom audit scope, acceptance criteria, and next actions.
+- Updates worker log (03) with cleanroom audit execution entry.
+- Updates validation log (04) with cleanroom audit validation entry.
+- Updates handoff (05) to reflect audit completion and field trial readiness state.
+- Updates CHANGELOG with pre-pilot cleanroom audit entry.
+- No app runtime files modified; no code implementation; governance and control-file updates only.
 
 ## Validation Plan
 
-- `pytest -v`
-- `pre-commit run --all-files`
-- `python scripts/repo_health.py`
-- `python scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`
-- `python scripts/validate_stage4_pilot.py` on valid and invalid pilot fixtures
-- Browser validation: not required; Stage 4B is validation/preview-only and not wired into runtime UI.
+- `pytest -v` (expect 1049 passed, 2 skipped; no new tests added)
+- `pre-commit run --all-files` (no code changes; markdown/formatting only)
+- `python3.13 scripts/repo_health.py` (expect warning-only for known numbering collisions)
+- `python3.13 scripts/merge_safety_check.py claude-code/pre-pilot-cleanroom-v2` (expect safe to merge)
+- Browser validation: not required; governance documents and control files only.
 
 ## Current Validation State
 
-- `pytest -v`: passed, 1049 passed, 2 skipped.
-- `pre-commit run --all-files`: passed.
-- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
-- `python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`: safe to merge.
-- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_valid_sample.csv`: reports written; recommendation `PARTIAL / RE-PILOT REQUIRED`.
-- `python3.13 scripts/validate_stage4_pilot.py` on `pilot_invalid_sample.csv`: reports written; recommendation `NO-GO`.
-- Browser validation: not required; no runtime/UI integration.
+- `pytest -v`: expected to pass, 1049 passed, 2 skipped (no new tests).
+- `pre-commit run --all-files`: expected to pass (markdown/formatting only).
+- `python3.13 scripts/repo_health.py`: expected warning-only for known numbering collisions.
+- `python3.13 scripts/merge_safety_check.py claude-code/pre-pilot-cleanroom-v2`: expected safe to merge.
+- Browser validation: not required; governance documents and control files only.
 - Manual review report: n/a.
 
 ## Next Action
 
-Review/merge this execution-system branch if clean, then run the CLI against
-Noel's real local pilot CSV and evidence folder before any Stage 4C work is
-considered.
+Review/merge this cleanroom audit branch if clean. Then read documents 66–69 to
+understand field trial readiness state, critical cautions, and next steps for
+Noel. Critical caution: decision-gate docs (61–65) are on unmerged branches;
+recommend merge or explicit review before final field trial go/no-go decision.
 
 ## Do Not Start
 

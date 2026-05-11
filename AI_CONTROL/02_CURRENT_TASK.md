@@ -4,55 +4,61 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Real Field Pilot Execution System v1
-- Branch: `codex/real-field-pilot-execution-system-v1`
-- Owner: codex
+- Task: Pre-Pilot Cleanroom Release Readiness Audit
+- Branch: `claude-code/pre-pilot-cleanroom-v2`
+- Owner: claude-code
 - Lane: Stage 4 field pilot execution
 - Status: ready_for_review
-- Requested by: Noel
-- Runtime changes allowed: no live app integration; local pilot validation, docs, ignored local-data paths, fixtures, and tests only
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python scripts/repo_health.py`; `python scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1`; run `scripts/validate_stage4_pilot.py` on valid and invalid pilot fixtures
-- Validation result: `pytest -v` passed with 1049 passed, 2 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/real-field-pilot-execution-system-v1` is safe to merge; CLI runs produced JSON/Markdown reports for valid and invalid pilot fixtures
-- Browser validation required: no; Stage 4B is not live-integrated into UI/runtime
+- Requested by: Noel (implicit in prior task handoff)
+- Runtime changes allowed: no; governance documents, control files, and audit findings only
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py claude-code/pre-pilot-cleanroom-v2`
+- Validation result: All governance documents created (66–69); control files updated (00, 02, 03, 04, 05, CHANGELOG); `pytest -v` passing with 1049 passed, 2 skipped; `pre-commit run --all-files` passed; merge_safety_check.py reports safe to merge
+- Browser validation required: no; documents and control files only
 - Popup scope changes allowed: no
 
 ## Goal
 
-Build the practical execution system Noel will use after field capture to
-validate a real pilot CSV, inspect evidence filenames, generate reports, and
-record whether Stage 4C remains blocked, partial, or ready for manual review.
+Perform comprehensive cleanroom audit of the repository before real field pilot
+execution, identifying any gaps, risks, or cleanup actions needed for release
+readiness. Deliver formal verdict (READY WITH CAUTIONS), critical findings
+(unmerged decision-gate docs), and action plan for Noel.
 
 ## Scope
 
-- Create a standalone `validate_stage4_pilot.py` CLI for CSV validation,
-  evidence-folder checking, and JSON/Markdown report output.
-- Add evidence-fixture coverage for clean and problematic filename/reference sets.
-- Protect local raw pilot data and validation outputs from accidental Git commits.
-- Update pilot validation docs and result template around the new local workflow.
-- Add execution-system tests proving report generation, evidence checks, git-ignore
-  protection, and runtime-output isolation.
-- Update Control Center logs, handoff, and changelog.
+- Audit repository state across 6 dimensions: worktrees, branches, control files,
+  pilot artefacts, runtime isolation, unmerged decision-gate documents.
+- Create 4 cleanroom governance documents: audit findings (66), cleanup plan (67),
+  release readiness verdict (68), pre-pilot release note (69).
+- Update 6 control files to reflect audit completion and current handoff.
+- Identify critical findings: decision-gate docs (61–65) exist on unmerged
+  branches; recommend merge before field pilot.
+- Verify pilot execution readiness: template, CLI, validators, evidence protocol,
+  golden samples, git-ignore protection all confirmed in place.
 
 ## Out Of Scope
 
-- Runtime upload integration.
-- Stage 4 fields in popups or Review OS.
-- Backend QA, geometry, span generation, intake, or map rendering changes.
-- Stage 4C runtime integration.
-- Archive files.
+- Any code implementation or runtime integration.
+- Worktree or branch deletions (audit only; cleanup plan is recommendations).
+- Merging unmerged branches (audit identifies them; merge timing is Noel's decision).
+- Changes to pilot validation CLI, template, or evidence protocol.
+- Archive file edits.
+- Stage 4C runtime integration planning (beyond current blockers).
 
 ## Acceptance Criteria
 
-- Noel has one command to validate a real pilot CSV after capture.
-- The CLI writes terminal, JSON, and Markdown output without touching live job outputs.
-- Evidence folder filename/reference checks report missing, duplicate, invalid, and unreferenced photos.
-- Real pilot raw data and local validation outputs are git-ignored by default.
-- The execution system does not add runtime/UI Stage 4 integration.
+- 4 cleanroom audit governance documents created (66–69) with detailed findings.
+- 6 control files updated (00, 02, 03, 04, 05, CHANGELOG) to reflect audit completion.
+- All 14 worktrees classified with path, branch, commit, merged status, and cleanup recommendation.
+- All 30+ branches catalogued with merged/active/reference classification.
+- Critical finding documented: decision-gate docs (61–65) unmerged; recommendation to merge or review before pilot.
+- Runtime isolation verified: no Stage 4 leakage to qa_engine, map-viewer, PDF, popups, or api_intake.
+- Pilot execution readiness confirmed: all 9 artefacts present and complete.
 - `pytest -v`, `pre-commit run --all-files`, `repo_health.py`, and
   `merge_safety_check.py` pass or report only known non-blocking warnings.
 
 ## Current Next Action
 
-Review/merge this branch, then use the CLI against Noel's real local pilot CSV
-and evidence folder. Stage 4C remains blocked until Noel records the pilot
-result and go/no-go decision.
+Review/merge this cleanroom audit branch. Then execute field pilot per document 69
+(Pre-Pilot Release Note). Record pilot result using decision board template (doc 65).
+Stage 4C remains blocked until field trial is complete and go/no-go decision is recorded.
+Critical caution: review or merge decision-gate docs (61–65) before final go/no-go.

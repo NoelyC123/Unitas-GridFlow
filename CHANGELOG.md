@@ -8,6 +8,43 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-11 - Pre-Pilot Cleanroom Release Readiness Audit
+
+### Added
+
+- Added `AI_CONTROL/66_PRE_PILOT_CLEANROOM_AUDIT.md` — comprehensive forensic audit
+  across worktrees (14 identified, classified), branches (30+, catalogued), control
+  files (6, verified current), pilot artefacts (9, all present), runtime isolation
+  (verified), and critical finding: decision-gate docs (61–65) on unmerged branches.
+- Added `AI_CONTROL/67_WORKTREE_BRANCH_CLEANUP_PLAN.md` — classified recommendations
+  for all 14 worktrees and 30+ branches with timing and safety checklists.
+- Added `AI_CONTROL/68_FIELD_TRIAL_RELEASE_READINESS_VERDICT.md` — formal verdict:
+  READY WITH CAUTIONS, with evidence, major/minor cautions, checklist for Noel,
+  post-pilot actions, and what is NOT ready (Stage 4C runtime).
+- Added `AI_CONTROL/69_PRE_PILOT_RELEASE_NOTE.md` — 1-pager for Noel on what's
+  ready, what's not, how to run pilot validation, decision template reference,
+  pre-field checklist, and FAQ.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`: active task to cleanroom audit,
+  validation results, added stable milestone.
+- Updated `AI_CONTROL/02_CURRENT_TASK.md`: scope, acceptance criteria, goal,
+  next actions reflect audit completion and field trial readiness.
+- Updated `AI_CONTROL/03_WORKER_LOG.md`: added cleanroom audit execution entry.
+- Updated `AI_CONTROL/04_VALIDATION_LOG.md`: added cleanroom audit validation entry.
+- Updated `AI_CONTROL/05_HANDOFF.md`: active handoff, branch changes, next actions.
+
+### Notes
+
+- Critical finding: Decision-gate framework (docs 61–65) exists on unmerged branches
+  `claude-code/stage4c-architecture-v2` and `claude-code/real-field-pilot-readiness-stage4c-gate-audit`.
+  Recommendation: merge or explicitly review before final field trial go/no-go.
+- Pilot execution readiness: CONFIRMED. All CLI, template, validators, evidence
+  protocol, golden samples, and git-ignore protection verified in place.
+- Runtime isolation: VERIFIED. No Stage 4 leakage to qa_engine, map-viewer, PDF,
+  popups, or api_intake. Feature flag ready for Stage 4D.
+
 ## 2026-05-10 - Stage 4C Architecture Gate + Runtime Integration Safety Design
 
 ### Added
