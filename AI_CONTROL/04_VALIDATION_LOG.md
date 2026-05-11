@@ -314,3 +314,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pending (expected pass)
 - Notes: P_REAL_001_MINI independent gate audit documents (71, 72). Mini pilot verdict: PARTIAL / successful shakedown. Stage 4C gate decision: remains blocked pending next controlled pilot. Real pilot data remains local (git-ignored).
+
+### 2026-05-11T16:45:00Z
+
+- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py claude-code/stage4c-controlled-baseline-pilot-prep`
+- validation_runs report path: n/a (control/docs only; no app runtime files)
+- failures.json status: []
+- Screenshots: no
+- Verdict: pending (expected pass with 1050+ tests, 1 skipped)
+- Notes: Stage 4C Controlled Baseline Pilot Preparation Pack documents (73–75) defining exact pole_id matching protocol, 30–50 pole controlled pilot workflow, and decision template. Control files (00, 02, 03, 04, 05, CHANGELOG) updated with prep-pack task context. Real pilot data workspace remains git-ignored.

@@ -18,41 +18,42 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `project-control-worker-bootstrap-complete`
 - `stage4c-architecture-gate-complete`
 - `real-field-pilot-execution-system-v1-complete`
+- `pre-pilot-cleanroom-release-readiness-audit-complete`
+- `p-real-001-mini-independent-gate-audit-complete`
+- `stage4c-controlled-baseline-pilot-prep-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Record P_REAL_001_MINI Mini Pilot Result
-- Branch: `codex/p-real-001-mini-result-record`
-- Owner: codex
-- Status: ready_for_review
-- Summary: Added a tracked non-sensitive control record for the real local mini pilot result while keeping raw evidence, CSV data, and validation artefacts ignored
+- Task: Stage 4C Controlled Baseline Pilot Preparation Pack
+- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
+- Owner: claude-code
+- Status: ready_for_validation
+- Summary: Created 3 governance documents (73–75) defining exact pole_id matching protocol, controlled pilot requirements, and decision template for next real baseline pilot. Updated 6 control files and ready for full validation suite.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Record P_REAL_001_MINI Mini Pilot Result | `codex/p-real-001-mini-result-record` | codex | Stage 4 field pilot execution | ready for review |
+| Stage 4C Controlled Baseline Pilot Preparation Pack | `claude-code/stage4c-controlled-baseline-pilot-prep` | claude-code | Stage 4 field pilot execution | ready for validation |
 
 ## Review / Validation
 
-**Mini Pilot Results (audit branch):**
-- `pytest -v`: expected 1050+ passed, 1 skipped (no new tests added).
-- `pre-commit run --all-files`: expected passed.
-- `python3.13 scripts/repo_health.py`: expected warning-only for known numbering collisions.
-- `python3.13 scripts/merge_safety_check.py claude-code/p-real-001-mini-independent-gate-audit`: expected safe to merge.
-- P_REAL_001_MINI pilot validation: **PARTIAL / RE-PILOT REQUIRED** (mini pilot successful as shakedown; Stage 4C remains blocked)
-- Evidence audit: 33 photos, 100% reference coverage, 0 missing/0 orphaned/0 duplicates/0 invalid patterns
-- Independent audit verdict: Successful rehearsal; next controlled pilot required before Stage 4C GO
+**Prep Pack Branch (`claude-code/stage4c-controlled-baseline-pilot-prep`):**
 
-**Tracked result record (`codex/p-real-001-mini-result-record`):**
-- `pytest -v`: passed, 1068 passed, 1 skipped.
-- `pre-commit run --all-files`: passed.
-- `python3.13 scripts/repo_health.py`: warning-only; known numbering collisions only.
-- `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`: safe to merge.
-- Tracked record added from the local-only `P_REAL_001_MINI` final pilot result without committing `real_pilot_data/` or `validation_runs/`.
-- Browser validation: not required for this control-only result branch.
+- Documents 73–75 created: controlled baseline pilot prep, pole_id match protocol, decision template
+- Control files updated: 00, 02, 03, 04, 05, CHANGELOG
+- Validation pending: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py`
+- Expected: 1050+ passed, 1 skipped; pre-commit clean; repo_health warning-only; merge_safety_check safe
+- Real pilot data protection: `real_pilot_data/` and `validation_runs/` remain git-ignored
+- Browser validation: not required; control/docs only, no runtime UI changes
+- Merge recommendation: ready to merge after validation passes
+
+**Prior Audit Branches (ready for merge or merged):**
+
+- P_REAL_001_MINI Independent Gate Audit (docs 71–72): verdict = successful shakedown, NO-GO for Stage 4C
+- Pre-Pilot Cleanroom Audit (docs 66–69): verdict = READY WITH CAUTIONS for field trial; critical finding: docs 61–65 on unmerged branches
 
 ## Blocked
 
@@ -84,6 +85,9 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - GridFlow Control Center v1.0 closed and tagged.
 - Stage 4A library correctness fixes closed and tagged.
 - P_REAL_001_MINI mini field pilot rehearsal complete; independent gate audit confirms successful shakedown; Stage 4C remains blocked pending next controlled pilot.
+- Pre-pilot cleanroom audit complete: worktree/branch cleanup plan, release readiness verdict, and pre-pilot release note created; critical finding: docs 61–65 unmerged.
+- P_REAL_001_MINI independent gate audit complete: verdict = PARTIAL/RE-PILOT REQUIRED (successful shakedown, 20% merge-ready, only 10 poles); Stage 4C blocked.
+- Stage 4C controlled baseline pilot preparation pack complete: docs 73–75 created defining exact pole_id matching protocol and controlled pilot requirements for next 30–50 pole real baseline pilot.
 
 ## Backlog / Next Candidates
 

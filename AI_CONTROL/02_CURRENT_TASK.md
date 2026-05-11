@@ -4,30 +4,32 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: Record P_REAL_001_MINI Mini Pilot Result
-- Branch: `codex/p-real-001-mini-result-record`
-- Owner: codex
+- Task: Stage 4C Controlled Baseline Pilot Preparation Pack
+- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
+- Owner: claude-code
 - Lane: Stage 4 field pilot execution
-- Status: ready_for_review
-- Requested by: Noel
-- Runtime changes allowed: no live app integration; control/docs/changelog updates only; no real photos, real CSV, or local validation outputs may be committed
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record`
-- Validation result: `pytest -v` passed with 1068 passed, 1 skipped; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions; `python3.13 scripts/merge_safety_check.py codex/p-real-001-mini-result-record` is safe to merge; tracked record created from the local `P_REAL_001_MINI` final pilot result without committing `real_pilot_data/` or `validation_runs/`
-- Browser validation required: no; Stage 4B is not live-integrated into UI/runtime
+- Status: ready_for_validation
+- Requested by: Noel (implicit from Stage 4C gate requirements)
+- Runtime changes allowed: no live app integration; control/docs only; no real evidence may be committed
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py claude-code/stage4c-controlled-baseline-pilot-prep`
+- Validation result: pending (expected: 1050+ passed, 1 skipped; pre-commit clean; repo_health warning-only; merge_safety_check safe)
+- Browser validation required: no; control/docs only, no runtime UI changes
 - Popup scope changes allowed: no
 
 ## Goal
 
-Create a tracked, non-sensitive project record of the `P_REAL_001_MINI` local
-mini-pilot result so the project can retain the verdict, warning profile, and
-Stage 4C gate outcome without committing raw evidence or local-only reports.
+Create a complete governance package for the next Stage 4C controlled baseline
+pilot (30–50 real poles with Trimble baseline). Define exact pole_id matching
+rules, pilot workflow, and decision template so Noel has all specifications
+needed to execute the real pilot that will determine Stage 4C merge readiness.
 
 ## Scope
 
-- Add `AI_CONTROL/70_P_REAL_001_MINI_FIELD_PILOT_RESULT.md`.
-- Record the mini-pilot row counts, evidence-cleanup result, warning profile, and gate verdict.
-- Update board, task tracker, worker log, validation log, handoff, and changelog.
-- Keep all raw pilot evidence, CSV data, and local validation reports ignored and untracked.
+- Create `AI_CONTROL/73_STAGE4C_CONTROLLED_BASELINE_PILOT_PREP.md` — full preparation guide for 30–50 pole pilot.
+- Create `AI_CONTROL/74_STAGE4C_BASELINE_POLE_ID_MATCH_PROTOCOL.md` — exact pole_id matching rules and decision thresholds.
+- Create `AI_CONTROL/75_STAGE4C_CONTROLLED_PILOT_DECISION_TEMPLATE.md` — template for recording pilot results and verdicts.
+- Update control files: 00_PROJECT_BOARD, 02_CURRENT_TASK, 03_WORKER_LOG, 04_VALIDATION_LOG, 05_HANDOFF, CHANGELOG.
+- Run full validation suite and prepare branch for merge.
 
 ## Out Of Scope
 
@@ -40,15 +42,23 @@ Stage 4C gate outcome without committing raw evidence or local-only reports.
 
 ## Acceptance Criteria
 
-- The project has a tracked control-layer record of the mini-pilot outcome.
-- The tracked record contains no raw photos, raw CSV payload, or local validation artefacts.
-- Stage 4C remains explicitly blocked and the next recommended pilot is recorded.
-- `pytest -v`, `pre-commit run --all-files`, `repo_health.py`, and
-  `merge_safety_check.py` pass or report only known non-blocking warnings.
+- All three governance documents (73–75) are created and consistent with Stage 4C architecture docs.
+- Documents define complete workflow for 30–50 pole controlled baseline pilot.
+- Exact pole_id matching protocol established with decision thresholds (≥80% GO, 75–80% CONDITIONAL GO, <75% NO-GO).
+- Decision template includes all required verification steps (row counts, match rates, attribute verification, operator friction assessment, risk assessment).
+- All 6 control files updated to reflect prep-pack task completion.
+- `pytest -v` passes with 1050+ tests, 1 skipped.
+- `pre-commit run --all-files` passes clean.
+- `python3.13 scripts/repo_health.py` reports warning-only (known collisions only).
+- `python3.13 scripts/merge_safety_check.py` confirms safe to merge.
+- `real_pilot_data/` and `validation_runs/` remain git-ignored with zero real evidence committed.
+- Branch ready for merge to master.
 
 ## Current Next Action
 
-Review/merge this control-record branch, then plan the next controlled pilot
-against a real GridFlow/Trimble job baseline with exact `pole_id` matching.
-Stage 4C remains blocked until that stronger pilot result and Noel's manual
-go/no-go decision exist.
+1. Run full validation suite on prep-pack branch (pytest, pre-commit, repo_health, merge_safety_check).
+2. Commit and push branch with summary of 3 documents + 6 control file updates.
+3. Merge to master when validation passes.
+4. Noel executes controlled baseline pilot per docs 73–75 specifications.
+5. Noel records results on decision template (doc 75) and signs GO/CONDITIONAL GO/NO-GO/STOP verdict.
+6. GO verdict authorizes Stage 4C runtime implementation task.

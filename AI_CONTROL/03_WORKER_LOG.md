@@ -428,3 +428,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/71_P_REAL_001_MINI_INDEPENDENT_GATE_AUDIT.md,AI_CONTROL/72_STAGE4C_NEXT_CONTROLLED_PILOT_PLAN.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: pending full validation suite
 - Next action: run pytest/pre-commit/repo_health/merge_safety and commit
+
+### 2026-05-11T16:45:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/stage4c-controlled-baseline-pilot-prep`
+- Action: Created Stage 4C Controlled Baseline Pilot Preparation Pack (docs 73–75) defining exact pole_id matching protocol, 30–50 pole controlled pilot workflow, and decision template for Noel; updated 6 control files with prep-pack task context
+- Files changed: AI_CONTROL/73_STAGE4C_CONTROLLED_BASELINE_PILOT_PREP.md,AI_CONTROL/74_STAGE4C_BASELINE_POLE_ID_MATCH_PROTOCOL.md,AI_CONTROL/75_STAGE4C_CONTROLLED_PILOT_DECISION_TEMPLATE.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: ready for pytest/pre-commit/repo_health/merge_safety
+- Next action: run full validation suite and commit branch

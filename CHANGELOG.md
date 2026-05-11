@@ -38,6 +38,66 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - No local validation reports committed.
 - `P_REAL_001_MINI` is recorded as a successful workflow shakedown with a Stage
   4C gate result of `PARTIAL / RE-PILOT REQUIRED`.
+## 2026-05-11 - Stage 4C Controlled Baseline Pilot Preparation Pack
+
+### Added
+
+- Added `AI_CONTROL/73_STAGE4C_CONTROLLED_BASELINE_PILOT_PREP.md` — comprehensive
+  preparation guide for 30–50 pole controlled baseline pilot. Explains why
+  P_REAL_001_MINI is insufficient (successful shakedown but only 10 workbook poles,
+  not real Trimble baseline). Defines job selection criteria, required inputs/outputs,
+  exact field-day workflow, post-field validation steps, and success definitions.
+
+- Added `AI_CONTROL/74_STAGE4C_BASELINE_POLE_ID_MATCH_PROTOCOL.md` — establishes
+  **EXACT MATCH ONLY** pole_id matching rule (no fuzzy matching). Defines normalisation
+  rules (whitespace strip, uppercase, dash standardization pending approval). Provides
+  4-step matching algorithm with examples. Sets decision thresholds: ≥80% GO,
+  75–80% CONDITIONAL GO, <75% NO-GO. Documents mismatch categorization and duplicate/
+  missing pole_id blocking rules. Describes merge simulation and append-only invariant.
+
+- Added `AI_CONTROL/75_STAGE4C_CONTROLLED_PILOT_DECISION_TEMPLATE.md` — decision
+  board template for Noel to record pilot results after field capture. Includes pilot
+  metadata, row-level findings, pole_id matching findings, evidence findings, warning
+  profile, attribute verification sample, operator friction assessment (1–5 rating),
+  defects/issues, risk assessment (R01–R06), verdict options (GO/CONDITIONAL GO/NO-GO/STOP),
+  sign-off section with 6 confirmation checkboxes, and scope clarification that GO verdict
+  authorizes new implementation task but does NOT auto-merge and does NOT approve Stage 4D.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md` to mark prep-pack complete, add milestone,
+  update active task, and update Review/Validation section with prep-pack status.
+
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` to reflect prep-pack task scope, acceptance
+  criteria, and next-action sequence (validate → commit → merge → Noel executes pilot).
+
+- Updated `AI_CONTROL/03_WORKER_LOG.md` with entry for prep-pack task completion.
+
+- Updated `AI_CONTROL/04_VALIDATION_LOG.md` with pending validation entry for prep-pack.
+
+- Updated `AI_CONTROL/05_HANDOFF.md` with active handoff update, What This Branch Changed
+  section, updated Validation Plan, Current Validation State, Feature Branch Note, Next Action,
+  and Stable Milestones list.
+
+### Validation
+
+- `pytest -v`: pending (expected 1050+ passed, 1 skipped)
+- `pre-commit run --all-files`: pending (expected clean)
+- `python3.13 scripts/repo_health.py`: pending (expected warning-only)
+- `python3.13 scripts/merge_safety_check.py claude-code/stage4c-controlled-baseline-pilot-prep`: pending (expected safe)
+- `git status --ignored --short`: confirms `real_pilot_data/` and `validation_runs/` remain git-ignored
+
+### Notes
+
+- Prep-pack is the complete specification Noel needs to execute the next critical controlled pilot
+  (30–50 real poles from a mature job with known Trimble baseline).
+- Exact pole_id matching protocol prevents silent merge errors and enforces upstream data quality.
+- Decision template provides structured method for Noel to record results and sign verdicts (GO/NO-GO).
+- Stage 4C runtime integration remains blocked until Noel's controlled pilot is executed and
+  a GO or CONDITIONAL GO verdict is signed on the decision template.
+
+---
+
 ## 2026-05-11 - P_REAL_001_MINI Independent Gate Audit + Next Controlled Pilot Plan
 
 ### Added
