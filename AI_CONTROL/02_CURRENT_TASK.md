@@ -4,8 +4,8 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
-- Branch: `claude-code/p-local-001-result-record-prep`
+- Task: P_LOCAL_001 Final Result Audit Prep (docs 93–94)
+- Branch: `claude-code/p-local-001-final-result-audit-prep`
 - Owner: none
 - Lane: Stage 4 field pilot execution
 - Status: awaiting_next_branch
@@ -18,8 +18,8 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Goal
 
-Prepare the governance/result-record framework for P_LOCAL_001 while Codex separately
-consolidates the final local workbook, CSV, photo mapping, and validator outputs.
+Prepare independent audit framework for verifying Codex's final P_LOCAL_001 consolidation
+outputs and explicitly confirm the remaining Phase 4 requirements for Stage 4C authorization.
 
 Deliverables:
 - Doc 91: P_LOCAL_001 Field-Capture Result Template (ready for filling after Codex consolidation)

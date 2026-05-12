@@ -7,6 +7,64 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## 2026-05-12 - P_LOCAL_001 Final Result Audit Prep (docs 93–94)
+
+### Added
+
+- Added `AI_CONTROL/93_P_LOCAL_001_FINAL_RESULT_AUDIT_CHECKLIST.md` — independent
+  audit checklist for verifying Codex's final P_LOCAL_001 consolidation outputs.
+  Includes 9 verification sections: files present, pole inventory, H-frame counting,
+  photo mapping, specific pole corrections (SPEN-QMM20 voltage/streetlight,
+  SPEN-NMFSP condition, POLE-GARDEN-XFMR-001 wording, POLE-RURAL-ROAD-001 dates,
+  POLE-VILLAGE-LSTC2021 photos), high-risk fields, validator metrics, verdict
+  readiness, and Stage 4C block confirmation.
+
+- Added `AI_CONTROL/94_P_LOCAL_001_STAGE4C_GAP_CONFIRMATION.md` — explicit permanent
+  record of what P_LOCAL_001 proves (field-capture workflow, photo linking, unknown
+  handling, validator reliability) and what remains missing for Stage 4C authorization
+  (Phase 4: same-site baseline + same-site field evidence + exact match ≥80% +
+  signed verdict + gate audit). Documents that Bellsprings/Gordon prove baseline
+  extraction only, not same-site field evidence. Confirms Stage 4C remains BLOCKED.
+  Recommends post-P_LOCAL_001 milestones: baseline field comparison, controlled
+  pilot candidate selection, Phase 4 execution.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md` to record audit framework completion
+  and note docs 93–94.
+
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` to document task scope for independent
+  audit of Codex outputs.
+
+- Updated `AI_CONTROL/03_WORKER_LOG.md` to record task completion with file list.
+
+- Updated `AI_CONTROL/04_VALIDATION_LOG.md` to prepare validation entry for
+  governance-docs-only branch.
+
+- Updated `AI_CONTROL/05_HANDOFF.md` to document deliverables, audit readiness,
+  and next actions (conduct audit after Codex finishes, confirm Phase 4 gap).
+
+### Notes
+
+- Audit checklist (doc 93) is ready to use immediately after Codex consolidates
+  final outputs. Provides step-by-step verification of 9 sections with specific
+  corrections and field checks.
+
+- Stage 4C Gap Confirmation (doc 94) is a permanent project record of Phase 4
+  requirements and why Bellsprings/Gordon/P_LOCAL_001 cannot substitute for it.
+
+- Both docs explicitly confirm Stage 4C remains BLOCKED pending Phase 4 execution
+  (baseline + field evidence + exact match + verdict + audit).
+
+- Audit checklist includes specific wording checks for conservative field documentation
+  (e.g., "limits access" not "blocks DNO access").
+
+- Gap Confirmation includes detailed timeline: P_LOCAL_001 → Phase 4 → Stage 4C
+  authorization (or NO-GO analysis if issues found).
+
+- All audit work is governance-only; no real data touched.
+
+---
 ## 2026-05-12 - P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
 
 ### Added

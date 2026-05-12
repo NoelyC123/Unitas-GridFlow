@@ -30,18 +30,18 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
-- Branch: `claude-code/p-local-001-result-record-prep`
+- Task: P_LOCAL_001 Final Result Audit Prep (docs 93–94)
+- Branch: `claude-code/p-local-001-final-result-audit-prep`
 - Owner: none
 - Status: awaiting_next_branch
-- Summary: Created P_LOCAL_001 Field-Capture Result Template (doc 91) for governance record after Codex consolidation. Created P_LOCAL_001 Final Review Checklist (doc 92) for Noel's pre-verdict review. Result template includes pilot metadata, validator result section, technical confirmations, and explicit Stage 4C block statement. Review checklist provides step-by-step verification of all 9 structures, H-frame counting, photo mapping, high-risk fields, and specific SPEN/POLE confirmations. Updated 6 control files. No real data touched. Stage 4C remains blocked.
+- Summary: Created P_LOCAL_001 Final Result Audit Checklist (doc 93) for independent audit of Codex consolidation outputs. Created P_LOCAL_001 Stage 4C Gap Confirmation (doc 94) documenting what P_LOCAL_001 proves and remaining Phase 4 requirements. Doc 93 provides 9-section audit covering files present, structures, H-frame, photo mapping, corrections, high-risk fields, validator metrics, verdict readiness, and Stage 4C block. Doc 94 explicitly confirms Phase 4 (baseline+field+exact match+verdict+audit) is still required; P_LOCAL_001 proves workflow only. Updated 6 control files. No real data touched. Stage 4C remains blocked.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| P_LOCAL_001 Field-Capture Result Record Preparation | `claude-code/p-local-001-result-record-prep` | none | Stage 4 field pilot execution | awaiting_next_branch |
+| P_LOCAL_001 Final Result Audit Prep | `claude-code/p-local-001-final-result-audit-prep` | none | Stage 4 field pilot execution | awaiting_next_branch |
 
 ## Review / Validation
 
