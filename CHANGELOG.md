@@ -7,7 +7,41 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## 2026-05-12 - Stage 4 real survey baseline conversion review
 
+### Added
+
+- Added `AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md` to record
+  the review of Bellsprings, Gordon, and Noel local survey files as Stage 4
+  baseline conversion inputs.
+
+- Added `docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md` to document the
+  local-only conversion workflow for raw controller-export files and capture-
+  compatible survey CSVs.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `AI_CONTROL/02_CURRENT_TASK.md`,
+  `AI_CONTROL/03_WORKER_LOG.md`, `AI_CONTROL/04_VALIDATION_LOG.md`, and
+  `AI_CONTROL/05_HANDOFF.md` to record the conversion-review task, support
+  counts, suitability classifications, and the continued Stage 4C block.
+
+### Notes
+
+- Bellsprings sample controller export is a clean compact baseline with `40`
+  support rows.
+- Gordon original is the strongest large baseline source with `128` support
+  rows.
+- Gordon PR2 is also usable with `53` support rows.
+- Gordon PR1 contains duplicate point identity `4` and needs cleanup before
+  strict exact-match use.
+- Noel's 2026-05-11 local survey CSV already aligns with the Stage 4 header
+  set, but includes 3 extra local-only columns and 1 blank trailing header
+  column; it should be treated as a capture-compatibility input, not a raw
+  baseline extract.
+- All generated starter CSVs and extract notes remain local-only under
+  `real_pilot_data/P_BASELINE_SURVEY_PACK/`.
+- Stage 4C remains blocked.
 ## 2026-05-12 - Stage 4 Real Survey Pack Readiness Review (docs 87–88)
 
 ### Added
@@ -61,7 +95,6 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   with signed verdict) can authorize Stage 4C.
 - All real baseline/field CSV, PDF, photo files remain local-only and git-ignored.
 - Stage 4C remains blocked until Phase 4 complete with validator pass + signed verdict.
-
 ## 2026-05-11 - P_CONTROLLED_001 Readiness Gate (docs 83–85)
 
 ### Added

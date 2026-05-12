@@ -5,56 +5,60 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: Stage 4 Real Survey Pack Readiness Review (docs 87–88)
-- Owner: claude-code
-- Branch: `claude-code/stage4-real-survey-pack-readiness-review`
-- Status: ready_for_review
-- Summary: Two readiness review documents (87–88) now classify Bellsprings/Gordon baselines as baseline-conversion evidence and explain 4-phase sequencing to Stage 4C authorization. Clarifies that baseline alone and field evidence alone are insufficient; only Phase 4 (full controlled pilot with validator pass + signed verdict) authorizes Stage 4C. Control files updated. All real baseline/field files remain local-only and git-ignored. Stage 4C remains blocked until Phase 4 complete.
-- Updated: 2026-05-12T08:30:00Z
-- Audit Note: After validation and merge, Codex executes Phase 1 (baseline extraction from Bellsprings/Gordon), Noel executes Phase 2 (field-capture learning), combined Phase 3 (baseline-field matching analysis), and Phase 4 (full controlled pilot with signed verdict).
+- Task: READY FOR NEXT TASK
+- Owner: none
+- Branch: `none`
+- Status: awaiting_next_branch
+- Summary: Stage 4 Real Survey Pack Readiness Review (docs 87–88) is merged and Stage 4 real survey baseline conversion review (doc 86 + guide) is merged. Bellsprings (`40` support rows), Gordon original (`128`), and Gordon PR2 (`53`) are suitable baseline conversion inputs. Gordon PR1 has a duplicate point identity blocker and is not strict exact-match safe as-is. Noel's local 2026-05-11 survey CSV is Stage 4 capture-compatible but not a raw baseline extract. Local starter CSVs were created under `real_pilot_data/P_BASELINE_SURVEY_PACK/csv/`. `real_pilot_data/`, `uploads/`, and `validation_runs/` remain ignored/uncommitted. Stage 4C remains blocked. Next action: build and validate `P_LOCAL_001` from Noel's actual local survey/photos.
+- Updated: 2026-05-12T21:30:00Z
+- Audit Note: Do not treat the baseline conversion review as runtime authorization. The next branch should stay local-evidence-safe and use the existing exact `pole_id` workflow.
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Adds
 
-- `AI_CONTROL/87_REAL_SURVEY_PACK_READINESS_REVIEW.md`: classify Bellsprings/Gordon/design files as baseline-conversion evidence, document what they can/cannot support, risks and mitigations, recommended controls.
-- `AI_CONTROL/88_BASELINE_VS_FIELD_EVIDENCE_DECISION_MEMO.md`: explain 3 pilot types (baseline conversion, field-capture learning, full controlled pilot), document 4-phase sequencing, clarify why baseline+field combined evidence required for Phase 4 authorization.
-- All 6 control files (00, 02, 03, 04, 05, CHANGELOG) updated with real-survey-pack-readiness-review context.
+- `AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md`: tracked review of Bellsprings, Gordon, and Noel local survey files, including support counts, field-structure findings, suitability classification, and local-only output paths.
+- `docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md`: local conversion workflow guide for real controller-export files and capture-compatible CSVs.
+- `AI_CONTROL/87_REAL_SURVEY_PACK_READINESS_REVIEW.md`: baseline-vs-field readiness framing for Stage 4C authorization boundaries.
+- `AI_CONTROL/88_BASELINE_VS_FIELD_EVIDENCE_DECISION_MEMO.md`: 4-phase sequencing and Phase 4 authorization rules.
 - All real baseline/field CSV, PDF, photo files remain local-only and git-ignored.
 
 ## Local Checkout Reality
 
 - The earlier clean audit branch correctly reported no tracked candidate files in that separate worktree.
-- This local main checkout does contain a usable local baseline at `real_pilot_data/P_CONTROLLED_001/baseline/baseline.csv`.
-- The helper extracted `40` structural candidate rows from `57` scanned rows in that raw controller export using point number as the exact identity source.
-- Any local baseline CSVs under `uploads/`, `validation_data/`, or `real_pilot_data/` must remain out of this helper branch commit.
-- `real_pilot_data/` and `validation_runs/` remain ignored/uncommitted local evidence paths.
+- This local main checkout contains the raw survey baseline pack under `real_pilot_data/P_BASELINE_SURVEY_PACK/raw/`.
+- The conversion review confirmed:
+  - Bellsprings: `40` support rows
+  - Gordon original: `128` support rows
+  - Gordon PR1: `86` support rows with duplicate point `4`
+  - Gordon PR2: `53` support rows
+- Noel's `pole_survey_2026-05-11_complete.csv` already matches the Stage 4 header set, with 3 extra local-only columns and 1 blank trailing header column.
+- Local starter CSVs were created under `real_pilot_data/P_BASELINE_SURVEY_PACK/csv/`.
+- `real_pilot_data/`, `uploads/`, and `validation_runs/` remain ignored/uncommitted local evidence paths.
 
 ## Validation Plan
 
 - `pytest -v`
 - `pre-commit run --all-files`
 - `python3.13 scripts/repo_health.py`
-- `python3.13 scripts/merge_safety_check.py claude-code/stage4-real-survey-pack-readiness-review`
+- `python3.13 scripts/merge_safety_check.py codex/stage4-real-survey-baseline-conversion-pack`
 - `git status --ignored --short real_pilot_data uploads validation_runs`
 - Browser validation: not required; governance review docs only, no runtime UI changes.
 - Manual review report: n/a.
 
 ## Current Validation State
 
-- Two governance review documents (87–88) created and complete.
-- Control files updated with real-survey-pack-readiness-review context.
-- Validation suite ready to run: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, and `python3.13 scripts/merge_safety_check.py` pending.
+- Stage 4 Real Survey Pack Readiness Review merged to `master`.
+- Stage 4 real survey baseline conversion review merged to `master`.
+- Merge validation pending/complete in the current merge resolution flow.
 - All real baseline/field files remain local-only and git-ignored.
-- Stage 4C remains blocked until Phase 4 (full controlled pilot with signed verdict) complete.
+- Stage 4C remains blocked.
 
 ## Next Action
 
-1. Complete full validation suite on `claude-code/stage4-real-survey-pack-readiness-review`.
-2. Verify all real baseline/field/design files remain git-ignored (git status --ignored --short).
-3. Commit and push real-survey-pack-readiness-review branch.
-4. Deliver final report with branch, commit hash, files changed, baseline conversion readiness verdict, field-evidence distinction summary, Phase 4 sequencing, validation results.
-5. Codex: Execute Phase 1 (baseline extraction from Bellsprings/Gordon). Noel: Execute Phase 2 (field-capture learning). Combined: Phase 3 (baseline-field analysis). Full pilot: Phase 4 (controlled pilot + signed verdict).
-6. Phase 4 signed verdict gates Stage 4C implementation authorization.
+1. Complete merge validation on `master`.
+2. Open the next branch to build and validate `P_LOCAL_001` from Noel's actual local survey/photos.
+3. Keep all real baseline/field/design files git-ignored.
+4. Do not start Stage 4C runtime integration until a controlled pilot result is recorded and approved.
 
 ## Do Not Start
 
@@ -88,3 +92,4 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - `controlled-pilot-field-pack-v1-complete`
 - `p-controlled-001-readiness-gate-complete`
 - `stage4-real-survey-pack-readiness-review-complete`
+- `stage4-real-survey-baseline-conversion-review-complete`

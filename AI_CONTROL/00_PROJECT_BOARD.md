@@ -25,22 +25,23 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `controlled-pilot-field-pack-v1-complete`
 - `p-controlled-001-readiness-gate-complete`
 - `stage4-real-survey-pack-readiness-review-complete`
+- `stage4-real-survey-baseline-conversion-review-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: Stage 4 Real Survey Pack Readiness Review (docs 87–88)
-- Branch: `claude-code/stage4-real-survey-pack-readiness-review`
-- Owner: claude-code
-- Status: ready_for_review
-- Summary: Created Real Survey Pack Readiness Review (doc 87) classifying Bellsprings/Gordon baselines as baseline-conversion evidence (not field-photo evidence or automatic Stage 4C approval). Created Baseline vs. Field Evidence Decision Memo (doc 88) explaining why baseline alone and field evidence alone are insufficient; only combined baseline+field pilot (Phase 4) authorizes Stage 4C. Documented recommended 4-phase sequencing: Phase 1 (baseline extraction), Phase 2 (field-capture learning), Phase 3 (baseline-field analysis), Phase 4 (full controlled pilot). Updated 6 control files. Stage 4C remains blocked until Phase 4 is complete with signed verdict.
+- Task: READY FOR NEXT TASK
+- Branch: `none`
+- Owner: none
+- Status: awaiting_next_branch
+- Summary: Stage 4 Real Survey Pack Readiness Review (docs 87–88) is complete and the Stage 4 real survey baseline conversion review (doc 86 + guide) is complete. Bellsprings (`40` support rows), Gordon original (`128`), and Gordon PR2 (`53`) are suitable baseline conversion inputs. Gordon PR1 is blocked by duplicate point identity `4`. Noel's local survey CSV is Stage 4 capture-compatible but not a raw baseline source. Local starter CSVs were created under `real_pilot_data/P_BASELINE_SURVEY_PACK/csv/`. `real_pilot_data/`, `uploads/`, and `validation_runs/` remain ignored/uncommitted. Stage 4C remains blocked. Next action: build and validate `P_LOCAL_001` from Noel's actual local survey/photos.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| Stage 4 Real Survey Pack Readiness Review (docs 87–88) | `claude-code/stage4-real-survey-pack-readiness-review` | claude-code | Stage 4 field pilot execution | ready for review |
+| READY FOR NEXT TASK | `none` | none | Stage 4 field pilot execution | awaiting next branch |
 
 ## Review / Validation
 
@@ -69,16 +70,25 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - These docs are ready for Noel once the local baseline CSV for `P_CONTROLLED_001` is selected
 - Browser validation is not required; this is control/docs only
 
+**Real survey baseline conversion review (doc 86):**
+
+- Bellsprings sample controller export is a clean compact baseline source with `40` support rows
+- Gordon original is the strongest large baseline source with `128` support rows
+- Gordon PR2 is also usable with `53` support rows
+- Gordon PR1 contains duplicate point identity `4` and should not be treated as a clean exact-match baseline until resolved
+- Noel's 2026-05-11 local survey CSV is already capture-shaped and useful for Stage 4 compatibility review, but it is not a raw baseline extract source
+- Local starter CSVs were created under `real_pilot_data/P_BASELINE_SURVEY_PACK/csv/`
+
 ## Blocked
 
 - Stage 4C runtime integration (pending controlled baseline pilot approval)
-- Stage 4C controlled baseline pilot execution (blocked until Noel uses the extracted baseline set, completes the controlled pilot capture, validates it, and records the exact-match decision outcome)
+- Stage 4C controlled baseline pilot execution (blocked until Noel builds and validates `P_LOCAL_001` against actual local survey/photos, records exact-match results, and completes the signed decision path)
 
 ## In Review / Audit
 
 | Task | Branch | Owner | Status |
 | --- | --- | --- | --- |
-| Stage 4 Real Survey Pack Readiness Review (docs 87–88) | `claude-code/stage4-real-survey-pack-readiness-review` | claude-code | ready for review |
+| No active review branch | `none` | none | merged to `master`; awaiting next branch |
 
 ## Done
 
@@ -106,10 +116,13 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Controlled pilot field pack v1 complete: docs 80–82 created providing Noel with simple field-day procedure, photo/evidence rules, and post-pilot decision notes for execution after baseline selection.
 - P_CONTROLLED_001 Readiness Gate complete: docs 83–85 created providing Noel with baseline readiness verdict (READY FOR FIELD WORK), per-pole field targets with 34-row full and 15-row fallback options, and post-field acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready). Stage 4C remains blocked pending field execution and signed verdict.
 - Stage 4 Real Survey Pack Readiness Review complete: docs 87–88 classifying real Bellsprings/Gordon baselines as baseline-conversion evidence (not field-photo evidence or automatic Stage 4C approval). Documented 4-phase sequencing: baseline extraction, field-capture learning, baseline-field analysis, full controlled pilot. Only Phase 4 (full controlled pilot with validator pass + signed verdict) authorizes Stage 4C implementation. Stage 4C remains blocked until Phase 4 complete.
+- Real survey baseline conversion review complete: doc 86 and the conversion guide record that Bellsprings, Gordon original, and Gordon PR2 are usable local baseline conversion inputs, while Gordon PR1 needs duplicate cleanup and Noel's local survey CSV is compatibility-only.
 
 ## Backlog / Next Candidates
 
-- Run the new controlled baseline helper against Noel's local `P_CONTROLLED_001` field capture and produce the exact-match decision report.
+- Build and validate `P_LOCAL_001` from Noel's actual local survey/photos using the current exact-match baseline workflow.
+- Run the controlled baseline helper against Noel's local `P_CONTROLLED_001` field capture and produce the exact-match decision report.
+- Use Bellsprings, Gordon original, or Gordon PR2 as local real-survey conversion references for further Stage 4 preparation work.
 - Controlled baseline pilot with exact `pole_id` matching and stronger access/closer capture.
 - Stage 4C controlled runtime integration, only after a controlled pilot against a real GridFlow/Trimble baseline is recorded and the go/no-go gate is approved.
 - DNO-grade rulepack planning.
