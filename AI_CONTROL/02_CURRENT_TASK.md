@@ -4,32 +4,56 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: READY FOR NEXT TASK
-- Branch: `none`
+- Task: P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
+- Branch: `claude-code/p-local-001-result-record-prep`
 - Owner: none
 - Lane: Stage 4 field pilot execution
 - Status: awaiting_next_branch
-- Requested by: Noel
-- Runtime changes allowed: no live app integration; governance/control state only until the next branch is opened
-- Tests required: none for the idle master state beyond normal merge validation
-- Validation result: Stage 4 Real Survey Pack Readiness Review (docs 87–88) merged; Stage 4 real survey baseline conversion review (doc 86 + guide) merged; merge validation pending/complete outside this record
+- Runtime changes allowed: no live app integration; governance/docs only
+- Tests required: pytest -v, pre-commit run --all-files
+- Validation result: pending (governance docs only, no real data committed)
 - Browser validation required: no; governance/docs only, no runtime UI changes
 - Popup scope changes allowed: no
+- Real data protection: all P_LOCAL_001 data remains local-only, no real files committed
 
 ## Goal
 
-No active implementation task is open on `master`.
+Prepare the governance/result-record framework for P_LOCAL_001 while Codex separately
+consolidates the final local workbook, CSV, photo mapping, and validator outputs.
 
-The next required branch should build and validate `P_LOCAL_001` from Noel's
-actual local survey/photos using the current Stage 4 controlled baseline
-workflow, without committing real evidence and without starting Stage 4C runtime
-integration.
+Deliverables:
+- Doc 91: P_LOCAL_001 Field-Capture Result Template (ready for filling after Codex consolidation)
+- Doc 92: P_LOCAL_001 Final Review Checklist (ready for Noel to use immediately)
+- Updated control files recording the framework preparation
+- No real data committed
+- Stage 4C remains blocked
 
 ## Scope
 
-- Preserve merged docs 86, 87, and 88 as the current source of truth for baseline conversion readiness
-- Preserve Stage 4C as blocked until a real controlled pilot result is recorded
-- Use the local baseline conversion outputs and exact `pole_id` workflow for the next pilot branch
+- Create P_LOCAL_001 Field-Capture Result Template (doc 91) with sections for:
+  - Pilot metadata
+  - Source files expected after Codex consolidation
+  - Pole structure count (9 structures, 10 individual supports with H-frame clarification)
+  - Photo evidence count and linking
+  - Validator result section (quantitative metrics, verdict)
+  - High-risk field verification checklist
+  - Known limitations (what P_LOCAL_001 proves/doesn't prove)
+  - Technical confirmations for SPEN-QMM20, POLE-GARDEN-XFMR-001, etc.
+  - Final verdict section (PASS / PARTIAL / NO-GO options)
+  - Explicit statement: does not authorize Stage 4C runtime integration
+
+- Create P_LOCAL_001 Final Review Checklist (doc 92) with step-by-step verification of:
+  - All 9 structures present
+  - H-frame count handled correctly
+  - Photo references match corrected photo mapping
+  - High-risk technical fields remain unknown unless verified
+  - SPEN-QMM20 LV classification and no streetlight misattribution
+  - POLE-GARDEN-XFMR-001 wording (limits access, not blocks DNO access)
+  - POLE-RURAL-ROAD-001 inspection plate dates from photo only
+  - POLE-VILLAGE-LSTC2021 photo mapping correct
+  - Stage 4C remains blocked confirmation
+
+- Update control files to record framework preparation
 - Keep `real_pilot_data/`, `uploads/`, and `validation_runs/` out of tracked commits
 
 ## Out Of Scope
@@ -43,14 +67,33 @@ integration.
 
 ## Acceptance Criteria
 
-- `master` reflects both completed governance states:
-  - Stage 4 Real Survey Pack Readiness Review (docs 87–88)
-  - Stage 4 real survey baseline conversion review (doc 86 + guide)
-- Bellsprings, Gordon original, and Gordon PR2 remain documented as suitable baseline conversion inputs
-- Gordon PR1 remains documented as blocked by duplicate point identity `4`
-- Noel local survey CSV remains documented as Stage 4 capture-compatible, not a raw baseline extract
-- All real Bellsprings/Gordon/local survey files remain uncommitted and git-ignored
-- Stage 4C remains blocked
+- Doc 91 (Result Template) is ready but not falsely completed
+  - All sections present with clear prompts for Noel to fill
+  - Explicit Stage 4C block statement included
+  - No assumptions made about validator results
+
+- Doc 92 (Final Review Checklist) is ready for Noel's immediate use
+  - 10 verification sections covering all required checks
+  - H-frame counting rule clearly explained
+  - Technical confirmations specific to each problematic pole
+  - Decision guide provides PASS / PARTIAL / NO-GO clarity
+
+- Control files updated:
+  - 00_PROJECT_BOARD.md records task completion
+  - 02_CURRENT_TASK.md (this file) documents scope
+  - 03_WORKER_LOG.md records work completion
+  - 04_VALIDATION_LOG.md records validation pass
+  - 05_HANDOFF.md updated for next task
+  - CHANGELOG.md records the deliverables
+
+- Validation confirms:
+  - pytest -v passes
+  - pre-commit run --all-files passes
+  - python3.13 scripts/repo_health.py passes
+  - python3.13 scripts/merge_safety_check.py passes
+  - git status confirms no real data committed
+
+- Stage 4C remains BLOCKED
 
 ## Current Next Action
 

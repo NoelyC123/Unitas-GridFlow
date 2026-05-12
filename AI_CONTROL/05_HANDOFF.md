@@ -5,22 +5,21 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: P_LOCAL_001 Field-Capture Readiness Review (docs 89–90)
+- Task: P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
 - Owner: none
-- Branch: `claude-code/p-local-001-field-capture-readiness-review`
+- Branch: `claude-code/p-local-001-result-record-prep`
 - Status: awaiting_next_branch
-- Summary: Two governance review documents now classify P_LOCAL_001 as accessible field-capture validation proof and explain Phase 4 (baseline+field combined) requirements for Stage 4C authorization. Control files updated. All P_LOCAL_001 data remains local-only and git-ignored. Stage 4C remains blocked until Phase 4 complete.
-- Updated: 2026-05-12T12:00:00Z
-- Audit Note: Do not treat the baseline conversion review as runtime authorization. The next branch should stay local-evidence-safe and use the existing exact `pole_id` workflow.
+- Summary: Created P_LOCAL_001 Field-Capture Result Template (doc 91) — governance record framework ready for Noel to fill after Codex consolidation. Created P_LOCAL_001 Final Review Checklist (doc 92) — step-by-step verification checklist ready for Noel to use immediately after validator run. Both docs include explicit checks for H-frame counting (9 structures, 10 individual supports), photo mapping, high-risk fields, and specific SPEN/POLE confirmations. Explicit Stage 4C block statement included in both docs. Control files updated. All P_LOCAL_001 data remains local-only and git-ignored. Stage 4C remains blocked until Phase 4 complete.
+- Updated: 2026-05-12T15:45:00Z
+- Audit Note: Result template is NOT falsely completed; checklist is ready for Noel's immediate use after Codex finishes consolidation. Do not proceed to Stage 4C runtime until full Phase 4 (baseline+field combined, ≥80% exact match, signed verdict, gate audit) is complete.
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Adds
 
-- `AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md`: tracked review of Bellsprings, Gordon, and Noel local survey files, including support counts, field-structure findings, suitability classification, and local-only output paths.
-- `docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md`: local conversion workflow guide for real controller-export files and capture-compatible CSVs.
-- `AI_CONTROL/87_REAL_SURVEY_PACK_READINESS_REVIEW.md`: baseline-vs-field readiness framing for Stage 4C authorization boundaries.
-- `AI_CONTROL/88_BASELINE_VS_FIELD_EVIDENCE_DECISION_MEMO.md`: 4-phase sequencing and Phase 4 authorization rules.
-- All real baseline/field CSV, PDF, photo files remain local-only and git-ignored.
+- `AI_CONTROL/91_P_LOCAL_001_FIELD_CAPTURE_RESULT_TEMPLATE.md`: governance result-record template (ready but not falsely completed) with sections for pilot metadata, source files expected, pole/support count, photo evidence, validator metrics, technical confirmations, and explicit Stage 4C block statement.
+- `AI_CONTROL/92_P_LOCAL_001_FINAL_REVIEW_CHECKLIST.md`: step-by-step checklist for Noel to verify all 9 structures, H-frame counting, photo mapping, high-risk fields, and specific SPEN-QMM20 and POLE confirmations before recording verdict.
+- Updated control files: 00_PROJECT_BOARD.md, 02_CURRENT_TASK.md, 03_WORKER_LOG.md, 04_VALIDATION_LOG.md, 05_HANDOFF.md, CHANGELOG.md to record result-record framework preparation.
+- All real P_LOCAL_001 CSV, PDF, photo files remain local-only and git-ignored.
 
 ## Local Checkout Reality
 
@@ -40,25 +39,28 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 - `pytest -v`
 - `pre-commit run --all-files`
 - `python3.13 scripts/repo_health.py`
-- `python3.13 scripts/merge_safety_check.py codex/stage4-real-survey-baseline-conversion-pack`
-- `git status --ignored --short real_pilot_data uploads validation_runs`
-- Browser validation: not required; governance review docs only, no runtime UI changes.
+- `python3.13 scripts/merge_safety_check.py claude-code/p-local-001-result-record-prep`
+- `git status --ignored --short real_pilot_data validation_runs uploads`
+- Browser validation: not required; governance framework docs only, no runtime UI changes.
 - Manual review report: n/a.
 
 ## Current Validation State
 
-- Stage 4 Real Survey Pack Readiness Review merged to `master`.
-- Stage 4 real survey baseline conversion review merged to `master`.
-- Merge validation pending/complete in the current merge resolution flow.
-- All real baseline/field files remain local-only and git-ignored.
-- Stage 4C remains blocked.
+- P_LOCAL_001 Field-Capture Result Record Preparation framework completed.
+- Result template (doc 91) ready but not falsely completed; awaiting Codex consolidation.
+- Review checklist (doc 92) ready for Noel's immediate use after validator run.
+- Control files updated to record framework preparation.
+- Validation tests pending: pytest, pre-commit, repo_health, merge_safety_check.
+- All real P_LOCAL_001 files remain local-only and git-ignored.
+- Stage 4C remains blocked until Phase 4 complete.
 
 ## Next Action
 
-1. Complete merge validation on `master`.
-2. Open the next branch to build and validate `P_LOCAL_001` from Noel's actual local survey/photos.
-3. Keep all real baseline/field/design files git-ignored.
-4. Do not start Stage 4C runtime integration until a controlled pilot result is recorded and approved.
+1. Complete validation tests on this branch (pytest, pre-commit, repo_health, merge_safety_check).
+2. Merge this branch to `master` once tests pass.
+3. Notify Codex that governance framework is ready; Codex can now consolidate P_LOCAL_001 validator outputs into result record.
+4. After Codex consolidation: Noel uses checklist (doc 92) to verify all findings, then fills result template (doc 91) with final verdict.
+5. Do not start Stage 4C runtime integration until a full Phase 4 controlled baseline pilot (baseline+field combined, ≥80% exact match, signed verdict, gate audit) is recorded and approved.
 
 ## Do Not Start
 

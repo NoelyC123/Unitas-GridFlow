@@ -7,6 +7,78 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## 2026-05-12 - P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
+
+### Added
+
+- Added `AI_CONTROL/91_P_LOCAL_001_FIELD_CAPTURE_RESULT_TEMPLATE.md` — governance
+  result-record template for P_LOCAL_001 field-capture validation evidence. Template
+  is ready but not falsely completed; includes sections for pilot metadata, source
+  files expected, pole structure count (9 structures, 10 individual timber supports
+  with H-frame clarification), photo evidence count, validator result metrics,
+  operator review notes, known limitations, and explicit Stage 4C block statement.
+  Final verdict section provides PASS / PARTIAL / NO-GO decision options.
+
+- Added `AI_CONTROL/92_P_LOCAL_001_FINAL_REVIEW_CHECKLIST.md` — step-by-step
+  verification checklist for Noel to use immediately after Codex finishes validator
+  consolidation. Includes 10 verification sections: pole structure inventory,
+  H-frame counting rule (1 structure = 2 timber supports), photo mapping, high-risk
+  field spot-checks, and specific technical confirmations for SPEN-QMM20 (voltage/
+  conductor), SPEN-QMM20 (streetlight mount), POLE-GARDEN-XFMR-001 (vegetation
+  wording), POLE-RURAL-ROAD-001 (inspection dates), POLE-VILLAGE-LSTC2021
+  (photo status), and Stage 4C block confirmation.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md` to record completion of P_LOCAL_001
+  result-record framework preparation and note docs 91–92.
+
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` to document task scope, acceptance
+  criteria for both result template and review checklist, and validation
+  requirements.
+
+- Updated `AI_CONTROL/03_WORKER_LOG.md` to record task completion with file list.
+
+- Updated `AI_CONTROL/04_VALIDATION_LOG.md` to prepare validation entry for
+  governance-docs-only branch with command list and no-real-data note.
+
+- Updated `AI_CONTROL/05_HANDOFF.md` to document deliverables, validation plan,
+  current state, and next actions (notify Codex, wait for consolidation, Noel
+  uses checklist, fills result template, records verdict).
+
+### Notes
+
+- Result template (doc 91) includes explicit section: "Does P_LOCAL_001 Authorize
+  Stage 4C Implementation? ANSWER: NO" with rationale and Phase 4 requirements.
+
+- Review checklist (doc 92) includes rule: "Critical Final Check: Stage 4C Remains
+  BLOCKED" with confirmation that reader understands field-capture evidence ≠
+  Stage 4C approval evidence.
+
+- H-frame counting rule documented twice (in both docs): POLE-H-FRAME-RES-001 is
+  1 structure but comprises 2 individual timber supports = 9 structures total,
+  10 supports total. Wording clarified to prevent ambiguity.
+
+- Photo naming rule in checklist: all photos must be named by pole_id and linked
+  via validator evidence_audit.json; zero orphaned photos expected.
+
+- Technical confirmations in checklist include specific wording checks:
+  - SPEN-QMM20: "LV with two bare conductors" per Noel field observation, no
+    streetlight misattribution
+  - POLE-GARDEN-XFMR-001: "limits access" or "blocks measurement", NOT "blocks
+    DNO access" (conservative wording)
+  - POLE-RURAL-ROAD-001: inspection dates from photo visibility only
+  - POLE-VILLAGE-LSTC2021: photo mapping verified from evidence_audit.json
+
+- Decision guide in checklist provides clear PASS / PARTIAL / NO-GO criteria with
+  actionable conditions for each verdict.
+
+- All P_LOCAL_001 real data (CSV, photos, validator reports) remains local-only
+  under real_pilot_data/, validation_runs/, and git-ignored per task rules.
+
+- Stage 4C remains BLOCKED. Result record does not authorize implementation.
+
+---
 ## 2026-05-12 - Stage 4 real survey baseline conversion review
 
 ### Added

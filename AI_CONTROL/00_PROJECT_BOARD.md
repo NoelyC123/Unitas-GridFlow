@@ -30,18 +30,18 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_LOCAL_001 Field-Capture Readiness Review (docs 89–90)
-- Branch: `claude-code/p-local-001-field-capture-readiness-review`
+- Task: P_LOCAL_001 Field-Capture Result Record Preparation (docs 91–92)
+- Branch: `claude-code/p-local-001-result-record-prep`
 - Owner: none
 - Status: awaiting_next_branch
-- Summary: Created P_LOCAL_001 Field-Capture Review (doc 89) classifying P_LOCAL_001 as accessible field-capture validation proof. Created Field-Capture vs. Baseline Merge Gap (doc 90) explaining why field evidence alone is insufficient; Phase 4 (baseline+field combined) required for Stage 4C. Updated 6 control files. Stage 4C remains blocked.
+- Summary: Created P_LOCAL_001 Field-Capture Result Template (doc 91) for governance record after Codex consolidation. Created P_LOCAL_001 Final Review Checklist (doc 92) for Noel's pre-verdict review. Result template includes pilot metadata, validator result section, technical confirmations, and explicit Stage 4C block statement. Review checklist provides step-by-step verification of all 9 structures, H-frame counting, photo mapping, high-risk fields, and specific SPEN/POLE confirmations. Updated 6 control files. No real data touched. Stage 4C remains blocked.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| READY FOR NEXT TASK | `none` | none | Stage 4 field pilot execution | awaiting next branch |
+| P_LOCAL_001 Field-Capture Result Record Preparation | `claude-code/p-local-001-result-record-prep` | none | Stage 4 field pilot execution | awaiting_next_branch |
 
 ## Review / Validation
 
@@ -117,6 +117,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - P_CONTROLLED_001 Readiness Gate complete: docs 83–85 created providing Noel with baseline readiness verdict (READY FOR FIELD WORK), per-pole field targets with 34-row full and 15-row fallback options, and post-field acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready). Stage 4C remains blocked pending field execution and signed verdict.
 - Stage 4 Real Survey Pack Readiness Review complete: docs 87–88 classifying real Bellsprings/Gordon baselines as baseline-conversion evidence (not field-photo evidence or automatic Stage 4C approval). Documented 4-phase sequencing: baseline extraction, field-capture learning, baseline-field analysis, full controlled pilot. Only Phase 4 (full controlled pilot with validator pass + signed verdict) authorizes Stage 4C implementation. Stage 4C remains blocked until Phase 4 complete.
 - Real survey baseline conversion review complete: doc 86 and the conversion guide record that Bellsprings, Gordon original, and Gordon PR2 are usable local baseline conversion inputs, while Gordon PR1 needs duplicate cleanup and Noel's local survey CSV is compatibility-only.
+- P_LOCAL_001 Field-Capture Readiness Review complete: docs 89–90 created classifying P_LOCAL_001 as accessible field-capture validation proof (not Stage 4C approval) and explaining Phase 4 requirements. Control files updated. All P_LOCAL_001 data remains local-only and git-ignored. Stage 4C remains blocked.
 
 ## Backlog / Next Candidates
 

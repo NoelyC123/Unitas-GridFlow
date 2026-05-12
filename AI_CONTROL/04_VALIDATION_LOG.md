@@ -30,6 +30,18 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 
 ## Validation Runs
 
+### 2026-05-12T15:45:00Z
+
+- Branch: `claude-code/p-local-001-result-record-prep`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py claude-code/p-local-001-result-record-prep`, `git status --ignored --short real_pilot_data validation_runs uploads`
+- validation_runs report path: n/a (governance docs only)
+- failures.json status: n/a (governance docs only)
+- Screenshots: no
+- Verdict: pending
+- Notes: P_LOCAL_001 governance/result-record framework docs only; no app runtime files changed; no real data committed
+
 ### 2026-05-09T19:55:00Z
 
 - Branch: `codex/project-control-center-foundation`
