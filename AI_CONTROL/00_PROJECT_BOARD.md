@@ -24,22 +24,23 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `existing-survey-baseline-candidate-audit-complete`
 - `controlled-pilot-field-pack-v1-complete`
 - `p-controlled-001-readiness-gate-complete`
+- `stage4-real-survey-pack-readiness-review-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_CONTROLLED_001 Readiness Gate (docs 83–85)
-- Branch: `claude-code/p-controlled-001-readiness-gate`
+- Task: Stage 4 Real Survey Pack Readiness Review (docs 87–88)
+- Branch: `claude-code/stage4-real-survey-pack-readiness-review`
 - Owner: claude-code
 - Status: ready_for_review
-- Summary: Created P_CONTROLLED_001 Readiness Gate (doc 83) confirming baseline is READY FOR FIELD WORK. Created Field Decision Checklist (doc 84) with 34-row full option and 15-row fallback, per-pole targets, and stop conditions. Created Post-Field Acceptance Gate (doc 85) with quantitative criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready), qualitative criteria (≥4 confidence, ≤1 friction), and GO/CONDITIONAL GO/NO-GO/STOP verdicts. Updated 6 control files. Stage 4C remains blocked pending Noel's field capture, validator output, and signed verdict on decision template (doc 75).
+- Summary: Created Real Survey Pack Readiness Review (doc 87) classifying Bellsprings/Gordon baselines as baseline-conversion evidence (not field-photo evidence or automatic Stage 4C approval). Created Baseline vs. Field Evidence Decision Memo (doc 88) explaining why baseline alone and field evidence alone are insufficient; only combined baseline+field pilot (Phase 4) authorizes Stage 4C. Documented recommended 4-phase sequencing: Phase 1 (baseline extraction), Phase 2 (field-capture learning), Phase 3 (baseline-field analysis), Phase 4 (full controlled pilot). Updated 6 control files. Stage 4C remains blocked until Phase 4 is complete with signed verdict.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| P_CONTROLLED_001 Readiness Gate (docs 83–85) | `claude-code/p-controlled-001-readiness-gate` | claude-code | Stage 4 field pilot execution | ready for review |
+| Stage 4 Real Survey Pack Readiness Review (docs 87–88) | `claude-code/stage4-real-survey-pack-readiness-review` | claude-code | Stage 4 field pilot execution | ready for review |
 
 ## Review / Validation
 
@@ -77,7 +78,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 | Task | Branch | Owner | Status |
 | --- | --- | --- | --- |
-| P_CONTROLLED_001 Readiness Gate (docs 83–85) | `claude-code/p-controlled-001-readiness-gate` | claude-code | ready for review |
+| Stage 4 Real Survey Pack Readiness Review (docs 87–88) | `claude-code/stage4-real-survey-pack-readiness-review` | claude-code | ready for review |
 
 ## Done
 
@@ -104,6 +105,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Existing survey baseline candidate audit complete: doc 79 recorded that the separate clean audit worktree did not contain tracked candidate baseline files.
 - Controlled pilot field pack v1 complete: docs 80–82 created providing Noel with simple field-day procedure, photo/evidence rules, and post-pilot decision notes for execution after baseline selection.
 - P_CONTROLLED_001 Readiness Gate complete: docs 83–85 created providing Noel with baseline readiness verdict (READY FOR FIELD WORK), per-pole field targets with 34-row full and 15-row fallback options, and post-field acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready). Stage 4C remains blocked pending field execution and signed verdict.
+- Stage 4 Real Survey Pack Readiness Review complete: docs 87–88 classifying real Bellsprings/Gordon baselines as baseline-conversion evidence (not field-photo evidence or automatic Stage 4C approval). Documented 4-phase sequencing: baseline extraction, field-capture learning, baseline-field analysis, full controlled pilot. Only Phase 4 (full controlled pilot with validator pass + signed verdict) authorizes Stage 4C implementation. Stage 4C remains blocked until Phase 4 complete.
 
 ## Backlog / Next Candidates
 

@@ -8,6 +8,60 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-05-12 - Stage 4 Real Survey Pack Readiness Review (docs 87–88)
+
+### Added
+
+- Added `AI_CONTROL/87_REAL_SURVEY_PACK_READINESS_REVIEW.md` — classifies
+  Bellsprings/Gordon raw baselines as baseline-conversion evidence (not field-photo
+  evidence or automatic Stage 4C approval). Documents what they support (starter CSV
+  generation, pole-label mapping, route geometry) and cannot support without field
+  evidence (condition assessment, photo linking, current attributes, defect detection).
+  Lists risks (schema variation, coordinate ambiguity, survey-vs-field confusion,
+  overfilling fields, sensitive data) and recommended controls.
+
+- Added `AI_CONTROL/88_BASELINE_VS_FIELD_EVIDENCE_DECISION_MEMO.md` — explains why
+  baseline alone and field evidence alone are insufficient for Stage 4C authorization.
+  Documents 3 pilot types (baseline conversion, field-capture learning, controlled
+  baseline+field combined), 4-phase sequencing (Phase 1: extraction, Phase 2: field
+  learning, Phase 3: baseline-field analysis, Phase 4: full pilot), and Phase 4
+  requirements (validator pass, signed verdict, gate audit). Only Phase 4 authorizes
+  Stage 4C implementation.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md` to record active task as Stage 4 Real
+  Survey Pack Readiness Review, add milestone, update In Progress and In Review
+  sections, document completion in Done section.
+
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` to define goal (classify real survey files,
+  clarify baseline-field relationship, document Phase 4 sequencing), scope (create
+  docs 87–88, update 6 control files), acceptance criteria (docs created, control
+  files updated, validation complete), and next action (run validation, commit, deliver report).
+
+- Updated `AI_CONTROL/03_WORKER_LOG.md` with new entry documenting readiness review
+  task, files changed, validation state (pending), and next actions.
+
+- Updated `AI_CONTROL/04_VALIDATION_LOG.md` with new entry documenting validation
+  plan and expected results (1050+ tests, pre-commit clean, merge-safety pending).
+
+- Updated `AI_CONTROL/05_HANDOFF.md` to record active handoff for next worker,
+  document what branch adds, validation plan, current validation state, next actions,
+  and add milestone to stable milestones list.
+
+### Notes
+
+- Two governance review documents (87–88) complete the readiness assessment framework
+  for real Bellsprings/Gordon/design-pack survey files.
+- Classification: Bellsprings/Gordon baselines are suitable for baseline-conversion
+  learning (Phase 1) and full controlled pilot (Phase 4), but NOT sole evidence for
+  Stage 4C approval.
+- 4-phase sequencing clarifies why Phase 1 (baseline extraction), Phase 2 (field
+  learning), and Phase 3 (analysis) are necessary learning before Phase 4 (full pilot
+  with signed verdict) can authorize Stage 4C.
+- All real baseline/field CSV, PDF, photo files remain local-only and git-ignored.
+- Stage 4C remains blocked until Phase 4 complete with validator pass + signed verdict.
+
 ## 2026-05-11 - P_CONTROLLED_001 Readiness Gate (docs 83–85)
 
 ### Added
