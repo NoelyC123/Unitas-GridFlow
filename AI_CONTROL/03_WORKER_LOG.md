@@ -527,3 +527,12 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/89_P_LOCAL_001_FIELD_CAPTURE_REVIEW.md,AI_CONTROL/90_FIELD_CAPTURE_VS_BASELINE_MERGE_GAP.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: ready for pytest/pre-commit/repo_health/merge_safety
 - Next action: run full validation suite, verify git-ignore protection, commit branch, deliver final report
+
+### 2026-05-12T15:09:19Z
+
+- Worker: codex
+- Branch: `codex/p-local-001-field-capture-result-record`
+- Action: Created `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md` to record the completed P_LOCAL_001 field-capture phase as PARTIAL AS FIELD-CAPTURE EVIDENCE.
+- Files changed: AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only before commit due to expected dirty governance files; pre-commit merge-safety warning-only because branch changes were not yet committed; local final validator result recorded 9 valid rows, 0 blocked rows, 9 review-required rows, 33/33 photos found, 0 missing photos, 0 unreferenced photos
+- Next action: commit governance files only, rerun merge-safety on the committed branch, and keep Stage 4C blocked.

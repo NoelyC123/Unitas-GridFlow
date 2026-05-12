@@ -30,6 +30,18 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 
 ## Validation Runs
 
+### 2026-05-12T15:09:19Z
+
+- Branch: `codex/p-local-001-field-capture-result-record`
+- Commit: pending final commit
+- Jobs tested: n/a
+- Command run: `python3.13 scripts/validate_stage4_pilot.py --csv real_pilot_data/P_LOCAL_001/csv/p_local_001_capture_final.csv --pilot-name P_LOCAL_001 --evidence-dir real_pilot_data/P_LOCAL_001/photos_final --out validation_runs/stage4_pilots/P_LOCAL_001`; `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py codex/p-local-001-field-capture-result-record`; `git status --ignored --short real_pilot_data validation_runs uploads`
+- validation_runs report path: `local-only: validation_runs/stage4_pilots/P_LOCAL_001/final_validation_report.md`
+- failures.json status: n/a
+- Screenshots: no
+- Verdict: pass with warning-only control checks before commit
+- Notes: P_LOCAL_001 result record only. Local final validator result: PARTIAL AS FIELD-CAPTURE EVIDENCE, 9 valid rows, 0 blocked rows, 9 review-required rows, 33/33 referenced photos found, 0 missing photos, 0 unreferenced photos. `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `repo_health.py` was warning-only before commit due to expected dirty governance files; merge-safety was warning-only before commit because the branch changes were not yet committed. Real CSV/XLSX/photos/validation outputs remain local-only and ignored. Stage 4C remains blocked.
+
 ### 2026-05-12T15:45:00Z
 
 - Branch: `claude-code/p-local-001-result-record-prep`

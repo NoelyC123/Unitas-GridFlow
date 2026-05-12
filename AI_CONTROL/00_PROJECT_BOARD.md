@@ -30,18 +30,18 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_LOCAL_001 Final Result Audit Prep (docs 93–94)
-- Branch: `claude-code/p-local-001-final-result-audit-prep`
-- Owner: none
-- Status: awaiting_next_branch
-- Summary: Created P_LOCAL_001 Final Result Audit Checklist (doc 93) for independent audit of Codex consolidation outputs. Created P_LOCAL_001 Stage 4C Gap Confirmation (doc 94) documenting what P_LOCAL_001 proves and remaining Phase 4 requirements. Doc 93 provides 9-section audit covering files present, structures, H-frame, photo mapping, corrections, high-risk fields, validator metrics, verdict readiness, and Stage 4C block. Doc 94 explicitly confirms Phase 4 (baseline+field+exact match+verdict+audit) is still required; P_LOCAL_001 proves workflow only. Updated 6 control files. No real data touched. Stage 4C remains blocked.
+- Task: P_LOCAL_001 Field Capture Result Record
+- Branch: `codex/p-local-001-field-capture-result-record`
+- Owner: codex
+- Status: validation_complete_pending_merge
+- Summary: Created `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md` recording the completed P_LOCAL_001 field-capture phase. Verdict is PARTIAL AS FIELD-CAPTURE EVIDENCE: 9 structures, 10 physical timber supports if the H-frame counts as two, 33 photos processed/referenced, 9 valid rows, 0 blocked rows, 9 review-required rows, 0 missing photos, and 0 unreferenced photos. The record confirms conservative corrections including SPEN-QMM20 as LV with two bare conductors per Noel field observation, no HV/11kV/four-conductor claim for SPEN-QMM20, no invented technical values, and Stage 4C remains blocked. Real CSV/XLSX/photos/validation outputs remain local-only and ignored.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| P_LOCAL_001 Final Result Audit Prep | `claude-code/p-local-001-final-result-audit-prep` | none | Stage 4 field pilot execution | awaiting_next_branch |
+| P_LOCAL_001 Field Capture Result Record | `codex/p-local-001-field-capture-result-record` | codex | Stage 4 field pilot execution | validation_complete_pending_merge |
 
 ## Review / Validation
 
@@ -118,10 +118,11 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Stage 4 Real Survey Pack Readiness Review complete: docs 87–88 classifying real Bellsprings/Gordon baselines as baseline-conversion evidence (not field-photo evidence or automatic Stage 4C approval). Documented 4-phase sequencing: baseline extraction, field-capture learning, baseline-field analysis, full controlled pilot. Only Phase 4 (full controlled pilot with validator pass + signed verdict) authorizes Stage 4C implementation. Stage 4C remains blocked until Phase 4 complete.
 - Real survey baseline conversion review complete: doc 86 and the conversion guide record that Bellsprings, Gordon original, and Gordon PR2 are usable local baseline conversion inputs, while Gordon PR1 needs duplicate cleanup and Noel's local survey CSV is compatibility-only.
 - P_LOCAL_001 Field-Capture Readiness Review complete: docs 89–90 created classifying P_LOCAL_001 as accessible field-capture validation proof (not Stage 4C approval) and explaining Phase 4 requirements. Control files updated. All P_LOCAL_001 data remains local-only and git-ignored. Stage 4C remains blocked.
+- P_LOCAL_001 Field Capture Result Record complete: doc 95 records the completed local field-capture phase with PARTIAL AS FIELD-CAPTURE EVIDENCE verdict, 9 structures, 10 physical timber supports if H-frame counted as two, 33 photos, 9 valid rows, 0 blocked rows, 9 review-required rows, conservative SPEN-QMM20 correction, and Stage 4C still blocked.
 
 ## Backlog / Next Candidates
 
-- Build and validate `P_LOCAL_001` from Noel's actual local survey/photos using the current exact-match baseline workflow.
+- Merge the P_LOCAL_001 field-capture result record branch after review.
 - Run the controlled baseline helper against Noel's local `P_CONTROLLED_001` field capture and produce the exact-match decision report.
 - Use Bellsprings, Gordon original, or Gordon PR2 as local real-survey conversion references for further Stage 4 preparation work.
 - Controlled baseline pilot with exact `pole_id` matching and stronger access/closer capture.

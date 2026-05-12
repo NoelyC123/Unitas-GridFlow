@@ -4,99 +4,76 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: P_LOCAL_001 Final Result Audit Prep (docs 93–94)
-- Branch: `claude-code/p-local-001-final-result-audit-prep`
-- Owner: none
+- Task: P_LOCAL_001 Field Capture Result Record
+- Branch: `codex/p-local-001-field-capture-result-record`
+- Owner: codex
 - Lane: Stage 4 field pilot execution
-- Status: awaiting_next_branch
-- Runtime changes allowed: no live app integration; governance/docs only
-- Tests required: pytest -v, pre-commit run --all-files
-- Validation result: pending (governance docs only, no real data committed)
-- Browser validation required: no; governance/docs only, no runtime UI changes
+- Status: validation_complete_pending_merge
+- Runtime changes allowed: no
+- Tests required: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py codex/p-local-001-field-capture-result-record`
+- Validation result: `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `repo_health.py` warning-only before commit due to expected dirty governance files; merge-safety warning-only before commit because branch changes were not yet committed
+- Browser validation required: no; governance/result record only
 - Popup scope changes allowed: no
-- Real data protection: all P_LOCAL_001 data remains local-only, no real files committed
+- Real data protection: all P_LOCAL_001 CSV/XLSX/photo/validation output files remain local-only and ignored
 
 ## Goal
 
-Prepare independent audit framework for verifying Codex's final P_LOCAL_001 consolidation
-outputs and explicitly confirm the remaining Phase 4 requirements for Stage 4C authorization.
+Record the completed P_LOCAL_001 field-capture phase in a tracked non-sensitive control document.
 
-Deliverables:
-- Doc 91: P_LOCAL_001 Field-Capture Result Template (ready for filling after Codex consolidation)
-- Doc 92: P_LOCAL_001 Final Review Checklist (ready for Noel to use immediately)
-- Updated control files recording the framework preparation
-- No real data committed
-- Stage 4C remains blocked
+Deliverable:
+
+- `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md`
+
+## Result Being Recorded
+
+- Verdict: PARTIAL AS FIELD-CAPTURE EVIDENCE
+- Structures analyzed: `9`
+- Physical timber supports: `10` if the H-frame is counted as two timber supports
+- Photos processed/referenced: `33`
+- Valid rows: `9`
+- Blocked rows: `0`
+- Review-required rows: `9`
+- Missing referenced photos: `0`
+- Unreferenced photos: `0`
+- Stage 4C: blocked
+
+## Required Truthfulness Points
+
+- `SPEN-QMM20` is recorded as LV with two bare conductors per Noel field observation.
+- `SPEN-QMM20` must not be described as HV, 11kV, or four-conductor evidence.
+- The nearby streetlight at `SPEN-QMM20` is treated as a separate column, not attached pole equipment.
+- No exact conductor size, phase configuration, pole class, pole strength, measured height, transformer rating, or specification is invented.
+- All technical fields requiring DNO records, direct measurement, or close inspection remain unknown, blank, or marked as requiring verification.
 
 ## Scope
 
-- Create P_LOCAL_001 Field-Capture Result Template (doc 91) with sections for:
-  - Pilot metadata
-  - Source files expected after Codex consolidation
-  - Pole structure count (9 structures, 10 individual supports with H-frame clarification)
-  - Photo evidence count and linking
-  - Validator result section (quantitative metrics, verdict)
-  - High-risk field verification checklist
-  - Known limitations (what P_LOCAL_001 proves/doesn't prove)
-  - Technical confirmations for SPEN-QMM20, POLE-GARDEN-XFMR-001, etc.
-  - Final verdict section (PASS / PARTIAL / NO-GO options)
-  - Explicit statement: does not authorize Stage 4C runtime integration
+Allowed:
 
-- Create P_LOCAL_001 Final Review Checklist (doc 92) with step-by-step verification of:
-  - All 9 structures present
-  - H-frame count handled correctly
-  - Photo references match corrected photo mapping
-  - High-risk technical fields remain unknown unless verified
-  - SPEN-QMM20 LV classification and no streetlight misattribution
-  - POLE-GARDEN-XFMR-001 wording (limits access, not blocks DNO access)
-  - POLE-RURAL-ROAD-001 inspection plate dates from photo only
-  - POLE-VILLAGE-LSTC2021 photo mapping correct
-  - Stage 4C remains blocked confirmation
+- Create and commit `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md`.
+- Update normal control files and changelog to record the result.
 
-- Update control files to record framework preparation
-- Keep `real_pilot_data/`, `uploads/`, and `validation_runs/` out of tracked commits
-
-## Out Of Scope
+Forbidden:
 
 - Runtime upload integration.
 - Stage 4 fields in popups or Review OS.
 - Backend QA, geometry, span generation, intake, or map rendering changes.
 - Stage 4C runtime integration.
-- Real evidence or report commits.
-- Archive files.
+- Real evidence, CSV, XLSX, photos, uploads, or validation output commits.
+- Archive edits.
 
 ## Acceptance Criteria
 
-- Doc 91 (Result Template) is ready but not falsely completed
-  - All sections present with clear prompts for Noel to fill
-  - Explicit Stage 4C block statement included
-  - No assumptions made about validator results
-
-- Doc 92 (Final Review Checklist) is ready for Noel's immediate use
-  - 10 verification sections covering all required checks
-  - H-frame counting rule clearly explained
-  - Technical confirmations specific to each problematic pole
-  - Decision guide provides PASS / PARTIAL / NO-GO clarity
-
-- Control files updated:
-  - 00_PROJECT_BOARD.md records task completion
-  - 02_CURRENT_TASK.md (this file) documents scope
-  - 03_WORKER_LOG.md records work completion
-  - 04_VALIDATION_LOG.md records validation pass
-  - 05_HANDOFF.md updated for next task
-  - CHANGELOG.md records the deliverables
-
-- Validation confirms:
-  - pytest -v passes
-  - pre-commit run --all-files passes
-  - python3.13 scripts/repo_health.py passes
-  - python3.13 scripts/merge_safety_check.py passes
-  - git status confirms no real data committed
-
-- Stage 4C remains BLOCKED
+- Doc 95 exists and records P_LOCAL_001 as PARTIAL AS FIELD-CAPTURE EVIDENCE.
+- Doc 95 confirms 9 structures, 10 physical timber supports if H-frame counted as two, 33 photos, 9 valid rows, 0 blocked rows, 9 review-required rows, 0 missing photos, and 0 unreferenced photos.
+- Doc 95 confirms all conservative corrections were applied.
+- Doc 95 confirms field-capture evidence only, not design-ready data and not Stage 4C authorization.
+- Control files and changelog record completion.
+- Full validation passes or is warning-only where known.
+- Real local pilot evidence remains ignored and uncommitted.
 
 ## Current Next Action
 
-1. Open the next branch for `P_LOCAL_001` baseline build/validation from Noel's actual local survey/photos.
-2. Reuse the exact `pole_id` workflow and local starter/baseline conversion guidance already merged to `master`.
-3. Keep all real survey/photos/validation outputs local-only.
+1. Merge this governance result record after review.
+2. Keep Stage 4C blocked.
+3. Use P_LOCAL_001 as field-capture workflow evidence only.
+4. Continue toward a controlled baseline pilot with exact `pole_id` matching before any Stage 4C runtime implementation.

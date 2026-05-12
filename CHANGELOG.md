@@ -7,6 +7,35 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## 2026-05-12 - P_LOCAL_001 Field Capture Result Record
+
+### Added
+
+- Added `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md` to record the
+  completed P_LOCAL_001 field-capture phase as `PARTIAL AS FIELD-CAPTURE
+  EVIDENCE`.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md`, `AI_CONTROL/02_CURRENT_TASK.md`,
+  `AI_CONTROL/03_WORKER_LOG.md`, `AI_CONTROL/04_VALIDATION_LOG.md`, and
+  `AI_CONTROL/05_HANDOFF.md` to record the completed result branch and the
+  continued Stage 4C block.
+
+### Notes
+
+- Result record confirms `9` structures analyzed and `10` physical timber
+  supports if the H-frame is counted as two.
+- Result record confirms `33` photos processed/referenced, `9` valid rows,
+  `0` blocked rows, `9` review-required rows, `0` missing photos, and `0`
+  unreferenced photos.
+- Result record confirms SPEN-QMM20 is recorded as LV with two bare conductors
+  per Noel field observation, with no HV/11kV/four-conductor claim.
+- P_LOCAL_001 is field-capture evidence only, not design-ready data and not
+  Stage 4C authorization.
+- Real CSV/XLSX/photo/validation outputs remain local-only and ignored.
+
+---
 ## 2026-05-12 - P_LOCAL_001 Final Result Audit Prep (docs 93–94)
 
 ### Added
