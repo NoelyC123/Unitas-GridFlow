@@ -473,3 +473,30 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md,AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md,AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: ready for pytest/pre-commit/repo_health/merge_safety
 - Next action: run full validation suite, verify git-ignore protection, commit branch, and deliver final report
+
+### 2026-05-12T08:30:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/stage4-real-survey-pack-readiness-review`
+- Action: Created Real Survey Pack Readiness Review (docs 87–88) classifying Bellsprings/Gordon baselines as baseline-conversion evidence and explaining 4-phase sequencing to Stage 4C authorization; updated 6 control files with real-survey-pack-readiness-review task context
+- Files changed: AI_CONTROL/87_REAL_SURVEY_PACK_READINESS_REVIEW.md,AI_CONTROL/88_BASELINE_VS_FIELD_EVIDENCE_DECISION_MEMO.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: ready for pytest/pre-commit/repo_health/merge_safety
+- Next action: run full validation suite, verify git-ignore protection, commit branch, and deliver final report
+
+### 2026-05-12T09:00:00Z
+
+- Worker: codex
+- Branch: `codex/stage4-real-survey-baseline-conversion-pack`
+- Action: Reviewed the real survey baseline pack under `real_pilot_data/P_BASELINE_SURVEY_PACK/raw/`, classified Bellsprings and Gordon controller exports for baseline suitability, checked Noel's local survey CSV against the Stage 4 header set, generated local-only starter CSVs and extract notes, and added a tracked conversion review plus guide.
+- Files changed: AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md,docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v`, `pre-commit run --all-files`, and `python3.13 scripts/repo_health.py` pending; real survey files and local outputs remain git-ignored
+- Next action: run validation, confirm ignored local evidence paths remain uncommitted, and commit the review branch if clean.
+
+### 2026-05-12T09:20:00Z
+
+- Worker: codex
+- Branch: `codex/stage4-real-survey-baseline-conversion-pack`
+- Action: Completed validation for the Stage 4 real survey baseline conversion review and confirmed all local survey evidence paths remain ignored.
+- Files changed: AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only for known numbering collisions; ignored local evidence paths confirmed
+- Next action: stage tracked review docs/control files, commit the branch, and hand back the suitability summary.

@@ -4,34 +4,34 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: P_CONTROLLED_001 Readiness Gate (docs 83–85)
-- Branch: `claude-code/p-controlled-001-readiness-gate`
-- Owner: claude-code
+- Task: Stage 4 real survey baseline conversion review
+- Branch: `codex/stage4-real-survey-baseline-conversion-pack`
+- Owner: codex
 - Lane: Stage 4 field pilot execution
 - Status: ready_for_review
-- Requested by: Noel (implicit: pilot readiness gate required before field work)
-- Runtime changes allowed: no live app integration; governance docs only; no real evidence may be committed
-- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`; `python3.13 scripts/merge_safety_check.py claude-code/p-controlled-001-readiness-gate`
-- Validation result: docs 83–85 created; control files updated; validation pending
-- Browser validation required: no; governance docs only, no runtime UI changes
+- Requested by: Noel
+- Runtime changes allowed: no live app integration; review/docs only; no real evidence may be committed
+- Tests required: `pytest -v`; `pre-commit run --all-files`; `python3.13 scripts/repo_health.py`
+- Validation result: review docs and control files complete; `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only for known numbering collisions
+- Browser validation required: no; governance review docs only, no runtime UI changes
 - Popup scope changes allowed: no
 
 ## Goal
 
-Create three formal governance documents (83–85) that establish readiness verdict,
-field targets, and acceptance criteria for the P_CONTROLLED_001 controlled baseline
-pilot. Provide Noel with exact per-pole decision logic, 34-row full option and 15-row
-fallback target, and quantitative/qualitative acceptance thresholds for GO/CONDITIONAL
-GO/NO-GO verdict. Keep Stage 4C blocked pending field execution and signed verdict.
+Review the real survey files under `real_pilot_data/P_BASELINE_SURVEY_PACK/raw/`,
+classify their usefulness as Stage 4 baseline conversion inputs, generate local-only
+starter outputs and notes, and record the review in tracked docs without committing
+any real survey evidence. Keep Stage 4C blocked.
 
 ## Scope
 
-- Create AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md: baseline readiness verdict and pre-field checks
-- Create AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md: per-pole targets, 34-row and 15-row options, stop conditions
-- Create AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md: quantitative criteria, qualitative criteria, GO/CONDITIONAL GO/NO-GO/STOP verdicts
-- Update 6 control files with readiness gate context: 00_PROJECT_BOARD.md, 02_CURRENT_TASK.md, 03_WORKER_LOG.md, 04_VALIDATION_LOG.md, 05_HANDOFF.md, CHANGELOG.md
-- Keep `real_pilot_data/`, `uploads/`, and `validation_runs/` out of governance commits
-- Cross-reference docs 73–75 (prep, protocol, template) and 80–82 (field pack, photo rules, decision notes)
+- Inspect Bellsprings, Gordon, and Noel local survey CSVs
+- Identify point number, grid, feature code, remarks, and height fields
+- Count `Pol`, `EXpole`, and `Angle` support rows
+- Generate local-only starter CSVs and extract notes under `real_pilot_data/P_BASELINE_SURVEY_PACK/`
+- Create `AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md`
+- Create `docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md`
+- Update the standard control files and keep all local evidence paths out of commit
 
 ## Out Of Scope
 
@@ -44,22 +44,21 @@ GO/NO-GO verdict. Keep Stage 4C blocked pending field execution and signed verdi
 
 ## Acceptance Criteria
 
-- AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md created: readiness verdict (READY FOR FIELD WORK), pre-field checks, expected field outputs documented
-- AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md created: per-pole identification logic, 34-row full and 15-row fallback targets, stop conditions documented
-- AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md created: quantitative thresholds (≥80% exact match, ≥90% valid, ≥50% merge-ready), qualitative criteria (≥4 confidence, ≤1 friction), GO/CONDITIONAL GO/NO-GO/STOP verdicts with approval workflow
-- All 6 control files updated with readiness gate context
+- `AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md` created with suitability classification for Bellsprings, Gordon variants, and Noel's local survey CSV
+- `docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md` created with local conversion workflow and boundary rules
+- Local-only starter CSVs and extract notes created for usable raw controller-export files
+- Bellsprings and Gordon support counts documented
+- Noel local survey CSV compatibility documented
+- All 6 control files updated with conversion-review context
 - `pytest -v` passes.
 - `pre-commit run --all-files` passes clean.
 - `python3.13 scripts/repo_health.py` reports warning-only (known collisions only).
-- `python3.13 scripts/merge_safety_check.py` confirms safe to merge for `claude-code/p-controlled-001-readiness-gate`.
-- `real_pilot_data/`, `validation_runs/`, and local `uploads/` CSVs remain uncommitted.
-- Stage 4C runtime integration remains blocked pending Noel's field execution and signed verdict.
+- All real Bellsprings/Gordon/local survey files remain uncommitted and git-ignored.
+- Real data remains local-only; no raw CSVs, PDFs, photos, or baselines in repo.
+- Stage 4C remains blocked.
 
 ## Current Next Action
 
-1. Complete control file updates (03_WORKER_LOG, 04_VALIDATION_LOG, 05_HANDOFF, CHANGELOG).
-2. Run full validation suite: pytest -v, pre-commit, repo_health, merge_safety_check.
-3. Verify no real_pilot_data/, validation_runs/, uploads/ committed (git status --ignored --short).
-4. Commit and push branch `claude-code/p-controlled-001-readiness-gate`.
-5. Deliver final report with commit hash, files changed, readiness verdict, field checklist summary, post-field gate summary, validation results.
-6. Next: Noel executes field capture using docs 80–84; runs validator; fills doc 82 notes; assesses results against doc 85; fills doc 75 decision template; signs verdict.
+1. Verify no `real_pilot_data/`, `validation_runs/`, or `uploads/` content is committed.
+2. Commit branch `codex/stage4-real-survey-baseline-conversion-pack`.
+3. Deliver final report with support counts, suitability classification, and local-only output paths.

@@ -374,3 +374,39 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pending (expected pass with 1050+ tests, 1 skipped)
 - Notes: P_CONTROLLED_001 Readiness Gate documents (83–85) establishing baseline readiness verdict (READY FOR FIELD WORK), per-pole field targets with 34-row full and 15-row fallback options, and post-field acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready, GO/CONDITIONAL GO/NO-GO/STOP verdicts). Control files (00, 02, 03, 04, 05, CHANGELOG) updated with readiness-gate task context. Real pilot data workspace remains git-ignored. Stage 4C remains blocked pending field execution and Noel's signed verdict.
+
+### 2026-05-12T08:30:00Z
+
+- Branch: `claude-code/stage4-real-survey-pack-readiness-review`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py claude-code/stage4-real-survey-pack-readiness-review && git status --ignored --short real_pilot_data uploads validation_runs`
+- validation_runs report path: n/a (governance review only; no app runtime files)
+- failures.json status: []
+- Screenshots: no
+- Verdict: pending (expected pass with 1050+ tests, 1 skipped)
+- Notes: Real Survey Pack Readiness Review documents (87–88) classifying Bellsprings/Gordon baselines as baseline-conversion evidence and documenting 4-phase sequencing to Stage 4C authorization. Control files (00, 02, 03, 04, 05, CHANGELOG) updated with real-survey-pack-readiness-review task context. All real baseline/field CSV, PDF, photo files remain local-only and git-ignored. Stage 4C remains blocked until Phase 4 (full controlled pilot with signed verdict) is complete.
+
+### 2026-05-12T09:00:00Z
+
+- Branch: `codex/stage4-real-survey-baseline-conversion-pack`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && git status --ignored --short real_pilot_data uploads validation_runs`
+- validation_runs report path: `local-only: real_pilot_data/P_BASELINE_SURVEY_PACK/notes/*.md`
+- failures.json status: []
+- Screenshots: no
+- Verdict: pending
+- Notes: Review/docs branch only. Local-only starter CSVs and extract notes were generated for Bellsprings, Gordon original, Gordon PR1, and Gordon PR2. Bellsprings produced `40` support rows, Gordon original `128`, Gordon PR1 `86` with duplicate point `4`, and Gordon PR2 `53`. Noel's local 2026-05-11 survey CSV includes all current Stage 4 headers plus three extra local-only columns and one blank trailing header. No real survey evidence is committed. Stage 4C remains blocked.
+
+### 2026-05-12T09:20:00Z
+
+- Branch: `codex/stage4-real-survey-baseline-conversion-pack`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && git status --ignored --short real_pilot_data uploads validation_runs`
+- validation_runs report path: n/a
+- failures.json status: []
+- Screenshots: no
+- Verdict: pass
+- Notes: Review/docs branch only. Full validation passed with `1075 passed, 1 skipped`. `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions and transient dirty-tree state until the resolved files are staged. Ignored-path check confirmed `real_pilot_data/`, `uploads/`, and `validation_runs/` remain local-only and uncommitted. Stage 4C remains blocked.

@@ -5,57 +5,58 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: P_CONTROLLED_001 Readiness Gate (docs 83–85)
-- Owner: claude-code
-- Branch: `claude-code/p-controlled-001-readiness-gate`
+- Task: Stage 4 real survey baseline conversion review
+- Owner: codex
+- Branch: `codex/stage4-real-survey-baseline-conversion-pack`
 - Status: ready_for_review
-- Summary: Three formal governance documents (83–85) now establish baseline readiness verdict (READY FOR FIELD WORK), per-pole field decision logic with 34-row full option and 15-row fallback, and quantitative/qualitative acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready, GO/CONDITIONAL GO/NO-GO/STOP verdicts). Control files updated. Real pilot data, validation outputs remain git-ignored. Stage 4C remains blocked pending Noel's field execution and signed verdict on decision template (doc 75).
-- Updated: 2026-05-11T20:55:00Z
-- Audit Note: After validation and merge, Noel should use docs 80–84 to execute field capture, run validator, fill doc 82 notes, assess results against doc 85 criteria, and sign verdict on doc 75. Signed verdict gates Stage 4C authorization.
+- Summary: Reviewed the local real survey conversion pack under `real_pilot_data/P_BASELINE_SURVEY_PACK/raw/`, created local-only starter CSVs and extract notes for Bellsprings and Gordon variants, and classified baseline suitability. Bellsprings (`40` support rows), Gordon original (`128`), and Gordon PR2 (`53`) are usable raw baseline inputs. Gordon PR1 has a duplicate point identity blocker. Noel's local 2026-05-11 survey CSV is capture-compatible but not a raw baseline extract. Real survey files, local outputs, and validation paths remain git-ignored. Stage 4C remains blocked.
+- Updated: 2026-05-12T09:00:00Z
+- Audit Note: Use doc 86 and the conversion guide to choose a local baseline reference set without committing any survey evidence. Do not treat this review as runtime authorization.
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 
 ## What This Branch Adds
 
-- `AI_CONTROL/83_P_CONTROLLED_001_READINESS_GATE.md`: baseline readiness verdict (READY FOR FIELD WORK), pre-field checks, required local inputs, readiness checklist, expected field outputs, what happens after field work, critical reminders.
-- `AI_CONTROL/84_P_CONTROLLED_001_FIELD_DECISION_CHECKLIST.md`: pole selection strategy, per-pole targets, decision logic at each pole, template filling guidance, photo capture, photo organization, full 34-row option, fallback 15-row option, stop conditions.
-- `AI_CONTROL/85_P_CONTROLLED_001_POST_FIELD_ACCEPTANCE_GATE.md`: quantitative acceptance criteria (≥80% exact match, ≥90% valid, ≥50% merge-ready), qualitative criteria (≥4 confidence, ≤1 friction), GO/CONDITIONAL GO/NO-GO/STOP verdict logic, approval workflow with gate auditor review.
-- All 6 control files (00, 02, 03, 04, 05, CHANGELOG) updated with readiness gate context.
-- Real pilot data, validation outputs remain git-ignored.
+- `AI_CONTROL/86_REAL_SURVEY_BASELINE_CONVERSION_REVIEW.md`: tracked review of Bellsprings, Gordon, and Noel local survey files, including support counts, field-structure findings, suitability classification, and local-only output paths.
+- `docs/STAGE4_REAL_SURVEY_BASELINE_CONVERSION_GUIDE.md`: local conversion workflow guide for real controller-export files and capture-compatible CSVs.
+- All 6 control files (00, 02, 03, 04, 05, CHANGELOG) updated with conversion-review context.
+- All real baseline/field CSV, PDF, photo files remain local-only and git-ignored.
 
 ## Local Checkout Reality
 
 - The earlier clean audit branch correctly reported no tracked candidate files in that separate worktree.
-- This local main checkout does contain a usable local baseline at `real_pilot_data/P_CONTROLLED_001/baseline/baseline.csv`.
-- The helper extracted `40` structural candidate rows from `57` scanned rows in that raw controller export using point number as the exact identity source.
-- Any local baseline CSVs under `uploads/`, `validation_data/`, or `real_pilot_data/` must remain out of this helper branch commit.
-- `real_pilot_data/` and `validation_runs/` remain ignored/uncommitted local evidence paths.
+- This local main checkout contains the raw survey baseline pack under `real_pilot_data/P_BASELINE_SURVEY_PACK/raw/`.
+- The conversion review confirmed:
+  - Bellsprings: `40` support rows
+  - Gordon original: `128` support rows
+  - Gordon PR1: `86` support rows with duplicate point `4`
+  - Gordon PR2: `53` support rows
+- Noel's `pole_survey_2026-05-11_complete.csv` already matches the Stage 4 header set, with 3 extra local-only columns and 1 blank trailing header column.
+- `real_pilot_data/`, `uploads/`, and `validation_runs/` remain ignored/uncommitted local evidence paths.
 
 ## Validation Plan
 
 - `pytest -v`
 - `pre-commit run --all-files`
 - `python3.13 scripts/repo_health.py`
-- `python3.13 scripts/merge_safety_check.py claude-code/p-controlled-001-readiness-gate`
-- `git status --ignored --short real_pilot_data validation_runs uploads`
-- Browser validation: not required; control/docs only, no runtime UI changes.
+- `git status --ignored --short real_pilot_data uploads validation_runs`
+- Browser validation: not required; governance review docs only, no runtime UI changes.
 - Manual review report: n/a.
 
 ## Current Validation State
 
-- Three governance documents (83–85) created and complete.
-- Control files updated with readiness gate context.
-- Validation suite ready to run: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, and `python3.13 scripts/merge_safety_check.py` pending.
-- Real pilot data, validation outputs remain git-ignored.
-- Stage 4C remains blocked pending field execution and Noel's signed verdict.
+- Review docs and guide complete.
+- Local-only starter CSVs and extract notes created for Bellsprings, Gordon original, Gordon PR1, and Gordon PR2.
+- `pytest -v` passed with `1075 passed, 1 skipped`.
+- `pre-commit run --all-files` passed.
+- `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions.
+- All real baseline/field files remain local-only and git-ignored.
+- Stage 4C remains blocked.
 
 ## Next Action
 
-1. Complete full validation suite on `claude-code/p-controlled-001-readiness-gate`.
-2. Verify real_pilot_data/, validation_runs/, uploads/ remain git-ignored.
-3. Commit and push readiness gate branch.
-4. Deliver final report with branch, commit hash, files changed, readiness verdict, field checklist, post-field gate criteria, and validation results.
-5. Noel executes field capture using docs 80–84; runs validator; fills doc 82 notes; assesses against doc 85 criteria; signs doc 75 verdict.
-6. Signed verdict gates Stage 4C authorization.
+1. Verify all real baseline/field/design files remain git-ignored (`git status --ignored --short`).
+2. Commit this review branch.
+3. Use doc 86 and the conversion guide to select the next local baseline reference set for controlled work.
 
 ## Do Not Start
 
