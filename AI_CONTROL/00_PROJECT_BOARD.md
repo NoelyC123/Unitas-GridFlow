@@ -30,11 +30,11 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: READY FOR NEXT TASK
-- Branch: `none`
+- Task: P_LOCAL_001 Field-Capture Readiness Review (docs 89–90)
+- Branch: `claude-code/p-local-001-field-capture-readiness-review`
 - Owner: none
 - Status: awaiting_next_branch
-- Summary: Stage 4 Real Survey Pack Readiness Review (docs 87–88) is complete and the Stage 4 real survey baseline conversion review (doc 86 + guide) is complete. Bellsprings (`40` support rows), Gordon original (`128`), and Gordon PR2 (`53`) are suitable baseline conversion inputs. Gordon PR1 is blocked by duplicate point identity `4`. Noel's local survey CSV is Stage 4 capture-compatible but not a raw baseline source. Local starter CSVs were created under `real_pilot_data/P_BASELINE_SURVEY_PACK/csv/`. `real_pilot_data/`, `uploads/`, and `validation_runs/` remain ignored/uncommitted. Stage 4C remains blocked. Next action: build and validate `P_LOCAL_001` from Noel's actual local survey/photos.
+- Summary: Created P_LOCAL_001 Field-Capture Review (doc 89) classifying P_LOCAL_001 as accessible field-capture validation proof. Created Field-Capture vs. Baseline Merge Gap (doc 90) explaining why field evidence alone is insufficient; Phase 4 (baseline+field combined) required for Stage 4C. Updated 6 control files. Stage 4C remains blocked.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress

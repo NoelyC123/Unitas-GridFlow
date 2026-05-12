@@ -5,12 +5,12 @@ Purpose: latest handoff for the next worker or Noel. This file must be updated b
 ## Active Handoff
 
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_START -->
-- Task: READY FOR NEXT TASK
+- Task: P_LOCAL_001 Field-Capture Readiness Review (docs 89–90)
 - Owner: none
-- Branch: `none`
+- Branch: `claude-code/p-local-001-field-capture-readiness-review`
 - Status: awaiting_next_branch
-- Summary: Stage 4 Real Survey Pack Readiness Review (docs 87–88) is merged and Stage 4 real survey baseline conversion review (doc 86 + guide) is merged. Bellsprings (`40` support rows), Gordon original (`128`), and Gordon PR2 (`53`) are suitable baseline conversion inputs. Gordon PR1 has a duplicate point identity blocker and is not strict exact-match safe as-is. Noel's local 2026-05-11 survey CSV is Stage 4 capture-compatible but not a raw baseline extract. Local starter CSVs were created under `real_pilot_data/P_BASELINE_SURVEY_PACK/csv/`. `real_pilot_data/`, `uploads/`, and `validation_runs/` remain ignored/uncommitted. Stage 4C remains blocked. Next action: build and validate `P_LOCAL_001` from Noel's actual local survey/photos.
-- Updated: 2026-05-12T21:30:00Z
+- Summary: Two governance review documents now classify P_LOCAL_001 as accessible field-capture validation proof and explain Phase 4 (baseline+field combined) requirements for Stage 4C authorization. Control files updated. All P_LOCAL_001 data remains local-only and git-ignored. Stage 4C remains blocked until Phase 4 complete.
+- Updated: 2026-05-12T12:00:00Z
 - Audit Note: Do not treat the baseline conversion review as runtime authorization. The next branch should stay local-evidence-safe and use the existing exact `pole_id` workflow.
 <!-- PROJECT_CONTROL:HANDOFF_ACTIVE_END -->
 

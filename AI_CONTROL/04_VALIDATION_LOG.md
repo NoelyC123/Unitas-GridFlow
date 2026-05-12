@@ -410,3 +410,15 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pass
 - Notes: Review/docs branch only. Full validation passed with `1075 passed, 1 skipped`. `python3.13 scripts/repo_health.py` is warning-only for known numbering collisions and transient dirty-tree state until the resolved files are staged. Ignored-path check confirmed `real_pilot_data/`, `uploads/`, and `validation_runs/` remain local-only and uncommitted. Stage 4C remains blocked.
+
+### 2026-05-12T12:00:00Z
+
+- Branch: `claude-code/p-local-001-field-capture-readiness-review`
+- Commit: pending
+- Jobs tested: n/a
+- Command run: `pytest -v && pre-commit run --all-files && python3.13 scripts/repo_health.py && python3.13 scripts/merge_safety_check.py claude-code/p-local-001-field-capture-readiness-review && git status --ignored --short real_pilot_data validation_runs uploads`
+- validation_runs report path: n/a (governance review only; no app runtime files)
+- failures.json status: []
+- Screenshots: no
+- Verdict: pending (expected pass with 1050+ tests, 1 skipped)
+- Notes: P_LOCAL_001 Field-Capture Review documents (89–90) classifying P_LOCAL_001 as field-capture validation proof and explaining Phase 4 requirements. Control files (00, 02, 03, 04, 05, CHANGELOG) updated with field-capture readiness task context. All P_LOCAL_001 CSV/photos remain local-only and git-ignored. Stage 4C remains blocked until Phase 4 complete.
