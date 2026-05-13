@@ -4,11 +4,11 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Active Task
 
-- Task: P_LOCAL_001 Field Capture Result Record
-- Branch: `codex/p-local-001-field-capture-result-record`
-- Owner: codex
+- Task: P_CONTROLLED_LOCAL_001 Planning (doc 96)
+- Branch: `claude-code/p-controlled-local-001-plan`
+- Owner: none
 - Lane: Stage 4 field pilot execution
-- Status: validation_complete_pending_merge
+- Status: awaiting_approval
 - Runtime changes allowed: no
 - Tests required: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py codex/p-local-001-field-capture-result-record`
 - Validation result: `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `repo_health.py` warning-only before commit due to expected dirty governance files; merge-safety warning-only before commit because branch changes were not yet committed
@@ -18,11 +18,11 @@ Purpose: active task tracker. This file is the canonical current task record alo
 
 ## Goal
 
-Record the completed P_LOCAL_001 field-capture phase in a tracked non-sensitive control document.
+Create governance plan for P_CONTROLLED_LOCAL_001, the next controlled local baseline-to-field pilot using ENWL Network Asset Viewer evidence as baseline.
 
 Deliverable:
 
-- `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md`
+- `AI_CONTROL/96_P_CONTROLLED_LOCAL_001_PLAN.md`
 
 ## Result Being Recorded
 

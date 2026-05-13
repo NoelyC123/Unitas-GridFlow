@@ -30,18 +30,18 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_LOCAL_001 Field Capture Result Record
-- Branch: `codex/p-local-001-field-capture-result-record`
-- Owner: codex
-- Status: validation_complete_pending_merge
-- Summary: Created `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md` recording the completed P_LOCAL_001 field-capture phase. Verdict is PARTIAL AS FIELD-CAPTURE EVIDENCE: 9 structures, 10 physical timber supports if the H-frame counts as two, 33 photos processed/referenced, 9 valid rows, 0 blocked rows, 9 review-required rows, 0 missing photos, and 0 unreferenced photos. The record confirms conservative corrections including SPEN-QMM20 as LV with two bare conductors per Noel field observation, no HV/11kV/four-conductor claim for SPEN-QMM20, no invented technical values, and Stage 4C remains blocked. Real CSV/XLSX/photos/validation outputs remain local-only and ignored.
+- Task: P_CONTROLLED_LOCAL_001 Planning (doc 96)
+- Branch: `claude-code/p-controlled-local-001-plan`
+- Owner: none
+- Status: awaiting_approval
+- Summary: Created `AI_CONTROL/96_P_CONTROLLED_LOCAL_001_PLAN.md` planning the next controlled local baseline-to-field matching pilot using ENWL Network Asset Viewer baseline data. Plan covers baseline data sources (trace-results.csv, pole/conductor popups, route overview), expected field inputs (context/marking/top/base photos), required outputs (baseline/conductor/field registers, match report, validator report), matching criteria (exact/likely/uncertain/no match categories), acceptance targets (≥8–12 structures, ≥80% exact match rate, 0 blocked rows), timeline (~1–2 weeks), and real data handling (local-only, not committed). Purpose: confidence test before Phase 4 (larger 30–50 pole baseline pilot). Stage 4C remains blocked pending Phase 4 execution. Document ready for approval to proceed with pilot execution.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| P_LOCAL_001 Field Capture Result Record | `codex/p-local-001-field-capture-result-record` | codex | Stage 4 field pilot execution | validation_complete_pending_merge |
+| P_CONTROLLED_LOCAL_001 Planning (doc 96) | `claude-code/p-controlled-local-001-plan` | none | Stage 4 field pilot execution | awaiting_approval |
 
 ## Review / Validation
 

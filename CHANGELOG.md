@@ -7,6 +7,61 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## 2026-05-13 - P_CONTROLLED_LOCAL_001 Planning (doc 96)
+
+### Added
+
+- Added `AI_CONTROL/96_P_CONTROLLED_LOCAL_001_PLAN.md` — governance plan for the
+  next controlled local baseline-to-field matching pilot using ENWL Network Asset
+  Viewer baseline data. Plan covers baseline inputs (trace-results.csv, pole/conductor
+  popups, route overview), field inputs (context/marking/top/base photos), required
+  outputs (baseline/conductor/field registers, match report, validator report),
+  matching criteria (exact/likely/uncertain/no match categories), acceptance targets
+  (8–12 structures, ≥80% exact match, 0 blocked rows), timeline (~1–2 weeks),
+  ownership (Codex for baseline/consolidation, Noel for field capture, Claude Code
+  for governance), and real data handling (local-only ENWL/field data, not committed).
+  Purpose: confidence test to demonstrate baseline-to-field matching works before
+  Phase 4 execution (larger 30–50 pole pilot). Stage 4C remains blocked pending
+  Phase 4 completion and approval.
+
+### Changed
+
+- Updated `AI_CONTROL/00_PROJECT_BOARD.md` to mark P_CONTROLLED_LOCAL_001 planning
+  as active task awaiting approval.
+
+- Updated `AI_CONTROL/02_CURRENT_TASK.md` to document planning scope and deliverable.
+
+- Updated `AI_CONTROL/03_WORKER_LOG.md` with planning task entry.
+
+- Updated `AI_CONTROL/05_HANDOFF.md` with planning summary and next actions.
+
+### Notes
+
+- P_CONTROLLED_LOCAL_001 is a prerequisite confidence test before Phase 4
+  (larger controlled baseline pilot). It answers: "Can Noel match field evidence
+  to a real baseline with ≥80% accuracy?"
+
+- Differs from P_LOCAL_001: P_CONTROLLED_LOCAL_001 has real baseline data from
+  ENWL Network Asset Viewer. P_LOCAL_001 was pure field-capture with no baseline.
+
+- Success criteria: ≥8–12 structures, ≥80% exact match rate, 0 blocked rows,
+  all unmatched/uncertain poles documented.
+
+- Failure threshold: <80% exact match rate or >10% blocked rows. Would require
+  investigation and potential rework.
+
+- Timeline: ~1–2 weeks (baseline prep ~2–3 days, field capture ~2–4 hours,
+  consolidation ~1–2 days, review ~2–4 hours).
+
+- Real data (ENWL baseline, field photos, validator outputs) remains local-only
+  under real_pilot_data/ and validation_runs/, fully git-ignored. Only governance
+  verdict (doc 97) will be committed after pilot completes.
+
+- Stage 4C remains BLOCKED. P_CONTROLLED_LOCAL_001 success enables Phase 4 planning;
+  Phase 4 completion enables Stage 4C authorization (pending signed verdict + gate audit).
+
+---
+
 ## 2026-05-12 - P_LOCAL_001 Field Capture Result Record
 
 ### Added

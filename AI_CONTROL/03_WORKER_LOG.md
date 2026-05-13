@@ -16,6 +16,15 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 
 ## Log
 
+### 2026-05-13T10:15:00Z
+
+- Worker: claude-code
+- Branch: `claude-code/p-controlled-local-001-plan`
+- Action: Created P_CONTROLLED_LOCAL_001 planning document
+- Files changed: AI_CONTROL/96_P_CONTROLLED_LOCAL_001_PLAN.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
+- Validation state: pending (pytest, pre-commit, repo_health, merge_safety_check)
+- Next action: Run validation tests; if pass, request approval to proceed with pilot execution
+
 ### 2026-05-12T16:30:00Z
 
 - Worker: claude-code
