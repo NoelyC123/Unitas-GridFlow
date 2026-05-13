@@ -1,0 +1,24 @@
+POLE IDENTITY
+Support No: 903201A
+Type: TIMBER
+Voltage: LV
+
+LOCATION
+Grid Ref: SD 54123 56789
+Access: Roadside public highway
+
+CONDITION
+Overall: GOOD
+Base: Sound, no rot visible
+Top: Intact, crossarm present
+Defects: None observed
+
+EQUIPMENT OBSERVED
+Warning Signs: Present - LV warning triangle
+Transformer: No
+Stay: No
+
+VERIFICATION REQUIRED
+voltage_verification_required
+conductor_verification_required
+pole_class_verification_required
