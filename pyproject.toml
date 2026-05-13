@@ -43,7 +43,9 @@ select = [
     "F",
     "I"
 ]
-ignore = []
+# E501: line-length is enforced by ruff format, not lint.
+# Ignoring it here prevents spurious failures on long strings (URLs, error messages, etc.)
+ignore = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"

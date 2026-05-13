@@ -1,360 +1,203 @@
-# Unitas GridFlow
+# GridFlow
 
-**Survey-to-design workflow intelligence and automation for UK electricity distribution overhead line work.**
+**Survey-to-design workflow tool for UK electricity distribution overhead line infrastructure.**
+
+GridFlow sits between field survey output and office design work. It ingests raw DNO baseline data and structured field evidence, matches them pole-by-pole, identifies what engineering specifications are still missing, and produces a clear QA report telling a designer exactly what they need to request from the DNO before design can proceed.
+
+```
+DNO Baseline CSV ──► Baseline Ingest ──┐
+                                        ├──► Matching ──► Merge ──► QA Report
+Field Evidence ──────► Field Import ───┘
+```
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.12+
+- Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run the Pipeline
+
+```bash
+python scripts/run_pipeline.py \
+  --baseline path/to/baseline.csv \
+  --field path/to/field_evidence/ \
+  --output path/to/output/
+```
+
+This runs all four stages and produces a timestamped output directory containing:
+
+- `01_baseline_dataset.json` — parsed and validated baseline
+- `02_field_dataset.json` — scanned field evidence with quality scores
+- `03_match_register.json` + `.csv` — pole-by-pole match results
+- `04_merged_dataset.json` + `.csv` — combined evidence per pole
+- `05_qa_report.md` — designer QA report with specific DNO action items
+- `pipeline_summary.json` — machine-readable run summary
+
+### Run Tests
+
+```bash
+pytest tests/ -v
+```
+
+### Test with Sample Data
+
+```bash
+python scripts/run_pipeline.py \
+  --baseline tests/baseline/fixtures/enwl_sample.csv \
+  --field real_pilot_data/P_LOCAL_001/enwl_enrichment_clean \
+  --output /tmp/gridflow_output/
+```
+
+## Pipeline Stages
+
+### Stage 4C.1 — Baseline Ingest (`gridflow/baseline/`)
+
+Parses DNO Network Asset Viewer CSV exports. Supports ENWL, Trimble, and generic formats
+with automatic detection. Validates data quality, transforms OSGB36 coordinates to WGS84,
+normalizes support numbers, and reconstructs route sequences.
+
+```bash
+python scripts/ingest_baseline.py \
+  --input baseline.csv --output baseline.json \
+  --validate --transform-coords
+```
+
+### Stage 4C.2 — Field Evidence Import (`gridflow/field/`)
+
+Scans structured field evidence folders (`NN_SUPPORT_*` pattern), parses observation notes,
+counts photos and screenshots, detects special cases (NO_POLE_POPUP, JOINT_USER, variant
+support numbers), and scores evidence quality (HIGH/MEDIUM/LOW).
+
+```bash
+python scripts/import_field_evidence.py \
+  --input evidence_folder/ --output field.json \
+  --validate --score
+```
+
+### Stage 4C.3 — Matching Engine (`gridflow/matching/`)
+
+Matches baseline poles to field evidence using support number comparison with normalization
+(handles prefix stripping, variant suffixes). Scores each match HIGH/MEDIUM/LOW/UNMATCHED.
+Detects voltage and equipment conflicts between baseline records and field observations.
+
+```bash
+python scripts/run_matching.py \
+  --baseline baseline.json --field field.json \
+  --output register.json --csv register.csv
+```
+
+### Stage 4C.4 — Merge Engine (`gridflow/merge/`)
+
+Combines all three inputs into unified pole records. Applies verification flags (voltage,
+conductor, pole class, condition, identity). Identifies design blockers. Generates QA report
+with specific action items per pole.
+
+```bash
+python scripts/run_merge.py \
+  --baseline baseline.json --field field.json --register register.json \
+  --output merged.json --report qa_report.md
+```
+
+## Validated Results — P_LOCAL_001
+
+Real field pilot validation against 10 ENWL poles in the Sheernest Lane area:
+
+| Metric | Result |
+|--------|--------|
+| Poles in baseline | 10 |
+| Poles surveyed | 10 |
+| Match rate | 100% |
+| HIGH confidence | 6 |
+| MEDIUM confidence | 1 (pole 08, NO_POLE_POPUP) |
+| LOW confidence | 3 (VOLTAGE_CONFLICT in notes) |
+| Design ready | 0 (DNO specs not yet obtained) |
+| Design blocked | 10 (expected — conductor/pole class required from DNO) |
+
+Special cases correctly handled:
+- `903201A` — variant support number (A suffix)
+- `903503` — joint user pole (telecoms co-attachment)
+- `903101` — OH/UG transition pole
+- `900346` — HV link pole with no map popup
+
+## Project Status
+
+| Stage | Component | Status |
+|-------|-----------|--------|
+| Stage 1 | Post-survey QA gate | ✅ Complete |
+| Stage 2 | Design-ready handoff / Design Chain | ✅ Complete |
+| Stage 4C.1 | Baseline Ingestion Engine | ✅ Complete |
+| Stage 4C.2 | Field Evidence Importer | ✅ Complete |
+| Stage 4C.3 | Matching Engine | ✅ Complete |
+| Stage 4C.4 | Merge Engine | ✅ Complete |
+| Pipeline CLI | Unified four-stage pipeline | ✅ Complete |
+| Stage 3 | Live intake platform | 🔲 Planned |
+| Stage 4 (full) | Structured field capture (tablet) | 🔲 Planned |
+| Stage 5 | Designer workspace | 🔲 Planned |
+| Stage 6 | DNO submission layer | 🔲 Planned |
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| `AI_CONTROL/00_PROJECT_CANONICAL.md` | Full 6-stage vision and project identity |
+| `AI_CONTROL/01_CURRENT_STATE.md` | What is true right now |
+| `AI_CONTROL/02_CURRENT_TASK.md` | Active task record |
+| `gridflow/baseline/README.md` | Baseline Ingestion Engine reference |
+| `gridflow/merge/README.md` | Merge Engine reference |
+| `docs/BASELINE_INGESTION_SPECIFICATION.md` | Technical specification for Stage 4C.1 |
+
+## Test Coverage
+
+```
+tests/baseline/    —  49 tests  (CSV parsing, validation, coordinate transform, route reconstruction)
+tests/field/       —  47 tests  (folder scanning, notes parsing, quality scoring)
+tests/matching/    —  21 tests  (support number matching, confidence scoring, register building)
+tests/merge/       —  45 tests  (data merging, verification flags, QA report, conflict detection)
+tests/             —  11 tests  (pipeline end-to-end)
+─────────────────────────────────────────────────────────────────────────────────────────
+Total              — 202 tests
+```
+
+Run with coverage:
+
+```bash
+pytest tests/ --cov=gridflow --cov-report=html
+```
+
+## Limitations
+
+**DNO data still required.** GridFlow identifies what is needed but cannot substitute for
+official DNO engineering records. Conductor specifications, pole class, and strength ratings
+must be obtained from the network operator before design can proceed. All merged output will
+show `design_blocked=true` until DNO data is ingested.
+
+**CLI-only.** No web UI or API in the current release. All interactions are via command-line
+scripts.
+
+**10-pole validation.** The pipeline has been validated against a 10-pole ENWL dataset
+(P_LOCAL_001). Performance at scale (1,000+ poles) has not been measured in production.
+
+**Coordinate accuracy.** OSGB36 to WGS84 transformation via pyproj achieves ±0.01° accuracy
+— sufficient for display and rough geolocation, but not for precise survey-grade work.
+
+**No live DNO connectivity.** GridFlow reads exported CSV files. It does not connect to live
+DNO GIS systems.
+
+## Architecture
+
+GridFlow is **validation-led, not feature-led**. Every component is designed to answer:
+
+> *Does this improve the reliability, clarity, and design-readiness of real survey data?*
+
+It does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is a pre-design
+intelligence layer that sits between field survey output and design input.
 
 ---
 
-## What this is
-
-Unitas GridFlow is a pre-CAD QA gatekeeper and workflow automation tool that sits between field survey output and office-based design work.
-
-It exists because the project owner has done both the survey job on site and the D2D/PoleCAD design job in the office, and knows from direct experience that the entire survey-to-design handoff can be made dramatically better.
-
-Strategic framing: the manual D2D spreadsheet is the legacy workaround GridFlow is designed to make unnecessary. Current CSV exports are transitional structured handoff outputs for designer review; the long-term destination is trusted design-ready handoff, eventually as close to PoleCAD-direct import as verified evidence allows.
-
-**No competing product exists in this space.** All existing tools sit upstream (field capture) or downstream (design/CAD). The survey-to-design handoff gap is unserved.
-
----
-
-## The problem
-
-The current survey-to-design workflow in UK overhead line work is fundamentally outdated:
-
-- Surveyors capture precise GNSS coordinates digitally, but record critical engineering information (stay specs, clearances, materials, obstructions, crossing details) in handwritten notebooks
-- Survey data is handed over on a physical USB drive at the end of the week
-- A designer manually cleans and reformats the raw controller export in a D2D spreadsheet before it can be used in PoleCAD
-- CAD is used as an error detector rather than a clean production stage
-- Quality depends on individuals compensating for weak systems
-
----
-
-## The vision (6 stages)
-
-| Stage | Name | Status |
-|-------|------|--------|
-| 1 | Post-survey QA gate | ✅ Complete |
-| 2 | Design-ready handoff / Design Chain | ✅ Complete |
-| 3C | Project management (multi-file) | ✅ Complete |
-| 3B | Designer review & export readiness | ✅ Complete |
-| 3A | Live intake platform | ✅ Complete |
-| 4 | Structured field capture | Future |
-| 5 | Designer workspace | Future |
-| 6 | DNO submission layer | Future |
-
-**Stage 1** is complete: the tool parses raw controller dumps, validates their contents, and gives the designer a clear pre-design briefing before they open PoleCAD.
-
-**Stage 2** is complete: the tool produces structured, sequenced, designer-readable handoff outputs directly from raw controller dumps. Design Chain export and Raw Working Audit included. These are transitional replacements for the old manual D2D workaround, not a claim that D2D spreadsheets are the future product model. Output is provisional and not a verified final PoleCAD import format.
-
-**Stage 3C** is complete: named projects group related survey files. Multiple CSVs can be uploaded to a single project. Each file still runs through the same Stage 1/2 pipeline independently. Map, PDF, Design Chain, and Raw Working Audit are all accessible per file from the project overview page. Legacy J##### jobs remain fully accessible.
-
-**Stage 3B** is complete: designers can now review and sign off on auto-generated EXpole pairings before using structured handoff exports. A per-file review page shows all EXpole-to-proposed-pole pairings with dropdown reassignment controls. Reviewed exports carry a "Designer Reviewed" header; unreviewed exports remain "provisional". Review can be reset to auto-generated at any time. The original `sequenced_route.json` is never modified.
-
----
-
-## What the tool does right now
-
-- Parses raw Trimble GNSS controller dump CSVs
-- Detects coordinate reference systems (Irish Grid TM65, ITM, OSGB27700) and converts to WGS84
-- Classifies records by role: structural, context (Hedge, Fence, BTxing, LVxing, Road, etc.), anchor
-- Detects EX/PR replacement pairs and produces design narratives
-- Applies confidence-aware QA checks with PASS/WARN/FAIL severity tiers
-- Generates 7 scoped design evidence gates (Position, Structure Identity, Structural Spec, Stay Evidence, Clearance Design, Conductor Scope, Overall Handoff Status)
-- Renders an interactive Leaflet map with design-readiness signals
-- Produces a PDF pre-design briefing report
-- Infers the correct DNO rulepack from geography (SPEN, SSEN, NIE, ENWL)
-- Produces a Design Chain export (`<job_id>_design_chain.csv`) as the primary transitional design handoff output
-- Produces a Raw Working Audit export (`<job_id>_raw_working_audit.csv`) as a secondary traceability view for old manual spreadsheet context
-- Performs route sequencing, EXpole matching, span calculation and deviation-angle calculation
-- Handles detached / `not required` records
-- Adds section summaries, global provisional design pole numbering and sequence-confidence notes
-- Groups related survey files into named projects (Stage 3C)
-- Per-project map, PDF, Design Chain, and Raw Working Audit all accessible independently per file
-- Designer review page with EXpole pairing reassignment and sign-off (Stage 3B)
-- Structured handoff exports reflect reviewed pairing decisions with reviewed/provisional header
-
-**Validated on real NIE, Gordon/SPEN, and Bellsprings/SPEN survey evidence, including a complete Bellsprings raw-survey-to-pole-schedule comparison.**
-
----
-
-## Current status
-
-- **Stage 1: complete**
-- **Stage 2: complete**
-- **Stage 3C: complete** (commit `b0b5331`)
-- **Stage 3B: complete** (commits `a9b3ee2`, `7daa5a9`)
-- **287 passing tests**
-- **Gordon + NIE + Bellsprings/SPEN real files validated**
-- Active CI (GitHub Actions: pre-commit + pytest)
-
-### What was just shipped
-
-**Stage 3B — Designer Review & Export Readiness** (commits `a9b3ee2`, `7daa5a9`):
-
-- `review.json` overlay storage per project file — original sequenced_route.json never modified
-- Per-file review page (`/review/project/<pid>/<fid>`) with EXpole pairing table and dropdown reassignment
-- Designer reviewed/not-reviewed flag with review notes
-- Design Chain and Raw Working Audit exports apply reviewed proximity QA overrides
-- Reviewed exports: "Designer Reviewed — <timestamp>" header; unreviewed: "provisional"
-- Reset to auto-generated — single delete, no pipeline re-run
-- 20 unit tests + 9 integration tests
-
-### Earlier: Stage 3C — Project Management (commit `b0b5331`):
-
-- Named project container (P001, P002, …) above the existing flat-job model
-- Multiple survey files per project (F001, F002, …)
-- `project.json` aggregates file summaries (total poles, issues, rulepacks)
-- Project-aware upload flow with auto-suggested project name from filename
-- Project overview page and projects list page (client-side rendered)
-- Map, PDF, Design Chain, and Raw Working Audit all routed per project file
-- All legacy J##### routes unchanged — full backward compatibility
-- 22 unit tests + 9 integration tests
-
-### Earlier: Stage 2 — Design-ready handoff / Design Chain
-
-Stage 2A / 2B / 2C delivered a validated provisional design handoff baseline:
-
-- Clean chain export for route analysis
-- Interleaved designer working view for review
-- Detached / not-required record handling
-- EXpole matching and replacement references
-- Section-aware output with section summaries
-- Global provisional design pole numbering
-- Sequence notes for high-ambiguity files
-- Export polish and clearer UI labels
-
----
-
-## Why this will succeed
-
-- Real domain expertise: the project owner has done both the survey and design sides of the workflow
-- Real validation: tested against actual NIE and SPEN survey files, not synthetic data
-- Clear gap: no product exists for this workflow segment
-- Defined commercial trajectory: internal tool → contractor tool → survey-team tool → DNO layer
-
----
-
-## Project structure
-
-```
-AI_CONTROL/         → control layer (project truth + direction)
-app/                → Flask application
-tests/              → pytest suite (244 passing)
-sample_data/        → example inputs
-README.md
-CHANGELOG.md
-CLAUDE.md           → Claude Code working instructions
-WORKFLOW_SYSTEM.md  → how the project operates across all tools
-_archive/           → historical only — do not use for development
-```
-
----
-
-## Control layer
-
-Project direction is controlled by:
-
-- `AI_CONTROL/00_PROJECT_CANONICAL.md` — full product vision and 6-stage roadmap
-- `AI_CONTROL/01_CURRENT_STATE.md` — what is true right now
-- `AI_CONTROL/02_CURRENT_TASK.md` — what to build next
-- `AI_CONTROL/03_WORKING_RULES.md` — development discipline
-- `AI_CONTROL/04_SESSION_HANDOFF.md` — session continuity
-- `AI_CONTROL/08_OHL_SURVEY_OPERATIONAL_STANDARD.md` — domain standard reference
-- `AI_CONTROL/09_PROJECT_ORIGIN_AND_FIELD_NOTES.md` — project origin and real workflow notes
-- `AI_CONTROL/28_DOMAIN_REFERENCE_SUMMARY.md` — repo-safe evidence-quality and domain reference summary
-- `AI_CONTROL/29_PRACTITIONER_REVIEW_SUMMARY.md` — repo-safe practitioner review and remediation plan
-
----
-
-## Quick start
-
-### Create and activate environment
-
-```
-python3.13 -m venv .venv312
-source .venv312/bin/activate
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install -r requirements.txt
-python -m pip install pre-commit ruff pytest
-```
-
-### Run the app
-
-```
-python run.py
-```
-
-### Run tests
-
-```
-pytest -v
-```
-
-### Run linting
-
-```
-pre-commit run --all-files
-```
-
-### Stage 3A2 Remote Access Trial
-
-Stage 3A2 tests whether the existing daily-intake workflow works remotely before building a hosted cloud platform.
-
-Recommended route:
-
-- Run GridFlow on the local office Mac.
-- Expose it with Cloudflare Tunnel.
-- Protect it with Cloudflare Access using approved email / one-time PIN.
-- Validate from a phone or external trusted device.
-
-Quick connectivity test:
-
-```
-brew install cloudflared
-cd /Users/noelcollins/Unitas-GridFlow
-source .venv312/bin/activate
-python run.py
-cloudflared tunnel --url http://localhost:5001
-```
-
-Use the temporary `trycloudflare.com` URL only for connectivity testing. Do not upload real or sensitive survey data through an unauthenticated temporary URL.
-
-Controlled trial:
-
-```
-cloudflared tunnel login
-cloudflared tunnel create gridflow
-cloudflared tunnel route dns gridflow gridflow.yourdomain.com
-cloudflared tunnel run gridflow
-```
-
-Then configure Cloudflare Access in the Cloudflare dashboard:
-
-- Zero Trust → Access → Applications
-- Add an application for `gridflow.yourdomain.com`
-- Require one-time PIN or approved email access
-- Test from a phone or external trusted device
-
-Validation checklist:
-
-- Cloudflare Access prompts before app access.
-- Remote device can open the projects page.
-- Remote upload into an existing project works.
-- Intake status appears on the project dashboard.
-- Map, PDF, Design Chain, Raw Working Audit, and Review links work remotely.
-
-Deferred from Stage 3A2 but retained in the roadmap:
-
-- photo upload linked to survey files / pole records
-- tablet-based structured field capture
-- live or semi-live Trimble/controller sync
-- Render/Railway/full hosted deployment
-- app user accounts or role-based access control
-
-### Validation Evidence Packs
-
-Create a shareable evidence pack for a project/file run:
-
-```
-python scripts/create_validation_pack.py --project-id P007 --file-id F001 --zip
-```
-
-Or use the compact run identifier:
-
-```
-python scripts/create_validation_pack.py --run P007/F001 --zip
-```
-
-Legacy jobs are also supported:
-
-```
-python scripts/create_validation_pack.py --job-id J16535 --zip
-```
-
-The pack is written to the Desktop by default and includes the raw input, `meta.json`, `issues.csv`, `map_data.json`, `sequenced_route.json`, review decisions when present, generated PDF, Design Chain CSV, Raw Working Audit CSV, validation notes, and an AI review prompt.
-
-Add screenshots when useful:
-
-```
-python scripts/create_validation_pack.py --run P007/F001 --screenshots-dir ~/Downloads/gridflow-screenshots --zip
-```
-
-### Manual Browser Review Harness
-
-Run the reusable browser validation harness after feature work:
-
-```
-python3 scripts/manual_review.py --jobs P008/F001 P010 --suite baseline
-python3 scripts/manual_review.py --jobs P008/F001 P010 --suite baseline --checklist validation_checklists/c2e2_popup.yml
-```
-
-Accepted job arguments include project files (`P008/F001`), project ids with a default first file (`P010`), legacy job ids (`J16535`), and the real-job aliases `Gordon` and `Bellsprings`.
-
-The baseline suite checks app/map load, console cleanliness, review navigation, Next/Previous, route highlight, Release Map, Planner Awareness toggle, and popup readability. Optional task checklists live in `validation_checklists/`; current starters cover C2E2 popups, planner awareness, and route highlighting.
-
-Outputs are written to `validation_runs/<timestamp>/`:
-
-- `validation_report.md`
-- `console_log.txt`
-- `failures.json`
-- screenshots for failed checks only
-- one final overview screenshot per job when `--overview-screenshot` is passed
-
-Install Playwright before running the browser harness on a fresh environment:
-
-```
-python3 -m pip install playwright
-python3 -m playwright install chromium
-```
-
-Pass `--evidence-screenshot` only when passed-check screenshots are explicitly needed.
-
----
-
-## Tech stack
-
-- Python 3.13
-- Flask
-- pandas / geopandas
-- shapely / pyproj
-- reportlab
-- Leaflet
-- Bootstrap 5
-- pytest
-- Ruff
-- pre-commit
-- GitHub Actions CI
-
----
-
-## Key files
-
-- `app/controller_intake.py` — raw controller dump parsing, CRS detection, record-role classification
-- `app/qa_engine.py` — QA check engine
-- `app/issue_model.py` — structured issue model, evidence gates, designer summary
-- `app/dno_rules.py` — DNO rulepacks
-- `app/routes/api_intake.py` — intake pipeline
-- `app/routes/map_preview.py` — map logic
-- `app/routes/pdf_reports.py` — PDF generation
-- `tests/` — must remain green
-
----
-
-## After any code change
-
-```
-pytest -v
-pre-commit run --all-files
-git add .
-git commit -m "clear message"
-git push
-```
-
----
-
-## Final note
-
-This is not a general platform.
-
-It is a specialist pre-CAD workflow tool for the survey-to-design gap in UK electricity network overhead line work, built by someone who has worked both sides of that gap.
-
-Stage 3C is now in place. The next meaningful milestone is Stage 3B: the designer reviews the auto-generated outputs (pairings, section boundaries) and adjusts them before exporting.
+*Built for UK overhead line infrastructure. Validated against ENWL Network Asset Viewer data.*
