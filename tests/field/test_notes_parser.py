@@ -101,3 +101,38 @@ def test_parse_partial_notes(parser):
     result = parser.parse(partial)
     assert result["support_no"] == "903203"
     assert result["voltage"] == "HV"
+
+
+def test_parse_empty_sections(parser):
+    """Headers without content should produce an empty structured result."""
+    notes = """POLE IDENTITY
+
+LOCATION
+
+CONDITION
+
+EQUIPMENT OBSERVED
+"""
+    result = parser.parse(notes)
+
+    assert result["support_no"] is None
+    assert result["equipment"] == []
+    assert result["free_text"] == ""
+
+
+def test_parse_unicode_content(parser):
+    """Unicode field notes should be preserved without parser failure."""
+    notes = """POLE IDENTITY
+Support No: 903203
+
+LOCATION
+Access: Roadside verge near café
+
+EQUIPMENT OBSERVED
+Warning Signs: Présent – vérifier
+"""
+    result = parser.parse(notes)
+
+    assert result["support_no"] == "903203"
+    assert result["access"] == "Roadside verge near café"
+    assert any("Présent" in item for item in result["equipment"])

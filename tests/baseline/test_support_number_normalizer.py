@@ -46,6 +46,12 @@ class TestNormalization:
         assert normalizer.normalize("") is None
         assert normalizer.normalize(None) is None
 
+    def test_normalize_very_long_string_extracts_numeric_core(self, normalizer):
+        """Long noisy support strings should not crash normalization."""
+        raw = "SP" + ("X" * 55) + "903203A"
+
+        assert normalizer.normalize(raw) == "903203"
+
 
 class TestExtraction:
     """Test numeric extraction."""
@@ -107,3 +113,15 @@ class TestValidation:
     def test_invalid_unknown_pattern(self, normalizer):
         """Test invalid unknown pattern."""
         assert not normalizer.is_valid_format("@#$%")
+
+    def test_alphabetic_support_number_invalid(self, normalizer):
+        """Pure alphabetic values are not valid support numbers."""
+        assert normalizer.normalize("SUPPORTONLY") == "SUPPORTONLY"
+        assert normalizer.extract_numeric("SUPPORTONLY") is None
+        assert not normalizer.is_valid_format("SUPPORTONLY")
+
+    def test_find_duplicates_after_normalization(self, normalizer):
+        """Variant/prefix forms that normalize together are reported as duplicates."""
+        duplicates = normalizer.find_duplicates(["903203", "SP903203", "90-3203", "903204"])
+
+        assert duplicates["903203"] == ["903203", "SP903203", "90-3203"]

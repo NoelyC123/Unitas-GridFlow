@@ -101,3 +101,46 @@ def test_no_conflict_matching_support_no(scorer):
     fp = make_fp(notes={"support_no": "903203", "voltage": "LV"})
     mr = scorer.score(make_mr(), make_bp(support_no="903203"), fp)
     assert "SUPPORT_NO_CONFLICT" not in mr.conflict_flags
+
+
+def test_conflict_detection_voltage(scorer):
+    """Baseline voltage and parsed field-note voltage disagreement is flagged."""
+    fp = make_fp(notes={"support_no": "903203", "voltage": "HV"})
+    mr = scorer.score(make_mr(), make_bp(voltage=VoltageLevel.LV), fp)
+
+    assert "VOLTAGE_CONFLICT" in mr.conflict_flags
+    assert mr.review_required is True
+
+
+def test_score_register_updates_entry_conflicts_and_stats(scorer):
+    """Register scoring should propagate conflicts and recompute confidence counts."""
+    from gridflow.baseline.models import BaselineDataset
+    from gridflow.field.models import FieldDataset
+    from gridflow.matching.models import MatchRegister, MatchRegisterEntry
+
+    baseline = BaselineDataset(poles=[make_bp()])
+    field_pole = make_fp(notes={"support_no": "900000", "voltage": "LV"})
+    field = FieldDataset(
+        dataset_path="/t",
+        scan_date="2026",
+        total_poles=1,
+        poles=[field_pole],
+    )
+    register = MatchRegister(
+        baseline_total=1,
+        field_total=1,
+        entries=[
+            MatchRegisterEntry(
+                support_no="903203",
+                baseline_pole_id="P01",
+                field_folder=field_pole.folder_name,
+                match_type="EXACT",
+            )
+        ],
+    )
+
+    scored = scorer.score_register(register, baseline, field)
+
+    assert scored.entries[0].review_required is True
+    assert "SUPPORT_NO_CONFLICT" in scored.entries[0].conflict_flags
+    assert scored.matched == 1

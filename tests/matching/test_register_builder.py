@@ -120,3 +120,45 @@ def test_export_csv(builder, tmp_path):
     assert len(rows) == 1
     assert rows[0]["support_no"] == "903203"
     assert rows[0]["match_confidence"] == "HIGH"
+
+
+def test_duplicate_support_numbers_preserved_in_register(builder):
+    """Duplicate baseline support numbers should remain visible in register output."""
+    baseline = BaselineDataset(
+        poles=[make_bp("P01", "903203"), make_bp("P02", "903203")]
+    )
+    field = FieldDataset(
+        dataset_path="/t",
+        scan_date="2026",
+        poles=[make_fp()],
+        total_poles=1,
+    )
+    match_results = [
+        make_mr("903203", "EXACT"),
+        MatchResult(
+            baseline_pole_id="P02",
+            baseline_support_no="903203",
+            match_type="UNMATCHED",
+            match_confidence="UNMATCHED",
+        ),
+    ]
+
+    register = builder.build(match_results, baseline, field)
+
+    entries_for_support = [e for e in register.entries if e.support_no == "903203"]
+    assert len(entries_for_support) == 2
+    assert register.unmatched_baseline == 1
+
+
+def test_empty_register_build(builder):
+    """Empty source datasets should produce an empty register without error."""
+    register = builder.build(
+        [],
+        BaselineDataset(poles=[]),
+        FieldDataset(dataset_path="/t", scan_date="2026", total_poles=0, poles=[]),
+    )
+
+    assert register.baseline_total == 0
+    assert register.field_total == 0
+    assert register.entries == []
+    assert register.match_rate == 0.0

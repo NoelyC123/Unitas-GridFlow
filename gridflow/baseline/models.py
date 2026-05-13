@@ -8,7 +8,7 @@ with validation, serialization, and type safety.
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class VoltageLevel(str, Enum):
@@ -100,11 +100,9 @@ class BaselinePole(BaseModel):
             raise ValueError(f"Longitude {v} outside UK bounds (-11 to 3)")
         return v
 
-    class Config:
-        """Pydantic config."""
-
-        use_enum_values = False
-        json_schema_extra = {
+    model_config = ConfigDict(
+        use_enum_values=False,
+        json_schema_extra={
             "example": {
                 "pole_id": "16938106",
                 "support_no": "903203",
@@ -119,7 +117,8 @@ class BaselinePole(BaseModel):
                 "status": "IN_SERVICE",
                 "metadata": {},
             }
-        }
+        },
+    )
 
 
 class ValidationIssue(BaseModel):
@@ -131,10 +130,8 @@ class ValidationIssue(BaseModel):
     message: str = Field(..., description="Human-readable error message")
     severity: str = Field(..., description="ERROR or WARNING")
 
-    class Config:
-        """Pydantic config."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "pole_id": "16938106",
                 "field": "support_no",
@@ -142,7 +139,8 @@ class ValidationIssue(BaseModel):
                 "message": "Support number not provided",
                 "severity": "WARNING",
             }
-        }
+        },
+    )
 
 
 class ValidationReport(BaseModel):
@@ -186,10 +184,8 @@ class ValidationReport(BaseModel):
         """Count of WARNING severity issues."""
         return sum(1 for issue in self.issues if issue.severity == "WARNING")
 
-    class Config:
-        """Pydantic config."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "total_poles": 100,
                 "valid_poles": 98,
@@ -199,7 +195,8 @@ class ValidationReport(BaseModel):
                 "errors": [],
                 "is_valid": True,
             }
-        }
+        },
+    )
 
 
 class BaselineDataset(BaseModel):
@@ -263,10 +260,8 @@ class BaselineDataset(BaseModel):
             else None,
         }
 
-    class Config:
-        """Pydantic config."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "metadata": {
                     "source_file": "baseline.csv",
@@ -277,4 +272,5 @@ class BaselineDataset(BaseModel):
                 "poles": [],
                 "validation_report": None,
             }
-        }
+        },
+    )

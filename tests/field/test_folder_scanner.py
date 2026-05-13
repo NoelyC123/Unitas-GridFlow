@@ -49,6 +49,43 @@ class TestScanDatasets:
         assert variant is not None
         assert "VARIANT_SUPPORT_NO" in variant.special_flags
 
+    def test_scan_malformed_partial_support_folder(self, scanner, tmp_path):
+        """Folders that partially match NN_SUPPORT_* but lack digits are scanned as UNKNOWN."""
+        pole_dir = tmp_path / "01_SUPPORT_ALPHA_LV"
+        (pole_dir / "field_photos").mkdir(parents=True)
+        (pole_dir / "map_screenshots").mkdir()
+        (pole_dir / "notes").mkdir()
+        (pole_dir / "field_photos" / "photo_001.jpeg").touch()
+        (pole_dir / "field_photos" / "photo_002.jpeg").touch()
+        (pole_dir / "field_photos" / "photo_003.jpeg").touch()
+        (pole_dir / "map_screenshots" / "map_popup.png").touch()
+        (pole_dir / "notes" / "identity_notes.txt").write_text("Support No: ALPHA")
+
+        result = scanner.scan(tmp_path)
+
+        assert result.total_poles == 1
+        assert result.poles[0].support_no == "UNKNOWN"
+        assert "UNKNOWN_SUPPORT" in result.poles[0].special_flags
+
+    def test_scan_reads_latin1_notes_content(self, scanner, tmp_path):
+        """Notes reader should fall back when a notes file is not UTF-8."""
+        pole_dir = tmp_path / "01_SUPPORT_903203_LV"
+        (pole_dir / "field_photos").mkdir(parents=True)
+        (pole_dir / "map_screenshots").mkdir()
+        (pole_dir / "notes").mkdir()
+        (pole_dir / "field_photos" / "photo_001.jpeg").touch()
+        (pole_dir / "field_photos" / "photo_002.jpeg").touch()
+        (pole_dir / "field_photos" / "photo_003.jpeg").touch()
+        (pole_dir / "map_screenshots" / "map_popup.png").touch()
+        (pole_dir / "notes" / "identity_notes.txt").write_bytes(
+            "Support No: 903203\nCondition: Café pole note".encode("latin-1")
+        )
+
+        result = scanner.scan(tmp_path)
+
+        assert result.total_poles == 1
+        assert "Café pole note" in result.poles[0].notes_content
+
 
 class TestExtractSupportNo:
     def test_extract_pure_numeric(self, scanner):
@@ -62,6 +99,9 @@ class TestExtractSupportNo:
 
     def test_extract_unknown(self, scanner):
         assert scanner._extract_support_no("01_SUPPORT_NODIGITS_LV") == "UNKNOWN"
+
+    def test_extract_purely_alphabetic_support_as_unknown(self, scanner):
+        assert scanner._extract_support_no("01_SUPPORT_ALPHA_LV_SECTION") == "UNKNOWN"
 
 
 class TestExtractSequenceNo:

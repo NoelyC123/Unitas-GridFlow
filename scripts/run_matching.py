@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--baseline", required=True, type=Path)
     parser.add_argument("--field", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--csv", action="store_true")
+    parser.add_argument("--csv", type=Path, help="Optional CSV output path")
     parser.add_argument("--report", type=Path)
     parser.add_argument(
         "--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR"], default="INFO"
@@ -118,8 +118,7 @@ def main():
 
         # Optional CSV
         if args.csv:
-            csv_path = args.output.with_suffix(".csv")
-            builder.export_csv(register, csv_path)
+            builder.export_csv(register, args.csv)
 
         # Optional report
         if args.report:

@@ -74,3 +74,29 @@ def test_detect_bad_naming(validator):
     bad_pole = make_pole(folder_name="BAD_FOLDER_NAME", support_no="UNKNOWN")
     report = validator.validate(make_dataset([bad_pole]))
     assert any(i.field == "folder_name" for i in report.issues)
+
+
+def test_alphabetic_support_number_from_partial_folder_warns(validator):
+    """Alphabetic-only support identity is represented as UNKNOWN and warned."""
+    pole = make_pole(
+        folder_name="01_SUPPORT_ALPHA_LV",
+        support_no="UNKNOWN",
+        parsed_notes={"support_no": None},
+    )
+
+    report = validator.validate(make_dataset([pole]))
+
+    assert report.warning_count >= 1
+    assert any(i.field == "parsed_notes.support_no" for i in report.issues)
+
+
+def test_all_poles_duplicate_unknown_support_numbers(validator):
+    """Duplicate UNKNOWN support numbers should be visible to reviewers."""
+    poles = [
+        make_pole(folder_name="01_SUPPORT_ALPHA_LV", support_no="UNKNOWN"),
+        make_pole(folder_name="02_SUPPORT_BETA_LV", support_no="UNKNOWN"),
+    ]
+
+    report = validator.validate(make_dataset(poles))
+
+    assert any(i.issue_type == "DUPLICATE" for i in report.issues)

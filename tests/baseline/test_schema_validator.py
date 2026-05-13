@@ -95,3 +95,34 @@ def test_detect_duplicate_pole_ids(validator):
 
     assert report.error_count > 0
     assert any(issue.issue_type == "DUPLICATE" for issue in report.issues)
+
+
+def test_validate_empty_baseline_dataset(validator):
+    """Empty baseline datasets should return a warning-only report."""
+    report = validator.validate_dataset(BaselineDataset(poles=[]))
+
+    assert report.total_poles == 0
+    assert report.valid_poles == 0
+    assert report.error_count == 0
+    assert "Dataset is empty" in report.warnings
+
+
+def test_detect_all_poles_duplicate_support_numbers(validator):
+    """If every pole shares a support_no, duplicate support warnings are emitted."""
+    poles = [
+        BaselinePole(
+            pole_id=f"POLE_{i}",
+            support_no="903203",
+            easting=354123.45 + i,
+            northing=456789.12 + i,
+        )
+        for i in range(3)
+    ]
+    report = validator.validate_dataset(BaselineDataset(poles=poles))
+
+    duplicate_issues = [
+        issue for issue in report.issues if issue.field == "support_no" and issue.issue_type == "DUPLICATE"
+    ]
+    assert duplicate_issues
+    assert report.warning_count >= 1
+    assert report.is_valid

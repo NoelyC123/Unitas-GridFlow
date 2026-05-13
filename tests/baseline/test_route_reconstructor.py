@@ -133,6 +133,19 @@ class TestContinuityValidation:
         # Should have no large gaps
         assert all(gap["distance"] <= reconstructor.MAX_DISTANCE_BETWEEN_POLES for gap in gaps)
 
+    def test_validate_route_continuity_detects_large_gap(self, reconstructor):
+        """Large gaps between consecutive poles should be reported."""
+        poles = [
+            BaselinePole(pole_id="POLE_001", easting=354000, northing=456000),
+            BaselinePole(pole_id="POLE_002", easting=355000, northing=456000),
+        ]
+
+        gaps = reconstructor.validate_route_continuity(poles)
+
+        assert len(gaps) == 1
+        assert gaps[0]["from"] == "POLE_001"
+        assert gaps[0]["to"] == "POLE_002"
+
 
 class TestSequenceReconstruction:
     """Test full sequence reconstruction."""
@@ -173,3 +186,12 @@ class TestSequenceReconstruction:
 
         # Route assignments should be preserved
         assert all(p.route_id == "ROUTE_A" for p in dataset.poles)
+
+    def test_reconstruct_single_pole_assigns_synthetic_route(self, reconstructor):
+        """A single-pole dataset should be handled deterministically."""
+        pole = BaselinePole(pole_id="POLE_001", easting=354123.45, northing=456789.12)
+        dataset = reconstructor.reconstruct_sequences(BaselineDataset(poles=[pole]))
+
+        assert dataset.pole_count == 1
+        assert dataset.poles[0].route_id == "SYNTHETIC_ROUTE_1"
+        assert dataset.poles[0].pole_sequence == 1

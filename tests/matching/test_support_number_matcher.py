@@ -45,6 +45,15 @@ class TestMatchSingle:
 
 
 class TestMatchDataset:
+    def test_empty_baseline_and_field_datasets(self, matcher):
+        """Empty inputs should return no match results."""
+        results = matcher.match(
+            BaselineDataset(poles=[]),
+            FieldDataset(dataset_path="/t", scan_date="2026", poles=[]),
+        )
+
+        assert results == []
+
     def test_exact_match_dataset(self, matcher):
         baseline = BaselineDataset(poles=[make_baseline_pole("P1", "903203")])
         field = FieldDataset(
@@ -119,3 +128,33 @@ class TestMatchDataset:
         )
         results = matcher.match(baseline, field)
         assert results[0].match_type == "EXACT"
+
+    def test_duplicate_field_support_numbers_last_folder_wins_current_behavior(self, matcher):
+        """Duplicate field support numbers are deterministic but need upstream review."""
+        baseline = BaselineDataset(poles=[make_baseline_pole("P1", "903203")])
+        field = FieldDataset(
+            dataset_path="/t",
+            scan_date="2026",
+            poles=[
+                make_field_pole("01_SUPPORT_903203_LV", "903203"),
+                make_field_pole("02_SUPPORT_903203_HV", "903203"),
+            ],
+        )
+
+        results = matcher.match(baseline, field)
+
+        assert len(results) == 1
+        assert results[0].match_type == "EXACT"
+        assert results[0].field_folder == "02_SUPPORT_903203_HV"
+
+    def test_alphabetic_field_support_does_not_match_numeric_baseline(self, matcher):
+        baseline = BaselineDataset(poles=[make_baseline_pole("P1", "903203")])
+        field = FieldDataset(
+            dataset_path="/t",
+            scan_date="2026",
+            poles=[make_field_pole("01_SUPPORT_ALPHA_LV", "ALPHA")],
+        )
+
+        results = matcher.match(baseline, field)
+
+        assert results[0].match_type == "UNMATCHED"

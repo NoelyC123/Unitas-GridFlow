@@ -34,6 +34,13 @@ def test_score_high(scorer):
     assert scorer.score(pole) == "HIGH"
 
 
+def test_score_exactly_three_photos_boundary_high(scorer):
+    """Exactly 3 photos is the minimum HIGH boundary when other evidence exists."""
+    pole = make_pole(field_photo_count=3)
+
+    assert scorer.score(pole) == "HIGH"
+
+
 def test_score_medium_no_popup(scorer):
     pole = make_pole(
         field_photo_count=3,
@@ -46,6 +53,13 @@ def test_score_medium_no_popup(scorer):
 
 def test_score_low_photos(scorer):
     pole = make_pole(field_photo_count=2)
+    assert scorer.score(pole) == "LOW"
+
+
+def test_score_zero_photos_low(scorer):
+    """Zero field photos is always LOW, even with notes and screenshots."""
+    pole = make_pole(field_photo_count=0, map_screenshot_count=1, notes_present=True)
+
     assert scorer.score(pole) == "LOW"
 
 
@@ -85,3 +99,14 @@ def test_score_dataset(scorer):
     assert qualities["900346"] == "MEDIUM"
     assert scored.evidence_summary["high"] == 1
     assert scored.evidence_summary["medium"] == 1
+
+
+def test_score_dataset_empty(scorer):
+    """Empty field datasets should be scoreable without error."""
+    dataset = FieldDataset(dataset_path="/test", scan_date="2026-01-01", total_poles=0)
+
+    scored = scorer.score_dataset(dataset)
+
+    assert scored.evidence_summary["high"] == 0
+    assert scored.evidence_summary["medium"] == 0
+    assert scored.evidence_summary["low"] == 0

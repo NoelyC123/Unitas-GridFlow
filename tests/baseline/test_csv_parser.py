@@ -112,3 +112,27 @@ class TestCSVParserEdgeCases:
         dataset = parser.parse(csv_path)
         # Should skip rows with missing coordinates
         assert dataset.pole_count == 0
+
+    def test_parse_csv_with_no_required_columns_returns_empty_dataset(self, parser, tmp_path):
+        """A baseline CSV with no id/support/coordinate columns should not crash."""
+        csv_path = tmp_path / "missing_required_columns.csv"
+        csv_path.write_text("Name,Description\nAlpha,No coordinate fields\n")
+
+        dataset = parser.parse(csv_path)
+
+        assert dataset.pole_count == 0
+        assert dataset.metadata["total_rows"] == 1
+        assert dataset.metadata["parsed_poles"] == 0
+
+    def test_parse_latin1_encoded_csv(self, parser, tmp_path):
+        """CSV parser should fall back to non-UTF encodings when needed."""
+        csv_path = tmp_path / "latin1.csv"
+        csv_path.write_bytes(
+            "ENID,Support No,Easting,Northing,Feature\n"
+            "P1,903203,354123.45,456789.12,Pol\xe9\n".encode("latin-1")
+        )
+
+        dataset = parser.parse(csv_path, format_hint="ENWL")
+
+        assert dataset.pole_count == 1
+        assert dataset.poles[0].feature_code == "Polé"

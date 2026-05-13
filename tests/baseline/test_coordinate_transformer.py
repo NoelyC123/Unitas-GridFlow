@@ -29,6 +29,11 @@ class TestCoordinateValidation:
         """Test rejection of out-of-bounds northing."""
         assert not transformer.validate_osgb36(350000, 2000000)
 
+    def test_validate_osgb36_boundary_values(self, transformer):
+        """Coordinates exactly on configured UK OSGB36 bounds are accepted."""
+        assert transformer.validate_osgb36(0, 0)
+        assert transformer.validate_osgb36(700000, 1300000)
+
     def test_validate_valid_wgs84(self, transformer):
         """Test validation of valid WGS84 coordinates."""
         assert transformer.validate_wgs84(54.5, -2.5)
@@ -40,6 +45,11 @@ class TestCoordinateValidation:
     def test_validate_invalid_wgs84_longitude(self, transformer):
         """Test rejection of out-of-bounds longitude."""
         assert not transformer.validate_wgs84(54.5, 10.0)
+
+    def test_validate_wgs84_boundary_values(self, transformer):
+        """Coordinates exactly on configured WGS84 bounds are accepted."""
+        assert transformer.validate_wgs84(50.0, -8.0)
+        assert transformer.validate_wgs84(60.0, 2.5)
 
 
 class TestCoordinateTransformation:
@@ -89,3 +99,12 @@ class TestDatasetTransformation:
         assert dataset.has_wgs84
         assert dataset.poles[0].latitude is not None
         assert dataset.poles[0].longitude is not None
+
+    def test_transform_dataset_empty_dataset(self, transformer):
+        """Empty datasets should pass through without errors."""
+        dataset = BaselineDataset(poles=[])
+
+        transformed = transformer.transform_dataset(dataset)
+
+        assert transformed.poles == []
+        assert transformed.has_wgs84 is True
