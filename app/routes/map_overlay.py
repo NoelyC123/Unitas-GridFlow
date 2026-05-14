@@ -23,6 +23,37 @@ _CONFIDENCE_COLORS = {
 }
 
 
+def _record_list(payload: object) -> list[dict]:
+    """Return pole records from either pipeline dataset dicts or legacy list payloads."""
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    if isinstance(payload, dict):
+        poles = payload.get("poles")
+        if isinstance(poles, list):
+            return [item for item in poles if isinstance(item, dict)]
+    return []
+
+
+def _support_number(record: dict) -> str:
+    """Extract support number from pipeline or legacy field names."""
+    return str(record.get("support_number") or record.get("support_no") or "Unknown")
+
+
+def _verification_flags(record: dict) -> dict:
+    """Extract verification flags from merged pole records."""
+    flags = record.get("verification_flags")
+    if isinstance(flags, dict):
+        return flags
+    return {
+        "voltage_verification_required": bool(record.get("voltage_verification_required")),
+        "conductor_verification_required": bool(record.get("conductor_verification_required")),
+        "pole_class_verification_required": bool(record.get("pole_class_verification_required")),
+        "condition_verification_required": bool(record.get("condition_verification_required")),
+        "identity_verification_required": bool(record.get("identity_verification_required")),
+        "equipment_conflict_flag": bool(record.get("equipment_conflict_flag")),
+    }
+
+
 def _get_lat_lng(record: dict) -> tuple[float | None, float | None]:
     """Extract lat/lng from a record, handling nested gps dict."""
     lat = record.get("latitude") or record.get("lat") or (record.get("gps") or {}).get("latitude")
@@ -56,10 +87,10 @@ def _build_baseline_features(baseline_data: list) -> list[dict]:
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [lng, lat]},
                 "properties": {
-                    "support_number": pole.get("support_number", "Unknown"),
+                    "support_number": _support_number(pole),
                     "layer": "baseline",
-                    "voltage": pole.get("voltage", ""),
-                    "pole_type": pole.get("pole_type", ""),
+                    "voltage": pole.get("voltage") or pole.get("voltage_level") or "",
+                    "pole_type": pole.get("pole_type") or pole.get("asset_type") or "",
                     "source": "DNO Baseline",
                 },
             }
@@ -78,7 +109,7 @@ def _build_field_features(field_data: list) -> list[dict]:
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [lng, lat]},
                 "properties": {
-                    "support_number": pole.get("support_number", "Unknown"),
+                    "support_number": _support_number(pole),
                     "layer": "field",
                     "evidence_quality": pole.get("evidence_quality", ""),
                     "special_flags": pole.get("special_flags", []),
@@ -96,8 +127,16 @@ def _build_match_lines(
 ) -> list[dict]:
     lines = []
     for entry in register_entries:
-        baseline_sn = entry.get("baseline_support_number") or entry.get("support_number")
-        field_sn = entry.get("field_support_number") or entry.get("support_number")
+        baseline_sn = (
+            entry.get("baseline_support_number")
+            or entry.get("support_number")
+            or entry.get("support_no")
+        )
+        field_sn = (
+            entry.get("field_support_number")
+            or entry.get("support_number")
+            or entry.get("support_no")
+        )
         confidence = entry.get("match_confidence", "LOW")
 
         b_coords = baseline_by_sn.get(baseline_sn)
@@ -158,15 +197,19 @@ def overlay_data(job_id: str):
         logger.error("Overlay load error for job %s: %s", job_id, exc)
         return jsonify({"error": str(exc)}), 500
 
-    baseline_poles = _build_baseline_features(baseline_data)
-    field_poles = _build_field_features(field_data)
+    baseline_records = _record_list(baseline_data)
+    field_records = _record_list(field_data)
+    merged_records = _record_list(merged_data)
+
+    baseline_poles = _build_baseline_features(baseline_records)
+    field_poles = _build_field_features(field_records)
 
     baseline_by_sn = {
         f["properties"]["support_number"]: f["geometry"]["coordinates"] for f in baseline_poles
     }
     field_by_sn: dict[str, list] = {}
-    for pole in field_data:
-        sn = pole.get("support_number")
+    for pole in field_records:
+        sn = _support_number(pole)
         lat, lng = _get_lat_lng(pole)
         if sn and lat is not None and lng is not None:
             field_by_sn[sn] = [lng, lat]
@@ -177,12 +220,12 @@ def overlay_data(job_id: str):
     match_lines = _build_match_lines(register_entries, baseline_by_sn, field_by_sn)
 
     design_status = {
-        m["support_number"]: {
+        _support_number(m): {
             "design_ready": m.get("design_ready", False),
-            "verification_flags": m.get("verification_flags", {}),
+            "verification_flags": _verification_flags(m),
         }
-        for m in merged_data
-        if m.get("support_number")
+        for m in merged_records
+        if _support_number(m) != "Unknown"
     }
 
     confidences = [ml["properties"]["match_confidence"] for ml in match_lines]
