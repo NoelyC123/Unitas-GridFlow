@@ -2,7 +2,7 @@
 
 from collections import Counter
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
 from gridflow.merge.models import MergedPole
 
@@ -10,8 +10,15 @@ from gridflow.merge.models import MergedPole
 class DesignReadinessReporter:
     """Generate a management-level design-readiness report."""
 
-    def generate(self, merged_poles: List[MergedPole]) -> str:
+    def generate(
+        self, merged_poles: List[MergedPole], job_context: dict[str, Any] | None = None
+    ) -> str:
         """Return Markdown report generated only from MergedPole records."""
+        ctx = job_context or {}
+        job_id = ctx.get("job_id", "Unknown Job")
+        baseline = ctx.get("baseline_file", "baseline.csv")
+        field = ctx.get("field_folder", "field_evidence")
+        timestamp = ctx.get("run_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         poles = list(merged_poles)
         total = len(poles)
         ready = sum(1 for p in poles if p.design_ready)
@@ -22,9 +29,11 @@ class DesignReadinessReporter:
         blockers = self._blocker_counts(poles)
 
         lines = [
-            "# Design Readiness Summary - Job GridFlow Pipeline",
+            f"# Design Readiness Summary - {job_id}",
             "",
-            f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"**Date:** {timestamp}",
+            f"**Baseline:** {baseline}",
+            f"**Field Evidence:** {field}",
             f"**Overall Status:** {status}",
             "",
             "## Pole Counts",

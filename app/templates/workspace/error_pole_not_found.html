@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Pole Not Found{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/jobs">All Jobs</a></li>
+      <li class="breadcrumb-item"><a href="/workspace/view/{{ job_id }}">{{ job_id }}</a></li>
+      <li class="breadcrumb-item active">Not Found</li>
+    </ol>
+  </nav>
+
+  <div class="alert alert-warning">
+    <h4>⚠️ Pole Not Found</h4>
+    <p>Support number <strong>{{ support_number }}</strong> was not found in job {{ job_id }}.</p>
+  </div>
+
+  {% if available_poles %}
+  <div class="card mt-3">
+    <div class="card-header">Available Poles in {{ job_id }}</div>
+    <div class="card-body">
+      <div class="row">
+        {% for sn in available_poles %}
+        <div class="col-md-3 mb-2">
+          <a href="/workspace/pole/{{ job_id }}/{{ sn }}" class="btn btn-outline-secondary btn-sm w-100">
+            {{ sn }}
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="mt-4">
+    <a href="/workspace/view/{{ job_id }}" class="btn btn-primary">← Back to Workspace</a>
+  </div>
+</div>
+{% endblock %}

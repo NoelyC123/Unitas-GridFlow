@@ -2,7 +2,7 @@
 
 from collections import Counter
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
 from gridflow.merge.models import MergedPole
 
@@ -10,13 +10,22 @@ from gridflow.merge.models import MergedPole
 class EvidenceProvenanceReporter:
     """Generate a data source audit trail for merged pole intelligence."""
 
-    def generate(self, merged_poles: List[MergedPole]) -> str:
+    def generate(
+        self, merged_poles: List[MergedPole], job_context: dict[str, Any] | None = None
+    ) -> str:
         """Return Markdown report generated only from merged pole records."""
+        ctx = job_context or {}
+        job_id = ctx.get("job_id", "Unknown Job")
+        baseline = ctx.get("baseline_file", "baseline.csv")
+        field = ctx.get("field_folder", "field_evidence")
+        timestamp = ctx.get("run_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         poles = list(merged_poles)
         lines = [
-            "# Evidence Provenance Log - Job GridFlow Pipeline",
+            f"# Evidence Provenance Log - {job_id}",
             "",
-            f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"**Date:** {timestamp}",
+            f"**Baseline:** {baseline}",
+            f"**Field Evidence:** {field}",
             "**Purpose:** Data source audit trail for merged intelligence",
             "",
             "This log shows where each field came from: baseline, field survey, "

@@ -3,7 +3,7 @@
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from gridflow.merge.models import MergedPole
 
@@ -23,8 +23,16 @@ class PilotIndexReporter:
         self.output_dir = str(output_dir or "See pipeline_summary.json")
         self.job_name = job_name
 
-    def generate(self, merged_poles: List[MergedPole]) -> str:
+    def generate(
+        self, merged_poles: List[MergedPole], job_context: dict[str, Any] | None = None
+    ) -> str:
         """Return Markdown report generated only from merged pole records."""
+        ctx = job_context or {}
+        job_id = ctx.get("job_id", self.job_name)
+        baseline = ctx.get("baseline_file", self.baseline_source)
+        field_source = ctx.get("field_folder", self.field_source)
+        output_dir = ctx.get("output_dir", self.output_dir)
+        timestamp = ctx.get("run_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         poles = list(merged_poles)
         total = len(poles)
         ready = sum(1 for p in poles if p.design_ready)
@@ -35,16 +43,22 @@ class PilotIndexReporter:
         top_name, top_count = self._top_blocker(flags)
         evidence = Counter(self._evidence_quality(p) for p in poles)
         confidence = Counter(p.match_confidence for p in poles)
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         lines = [
-            f"# GridFlow Pilot Output Pack - {self.job_name}",
+            f"# GridFlow Pilot Output Pack - {job_id}",
             "",
             f"**Generated:** {timestamp}",
-            "**Pipeline Status:** ✅ COMPLETE (all stages succeeded)",
+            "**Pipeline Status:** ✅ COMPLETE (all 4 stages succeeded)",
             f"**Design Status:** {self._design_headline(ready, blocked, total)}",
             "",
             "---",
+            "",
+            "## Quick Actions",
+            "",
+            f"- 🗺️ Map View: `/map/view/{job_id}` - Visualise poles on interactive map",
+            f"- 📊 Review Workspace: `/workspace/view/{job_id}` - Browse and filter poles",
+            "- 📄 Full QA Report: `05_qa_report.md` - Detailed QA findings",
+            "- 📥 DNO Request: `06_dno_data_request.md` - Action missing data",
             "",
             "## Quick Stats",
             "",
@@ -59,10 +73,12 @@ class PilotIndexReporter:
             "",
             "## Input Sources",
             "",
-            f"**Baseline:** {self.baseline_source}",
-            f"**Field Evidence:** {self.field_source}",
-            f"**Output Directory:** {self.output_dir}",
-            f"**Run Timestamp:** {timestamp}",
+            "| Field | Value |",
+            "| --- | --- |",
+            f"| Baseline | {baseline} |",
+            f"| Field Evidence | {field_source} |",
+            f"| Output Directory | {output_dir} |",
+            f"| Run ID | {job_id} |",
             "",
             "## Design Readiness Headline",
             "",

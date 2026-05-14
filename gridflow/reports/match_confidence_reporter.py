@@ -1,7 +1,7 @@
 """Match confidence analysis report for Stage 5A pilot output packs."""
 
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
 from gridflow.merge.models import MergedPole
 
@@ -9,8 +9,15 @@ from gridflow.merge.models import MergedPole
 class MatchConfidenceReporter:
     """Generate baseline-to-field match confidence analysis."""
 
-    def generate(self, merged_poles: List[MergedPole]) -> str:
+    def generate(
+        self, merged_poles: List[MergedPole], job_context: dict[str, Any] | None = None
+    ) -> str:
         """Return Markdown report generated only from MergedPole records."""
+        ctx = job_context or {}
+        job_id = ctx.get("job_id", "Unknown Job")
+        baseline = ctx.get("baseline_file", "baseline.csv")
+        field = ctx.get("field_folder", "field_evidence")
+        timestamp = ctx.get("run_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         poles = list(merged_poles)
         total = len(poles)
         groups = {
@@ -20,9 +27,11 @@ class MatchConfidenceReporter:
             "UNMATCHED": [p for p in poles if p.match_confidence == "UNMATCHED"],
         }
         lines = [
-            "# Match Confidence Analysis - Job GridFlow Pipeline",
+            f"# Match Confidence Analysis - {job_id}",
             "",
-            f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"**Date:** {timestamp}",
+            f"**Baseline:** {baseline}",
+            f"**Field Evidence:** {field}",
             "",
         ]
 
