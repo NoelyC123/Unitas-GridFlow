@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+
+        #map-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #map-wrap {
+            position: relative;
+            flex: 1;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            width: 300px;
+            min-width: 280px;
+            background: #fff;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .controls-header {
+            padding: 12px 16px;
+            background: #1e293b;
+            color: white;
+        }
+
+        .controls-section {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .controls-section h6 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .layer-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            width: 12px;
+            height: 4px;
+            border-radius: 2px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .confidence-HIGH  { background: #10b981; }
+        .confidence-MEDIUM { background: #f59e0b; }
+        .confidence-LOW   { background: #ef4444; }
+
+        .confidence-HIGH-text  { color: #059669; font-weight: 600; }
+        .confidence-MEDIUM-text { color: #d97706; font-weight: 600; }
+        .confidence-LOW-text   { color: #dc2626; font-weight: 600; }
+
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .leaflet-popup-content-wrapper {
+            max-width: 260px;
+        }
+
+        .popup-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 2px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map-container">
+    <div id="map-wrap">
+        <div id="loading-overlay">
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-2">Loading overlay data...</div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <div id="controls">
+
+        <div class="controls-header">
+            <div class="fw-bold">Overlay Map</div>
+            <div class="small text-white-50">{{ job_id }}</div>
+            <div class="mt-2 d-flex gap-1 flex-wrap">
+                <a href="/workspace/view/{{ job_id }}" class="btn btn-outline-light btn-sm">Workspace</a>
+                <a href="/map/view/{{ job_id }}" class="btn btn-outline-light btn-sm">QA Map</a>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <h6>Statistics</h6>
+            <div id="stats-panel"><div class="text-muted small">Loading...</div></div>
+        </div>
+
+        <div class="controls-section">
+            <h6>Layers</h6>
+            <div class="layer-toggle">
+                <span>
+                    <span class="layer-dot" style="background:#3b82f6; border:2px solid #1d4ed8;"></span>
+                    Baseline Poles
+                </span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="toggle-baseline" checked>
+                </div>
+            </div>
+            <div class="layer-toggle">
+                <span>
+                    <span class="layer-dot" style="background:#10b981; border:2px solid #059669;"></span>
+                    Field Evidence
+                </span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="toggle-field" checked>
+                </div>
+            </div>
+            <div class="layer-toggle">
+                <span>
+                    <span style="display:inline-block; width:16px; height:3px; background:#94a3b8; margin-right:6px; vertical-align:middle;"></span>
+                    Match Lines
+                </span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="toggle-lines" checked>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <h6>Filter by Confidence</h6>
+            <div class="d-flex flex-wrap gap-1">
+                <button class="btn btn-success btn-sm active" data-confidence="HIGH" id="filter-HIGH">HIGH</button>
+                <button class="btn btn-warning btn-sm active" data-confidence="MEDIUM" id="filter-MEDIUM">MEDIUM</button>
+                <button class="btn btn-danger btn-sm active" data-confidence="LOW" id="filter-LOW">LOW</button>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <h6>Review Actions</h6>
+            <button class="btn btn-outline-danger btn-sm w-100 mb-2" id="jump-to-low">
+                &#9888; Jump to LOW Confidence
+            </button>
+            <button class="btn btn-outline-secondary btn-sm w-100" id="fit-all">
+                &#128269; Fit All Poles
+            </button>
+        </div>
+
+        <div class="controls-section">
+            <h6>Legend</h6>
+            <div class="stat-row">
+                <span><span class="confidence-badge confidence-HIGH"></span>HIGH confidence match</span>
+            </div>
+            <div class="stat-row">
+                <span><span class="confidence-badge confidence-MEDIUM"></span>MEDIUM confidence match</span>
+            </div>
+            <div class="stat-row">
+                <span><span class="confidence-badge confidence-LOW"></span>LOW confidence — review needed</span>
+            </div>
+            <hr class="my-2">
+            <div class="stat-row">
+                <span><span class="layer-dot" style="background:#3b82f6; border:2px solid #1d4ed8;"></span>Baseline (DNO) position</span>
+            </div>
+            <div class="stat-row">
+                <span><span class="layer-dot" style="background:#10b981; border:2px solid #059669;"></span>Field survey position</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const JOB_ID = {{ job_id | tojson }};
+const DATA_URL = `/map/overlay/data/${JOB_ID}`;
+
+let overlayData = null;
+let baselineLayerGroup = null;
+let fieldLayerGroup = null;
+let matchLineGroup = null;
+let lowConfidencePoints = [];
+let lowConfidenceIndex = 0;
+let activeFilters = new Set(["HIGH", "MEDIUM", "LOW"]);
+
+const map = L.map("map", { center: [54.5, -2.0], zoom: 8 });
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
+    maxZoom: 19,
+}).addTo(map);
+
+async function loadOverlayData() {
+    try {
+        const res = await fetch(DATA_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        overlayData = await res.json();
+        renderOverlay();
+        updateStats();
+        document.getElementById("loading-overlay").style.display = "none";
+    } catch (err) {
+        document.getElementById("loading-overlay").innerHTML =
+            `<div class="alert alert-danger m-3">Failed to load overlay data:<br>${err.message}</div>`;
+    }
+}
+
+function getMatchConfidenceForSN(sn) {
+    if (!overlayData) return null;
+    const line = overlayData.match_lines.find(m => m.properties.support_number === sn);
+    return line ? line.properties.match_confidence : null;
+}
+
+function renderOverlay() {
+    if (!overlayData) return;
+
+    if (baselineLayerGroup) map.removeLayer(baselineLayerGroup);
+    if (fieldLayerGroup) map.removeLayer(fieldLayerGroup);
+    if (matchLineGroup) map.removeLayer(matchLineGroup);
+
+    baselineLayerGroup = L.layerGroup();
+    fieldLayerGroup = L.layerGroup();
+    matchLineGroup = L.layerGroup();
+    lowConfidencePoints = [];
+
+    // Match lines first (render behind markers)
+    overlayData.match_lines.forEach(feature => {
+        const conf = feature.properties.match_confidence;
+        if (!activeFilters.has(conf)) return;
+
+        const coords = feature.geometry.coordinates.map(c => [c[1], c[0]]);
+        const line = L.polyline(coords, {
+            color: feature.properties.color,
+            weight: conf === "LOW" ? 3 : 2,
+            opacity: 0.75,
+            dashArray: conf === "LOW" ? "6, 4" : null,
+        });
+
+        const flags = Object.entries(feature.properties.conflict_flags || {})
+            .filter(([, v]) => v).map(([k]) => k).join(", ") || "None";
+
+        line.bindPopup(`
+            <div>
+                <div class="popup-section-title">Match Link</div>
+                <div class="popup-row"><span>Support No.</span><strong>${feature.properties.support_number}</strong></div>
+                <div class="popup-row"><span>Confidence</span><strong class="confidence-${conf}-text">${conf}</strong></div>
+                <div class="popup-row"><span>GPS Offset</span><span>${feature.properties.distance_m}m</span></div>
+                <div class="popup-row"><span>Conflicts</span><span>${flags}</span></div>
+            </div>
+        `);
+
+        matchLineGroup.addLayer(line);
+
+        if (conf === "LOW") {
+            const mid = [(coords[0][0] + coords[1][0]) / 2, (coords[0][1] + coords[1][1]) / 2];
+            lowConfidencePoints.push(L.latLng(mid[0], mid[1]));
+        }
+    });
+
+    // Baseline poles (blue)
+    overlayData.baseline_poles.forEach(feature => {
+        const sn = feature.properties.support_number;
+        const conf = getMatchConfidenceForSN(sn);
+        if (conf && !activeFilters.has(conf)) return;
+
+        const ds = overlayData.design_status[sn] || {};
+        const marker = L.circleMarker(
+            [feature.geometry.coordinates[1], feature.geometry.coordinates[0]],
+            { radius: 8, fillColor: "#3b82f6", color: "#1d4ed8", weight: 2, fillOpacity: 0.8 }
+        );
+        marker.bindPopup(`
+            <div>
+                <div class="popup-section-title">Baseline (DNO Record)</div>
+                <div class="popup-row"><span>Support No.</span><strong>${sn}</strong></div>
+                <div class="popup-row"><span>Voltage</span><span>${feature.properties.voltage || "—"}</span></div>
+                <div class="popup-row"><span>Design Ready</span><span>${ds.design_ready ? "✅ Yes" : "⚠️ Blocked"}</span></div>
+            </div>
+        `);
+        baselineLayerGroup.addLayer(marker);
+    });
+
+    // Field poles (green)
+    overlayData.field_poles.forEach(feature => {
+        const sn = feature.properties.support_number;
+        const conf = getMatchConfidenceForSN(sn);
+        if (conf && !activeFilters.has(conf)) return;
+
+        const marker = L.circleMarker(
+            [feature.geometry.coordinates[1], feature.geometry.coordinates[0]],
+            { radius: 6, fillColor: "#10b981", color: "#059669", weight: 2, fillOpacity: 0.9 }
+        );
+        marker.bindPopup(`
+            <div>
+                <div class="popup-section-title">Field Evidence</div>
+                <div class="popup-row"><span>Support No.</span><strong>${sn}</strong></div>
+                <div class="popup-row"><span>Evidence Quality</span><span>${feature.properties.evidence_quality || "—"}</span></div>
+            </div>
+        `);
+        fieldLayerGroup.addLayer(marker);
+    });
+
+    matchLineGroup.addTo(map);
+    baselineLayerGroup.addTo(map);
+    fieldLayerGroup.addTo(map);
+
+    // Re-apply toggle state
+    if (!document.getElementById("toggle-baseline").checked) map.removeLayer(baselineLayerGroup);
+    if (!document.getElementById("toggle-field").checked) map.removeLayer(fieldLayerGroup);
+    if (!document.getElementById("toggle-lines").checked) map.removeLayer(matchLineGroup);
+
+    fitToAll();
+}
+
+function fitToAll() {
+    const pts = [
+        ...overlayData.baseline_poles.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]),
+        ...overlayData.field_poles.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]),
+    ];
+    if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding: [40, 40] });
+}
+
+function updateStats() {
+    const s = overlayData.statistics;
+    document.getElementById("stats-panel").innerHTML = `
+        <div class="stat-row"><span>Baseline poles</span><strong>${s.total_baseline}</strong></div>
+        <div class="stat-row"><span>Field poles</span><strong>${s.total_field}</strong></div>
+        <div class="stat-row"><span>Matched pairs</span><strong>${s.total_matched}</strong></div>
+        <hr class="my-1">
+        <div class="stat-row"><span><span class="confidence-badge confidence-HIGH"></span>HIGH</span><strong class="confidence-HIGH-text">${s.high_confidence}</strong></div>
+        <div class="stat-row"><span><span class="confidence-badge confidence-MEDIUM"></span>MEDIUM</span><strong class="confidence-MEDIUM-text">${s.medium_confidence}</strong></div>
+        <div class="stat-row"><span><span class="confidence-badge confidence-LOW"></span>LOW</span><strong class="confidence-LOW-text">${s.low_confidence}</strong></div>
+    `;
+}
+
+document.getElementById("toggle-baseline").addEventListener("change", e => {
+    e.target.checked ? baselineLayerGroup.addTo(map) : map.removeLayer(baselineLayerGroup);
+});
+document.getElementById("toggle-field").addEventListener("change", e => {
+    e.target.checked ? fieldLayerGroup.addTo(map) : map.removeLayer(fieldLayerGroup);
+});
+document.getElementById("toggle-lines").addEventListener("change", e => {
+    e.target.checked ? matchLineGroup.addTo(map) : map.removeLayer(matchLineGroup);
+});
+
+document.querySelectorAll("[data-confidence]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const conf = btn.dataset.confidence;
+        if (activeFilters.has(conf)) {
+            activeFilters.delete(conf);
+            btn.classList.remove("active");
+        } else {
+            activeFilters.add(conf);
+            btn.classList.add("active");
+        }
+        renderOverlay();
+    });
+});
+
+document.getElementById("jump-to-low").addEventListener("click", () => {
+    if (!lowConfidencePoints.length) {
+        alert("No LOW confidence matches visible.");
+        return;
+    }
+    map.setView(lowConfidencePoints[lowConfidenceIndex % lowConfidencePoints.length], 16);
+    lowConfidenceIndex++;
+});
+
+document.getElementById("fit-all").addEventListener("click", fitToAll);
+
+loadOverlayData();
+</script>
+
+</body>
+</html>
