@@ -7,6 +7,78 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## 2026-05-14 - Stage 4C Backend Pipeline Complete
+
+### Added
+
+- Added `AI_CONTROL/108_STAGE4C_COMPLETION_REPORT.md` to document completion of
+  Stage 4C as a full backend survey-to-design reconciliation pipeline.
+- Added `AI_CONTROL/109_STAGE5_PILOT_HARDENING_SPEC.md` to define the next
+  phase: pilot hardening and operational review workflow.
+
+### Stage 4C.1 - Baseline Ingestion
+
+- Completed `gridflow/baseline/` and `scripts/ingest_baseline.py`.
+- Added baseline CSV parsing for ENWL, Trimble, and generic formats.
+- Added schema validation, OSGB36/WGS84 coordinate handling, support number
+  normalization, and route reconstruction.
+- Validation: 49 baseline tests passing.
+
+### Stage 4C.2 - Field Evidence Import
+
+- Completed `gridflow/field/` and `scripts/import_field_evidence.py`.
+- Added structured evidence folder scanning for `NN_SUPPORT_*` folders.
+- Added notes parsing, evidence quality scoring, and special flag detection.
+- Supported special flags include `NO_POLE_POPUP`, `JOINT_USER`,
+  `VARIANT_SUPPORT_NO`, `OH_UG_TRANSITION`, and `HV_LINK`.
+- Validation: 47 field importer tests passing.
+
+### Stage 4C.3 - Baseline-to-Field Matching
+
+- Completed `gridflow/matching/` and `scripts/run_matching.py`.
+- Added normalized support number matching, confidence scoring, conflict
+  detection, and match register generation.
+- Validated P_LOCAL_001 at 10/10 matched poles and 100% match rate.
+- Validation: 21 matching tests passing.
+
+### Stage 4C.4 - Merge + QA
+
+- Completed `gridflow/merge/` and `scripts/run_merge.py`.
+- Added merged pole records, verification flags, DNO action reporting, and
+  design blocker analysis.
+- Confirmed all P_LOCAL_001 poles correctly remain `design_blocked=True`
+  because DNO engineering data is still required for final design.
+- Validation: 45 merge tests passing.
+
+### Unified Pipeline
+
+- Completed `scripts/run_pipeline.py`.
+- Added single-command execution for baseline ingest, field import, matching,
+  merge, and QA.
+- Pipeline produces timestamped structured outputs, including baseline dataset,
+  field dataset, match register, merged dataset, QA report, and run summary.
+- Final verified test result: 1,277 tests passing.
+
+### Production Ready v1
+
+- GridFlow is now backend-complete for Stage 4C and can be described as a
+  working survey-to-design reconciliation engine for overhead line
+  infrastructure workflows.
+- This is production-ready at the backend pipeline level for controlled pilot
+  evaluation, not yet a production multi-user deployment.
+- Stage 5 is now the active next phase: pilot hardening and operational review
+  workflow.
+
+### Changed
+
+- Rewrote `AI_CONTROL/01_CURRENT_STATE.md` to mark Stage 4C complete and set
+  Stage 5 as the next phase.
+- Rewrote `AI_CONTROL/02_CURRENT_TASK.md` to set the active priority to
+  Stage 5 pilot hardening and operational review workflow.
+- Updated `README.md` to reflect the actual current architecture, pipeline,
+  validation outcomes, limitations, and roadmap.
+
+---
 ## 2026-05-13 - P_CONTROLLED_LOCAL_001 Planning (doc 96)
 
 ### Added

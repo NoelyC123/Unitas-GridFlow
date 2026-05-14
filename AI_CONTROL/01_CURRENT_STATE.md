@@ -1,71 +1,135 @@
 # GridFlow Current State
 
-Purpose: canonical project state for all AI workers. Read this before interpreting any task prompt.
+Purpose: authoritative current-state file for all GridFlow workers and project reviewers.
 
-## Product Position
+## Current Status
 
-GridFlow is a validation-led survey-to-design intelligence and design-readiness tool for UK electrical OHL handoffs. It is strongest around real Trimble/controller survey workflows, C2E/C2E2 popup truthfulness, route review, lifecycle/replacement visualization, and evidence-led QA.
+Stage 4C is COMPLETE.
 
-GridFlow is not currently a full CAD replacement, GIS platform, DNO compliance engine, field-survey platform, Field Maps replacement, or commercial multi-user SaaS product.
+GridFlow now has a working backend survey-to-design reconciliation pipeline for overhead line infrastructure workflows.
 
-## Current Stable State
+The operational backend pipeline is:
 
-The stable product baseline includes:
+```text
+Baseline -> Field -> Matching -> Merge -> QA
+```
 
-- Post-survey QA gate and design-ready handoff outputs.
-- Project/file intake and per-file map, PDF, design-chain, and audit outputs.
-- Reality-based C2E2 pole/support popup scope.
-- Review navigation, route highlighting, release map behavior, planner awareness, review focus, and lifecycle visualization.
-- Manual Selenium review harness and validation evidence folders.
-- Stage 4 structured capture foundation modules and template only; runtime integration is not built.
-- Control Center v1.0 is being created on `codex/gridflow-control-center-v1`.
+Expanded:
 
-## Completed C2E2 Closeout
+```text
+Baseline Ingest
+  -> Field Evidence Import
+  -> Baseline-to-Field Matching
+  -> Merge + QA
+  -> Structured Outputs
+```
 
-- `c2e2-popup-scope-reduction-complete`: complete.
-- `c2e2-map-navigation-followups-complete`: complete and tagged.
-- Popup scope: closed.
-- Navigation follow-ups: closed.
+## Current Product Identity
 
-Details live in `AI_CONTROL/13_C2E2_CLOSEOUT.md`.
+GridFlow is a survey-to-design reconciliation platform for UK overhead line infrastructure workflows.
+
+It sits between field survey evidence and design preparation. It correlates DNO or survey baseline records with field evidence, identifies evidence confidence, generates verification flags, and produces QA outputs that help designers prepare structured DNO data requests.
+
+GridFlow is not:
+
+- an autonomous design system,
+- a DNO records replacement,
+- a compliance certifier,
+- a PoleCAD replacement,
+- a production multi-user SaaS deployment.
+
+## Current Modules
+
+Stage 4C backend modules now present:
+
+- `gridflow/baseline/` - baseline ingestion, schema validation, coordinate transformation, support number normalization, route reconstruction.
+- `gridflow/field/` - structured field evidence import, notes parsing, evidence quality scoring, special flag detection.
+- `gridflow/matching/` - support number matching, confidence scoring, conflict detection, match register generation.
+- `gridflow/merge/` - merged pole records, verification flags, design blocker analysis, QA report generation.
+
+Unified CLI:
+
+- `scripts/run_pipeline.py`
+
+Stage CLIs:
+
+- `scripts/ingest_baseline.py`
+- `scripts/import_field_evidence.py`
+- `scripts/run_matching.py`
+- `scripts/run_merge.py`
+
+## Current Validation Status
+
+Validated against:
+
+- `real_pilot_data/P_LOCAL_001/enwl_enrichment_clean`
+
+Verified outcomes:
+
+- 10/10 poles matched.
+- 9 HIGH evidence quality.
+- 1 MEDIUM evidence quality.
+- 100% match rate.
+- All 10 poles have `design_blocked=True`.
+- QA reports generated successfully.
+- Unified pipeline operational.
+- 1,277 tests passing.
+
+The `design_blocked=True` result is correct and expected. It reflects that identity and evidence reconciliation can succeed while final design remains blocked pending DNO engineering data such as voltage, conductor specification, pole class, equipment ratings, and inspection history.
+
+## Current Limitations
+
+GridFlow does not yet have:
+
+- a review UI,
+- production multi-user workflow,
+- PoleCAD export,
+- live DNO API integration,
+- production deployment layer,
+- broad multi-DNO validation beyond the current ENWL-focused evidence set,
+- final design authorization capability.
+
+Current validation is strongest for ENWL-style support number and evidence workflows. Additional pilot work is required before broader claims across DNO regions, larger route datasets, and production contractor workflows.
+
+## Current Next Phase
+
+Current next phase:
+
+```text
+Stage 5 - Pilot Hardening
+```
+
+Stage 5 focus:
+
+- stabilize the completed Stage 4C backend pipeline,
+- improve operational review workflows,
+- plan and build review workspace capability,
+- validate larger and multi-job datasets,
+- prepare ICP/Tier-1 pilot workflows,
+- package DNO request outputs and designer review evidence.
 
 ## Source Of Truth Hierarchy
 
-1. Real survey files and validation evidence.
-2. Current task prompt from Noel or ChatGPT controller.
-3. `AI_CONTROL/01_CURRENT_STATE.md`, `AI_CONTROL/02_CURRENT_TASK.md`, and `AI_CONTROL/00_PROJECT_BOARD.md`.
-4. Protocol files `AI_CONTROL/06_*` through `AI_CONTROL/16_*`.
-5. Code and tests.
-6. Historical docs and older control files.
-7. AI memory or chat summaries.
+1. Current task prompt from Noel or controller.
+2. `AI_CONTROL/01_CURRENT_STATE.md`, `AI_CONTROL/02_CURRENT_TASK.md`, and `AI_CONTROL/00_PROJECT_BOARD.md`.
+3. Stage completion reports and current specification docs.
+4. Code, tests, and generated validation outputs.
+5. Historical docs and older control files.
+6. AI memory or chat summaries.
 
-If sources conflict, stop and report the conflict before coding.
+If sources conflict, prefer the newest committed control file and report the conflict before making broad changes.
 
-## Protected Runtime Areas
+## Protected Boundaries
 
-Do not modify these unless the current task explicitly allows it:
+Do not overclaim GridFlow output.
 
-- `app/`
-- `app/static/js/map-viewer.js`
-- `app/routes/`
-- QA engine, geometry pipeline, span generation, controller intake, API intake.
-- Stage 4 schema/validator modules.
-- Archive files.
+Stage 4C provides reconciliation and QA. It does not certify:
 
-## Validation Baseline
+- voltage,
+- conductor size or type,
+- pole class,
+- equipment ratings,
+- inspection history,
+- final design readiness.
 
-The normal branch readiness gate is:
-
-- `pytest -v`
-- `pre-commit run --all-files`
-- Manual browser validation or `scripts/manual_review.py` when UI, map, popup, route, review navigation, planner awareness, or lifecycle behavior changes.
-
-Validation evidence rules are in `AI_CONTROL/10_VALIDATION_EVIDENCE_PROTOCOL.md`.
-
-## Current Risk Boundary
-
-The app is display-ready for manual review, not a final engineering authority. Asset classification, stay detection, span sequencing, lifecycle matching, and grid/coordinate handling are useful review signals but must not be overclaimed as verified engineering truth without real-job validation evidence.
-
-## Current Operating Instruction
-
-Use the Control Center v1.0 files as the worker operating system. Do not start Stage 4 integration, rulepack implementation, or product feature work unless the current task file and board name that branch and scope.
+These remain DNO/designer responsibilities.

@@ -1,79 +1,90 @@
-# GridFlow Current Task
+# Current Active Phase
 
-Purpose: active task tracker. This file is the canonical current task record alongside `00_PROJECT_BOARD.md`.
+Stage 5 - Pilot Hardening & Operational Review Workflow
 
-## Active Task
+## Active Priority
 
-- Task: P_CONTROLLED_LOCAL_001 Planning (doc 96)
-- Branch: `claude-code/p-controlled-local-001-plan`
-- Owner: none
-- Lane: Stage 4 field pilot execution
-- Status: awaiting_approval
-- Runtime changes allowed: no
-- Tests required: `pytest -v`, `pre-commit run --all-files`, `python3.13 scripts/repo_health.py`, `python3.13 scripts/merge_safety_check.py codex/p-local-001-field-capture-result-record`
-- Validation result: `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `repo_health.py` warning-only before commit due to expected dirty governance files; merge-safety warning-only before commit because branch changes were not yet committed
-- Browser validation required: no; governance/result record only
-- Popup scope changes allowed: no
-- Real data protection: all P_LOCAL_001 CSV/XLSX/photo/validation output files remain local-only and ignored
+Move GridFlow from a completed Stage 4C backend pipeline into a pilot-ready operational review workflow.
 
-## Goal
+Stage 4C is complete:
 
-Create governance plan for P_CONTROLLED_LOCAL_001, the next controlled local baseline-to-field pilot using ENWL Network Asset Viewer evidence as baseline.
+- Baseline ingestion operational.
+- Field evidence import operational.
+- Baseline-to-field matching operational.
+- Merge + QA operational.
+- Unified pipeline CLI operational.
 
-Deliverable:
+The current priority is not more core reconciliation logic. The current priority is making the completed backend pipeline usable, reviewable, and pilot-ready for real ICP/Tier-1 evaluation.
 
-- `AI_CONTROL/96_P_CONTROLLED_LOCAL_001_PLAN.md`
+## Current Work Themes
 
-## Result Being Recorded
+### Stabilize Stage 4C
 
-- Verdict: PARTIAL AS FIELD-CAPTURE EVIDENCE
-- Structures analyzed: `9`
-- Physical timber supports: `10` if the H-frame is counted as two timber supports
-- Photos processed/referenced: `33`
-- Valid rows: `9`
-- Blocked rows: `0`
-- Review-required rows: `9`
-- Missing referenced photos: `0`
-- Unreferenced photos: `0`
-- Stage 4C: blocked
+- Keep pipeline outputs stable.
+- Preserve structured JSON, CSV, and Markdown outputs.
+- Keep CLI behavior predictable.
+- Maintain test coverage across baseline, field, matching, merge, and pipeline layers.
+- Protect governance-safe wording around design blockers and DNO verification.
 
-## Required Truthfulness Points
+### Operational Review Workflows
 
-- `SPEN-QMM20` is recorded as LV with two bare conductors per Noel field observation.
-- `SPEN-QMM20` must not be described as HV, 11kV, or four-conductor evidence.
-- The nearby streetlight at `SPEN-QMM20` is treated as a separate column, not attached pole equipment.
-- No exact conductor size, phase configuration, pole class, pole strength, measured height, transformer rating, or specification is invented.
-- All technical fields requiring DNO records, direct measurement, or close inspection remain unknown, blank, or marked as requiring verification.
+- Define how designers review merged records.
+- Define how survey evidence is navigated.
+- Define how verification flags become DNO request actions.
+- Define review states such as reviewed, awaiting DNO data, requires re-survey, and approved for design preparation.
 
-## Scope
+### Review Workspace Planning
 
-Allowed:
+- Plan Stage 5 review UI.
+- Support evidence/photo review.
+- Support merged record exploration.
+- Support blocker/action dashboards.
+- Support export packaging.
 
-- Create and commit `AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md`.
-- Update normal control files and changelog to record the result.
+### Multi-job Validation
 
-Forbidden:
+- Validate beyond P_LOCAL_001 where safe data is available.
+- Test larger pole counts.
+- Track DNO format differences.
+- Record limitations honestly.
 
-- Runtime upload integration.
-- Stage 4 fields in popups or Review OS.
-- Backend QA, geometry, span generation, intake, or map rendering changes.
-- Stage 4C runtime integration.
-- Real evidence, CSV, XLSX, photos, uploads, or validation output commits.
-- Archive edits.
+### Pilot Preparation
 
-## Acceptance Criteria
+- Prepare ICP/Tier-1 pilot materials.
+- Package surveyor and designer guidance.
+- Prepare DNO data request templates.
+- Define pilot success criteria.
 
-- Doc 95 exists and records P_LOCAL_001 as PARTIAL AS FIELD-CAPTURE EVIDENCE.
-- Doc 95 confirms 9 structures, 10 physical timber supports if H-frame counted as two, 33 photos, 9 valid rows, 0 blocked rows, 9 review-required rows, 0 missing photos, and 0 unreferenced photos.
-- Doc 95 confirms all conservative corrections were applied.
-- Doc 95 confirms field-capture evidence only, not design-ready data and not Stage 4C authorization.
-- Control files and changelog record completion.
-- Full validation passes or is warning-only where known.
-- Real local pilot evidence remains ignored and uncommitted.
+### Workflow Packaging
 
-## Current Next Action
+- Package outputs so a designer can move from survey evidence to DNO data request without manually interpreting raw JSON.
+- Preserve audit traceability from baseline to field evidence to match register to merged QA output.
 
-1. Merge this governance result record after review.
-2. Keep Stage 4C blocked.
-3. Use P_LOCAL_001 as field-capture workflow evidence only.
-4. Continue toward a controlled baseline pilot with exact `pole_id` matching before any Stage 4C runtime implementation.
+## Current Acceptance Direction
+
+Stage 5 work should prove:
+
+- Stage 4C outputs are understandable by a designer.
+- Evidence traceability is clear.
+- DNO data requirements are explicit.
+- The workflow can support a real pilot.
+- GridFlow remains honest about what is verified and what still requires DNO data.
+
+## Active Boundaries
+
+Do not claim:
+
+- final engineering design capability,
+- DNO data replacement,
+- autonomous design authorization,
+- production multi-user deployment,
+- PoleCAD export,
+- broad multi-DNO production validation.
+
+Do preserve:
+
+- evidence-based claims,
+- source authority hierarchy,
+- verification flags,
+- design blocker visibility,
+- Stage 4C test stability.

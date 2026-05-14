@@ -1,203 +1,341 @@
 # GridFlow
 
-**Survey-to-design workflow tool for UK electricity distribution overhead line infrastructure.**
+GridFlow is a survey-to-design reconciliation platform for overhead line infrastructure workflows.
 
-GridFlow sits between field survey output and office design work. It ingests raw DNO baseline data and structured field evidence, matches them pole-by-pole, identifies what engineering specifications are still missing, and produces a clear QA report telling a designer exactly what they need to request from the DNO before design can proceed.
+It sits between field survey evidence and design preparation. It ingests baseline asset data, imports structured field evidence, matches the two sources pole by pole, merges the records, and produces QA outputs showing what still requires DNO engineering data before design can proceed.
 
+GridFlow is not an autonomous design tool, a DNO records replacement, a compliance certifier, or a production multi-user SaaS platform.
+
+## What GridFlow Is
+
+GridFlow helps project teams answer practical survey-to-design questions:
+
+- Which baseline poles have field evidence?
+- Which field evidence folders match which support numbers?
+- How confident is the baseline-to-field identity match?
+- Which poles have evidence gaps or conflicts?
+- What DNO engineering data is still required before design?
+- What should the designer request from the DNO?
+
+The current backend pipeline is complete through Stage 4C.
+
+## Pipeline Diagram
+
+```text
+DNO / Survey Baseline CSV
+        |
+        v
+Baseline Ingest
+        |
+        v
+Field Evidence Import  <--- field photos, map screenshots, notes
+        |
+        v
+Baseline-to-Field Matching
+        |
+        v
+Merge + QA
+        |
+        v
+Structured Outputs
 ```
-DNO Baseline CSV ──► Baseline Ingest ──┐
-                                        ├──► Matching ──► Merge ──► QA Report
-Field Evidence ──────► Field Import ───┘
+
+Operational sequence:
+
+```text
+Baseline -> Field -> Matching -> Merge -> QA
 ```
+
+## Operational Workflow
+
+1. Export or obtain a baseline CSV containing support numbers, coordinates, and asset context.
+2. Capture field evidence in structured `NN_SUPPORT_*` folders.
+3. Run the unified GridFlow pipeline.
+4. Review match confidence and evidence quality.
+5. Review merged pole records and verification flags.
+6. Use the QA report to prepare a structured DNO data request.
+7. Proceed with design only after DNO engineering data and designer review are complete.
+
+## Stage 4C Overview
+
+Stage 4C is complete and operational.
+
+### Stage 4C.1 - Baseline Ingestion
+
+Module:
+
+- `gridflow/baseline/`
+
+CLI:
+
+- `scripts/ingest_baseline.py`
+
+Capabilities:
+
+- CSV parsing.
+- ENWL, Trimble, and generic format detection.
+- Schema validation.
+- OSGB36 <-> WGS84 coordinate transformation.
+- Support number normalization.
+- Route reconstruction.
+
+### Stage 4C.2 - Field Evidence Import
+
+Module:
+
+- `gridflow/field/`
+
+CLI:
+
+- `scripts/import_field_evidence.py`
+
+Capabilities:
+
+- Scans `NN_SUPPORT_*` evidence folders.
+- Parses notes.
+- Counts field photos and map screenshots.
+- Scores evidence quality.
+- Detects special flags such as `NO_POLE_POPUP`, `JOINT_USER`, `VARIANT_SUPPORT_NO`, `OH_UG_TRANSITION`, and `HV_LINK`.
+
+### Stage 4C.3 - Baseline-to-Field Matching
+
+Module:
+
+- `gridflow/matching/`
+
+CLI:
+
+- `scripts/run_matching.py`
+
+Capabilities:
+
+- Normalized support number matching.
+- Variant support number handling.
+- Match confidence scoring.
+- Conflict detection.
+- Match register generation.
+
+### Stage 4C.4 - Merge + QA
+
+Module:
+
+- `gridflow/merge/`
+
+CLI:
+
+- `scripts/run_merge.py`
+
+Capabilities:
+
+- Merged pole records.
+- Verification flags.
+- DNO action reporting.
+- Design blocker analysis.
+- QA report generation.
+
+### Unified Pipeline CLI
+
+CLI:
+
+- `scripts/run_pipeline.py`
+
+The unified pipeline runs baseline ingest, field import, matching, merge, and QA in one command.
+
+It produces timestamped structured outputs, including baseline dataset, field dataset, match register, merged dataset, QA report, and machine-readable summary.
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.12+
-- Install dependencies:
+- Python 3.12+.
+- Project dependencies installed.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the Pipeline
+### Run the Unified Pipeline
 
 ```bash
 python scripts/run_pipeline.py \
   --baseline path/to/baseline.csv \
-  --field path/to/field_evidence/ \
-  --output path/to/output/
+  --field path/to/enwl_enrichment_clean \
+  --output path/to/output
 ```
 
-This runs all four stages and produces a timestamped output directory containing:
+Expected output package:
 
-- `01_baseline_dataset.json` — parsed and validated baseline
-- `02_field_dataset.json` — scanned field evidence with quality scores
-- `03_match_register.json` + `.csv` — pole-by-pole match results
-- `04_merged_dataset.json` + `.csv` — combined evidence per pole
-- `05_qa_report.md` — designer QA report with specific DNO action items
-- `pipeline_summary.json` — machine-readable run summary
+- `01_baseline_dataset.json`
+- `02_field_dataset.json`
+- `03_match_register.json`
+- `03_match_register.csv`
+- `04_merged_dataset.json`
+- `04_merged_dataset.csv`
+- `05_qa_report.md`
+- `pipeline_summary.json`
+
+### Run Individual Stages
+
+```bash
+python scripts/ingest_baseline.py \
+  --input baseline.csv \
+  --output baseline.json \
+  --validate \
+  --transform-coords
+```
+
+```bash
+python scripts/import_field_evidence.py \
+  --input evidence_folder \
+  --output field.json \
+  --validate \
+  --score
+```
+
+```bash
+python scripts/run_matching.py \
+  --baseline baseline.json \
+  --field field.json \
+  --output match_register.json \
+  --csv match_register.csv
+```
+
+```bash
+python scripts/run_merge.py \
+  --baseline baseline.json \
+  --field field.json \
+  --register match_register.json \
+  --output merged_dataset.json \
+  --report qa_report.md \
+  --csv merged_dataset.csv
+```
 
 ### Run Tests
 
 ```bash
-pytest tests/ -v
+pytest -v
 ```
 
-### Test with Sample Data
+Current verified test result:
 
-```bash
-python scripts/run_pipeline.py \
-  --baseline tests/baseline/fixtures/enwl_sample.csv \
-  --field real_pilot_data/P_LOCAL_001/enwl_enrichment_clean \
-  --output /tmp/gridflow_output/
+```text
+1,277 tests passing
 ```
 
-## Pipeline Stages
+## P_LOCAL_001 Validation Results
 
-### Stage 4C.1 — Baseline Ingest (`gridflow/baseline/`)
+Validated dataset:
 
-Parses DNO Network Asset Viewer CSV exports. Supports ENWL, Trimble, and generic formats
-with automatic detection. Validates data quality, transforms OSGB36 coordinates to WGS84,
-normalizes support numbers, and reconstructs route sequences.
+- `real_pilot_data/P_LOCAL_001/enwl_enrichment_clean`
 
-```bash
-python scripts/ingest_baseline.py \
-  --input baseline.csv --output baseline.json \
-  --validate --transform-coords
-```
-
-### Stage 4C.2 — Field Evidence Import (`gridflow/field/`)
-
-Scans structured field evidence folders (`NN_SUPPORT_*` pattern), parses observation notes,
-counts photos and screenshots, detects special cases (NO_POLE_POPUP, JOINT_USER, variant
-support numbers), and scores evidence quality (HIGH/MEDIUM/LOW).
-
-```bash
-python scripts/import_field_evidence.py \
-  --input evidence_folder/ --output field.json \
-  --validate --score
-```
-
-### Stage 4C.3 — Matching Engine (`gridflow/matching/`)
-
-Matches baseline poles to field evidence using support number comparison with normalization
-(handles prefix stripping, variant suffixes). Scores each match HIGH/MEDIUM/LOW/UNMATCHED.
-Detects voltage and equipment conflicts between baseline records and field observations.
-
-```bash
-python scripts/run_matching.py \
-  --baseline baseline.json --field field.json \
-  --output register.json --csv register.csv
-```
-
-### Stage 4C.4 — Merge Engine (`gridflow/merge/`)
-
-Combines all three inputs into unified pole records. Applies verification flags (voltage,
-conductor, pole class, condition, identity). Identifies design blockers. Generates QA report
-with specific action items per pole.
-
-```bash
-python scripts/run_merge.py \
-  --baseline baseline.json --field field.json --register register.json \
-  --output merged.json --report qa_report.md
-```
-
-## Validated Results — P_LOCAL_001
-
-Real field pilot validation against 10 ENWL poles in the Sheernest Lane area:
+Current verified outcomes:
 
 | Metric | Result |
-|--------|--------|
-| Poles in baseline | 10 |
-| Poles surveyed | 10 |
+| --- | --- |
+| Poles matched | 10/10 |
 | Match rate | 100% |
-| HIGH confidence | 6 |
-| MEDIUM confidence | 1 (pole 08, NO_POLE_POPUP) |
-| LOW confidence | 3 (VOLTAGE_CONFLICT in notes) |
-| Design ready | 0 (DNO specs not yet obtained) |
-| Design blocked | 10 (expected — conductor/pole class required from DNO) |
+| HIGH evidence quality | 9 |
+| MEDIUM evidence quality | 1 |
+| Design blocked | 10/10 |
+| Unified pipeline | Operational |
+| QA reports | Generated successfully |
+| Tests | 1,277 passing |
 
-Special cases correctly handled:
-- `903201A` — variant support number (A suffix)
-- `903503` — joint user pole (telecoms co-attachment)
-- `903101` — OH/UG transition pole
-- `900346` — HV link pole with no map popup
+The `design_blocked=True` result for all 10 poles is correct. It means GridFlow has reconciled baseline and field evidence, but DNO engineering data is still required before final design.
 
-## Project Status
+GridFlow does not certify:
 
-| Stage | Component | Status |
-|-------|-----------|--------|
-| Stage 1 | Post-survey QA gate | ✅ Complete |
-| Stage 2 | Design-ready handoff / Design Chain | ✅ Complete |
-| Stage 4C.1 | Baseline Ingestion Engine | ✅ Complete |
-| Stage 4C.2 | Field Evidence Importer | ✅ Complete |
-| Stage 4C.3 | Matching Engine | ✅ Complete |
-| Stage 4C.4 | Merge Engine | ✅ Complete |
-| Pipeline CLI | Unified four-stage pipeline | ✅ Complete |
-| Stage 3 | Live intake platform | 🔲 Planned |
-| Stage 4 (full) | Structured field capture (tablet) | 🔲 Planned |
-| Stage 5 | Designer workspace | 🔲 Planned |
-| Stage 6 | DNO submission layer | 🔲 Planned |
+- voltage,
+- conductor size or type,
+- pole class,
+- equipment rating,
+- inspection history,
+- design approval.
 
-## Documentation
+## Current Architecture
 
-| Document | Description |
-|----------|-------------|
-| `AI_CONTROL/00_PROJECT_CANONICAL.md` | Full 6-stage vision and project identity |
-| `AI_CONTROL/01_CURRENT_STATE.md` | What is true right now |
-| `AI_CONTROL/02_CURRENT_TASK.md` | Active task record |
-| `gridflow/baseline/README.md` | Baseline Ingestion Engine reference |
-| `gridflow/merge/README.md` | Merge Engine reference |
-| `docs/BASELINE_INGESTION_SPECIFICATION.md` | Technical specification for Stage 4C.1 |
+```text
+gridflow/
+  baseline/
+  field/
+  matching/
+  merge/
 
-## Test Coverage
-
-```
-tests/baseline/    —  49 tests  (CSV parsing, validation, coordinate transform, route reconstruction)
-tests/field/       —  47 tests  (folder scanning, notes parsing, quality scoring)
-tests/matching/    —  21 tests  (support number matching, confidence scoring, register building)
-tests/merge/       —  45 tests  (data merging, verification flags, QA report, conflict detection)
-tests/             —  11 tests  (pipeline end-to-end)
-─────────────────────────────────────────────────────────────────────────────────────────
-Total              — 202 tests
-```
-
-Run with coverage:
-
-```bash
-pytest tests/ --cov=gridflow --cov-report=html
+scripts/
+  ingest_baseline.py
+  import_field_evidence.py
+  run_matching.py
+  run_merge.py
+  run_pipeline.py
 ```
 
 ## Limitations
 
-**DNO data still required.** GridFlow identifies what is needed but cannot substitute for
-official DNO engineering records. Conductor specifications, pole class, and strength ratings
-must be obtained from the network operator before design can proceed. All merged output will
-show `design_blocked=true` until DNO data is ingested.
+GridFlow currently has these limitations:
 
-**CLI-only.** No web UI or API in the current release. All interactions are via command-line
-scripts.
+- No designer review UI yet.
+- ENWL-focused validation to date.
+- No PoleCAD export yet.
+- No production multi-user workflow yet.
+- No live DNO API integration.
+- No production deployment layer.
+- No autonomous engineering design.
 
-**10-pole validation.** The pipeline has been validated against a 10-pole ENWL dataset
-(P_LOCAL_001). Performance at scale (1,000+ poles) has not been measured in production.
+P_LOCAL_001 proves the Stage 4C backend pipeline on a controlled ENWL evidence set. Larger jobs, other DNO formats, and production contractor workflows still require pilot validation.
 
-**Coordinate accuracy.** OSGB36 to WGS84 transformation via pyproj achieves ±0.01° accuracy
-— sufficient for display and rough geolocation, but not for precise survey-grade work.
+## Current Roadmap
 
-**No live DNO connectivity.** GridFlow reads exported CSV files. It does not connect to live
-DNO GIS systems.
+### Complete
 
-## Architecture
+- Stage 4C.1 Baseline Ingestion.
+- Stage 4C.2 Field Evidence Import.
+- Stage 4C.3 Baseline-to-Field Matching.
+- Stage 4C.4 Merge + QA.
+- Unified Pipeline CLI.
 
-GridFlow is **validation-led, not feature-led**. Every component is designed to answer:
+### Current Next Phase
 
-> *Does this improve the reliability, clarity, and design-readiness of real survey data?*
+- Stage 5 - Pilot Hardening & Operational Review Workflow.
 
-It does not replace Trimble, PoleCAD, AutoCAD, or engineering designers. It is a pre-design
-intelligence layer that sits between field survey output and design input.
+### Planned Stage 5 Focus
 
----
+- Review workspace UI.
+- Evidence/photo viewer.
+- Merged record explorer.
+- Blocker/action dashboard.
+- DNO request export packaging.
+- Multi-job validation.
+- ICP/Tier-1 pilot preparation.
 
-*Built for UK overhead line infrastructure. Validated against ENWL Network Asset Viewer data.*
+## Stage 5 Preview
+
+Stage 5 will not replace the completed backend pipeline. It will make the pipeline usable in real pilot workflows.
+
+Planned outcomes:
+
+- Designers can review merged pole records without reading raw JSON.
+- Evidence can be navigated alongside baseline and match data.
+- DNO data request packs can be generated from verification flags.
+- Review states can be tracked across poles and jobs.
+- Pilot teams can evaluate GridFlow on real survey-to-design handoffs.
+
+## Documentation
+
+Useful project references:
+
+- `AI_CONTROL/01_CURRENT_STATE.md`
+- `AI_CONTROL/02_CURRENT_TASK.md`
+- `AI_CONTROL/108_STAGE4C_COMPLETION_REPORT.md`
+- `AI_CONTROL/109_STAGE5_PILOT_HARDENING_SPEC.md`
+- `PRODUCT_SPEC.md`
+- `GRIDFLOW_DOMAIN_REFERENCE.md`
+- `docs/SURVEYOR_GUIDE.md`
+- `docs/DESIGNER_GUIDE.md`
+- `docs/DNO_DATA_REQUEST_TEMPLATE.md`
+- `docs/ICP_PILOT_BRIEFING.md`
+
+## Governance Position
+
+GridFlow is validation-led and evidence-based.
+
+It is designed to improve the reliability, clarity, and traceability of survey-to-design handoff. It does not replace DNO records, designer judgement, statutory requirements, or engineering approval.
