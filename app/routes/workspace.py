@@ -4,6 +4,7 @@ Review Workspace Routes
 Web UI for browsing and filtering merged pole data produced by the GridFlow pipeline.
 """
 
+import json
 import logging
 from pathlib import Path
 
@@ -20,6 +21,33 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 JOBS_ROOT = PROJECT_ROOT / "uploads" / "jobs"
 
 
+def _available_jobs(limit: int = 10) -> list[str]:
+    """Return job folders that can be offered in workspace error pages."""
+    if not JOBS_ROOT.exists():
+        return []
+    return sorted(d.name for d in JOBS_ROOT.iterdir() if d.is_dir() and not d.name.startswith("."))[
+        :limit
+    ]
+
+
+def _pipeline_run_timestamp(job_dir: Path) -> str:
+    """Read the latest pipeline run id/date for display in the workspace header."""
+    candidates = []
+    direct_summary = job_dir / "pipeline_summary.json"
+    if direct_summary.exists():
+        candidates.append(direct_summary)
+    candidates.extend(sorted(job_dir.glob("pipeline_run_*/pipeline_summary.json"), reverse=True))
+
+    for summary_path in candidates:
+        try:
+            with open(summary_path, encoding="utf-8") as f:
+                summary = json.load(f)
+            return summary.get("run_id") or summary.get("run_date") or "Unknown"
+        except Exception:
+            logger.warning("Could not read pipeline summary: %s", summary_path)
+    return "Unknown"
+
+
 @workspace_bp.route("/view/<job_id>")
 def view_job(job_id: str):
     """Display review workspace for a job."""
@@ -27,6 +55,7 @@ def view_job(job_id: str):
         job_dir = JOBS_ROOT / job_id
         provider = ReviewDataProvider(job_dir)
         provider.load_job()
+        run_timestamp = _pipeline_run_timestamp(job_dir)
 
         filters: dict = {}
         if request.args.get("design_ready") in ("true", "false"):
@@ -50,11 +79,19 @@ def view_job(job_id: str):
             poles_with_eq=poles_with_eq,
             stats=stats,
             active_filters=filters,
+            run_timestamp=run_timestamp,
         )
 
     except FileNotFoundError as e:
         logger.error("Job not found: %s — %s", job_id, e)
-        return f"Job not found: {job_id}", 404
+        return (
+            render_template(
+                "workspace/error_job_not_found.html",
+                job_id=job_id,
+                available_jobs=_available_jobs(),
+            ),
+            404,
+        )
 
     except Exception as e:
         logger.error("Error loading workspace for %s: %s", job_id, e, exc_info=True)
@@ -71,7 +108,16 @@ def view_pole(job_id: str, support_no: str):
 
         pole = provider.get_pole_details(support_no)
         if pole is None:
-            return f"Pole not found: {support_no}", 404
+            all_poles = provider.get_poles()
+            return (
+                render_template(
+                    "workspace/error_pole_not_found.html",
+                    job_id=job_id,
+                    support_number=support_no,
+                    available_poles=[p.support_no for p in all_poles[:20]],
+                ),
+                404,
+            )
 
         evidence_quality = _evidence_quality(pole)
 
@@ -84,7 +130,14 @@ def view_pole(job_id: str, support_no: str):
 
     except FileNotFoundError as e:
         logger.error("Job not found: %s — %s", job_id, e)
-        return f"Job not found: {job_id}", 404
+        return (
+            render_template(
+                "workspace/error_job_not_found.html",
+                job_id=job_id,
+                available_jobs=_available_jobs(),
+            ),
+            404,
+        )
 
     except Exception as e:
         logger.error("Error loading pole %s: %s", support_no, e, exc_info=True)

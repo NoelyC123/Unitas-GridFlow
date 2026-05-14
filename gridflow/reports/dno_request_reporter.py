@@ -1,7 +1,7 @@
 """DNO data request report for Stage 5A pilot output packs."""
 
 from datetime import datetime
-from typing import List
+from typing import Any, List
 
 from gridflow.merge.models import MergedPole
 
@@ -9,14 +9,23 @@ from gridflow.merge.models import MergedPole
 class DNORequestReporter:
     """Generate an actionable DNO engineering data request."""
 
-    def generate(self, merged_poles: List[MergedPole]) -> str:
+    def generate(
+        self, merged_poles: List[MergedPole], job_context: dict[str, Any] | None = None
+    ) -> str:
         """Return Markdown report generated only from MergedPole records."""
+        ctx = job_context or {}
+        job_id = ctx.get("job_id", "Unknown Job")
+        baseline = ctx.get("baseline_file", "baseline.csv")
+        field = ctx.get("field_folder", "field_evidence")
+        timestamp = ctx.get("run_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         poles = list(merged_poles)
         blocked = [p for p in poles if not p.design_ready]
         lines = [
-            "# DNO Data Request - Job GridFlow Pipeline",
+            f"# DNO Data Request - {job_id}",
             "",
-            f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"**Date:** {timestamp}",
+            f"**Baseline:** {baseline}",
+            f"**Field Evidence:** {field}",
             f"**Status:** {len(blocked)} poles require DNO engineering data",
             "",
             "## Summary",

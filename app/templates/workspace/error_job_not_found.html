@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Job Not Found{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/jobs">All Jobs</a></li>
+      <li class="breadcrumb-item active">Not Found</li>
+    </ol>
+  </nav>
+
+  <div class="alert alert-warning" role="alert">
+    <h4 class="alert-heading">⚠️ Job Not Found</h4>
+    <p>Job <strong>{{ job_id }}</strong> does not exist or has not been processed through the pipeline yet.</p>
+    <hr>
+    <p class="mb-0">
+      The review workspace requires a job with a <code>04_merged_dataset.json</code> output.
+    </p>
+  </div>
+
+  {% if available_jobs %}
+  <div class="card mt-4">
+    <div class="card-header"><h5 class="mb-0">Available Jobs</h5></div>
+    <div class="card-body">
+      <div class="list-group">
+        {% for job in available_jobs %}
+        <a href="/workspace/view/{{ job }}" class="list-group-item list-group-item-action">
+          {{ job }} <span class="float-end text-muted small">Open Workspace →</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-info mt-3">
+    <p class="mb-0">No processed jobs found. Run the pipeline first to create workspace-ready jobs.</p>
+  </div>
+  {% endif %}
+
+  <div class="mt-4">
+    <a href="/jobs" class="btn btn-primary">View All Jobs</a>
+    <a href="/" class="btn btn-outline-secondary ms-2">Home</a>
+  </div>
+</div>
+{% endblock %}

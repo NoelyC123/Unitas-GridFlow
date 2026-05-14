@@ -341,7 +341,7 @@ def run_stage4(baseline_dataset, field_dataset, register, run_dir: Path) -> tupl
     return merged, result
 
 
-def run_stage5a_reports(merged, run_dir: Path) -> list[Path]:
+def run_stage5a_reports(merged, run_dir: Path, job_context: dict | None = None) -> list[Path]:
     """Generate Stage 5A pilot output pack reports."""
     logger.info("=" * 60)
     logger.info("Stage 5A — Generating Pilot Reports")
@@ -349,14 +349,7 @@ def run_stage5a_reports(merged, run_dir: Path) -> list[Path]:
 
     merged_poles = merged.poles
     reporters = [
-        (
-            "00_pilot_output_pack_index.md",
-            PilotIndexReporter(
-                baseline_source=merged.baseline_source,
-                field_source=merged.field_source,
-                output_dir=run_dir,
-            ),
-        ),
+        ("00_pilot_output_pack_index.md", PilotIndexReporter()),
         ("06_dno_data_request.md", DNORequestReporter()),
         ("07_design_readiness_summary.md", DesignReadinessReporter()),
         ("08_match_confidence_analysis.md", MatchConfidenceReporter()),
@@ -367,7 +360,7 @@ def run_stage5a_reports(merged, run_dir: Path) -> list[Path]:
     written: list[Path] = []
     for filename, reporter in reporters:
         logger.info("Generating %s...", filename)
-        report_text = reporter.generate(merged_poles)
+        report_text = reporter.generate(merged_poles, job_context=job_context)
         path = run_dir / filename
         path.write_text(report_text, encoding="utf-8")
         logger.info("✓ Report: %s (%d chars)", path.name, len(report_text))
@@ -456,8 +449,18 @@ def main():
         _write_summary(run_id, args, run_dir, stages, overall_status, None, t_pipeline_start)
         return 1
 
+    job_context = {
+        "job_id": run_id,
+        "baseline_file": Path(args.baseline).name,
+        "baseline_path": str(args.baseline),
+        "field_folder": Path(args.field).name,
+        "field_path": str(args.field),
+        "output_dir": str(run_dir),
+        "run_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
     try:
-        report_paths = run_stage5a_reports(merged, run_dir)
+        report_paths = run_stage5a_reports(merged, run_dir, job_context=job_context)
         print(f"  Stage 5A reports: {len(report_paths)} files")
     except Exception as e:
         logger.warning("Stage 5A reporting failed (pipeline result preserved): %s", e)

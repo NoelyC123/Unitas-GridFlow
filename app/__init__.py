@@ -131,4 +131,11 @@ def create_app() -> Flask:
     except Exception as exc:
         app.logger.warning(f"workspace blueprint not loaded: {exc}")
 
+    try:
+        from app.routes.map_overlay import map_overlay_bp
+
+        app.register_blueprint(map_overlay_bp)
+    except Exception as exc:
+        app.logger.warning(f"map_overlay blueprint not loaded: {exc}")
+
     return app

@@ -2,7 +2,7 @@
 
 from collections import Counter
 from datetime import datetime
-from typing import Callable, List
+from typing import Any, Callable, List
 
 from gridflow.merge.models import MergedPole
 
@@ -10,17 +10,26 @@ from gridflow.merge.models import MergedPole
 class VerificationFlagsReporter:
     """Generate detailed verification flag analysis with standards references."""
 
-    def generate(self, merged_poles: List[MergedPole]) -> str:
+    def generate(
+        self, merged_poles: List[MergedPole], job_context: dict[str, Any] | None = None
+    ) -> str:
         """Return Markdown report generated only from merged pole records."""
+        ctx = job_context or {}
+        job_id = ctx.get("job_id", "Unknown Job")
+        baseline = ctx.get("baseline_file", "baseline.csv")
+        field = ctx.get("field_folder", "field_evidence")
+        timestamp = ctx.get("run_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         poles = list(merged_poles)
         flagged = [p for p in poles if self._pole_flags(p)]
         active_specs = [(spec, self._affected(poles, spec)) for spec in self._specs()]
         active_specs = [(spec, affected) for spec, affected in active_specs if affected]
 
         lines = [
-            "# Verification Flags Breakdown - Job GridFlow Pipeline",
+            f"# Verification Flags Breakdown - {job_id}",
             "",
-            f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"**Date:** {timestamp}",
+            f"**Baseline:** {baseline}",
+            f"**Field Evidence:** {field}",
             f"**Total poles with flags:** {len(flagged)}",
             f"**Unique flag types:** {len(active_specs)}",
             "",
