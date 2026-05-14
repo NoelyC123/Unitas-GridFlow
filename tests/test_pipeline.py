@@ -3,15 +3,16 @@ End-to-end tests for the GridFlow unified pipeline (scripts/run_pipeline.py).
 """
 
 import json
-from pathlib import Path
-from unittest.mock import patch
-import pytest
 
 # Import main() directly rather than calling subprocess
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from scripts.run_pipeline import main, parse_args
+from pathlib import Path
+from unittest.mock import patch
 
+import pytest
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from scripts.run_pipeline import main
 
 BASELINE_FIXTURE = Path(__file__).parent / "baseline" / "fixtures" / "enwl_sample.csv"
 # Use the real field dataset if available, otherwise fallback to test fixtures
@@ -37,12 +38,18 @@ class TestPipelineE2E:
 
     def test_pipeline_runs_end_to_end(self, output_dir):
         """Full pipeline produces all expected output files."""
-        rc = _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        rc = _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         assert rc == 0
 
         # Find the run directory
@@ -66,12 +73,18 @@ class TestPipelineE2E:
 
     def test_pipeline_summary_json_structure(self, output_dir):
         """pipeline_summary.json has all required fields."""
-        _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
         summary_path = run_dir / "pipeline_summary.json"
 
@@ -79,10 +92,18 @@ class TestPipelineE2E:
             summary = json.load(f)
 
         required_keys = [
-            "run_id", "run_date", "baseline_source", "field_source",
-            "baseline_format_detected", "duration_seconds", "stages",
-            "overall_status", "match_rate", "design_ready_count",
-            "design_blocked_count", "output_directory",
+            "run_id",
+            "run_date",
+            "baseline_source",
+            "field_source",
+            "baseline_format_detected",
+            "duration_seconds",
+            "stages",
+            "overall_status",
+            "match_rate",
+            "design_ready_count",
+            "design_blocked_count",
+            "output_directory",
         ]
         for key in required_keys:
             assert key in summary, f"Missing key in summary: {key}"
@@ -92,24 +113,36 @@ class TestPipelineE2E:
     def test_pipeline_output_directory_created(self, output_dir):
         """A timestamped run directory is created under output/."""
         assert not output_dir.exists()  # Starts non-existent
-        _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         assert output_dir.exists()
         run_dirs = list(output_dir.glob("pipeline_run_*"))
         assert len(run_dirs) == 1
 
     def test_pipeline_stage_timing(self, output_dir):
         """pipeline_summary.json records duration_seconds for all stages."""
-        _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
         with open(run_dir / "pipeline_summary.json") as f:
             summary = json.load(f)
@@ -122,12 +155,18 @@ class TestPipelineE2E:
 
     def test_pipeline_format_detection(self, output_dir):
         """ENWL format is auto-detected from the fixture CSV."""
-        _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
         with open(run_dir / "pipeline_summary.json") as f:
             summary = json.load(f)
@@ -139,34 +178,52 @@ class TestPipelineErrorHandling:
 
     def test_pipeline_handles_missing_baseline(self, output_dir):
         """Pipeline exits cleanly when baseline CSV not found."""
-        rc = _run_pipeline([
-            "--baseline", "/nonexistent/baseline.csv",
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        rc = _run_pipeline(
+            [
+                "--baseline",
+                "/nonexistent/baseline.csv",
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         assert rc == 1
 
     def test_pipeline_handles_missing_field(self, output_dir):
         """Pipeline exits cleanly when field folder not found."""
-        rc = _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", "/nonexistent/field/",
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        rc = _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                "/nonexistent/field/",
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         assert rc == 1
 
     def test_pipeline_handles_empty_field(self, tmp_path, output_dir):
         """Pipeline handles empty field folder gracefully."""
         empty_field = tmp_path / "empty_field"
         empty_field.mkdir()
-        rc = _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(empty_field),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        rc = _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(empty_field),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         # Should complete (0 poles matched) without crashing
         assert rc == 0
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
@@ -175,12 +232,18 @@ class TestPipelineErrorHandling:
     def test_pipeline_partial_output_on_stage2_fail(self, tmp_path, output_dir):
         """Stage 1 output is preserved even when Stage 2 fails."""
         fake_field = tmp_path / "not_a_real_folder_xyz"
-        rc = _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(fake_field),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        rc = _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(fake_field),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         assert rc == 1
         run_dirs = list(output_dir.glob("pipeline_run_*"))
         if run_dirs:
@@ -194,12 +257,18 @@ class TestPipelineOutputContent:
 
     def test_baseline_dataset_json_has_poles(self, output_dir):
         """01_baseline_dataset.json contains expected pole count."""
-        _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
         with open(run_dir / "01_baseline_dataset.json") as f:
             data = json.load(f)
@@ -208,12 +277,18 @@ class TestPipelineOutputContent:
 
     def test_qa_report_is_markdown(self, output_dir):
         """05_qa_report.md is valid markdown with expected sections."""
-        _run_pipeline([
-            "--baseline", str(BASELINE_FIXTURE),
-            "--field", str(FIELD_DATASET),
-            "--output", str(output_dir),
-            "--log-level", "WARNING",
-        ])
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
         report_text = (run_dir / "05_qa_report.md").read_text()
 
@@ -221,3 +296,28 @@ class TestPipelineOutputContent:
         assert "Design Blockers" in report_text
         assert "Recommended Next Steps" in report_text
         assert "Unmatched Poles" in report_text
+
+    def test_stage5a_reports_are_generated(self, output_dir):
+        """Stage 5A emits pilot output pack reports 06, 07, and 08."""
+        _run_pipeline(
+            [
+                "--baseline",
+                str(BASELINE_FIXTURE),
+                "--field",
+                str(FIELD_DATASET),
+                "--output",
+                str(output_dir),
+                "--log-level",
+                "WARNING",
+            ]
+        )
+        run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
+        expected = [
+            "06_dno_data_request.md",
+            "07_design_readiness_summary.md",
+            "08_match_confidence_analysis.md",
+        ]
+        for filename in expected:
+            path = run_dir / filename
+            assert path.exists()
+            assert len(path.read_text(encoding="utf-8")) > 500
