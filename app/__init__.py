@@ -138,4 +138,11 @@ def create_app() -> Flask:
     except Exception as exc:
         app.logger.warning(f"map_overlay blueprint not loaded: {exc}")
 
+    try:
+        from app.routes.feedback import feedback_bp
+
+        app.register_blueprint(feedback_bp)
+    except Exception as exc:
+        app.logger.warning(f"feedback blueprint not loaded: {exc}")
+
     return app
