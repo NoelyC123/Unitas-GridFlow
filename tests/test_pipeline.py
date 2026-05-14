@@ -298,7 +298,7 @@ class TestPipelineOutputContent:
         assert "Unmatched Poles" in report_text
 
     def test_stage5a_reports_are_generated(self, output_dir):
-        """Stage 5A emits pilot output pack reports 06, 07, and 08."""
+        """Stage 5A emits the full pilot output pack reports."""
         _run_pipeline(
             [
                 "--baseline",
@@ -313,9 +313,12 @@ class TestPipelineOutputContent:
         )
         run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
         expected = [
+            "00_pilot_output_pack_index.md",
             "06_dno_data_request.md",
             "07_design_readiness_summary.md",
             "08_match_confidence_analysis.md",
+            "09_verification_flags_breakdown.md",
+            "10_evidence_provenance_log.md",
         ]
         for filename in expected:
             path = run_dir / filename
