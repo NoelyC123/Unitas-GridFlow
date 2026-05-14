@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Designer Feedback — {{ job_id }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8fafc; padding: 30px 0; }
+    .feedback-container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+    .question-card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .question-label { font-weight: 600; color: #1e293b; margin-bottom: 12px; display: block; font-size: 14px; }
+    .radio-option { padding: 5px 0; }
+    textarea { min-height: 80px; }
+    .header-card { background: #1e40af; color: white; padding: 24px; border-radius: 8px; margin-bottom: 24px; }
+    .core-message { font-style: italic; opacity: 0.9; margin: 8px 0 0 0; font-size: 14px; }
+    .submit-row { text-align: center; padding: 20px 0 8px; }
+    .btn-submit { padding: 12px 48px; font-size: 16px; }
+    .nav-links { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="feedback-container">
+
+  <div class="nav-links">
+    <a href="/workspace/view/{{ job_id }}" class="btn btn-sm btn-outline-secondary">&larr; Workspace</a>
+    <a href="/map/overlay/{{ job_id }}" class="btn btn-sm btn-outline-secondary ms-1">Overlay Map</a>
+  </div>
+
+  <div class="header-card">
+    <h2 class="mb-1">GridFlow Designer Feedback</h2>
+    <div class="small opacity-75">Job: {{ job_id }}</div>
+    <p class="core-message mb-0">
+      "You have survey evidence, but you still need confirmed DNO engineering records before design."
+    </p>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-danger">
+    <strong>Error:</strong> {{ error }}
+    <hr>
+    <p class="mb-0">
+      Make sure the registered job exists at
+      <code>uploads/jobs/{{ job_id }}/</code>.
+      Run the pipeline with <code>--register --job-id {{ job_id }}</code> first.
+    </p>
+  </div>
+  {% endif %}
+
+  {% if existing_feedback %}
+  <div class="alert alert-info">
+    <strong>Note:</strong> Feedback has already been submitted for this job.
+    Submitting again will append a new entry.
+  </div>
+  {% endif %}
+
+  {% if questions %}
+  <form method="POST" action="/feedback/{{ job_id }}/submit">
+
+    <div class="question-card">
+      <label class="question-label">Designer Name (optional)</label>
+      <input type="text" name="designer_name" class="form-control" placeholder="Anonymous">
+    </div>
+
+    <div class="question-card">
+      <label class="question-label">Designer Role (optional)</label>
+      <input type="text" name="designer_role" class="form-control"
+             placeholder="e.g. OHL Designer, Senior Engineer">
+    </div>
+
+    {% for q in questions %}
+    <div class="question-card">
+      <label class="question-label">{{ q.label }}</label>
+
+      {% if q.type == "textarea" %}
+        <textarea name="{{ q.id }}" class="form-control"
+                  {% if q.required %}required{% endif %}></textarea>
+      {% elif q.type == "radio" %}
+        {% for option in q.options %}
+        <div class="form-check radio-option">
+          <input class="form-check-input" type="radio"
+                 name="{{ q.id }}" id="{{ q.id }}_{{ loop.index }}"
+                 value="{{ option }}" {% if q.required %}required{% endif %}>
+          <label class="form-check-label" for="{{ q.id }}_{{ loop.index }}">
+            {{ option }}
+          </label>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="question-card">
+      <label class="question-label">Additional notes or comments (optional)</label>
+      <textarea name="additional_notes" class="form-control"
+                placeholder="Anything else worth recording from the review session..."></textarea>
+    </div>
+
+    <div class="submit-row">
+      <button type="submit" class="btn btn-primary btn-submit">Submit Feedback</button>
+    </div>
+
+  </form>
+  {% endif %}
+
+</div>
+
+</body>
+</html>
