@@ -94,6 +94,24 @@ def parse_args():
         help="Skip OSGB36→WGS84 coordinate transformation",
     )
     p.add_argument("--no-route-reconstruct", action="store_true", help="Skip route reconstruction")
+    p.add_argument(
+        "--job-id",
+        type=str,
+        default=None,
+        help="Job ID for registration. Auto-generated if not provided.",
+    )
+    p.add_argument(
+        "--register",
+        action="store_true",
+        default=False,
+        help="Register pipeline output into uploads/jobs/<job_id>/ for web access.",
+    )
+    p.add_argument(
+        "--overwrite-registration",
+        action="store_true",
+        default=False,
+        help="Allow --register to replace an existing uploads/jobs/<job_id>/ directory.",
+    )
     p.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return p.parse_args()
 
@@ -449,8 +467,14 @@ def main():
         _write_summary(run_id, args, run_dir, stages, overall_status, None, t_pipeline_start)
         return 1
 
+    registration_job_id = None
+    if args.register:
+        from gridflow.registration import generate_job_id
+
+        registration_job_id = args.job_id or generate_job_id()
+
     job_context = {
-        "job_id": run_id,
+        "job_id": registration_job_id or run_id,
         "baseline_file": Path(args.baseline).name,
         "baseline_path": str(args.baseline),
         "field_folder": Path(args.field).name,
@@ -489,6 +513,20 @@ def main():
     print()
     print("Next steps: Review 05_qa_report.md for required DNO actions.")
     print(SEP)
+
+    if args.register:
+        from gridflow.registration import (
+            print_registration_summary,
+            register_pipeline_output,
+        )
+
+        job_id = registration_job_id or args.job_id
+        job_dir = register_pipeline_output(
+            pipeline_run_dir=run_dir,
+            job_id=job_id,
+            overwrite=args.overwrite_registration,
+        )
+        print_registration_summary(job_id, job_dir)
 
     return 0
 

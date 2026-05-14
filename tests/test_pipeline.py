@@ -324,3 +324,53 @@ class TestPipelineOutputContent:
             path = run_dir / filename
             assert path.exists()
             assert len(path.read_text(encoding="utf-8")) > 500
+
+    def test_registration_uses_job_id_and_overwrite_flag(self, output_dir):
+        """--register passes job_id and overwrite intent to the registration bridge."""
+        captured = {}
+
+        def fake_register_pipeline_output(
+            pipeline_run_dir, job_id, jobs_root=None, overwrite=False
+        ):
+            captured["pipeline_run_dir"] = pipeline_run_dir
+            captured["job_id"] = job_id
+            captured["jobs_root"] = jobs_root
+            captured["overwrite"] = overwrite
+            return output_dir / "registered" / job_id
+
+        def fake_print_registration_summary(job_id, job_dir):
+            captured["summary"] = (job_id, job_dir)
+
+        with (
+            patch(
+                "gridflow.registration.register_pipeline_output",
+                side_effect=fake_register_pipeline_output,
+            ),
+            patch(
+                "gridflow.registration.print_registration_summary",
+                side_effect=fake_print_registration_summary,
+            ),
+        ):
+            rc = _run_pipeline(
+                [
+                    "--baseline",
+                    str(BASELINE_FIXTURE),
+                    "--field",
+                    str(FIELD_DATASET),
+                    "--output",
+                    str(output_dir),
+                    "--job-id",
+                    "PIPELINE_REG_TEST",
+                    "--register",
+                    "--overwrite-registration",
+                    "--log-level",
+                    "WARNING",
+                ]
+            )
+
+        assert rc == 0
+        assert captured["pipeline_run_dir"].name.startswith("pipeline_run_")
+        assert captured["job_id"] == "PIPELINE_REG_TEST"
+        assert captured["jobs_root"] is None
+        assert captured["overwrite"] is True
+        assert captured["summary"][0] == "PIPELINE_REG_TEST"

@@ -195,3 +195,66 @@ def test_overlay_view_unknown_job_still_renders(tmp_path, monkeypatch):
 
     res = client.get("/map/overlay/FAKE_JOB_ID")
     assert res.status_code == 200
+
+
+def test_overlay_data_accepts_pipeline_dataset_shape(tmp_path, monkeypatch):
+    """Overlay data accepts pipeline JSON shaped as dicts with poles arrays."""
+    jobs_root = tmp_path / "uploads" / "jobs"
+    job_id = "PIPELINE_SHAPE"
+    job_dir = jobs_root / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+
+    _write_json(
+        job_dir / "01_baseline_dataset.json",
+        {
+            "poles": [
+                {
+                    "support_no": "903203",
+                    "latitude": 54.1,
+                    "longitude": -2.9,
+                    "voltage_level": "LV",
+                    "asset_type": "POLE",
+                }
+            ]
+        },
+    )
+    _write_json(
+        job_dir / "02_field_dataset.json",
+        {
+            "poles": [
+                {
+                    "support_no": "903203",
+                    "latitude": 54.1001,
+                    "longitude": -2.9001,
+                    "evidence_quality": "HIGH",
+                }
+            ]
+        },
+    )
+    _write_json(
+        job_dir / "03_match_register.json",
+        {"entries": [{"support_no": "903203", "match_confidence": "HIGH"}]},
+    )
+    _write_json(
+        job_dir / "04_merged_dataset.json",
+        {
+            "poles": [
+                {
+                    "support_no": "903203",
+                    "design_ready": False,
+                    "conductor_verification_required": True,
+                }
+            ]
+        },
+    )
+
+    monkeypatch.setattr(map_overlay, "JOBS_ROOT", jobs_root)
+    client = create_app().test_client()
+
+    res = client.get(f"/map/overlay/data/{job_id}")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["statistics"]["total_baseline"] == 1
+    assert data["statistics"]["total_field"] == 1
+    assert data["statistics"]["total_matched"] == 1
+    assert data["design_status"]["903203"]["verification_flags"]["conductor_verification_required"]
