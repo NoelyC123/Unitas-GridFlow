@@ -19,6 +19,24 @@ GridFlow helps project teams answer practical survey-to-design questions:
 
 The current backend pipeline is complete through Stage 4C.
 
+## Current Status
+
+Stage 5 Pilot Pack Complete - Validation Active.
+
+Current verified test baseline:
+
+```text
+1331 passed, 1 skipped
+```
+
+Stage 4C backend reconciliation is complete. Stage 5 pilot-pack surfaces are now available for validation:
+
+- Stage 5A enhanced reports.
+- Stage 5B review workspace and pole detail views.
+- Stage 5C preview map overlay.
+
+This does not mean commercial/platform completion. The next step is real-job validation before broad Stage 6 implementation.
+
 ## Pipeline Diagram
 
 ```text
@@ -165,6 +183,7 @@ python scripts/run_pipeline.py \
 
 Expected output package:
 
+- `00_pilot_output_pack_index.md`
 - `01_baseline_dataset.json`
 - `02_field_dataset.json`
 - `03_match_register.json`
@@ -172,7 +191,24 @@ Expected output package:
 - `04_merged_dataset.json`
 - `04_merged_dataset.csv`
 - `05_qa_report.md`
+- `06_dno_data_request.md`
+- `07_design_readiness_summary.md`
+- `08_match_confidence_analysis.md`
+- `09_verification_flags_breakdown.md`
+- `10_evidence_provenance_log.md`
 - `pipeline_summary.json`
+
+### Useful Review Routes
+
+After a job has pipeline outputs available under `uploads/jobs/<job_id>` or an equivalent processed job location, useful review routes are:
+
+- `/workspace/view/<job_id>`
+- `/workspace/pole/<job_id>/<support_number>`
+- `/map/overlay/<job_id>`
+- `/map/view/<job_id>`
+- `/jobs/`
+
+`/map/overlay/<job_id>` is a preview/review overlay for baseline-field comparison. It is not a full GIS product.
 
 ### Run Individual Stages
 
@@ -219,7 +255,7 @@ pytest -v
 Current verified test result:
 
 ```text
-1,277 tests passing
+1331 passed, 1 skipped
 ```
 
 ## P_LOCAL_001 Validation Results
@@ -239,7 +275,7 @@ Current verified outcomes:
 | Design blocked | 10/10 |
 | Unified pipeline | Operational |
 | QA reports | Generated successfully |
-| Tests | 1,277 passing |
+| Tests | 1331 passed, 1 skipped |
 
 The `design_blocked=True` result for all 10 poles is correct. It means GridFlow has reconciled baseline and field evidence, but DNO engineering data is still required before final design.
 
@@ -273,7 +309,7 @@ scripts/
 
 GridFlow currently has these limitations:
 
-- No designer review UI yet.
+- Review workspace and preview overlay are available, but real-job validation is still active.
 - ENWL-focused validation to date.
 - No PoleCAD export yet.
 - No production multi-user workflow yet.
@@ -281,7 +317,7 @@ GridFlow currently has these limitations:
 - No production deployment layer.
 - No autonomous engineering design.
 
-P_LOCAL_001 proves the Stage 4C backend pipeline on a controlled ENWL evidence set. Larger jobs, other DNO formats, and production contractor workflows still require pilot validation.
+P_LOCAL_001 proves the Stage 4C backend pipeline on a controlled ENWL evidence set. Larger jobs, other DNO formats, Gordon/Bellsprings survey packs, P010/P011 where available, and production contractor workflows still require real-job validation.
 
 ## Current Roadmap
 
@@ -292,32 +328,37 @@ P_LOCAL_001 proves the Stage 4C backend pipeline on a controlled ENWL evidence s
 - Stage 4C.3 Baseline-to-Field Matching.
 - Stage 4C.4 Merge + QA.
 - Unified Pipeline CLI.
+- Stage 5A enhanced pilot reports.
+- Stage 5B review workspace improvements.
+- Stage 5C preview map overlay.
 
 ### Current Next Phase
 
-- Stage 5 - Pilot Hardening & Operational Review Workflow.
+- Stage 5 Validation - Real Job Review.
 
-### Planned Stage 5 Focus
+### Current Validation Focus
 
-- Review workspace UI.
-- Evidence/photo viewer.
-- Merged record explorer.
-- Blocker/action dashboard.
-- DNO request export packaging.
-- Multi-job validation.
-- ICP/Tier-1 pilot preparation.
+- Run the full pipeline and output pack on available real jobs.
+- Validate reports `00`, `05`, `06`, `07`, `08`, `09`, and `10`.
+- Validate workspace routes and pole detail pages.
+- Validate the preview map overlay and overlay JSON endpoint.
+- Document findings in `AI_CONTROL/111_STAGE5_VALIDATION_FINDINGS.md`.
+- Defer broad Stage 6 implementation until validation findings are recorded.
 
-## Stage 5 Preview
+## Stage 5 Pilot Pack
 
-Stage 5 will not replace the completed backend pipeline. It will make the pipeline usable in real pilot workflows.
+Stage 5 does not replace the completed backend pipeline. It packages the pipeline outputs for pilot review workflows.
 
-Planned outcomes:
+Available outcomes:
 
 - Designers can review merged pole records without reading raw JSON.
 - Evidence can be navigated alongside baseline and match data.
 - DNO data request packs can be generated from verification flags.
-- Review states can be tracked across poles and jobs.
-- Pilot teams can evaluate GridFlow on real survey-to-design handoffs.
+- Workspace and pole detail routes support review navigation.
+- A preview map overlay supports baseline-field comparison.
+- Pilot teams can start evaluating GridFlow on real survey-to-design handoffs.
+
+Validation is still active. Do not describe Stage 5 as fully complete in a commercial/platform sense until real-job findings are documented.
 
 ## Documentation
 
