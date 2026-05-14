@@ -7,6 +7,47 @@ This file is the rolling history of what shipped. Each entry is dated.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+## [Stage 5 Pilot Pack / Quick Wins] - 2026-05-14
+
+### Added
+
+- Added Stage 5A enhanced pilot reports:
+  - `00_pilot_output_pack_index.md`
+  - `06_dno_data_request.md`
+  - `07_design_readiness_summary.md`
+  - `08_match_confidence_analysis.md`
+  - `09_verification_flags_breakdown.md`
+  - `10_evidence_provenance_log.md`
+- Kept `05_qa_report.md` as the core Stage 4C QA output in the pilot pack.
+- Added job context to pilot reports so headers show the actual run/job id,
+  baseline filename, field evidence folder, and run timestamp.
+- Added Stage 5B workspace improvements:
+  - `/workspace/view/<job_id>`
+  - `/workspace/pole/<job_id>/<support_number>`
+  - improved navigation between jobs, workspace, pole detail, map, and QA report
+  - helpful workspace 404 pages for unknown jobs and unknown poles.
+- Added Stage 5C preview map overlay:
+  - `/map/overlay/<job_id>`
+  - overlay JSON endpoint
+  - baseline-field comparison view
+  - map overlay tests.
+
+### Validation
+
+- Current test baseline: `1331 passed, 1 skipped`.
+
+### Notes
+
+- Stage 5 Pilot Pack Complete - Validation Active.
+- The map overlay is a preview/review overlay, not a full GIS product.
+- Standards references in reports are guidance only; they do not claim ENA,
+  ESQCR, DNO, or engineering compliance has been verified.
+- Next task: real-job validation across available P_LOCAL_001, P010/P011,
+  Gordon, and Bellsprings datasets where available.
+- Broad Stage 6 implementation should wait until validation findings are
+  documented.
+
+---
 ## 2026-05-14 - Stage 4C Backend Pipeline Complete
 
 ### Added

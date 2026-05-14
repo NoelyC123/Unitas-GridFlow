@@ -4,25 +4,21 @@ Purpose: authoritative current-state file for all GridFlow workers and project r
 
 ## Current Status
 
-Stage 4C is COMPLETE.
+Stage 5 Pilot Pack Complete - Validation Active.
 
-GridFlow now has a working backend survey-to-design reconciliation pipeline for overhead line infrastructure workflows.
-
-The operational backend pipeline is:
+Stage 4C is complete. The backend reconciliation pipeline is operational:
 
 ```text
 Baseline -> Field -> Matching -> Merge -> QA
 ```
 
-Expanded:
+Stage 5 pilot-pack work is now merged on master:
 
-```text
-Baseline Ingest
-  -> Field Evidence Import
-  -> Baseline-to-Field Matching
-  -> Merge + QA
-  -> Structured Outputs
-```
+- Stage 5A enhanced report pack is active.
+- Stage 5B review workspace improvements are active.
+- Stage 5C preview map overlay is active.
+
+The next active phase is real-job validation, not broad new feature implementation.
 
 ## Current Product Identity
 
@@ -36,11 +32,14 @@ GridFlow is not:
 - a DNO records replacement,
 - a compliance certifier,
 - a PoleCAD replacement,
-- a production multi-user SaaS deployment.
+- a production multi-user SaaS deployment,
+- a full GIS product.
 
-## Current Modules
+The Stage 5C map overlay is a preview/review overlay for baseline-field comparison. It should not be described as production GIS.
 
-Stage 4C backend modules now present:
+## Current Modules And Surfaces
+
+Stage 4C backend modules:
 
 - `gridflow/baseline/` - baseline ingestion, schema validation, coordinate transformation, support number normalization, route reconstruction.
 - `gridflow/field/` - structured field evidence import, notes parsing, evidence quality scoring, special flag detection.
@@ -51,62 +50,78 @@ Unified CLI:
 
 - `scripts/run_pipeline.py`
 
-Stage CLIs:
+Stage 5A pilot reports:
 
-- `scripts/ingest_baseline.py`
-- `scripts/import_field_evidence.py`
-- `scripts/run_matching.py`
-- `scripts/run_merge.py`
+- `00_pilot_output_pack_index.md`
+- `05_qa_report.md`
+- `06_dno_data_request.md`
+- `07_design_readiness_summary.md`
+- `08_match_confidence_analysis.md`
+- `09_verification_flags_breakdown.md`
+- `10_evidence_provenance_log.md`
+
+Stage 5B workspace routes:
+
+- `/workspace/view/<job_id>`
+- `/workspace/pole/<job_id>/<support_number>`
+
+Stage 5C preview map overlay:
+
+- `/map/overlay/<job_id>`
+- overlay JSON endpoint
+- baseline-field comparison view
 
 ## Current Validation Status
 
-Validated against:
+Current test baseline:
+
+```text
+1331 passed, 1 skipped
+```
+
+Validated reference dataset:
 
 - `real_pilot_data/P_LOCAL_001/enwl_enrichment_clean`
 
-Verified outcomes:
+Known P_LOCAL_001 outcomes:
 
 - 10/10 poles matched.
 - 9 HIGH evidence quality.
 - 1 MEDIUM evidence quality.
 - 100% match rate.
 - All 10 poles have `design_blocked=True`.
-- QA reports generated successfully.
-- Unified pipeline operational.
-- 1,277 tests passing.
+- QA and pilot-pack reports generate successfully.
+- Workspace and preview overlay can review the output.
 
 The `design_blocked=True` result is correct and expected. It reflects that identity and evidence reconciliation can succeed while final design remains blocked pending DNO engineering data such as voltage, conductor specification, pole class, equipment ratings, and inspection history.
 
-## Current Limitations
+## Current Weakness
 
-GridFlow does not yet have:
+The current weakness is the real-job validation gap.
 
-- a review UI,
-- production multi-user workflow,
-- PoleCAD export,
-- live DNO API integration,
-- production deployment layer,
-- broad multi-DNO validation beyond the current ENWL-focused evidence set,
-- final design authorization capability.
+P_LOCAL_001 proves the workflow on a controlled reference evidence set. The next task is to validate the full pipeline, output pack, workspace, and preview overlay against available real jobs and survey packs, including:
 
-Current validation is strongest for ENWL-style support number and evidence workflows. Additional pilot work is required before broader claims across DNO regions, larger route datasets, and production contractor workflows.
+- P_LOCAL_001,
+- P010 where available,
+- P011 where available,
+- Gordon where available,
+- Bellsprings where available.
+
+Validation must document which jobs are usable, which files are missing, which outputs generate cleanly, and where the pipeline or review surfaces need refinement.
 
 ## Current Next Phase
 
-Current next phase:
+Current active phase:
 
 ```text
-Stage 5 - Pilot Hardening
+Stage 5 Validation - Real Job Review
 ```
 
-Stage 5 focus:
+Do not start broad Stage 6 implementation until validation findings are documented.
 
-- stabilize the completed Stage 4C backend pipeline,
-- improve operational review workflows,
-- plan and build review workspace capability,
-- validate larger and multi-job datasets,
-- prepare ICP/Tier-1 pilot workflows,
-- package DNO request outputs and designer review evidence.
+Expected validation output:
+
+- `AI_CONTROL/111_STAGE5_VALIDATION_FINDINGS.md`
 
 ## Source Of Truth Hierarchy
 
@@ -123,13 +138,14 @@ If sources conflict, prefer the newest committed control file and report the con
 
 Do not overclaim GridFlow output.
 
-Stage 4C provides reconciliation and QA. It does not certify:
+Stage 4C and Stage 5 pilot-pack outputs provide reconciliation, QA, review navigation, and DNO request preparation. They do not certify:
 
 - voltage,
 - conductor size or type,
 - pole class,
 - equipment ratings,
 - inspection history,
-- final design readiness.
+- final design readiness,
+- DNO-grade compliance.
 
-These remain DNO/designer responsibilities.
+Standards references in reports are guidance for review and request preparation only. They do not mean compliance has been verified.
