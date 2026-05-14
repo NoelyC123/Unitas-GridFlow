@@ -181,6 +181,35 @@ python scripts/run_pipeline.py \
   --output path/to/output
 ```
 
+## Registered Pipeline Runs
+
+To make pipeline output immediately viewable in the web interface, use the `--register` flag:
+
+```bash
+python scripts/run_pipeline.py \
+  --baseline tests/baseline/fixtures/enwl_sample.csv \
+  --field real_pilot_data/P_LOCAL_001/enwl_enrichment_clean \
+  --output /tmp/gridflow_run \
+  --job-id MY_JOB_ID \
+  --register
+```
+
+This copies pipeline output into `uploads/jobs/<job_id>/` so these routes work immediately:
+
+- Workspace: `http://127.0.0.1:5000/workspace/view/<job_id>`
+- Overlay map: `http://127.0.0.1:5000/map/overlay/<job_id>`
+- QA map: `http://127.0.0.1:5000/map/view/<job_id>`
+
+### Re-running with the Same Job ID
+
+If `uploads/jobs/<job_id>/` already exists, registration fails by default to prevent accidental data loss. To replace an existing registered job:
+
+```bash
+python scripts/run_pipeline.py ... --register --overwrite-registration
+```
+
+Without `--register`, the pipeline behaves exactly as before: output is written only to `--output`, and `uploads/jobs/` is not touched.
+
 Expected output package:
 
 - `00_pilot_output_pack_index.md`
