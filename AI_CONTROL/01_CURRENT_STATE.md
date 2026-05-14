@@ -4,7 +4,7 @@ Purpose: authoritative current-state file for all GridFlow workers and project r
 
 ## Current Status
 
-Stage 5 Pilot Pack Complete - Validation Active.
+Stage 5G Complete - Designer Review Ready.
 
 Stage 4C is complete. The backend reconciliation pipeline is operational:
 
@@ -12,13 +12,17 @@ Stage 4C is complete. The backend reconciliation pipeline is operational:
 Baseline -> Field -> Matching -> Merge -> QA
 ```
 
-Stage 5 pilot-pack work is now merged on master:
+Stage 5 has produced a pilot-ready review package:
 
-- Stage 5A enhanced report pack is active.
-- Stage 5B review workspace improvements are active.
-- Stage 5C preview map overlay is active.
+- ✅ Stage 5A: 11 pilot reports
+- ✅ Stage 5B: Review workspace
+- ✅ Stage 5C: Map overlay
+- ✅ Stage 5D: Quick wins (job names, navigation, errors)
+- ✅ Stage 5E: Pipeline output registration
+- ✅ Stage 5F: Truthfulness hardening (114 review document)
+- ✅ Stage 5G: Designer review kit
 
-The next active phase is real-job validation, not broad new feature implementation.
+The next active phase is an in-person designer review, not broad new feature implementation.
 
 ## Current Product Identity
 
@@ -53,6 +57,10 @@ Unified CLI:
 Stage 5A pilot reports:
 
 - `00_pilot_output_pack_index.md`
+- `01_baseline_dataset.json`
+- `02_field_dataset.json`
+- `03_match_register.csv`
+- `04_merged_dataset.json`
 - `05_qa_report.md`
 - `06_dno_data_request.md`
 - `07_design_readiness_summary.md`
@@ -71,12 +79,23 @@ Stage 5C preview map overlay:
 - overlay JSON endpoint
 - baseline-field comparison view
 
+Stage 5E registration bridge:
+
+- `scripts/run_pipeline.py --register --job-id <job_id>`
+- optional `--overwrite-registration`
+- registered output under `uploads/jobs/<job_id>/`
+
+Stage 5G designer review assets:
+
+- `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md`
+- `AI_CONTROL/115_DESIGNER_ONE_PAGER.html`
+
 ## Current Validation Status
 
-Current test baseline:
+Latest expected test baseline:
 
 ```text
-1331 passed, 1 skipped
+1355 passed
 ```
 
 Validated reference dataset:
@@ -91,37 +110,36 @@ Known P_LOCAL_001 outcomes:
 - 100% match rate.
 - All 10 poles have `design_blocked=True`.
 - QA and pilot-pack reports generate successfully.
-- Workspace and preview overlay can review the output.
+- Workspace and preview overlay can review registered output.
 
-The `design_blocked=True` result is correct and expected. It reflects that identity and evidence reconciliation can succeed while final design remains blocked pending DNO engineering data such as voltage, conductor specification, pole class, equipment ratings, and inspection history.
+The `design_blocked=True` result is correct and expected for this dataset. It reflects that identity and evidence reconciliation can succeed while final design remains blocked pending authoritative DNO engineering records such as voltage, conductor specification, pole class or strength rating, equipment ratings, and inspection history.
 
 ## Current Weakness
 
-The current weakness is the real-job validation gap.
+The current weakness is designer validation.
 
-P_LOCAL_001 proves the workflow on a controlled reference evidence set. The next task is to validate the full pipeline, output pack, workspace, and preview overlay against available real jobs and survey packs, including:
+P_LOCAL_001 proves the workflow on a controlled reference evidence set. It does not yet prove that a practising UK OHL designer understands, trusts, or would use the output on a live project.
 
-- P_LOCAL_001,
-- P010 where available,
-- P011 where available,
-- Gordon where available,
-- Bellsprings where available.
+The next task is to conduct the structured designer review using:
 
-Validation must document which jobs are usable, which files are missing, which outputs generate cleanly, and where the pipeline or review surfaces need refinement.
+- `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md`
+- `AI_CONTROL/115_DESIGNER_ONE_PAGER.html`
+- registered job `P_LOCAL_DESIGNER_REVIEW`
+- live feedback capture route when available
 
 ## Current Next Phase
 
 Current active phase:
 
 ```text
-Stage 5 Validation - Real Job Review
+Conduct Designer Review - In-Person Walk-Through
 ```
 
-Do not start broad Stage 6 implementation until validation findings are documented.
+Do not start Stage 6 implementation until designer feedback is captured and documented.
 
-Expected validation output:
+Expected review output:
 
-- `AI_CONTROL/111_STAGE5_VALIDATION_FINDINGS.md`
+- `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md`
 
 ## Source Of Truth Hierarchy
 
@@ -147,5 +165,7 @@ Stage 4C and Stage 5 pilot-pack outputs provide reconciliation, QA, review navig
 - inspection history,
 - final design readiness,
 - DNO-grade compliance.
+
+Conductor spec and pole class/strength rating require authoritative confirmation from DNO baseline engineering records. Field evidence may suggest these attributes, but they should not be treated as authoritative design inputs unless confirmed by DNO or baseline records.
 
 Standards references in reports are guidance for review and request preparation only. They do not mean compliance has been verified.

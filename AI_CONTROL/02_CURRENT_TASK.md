@@ -1,89 +1,91 @@
 # Current Active Phase
 
-Stage 5 Validation - Real Job Review
+Conduct Designer Review - In-Person Walk-Through
 
 ## Active Priority
 
-Validate the completed Stage 5 pilot pack against available real jobs before starting broad new feature implementation.
+Run the Stage 5G designer review using the structured script and one-page summary.
 
-Stage 4C is complete, and Stage 5A/5B/5C pilot-pack surfaces are active:
+Use:
 
-- enhanced reports,
-- review workspace,
-- pole detail pages,
-- helpful workspace error pages,
-- preview map overlay,
-- overlay JSON endpoint.
+- `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md` as the walk-through script.
+- `AI_CONTROL/115_DESIGNER_ONE_PAGER.html` as the printed summary handed to the designer at the start.
+- Registered job `P_LOCAL_DESIGNER_REVIEW`.
+- Feedback route `http://127.0.0.1:5000/feedback/<job_id>` when available.
 
-The current priority is to prove the package on real job data, document findings, and identify the smallest set of fixes needed before any Stage 6 work.
+## Review Setup
 
-## Validation Targets
-
-Use available local data only. Discover paths rather than assuming exact locations.
-
-Candidate targets:
-
-- P_LOCAL_001,
-- P010,
-- P011,
-- Gordon,
-- Bellsprings.
-
-Useful path-discovery commands:
+Create the registered review job:
 
 ```bash
-find real_pilot_data uploads validation_data -maxdepth 4 -type f \( -name "*.csv" -o -name "*.json" -o -name "*.md" \) 2>/dev/null | sort
-find real_pilot_data uploads validation_data -maxdepth 5 -type d \( -name "enwl_enrichment_clean" -o -name "pipeline_run_*" -o -name "photos_final" \) 2>/dev/null | sort
-find uploads/jobs uploads/projects -maxdepth 4 -type f \( -name "*.csv" -o -name "04_merged_dataset.json" -o -name "pipeline_summary.json" \) 2>/dev/null | sort
+cd /Users/noelcollins/Unitas-GridFlow
+source .venv312/bin/activate
+
+python scripts/run_pipeline.py \
+  --baseline tests/baseline/fixtures/enwl_sample.csv \
+  --field real_pilot_data/P_LOCAL_001/enwl_enrichment_clean \
+  --output /tmp/gridflow_designer_review \
+  --job-id P_LOCAL_DESIGNER_REVIEW \
+  --register \
+  --overwrite-registration
 ```
 
-Do not commit real job data, photos, local uploads, or validation outputs unless explicitly approved and anonymised.
+Run the pre-flight check when available:
 
-## Per-Job Checklist
+```bash
+python scripts/preflight_designer_review.py P_LOCAL_DESIGNER_REVIEW
+```
 
-For each usable job or survey pack, record:
+Start Flask:
 
-- baseline source found,
-- field evidence source found,
-- whether `scripts/run_pipeline.py` can run,
-- whether reports `00`, `05`, `06`, `07`, `08`, `09`, and `10` are generated,
-- whether `/workspace/view/<job_id>` loads,
-- whether `/workspace/pole/<job_id>/<support_number>` loads for at least one pole,
-- whether `/map/overlay/<job_id>` loads as a preview/review overlay,
-- whether overlay JSON returns usable baseline-field comparison data,
-- match rate,
-- evidence quality distribution,
-- design-ready/design-blocked counts,
-- verification flag counts,
-- missing file/path issues,
-- data quality issues,
-- wording or usability issues,
-- recommended fix category: data issue, pipeline issue, report issue, workspace issue, overlay issue, or documentation issue.
+```bash
+export FLASK_APP=run.py
+flask run
+```
 
-## Required Output
+Review routes:
 
-Create:
+- Workspace: `http://127.0.0.1:5000/workspace/view/P_LOCAL_DESIGNER_REVIEW`
+- Overlay map: `http://127.0.0.1:5000/map/overlay/P_LOCAL_DESIGNER_REVIEW`
+- QA map: `http://127.0.0.1:5000/map/view/P_LOCAL_DESIGNER_REVIEW`
+- Feedback form: `http://127.0.0.1:5000/feedback/P_LOCAL_DESIGNER_REVIEW`
 
-- `AI_CONTROL/111_STAGE5_VALIDATION_FINDINGS.md`
+## Core Message
 
-The findings document should include:
+Use this wording throughout the review:
 
-- jobs checked,
-- paths discovered,
-- commands run,
-- generated outputs,
-- pass/fail/partial result per job,
-- report quality observations,
-- workspace observations,
-- map overlay observations,
-- data blockers,
-- recommended fixes,
-- whether validation is sufficient to proceed to targeted hardening,
-- whether any Stage 6 planning is justified.
+> You have survey evidence, but you still need confirmed DNO engineering
+> records before design.
+
+Conductor spec and pole class/strength rating require authoritative confirmation from DNO baseline engineering records. Field evidence may suggest these attributes, but they should not be treated as authoritative design inputs unless confirmed by DNO or baseline records.
+
+In the current readiness model, poles without confirmed conductor specification and pole class/strength rating remain design-blocked until the relevant DNO engineering records are obtained.
+
+## Feedback Capture
+
+Capture designer feedback through the live form where possible:
+
+- `http://127.0.0.1:5000/feedback/P_LOCAL_DESIGNER_REVIEW`
+
+If the live form is unavailable, use the paper backup table in `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md`.
+
+Document findings in:
+
+- `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md`
+
+The findings document must include:
+
+- one direct designer quote per review question where possible,
+- severity per finding,
+- whether the designer understands why 0/10 design-ready is correct for this dataset,
+- whether Report 06 is usable for a DNO data request,
+- whether the workspace and map overlay are useful enough for pilot review,
+- whether photo/evidence integration is a blocker or later enhancement,
+- the recommended next phase.
 
 ## Active Boundaries
 
-Do not implement new features until `AI_CONTROL/111_STAGE5_VALIDATION_FINDINGS.md` exists.
+Do not start Stage 6 implementation until designer feedback is captured and `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md` exists.
 
 Do not claim:
 
@@ -101,15 +103,16 @@ Do preserve:
 - source authority hierarchy,
 - verification flags,
 - design blocker visibility,
-- real-job validation notes,
+- designer feedback as the next decision input,
 - local-data privacy boundaries.
 
 ## Acceptance Direction
 
-Stage 5 validation should answer:
+The designer review should answer:
 
-- Which real jobs can run through the current pipeline?
-- Which reports are useful without manual interpretation?
-- Which workspace and overlay routes are reliable enough for pilot review?
-- Which blockers are due to missing DNO data rather than pipeline failure?
-- What must be fixed before an ICP/Tier-1 pilot review?
+- Can a UK OHL designer explain what GridFlow does after a 25-minute walk-through?
+- Does the designer understand that 0/10 design-ready is due to missing DNO engineering records, not pipeline failure?
+- Is Report 06 clear enough to support a real DNO data request?
+- Does the workspace help designers inspect matched poles efficiently?
+- Does the map overlay help detect baseline-field alignment issues?
+- What is the first practical improvement needed before a controlled pilot?

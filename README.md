@@ -363,16 +363,16 @@ P_LOCAL_001 proves the Stage 4C backend pipeline on a controlled ENWL evidence s
 
 ### Current Next Phase
 
-- Stage 5 Validation - Real Job Review.
+- Stage 5G Designer Review - In-Person Walk-Through.
 
-### Current Validation Focus
+### Current Review Focus
 
-- Run the full pipeline and output pack on available real jobs.
-- Validate reports `00`, `05`, `06`, `07`, `08`, `09`, and `10`.
-- Validate workspace routes and pole detail pages.
-- Validate the preview map overlay and overlay JSON endpoint.
-- Document findings in `AI_CONTROL/111_STAGE5_VALIDATION_FINDINGS.md`.
-- Defer broad Stage 6 implementation until validation findings are recorded.
+- Create the registered review job `P_LOCAL_DESIGNER_REVIEW`.
+- Use `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md` as the 25-minute walk-through.
+- Hand `AI_CONTROL/115_DESIGNER_ONE_PAGER.html` to the designer at the start.
+- Capture feedback through the live feedback route when available.
+- Document findings in `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md`.
+- Defer Stage 6 implementation until designer feedback is captured.
 
 ## Stage 5 Pilot Pack
 
@@ -388,6 +388,42 @@ Available outcomes:
 - Pilot teams can start evaluating GridFlow on real survey-to-design handoffs.
 
 Validation is still active. Do not describe Stage 5 as fully complete in a commercial/platform sense until real-job findings are documented.
+
+## Designer Review
+
+Stage 5G provides a structured designer review kit:
+
+```bash
+# 1. Create the registered review job
+python scripts/run_pipeline.py \
+  --baseline tests/baseline/fixtures/enwl_sample.csv \
+  --field real_pilot_data/P_LOCAL_001/enwl_enrichment_clean \
+  --output /tmp/gridflow_designer_review \
+  --job-id P_LOCAL_DESIGNER_REVIEW \
+  --register \
+  --overwrite-registration
+
+# 2. Run the pre-flight check
+python scripts/preflight_designer_review.py P_LOCAL_DESIGNER_REVIEW
+
+# 3. Start Flask
+export FLASK_APP=run.py
+flask run
+
+# 4. Open the printable one-pager for the designer
+open AI_CONTROL/115_DESIGNER_ONE_PAGER.html
+
+# 5. Follow the review script
+open AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md
+```
+
+Review routes:
+
+- Workspace: `http://127.0.0.1:5000/workspace/view/P_LOCAL_DESIGNER_REVIEW`
+- Overlay map: `http://127.0.0.1:5000/map/overlay/P_LOCAL_DESIGNER_REVIEW`
+- Live feedback form: `http://127.0.0.1:5000/feedback/P_LOCAL_DESIGNER_REVIEW`
+
+Feedback is saved to `uploads/jobs/P_LOCAL_DESIGNER_REVIEW/feedback.json`.
 
 ## Documentation
 
