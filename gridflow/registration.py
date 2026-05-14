@@ -70,7 +70,7 @@ def register_pipeline_output(
     if job_dir.exists():
         if not overwrite:
             raise FileExistsError(
-                f"Job directory already exists: {job_dir}. "
+                f"Job '{job_id}' already exists at {job_dir}. "
                 "Use --overwrite-registration to replace it."
             )
         logger.warning("Job directory already exists, overwriting: %s", job_dir)

@@ -100,6 +100,52 @@ def test_unmatched_poles_in_register(builder):
     assert register.unmatched_baseline == 1
 
 
+def test_match_rate_excludes_extra_field_entries(builder):
+    """EXTRA_FIELD poles must not inflate the match rate (Stage 5F regression)."""
+    # 10 baseline poles, 9 matched, 1 baseline UNMATCHED (blank name), 1 field EXTRA
+    baseline = BaselineDataset(poles=[make_bp(f"P{i:02d}", f"90320{i}") for i in range(10)])
+    field = FieldDataset(
+        dataset_path="/t",
+        scan_date="2026",
+        poles=[make_fp(f"0{i + 1}_SUPPORT_90320{i}_LV", f"90320{i}") for i in range(9)]
+        + [make_fp("10_SUPPORT_902204_HV", "902204")],
+        total_poles=10,
+    )
+    match_results = [
+        make_mr(f"90320{i}", "EXACT", f"0{i + 1}_SUPPORT_90320{i}_LV") for i in range(9)
+    ] + [
+        MatchResult(
+            baseline_pole_id="P09",
+            baseline_support_no="",  # blank — like Trimble row with no Point Name
+            match_type="UNMATCHED",
+            match_confidence="UNMATCHED",
+        )
+    ]
+    register = builder.build(match_results, baseline, field)
+
+    assert register.matched == 9
+    assert register.unmatched_baseline == 1
+    assert register.unmatched_field == 1
+    assert register.match_rate == pytest.approx(90.0)
+
+
+def test_compute_stats_extra_field_not_counted_as_matched():
+    """compute_stats must exclude EXTRA_FIELD from matched count."""
+    from gridflow.matching.models import MatchRegister, MatchRegisterEntry
+
+    reg = MatchRegister(baseline_total=10, field_total=10)
+    reg.entries = [
+        MatchRegisterEntry(support_no="A", match_type="EXACT", match_confidence="HIGH"),
+        MatchRegisterEntry(support_no="B", match_type="EXACT", match_confidence="HIGH"),
+        MatchRegisterEntry(support_no="C", match_type="UNMATCHED", match_confidence="UNMATCHED"),
+        MatchRegisterEntry(support_no="D", match_type="EXTRA_FIELD", match_confidence="UNMATCHED"),
+    ]
+    reg.compute_stats()
+
+    assert reg.matched == 2  # EXACT only, not EXTRA_FIELD
+    assert reg.match_rate == pytest.approx(20.0)  # 2/10
+
+
 def test_export_csv(builder, tmp_path):
     baseline = BaselineDataset(poles=[make_bp()])
     field = FieldDataset(
@@ -124,9 +170,7 @@ def test_export_csv(builder, tmp_path):
 
 def test_duplicate_support_numbers_preserved_in_register(builder):
     """Duplicate baseline support numbers should remain visible in register output."""
-    baseline = BaselineDataset(
-        poles=[make_bp("P01", "903203"), make_bp("P02", "903203")]
-    )
+    baseline = BaselineDataset(poles=[make_bp("P01", "903203"), make_bp("P02", "903203")])
     field = FieldDataset(
         dataset_path="/t",
         scan_date="2026",

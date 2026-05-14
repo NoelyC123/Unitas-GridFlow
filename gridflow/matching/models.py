@@ -62,7 +62,7 @@ class MatchRegister(BaseModel):
         self.high_confidence = sum(1 for e in self.entries if e.match_confidence == "HIGH")
         self.medium_confidence = sum(1 for e in self.entries if e.match_confidence == "MEDIUM")
         self.low_confidence = sum(1 for e in self.entries if e.match_confidence == "LOW")
-        matched = sum(1 for e in self.entries if e.match_type != "UNMATCHED")
+        matched = sum(1 for e in self.entries if e.match_type not in ("UNMATCHED", "EXTRA_FIELD"))
         self.matched = matched
         if self.baseline_total > 0:
             self.match_rate = (matched / self.baseline_total) * 100
