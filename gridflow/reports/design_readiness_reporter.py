@@ -113,12 +113,12 @@ class DesignReadinessReporter:
     @staticmethod
     def _overall_status(total: int, ready: int, blocked: int) -> str:
         if total == 0:
-            return "NO DATA"
+            return "ℹ️ NO DATA"
         if ready == total:
-            return "DESIGN-READY"
+            return "✅ DESIGN-READY (All Poles)"
         if ready > 0 and blocked > 0:
-            return "PARTIALLY READY"
-        return "DESIGN-BLOCKED (DNO Data Required)"
+            return f"ℹ️ PARTIALLY READY ({ready} ready, {blocked} blocked)"
+        return "⚠️ DESIGN-BLOCKED (DNO Data Required)"
 
     @staticmethod
     def _pct(count: int, total: int) -> str:

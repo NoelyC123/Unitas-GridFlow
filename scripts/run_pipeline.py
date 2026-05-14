@@ -41,7 +41,10 @@ from gridflow.merge import DataMerger, QAReportGenerator
 from gridflow.reports import (
     DesignReadinessReporter,
     DNORequestReporter,
+    EvidenceProvenanceReporter,
     MatchConfidenceReporter,
+    PilotIndexReporter,
+    VerificationFlagsReporter,
 )
 
 logger = logging.getLogger(__name__)
@@ -346,9 +349,19 @@ def run_stage5a_reports(merged, run_dir: Path) -> list[Path]:
 
     merged_poles = merged.poles
     reporters = [
+        (
+            "00_pilot_output_pack_index.md",
+            PilotIndexReporter(
+                baseline_source=merged.baseline_source,
+                field_source=merged.field_source,
+                output_dir=run_dir,
+            ),
+        ),
         ("06_dno_data_request.md", DNORequestReporter()),
         ("07_design_readiness_summary.md", DesignReadinessReporter()),
         ("08_match_confidence_analysis.md", MatchConfidenceReporter()),
+        ("09_verification_flags_breakdown.md", VerificationFlagsReporter()),
+        ("10_evidence_provenance_log.md", EvidenceProvenanceReporter()),
     ]
 
     written: list[Path] = []

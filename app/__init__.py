@@ -124,4 +124,11 @@ def create_app() -> Flask:
     except Exception as exc:
         app.logger.warning(f"review_page blueprint not loaded: {exc}")
 
+    try:
+        from app.routes.workspace import workspace_bp
+
+        app.register_blueprint(workspace_bp)
+    except Exception as exc:
+        app.logger.warning(f"workspace blueprint not loaded: {exc}")
+
     return app

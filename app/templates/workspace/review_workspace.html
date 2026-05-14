@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Review Workspace — {{ job_id }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body { background: #f5f7fb; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .page-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 40px; }
+    .stat-card { border-radius: 10px; padding: 18px 20px; }
+    .filter-bar { background: #fff; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+    .badge-high { background: #198754; }
+    .badge-medium { background: #fd7e14; }
+    .badge-low { background: #dc3545; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/jobs">Jobs</a></li>
+      <li class="breadcrumb-item active">Workspace — {{ job_id }}</li>
+    </ol>
+  </nav>
+
+  <h1 class="mb-1">Review Workspace</h1>
+  <p class="text-muted mb-4">Job: <code>{{ job_id }}</code></p>
+
+  <!-- Statistics panel -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card bg-white border text-center">
+        <div class="text-muted small mb-1">Total Poles</div>
+        <div class="fs-2 fw-bold">{{ stats.total_poles }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card bg-success bg-opacity-10 border border-success text-center">
+        <div class="text-success small mb-1">Design Ready</div>
+        <div class="fs-2 fw-bold text-success">{{ stats.design_ready }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card bg-warning bg-opacity-10 border border-warning text-center">
+        <div class="text-warning-emphasis small mb-1">Design Blocked</div>
+        <div class="fs-2 fw-bold text-warning-emphasis">{{ stats.design_blocked }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card bg-danger bg-opacity-10 border border-danger text-center">
+        <div class="text-danger small mb-1">With Flags</div>
+        <div class="fs-2 fw-bold text-danger">{{ stats.poles_with_flags }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar mb-4">
+    <div class="fw-semibold mb-2"><i class="bi bi-funnel"></i> Filter Poles</div>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/workspace/view/{{ job_id }}"
+         class="btn btn-sm {{ 'btn-secondary' if not active_filters else 'btn-outline-secondary' }}">
+        All Poles
+      </a>
+      <a href="/workspace/view/{{ job_id }}?design_ready=true"
+         class="btn btn-sm {{ 'btn-success' if active_filters.get('design_ready') == true else 'btn-outline-success' }}">
+        Design Ready
+      </a>
+      <a href="/workspace/view/{{ job_id }}?design_ready=false"
+         class="btn btn-sm {{ 'btn-warning' if active_filters.get('design_ready') == false else 'btn-outline-warning' }}">
+        Design Blocked
+      </a>
+      <a href="/workspace/view/{{ job_id }}?match_confidence=HIGH"
+         class="btn btn-sm {{ 'btn-primary' if active_filters.get('match_confidence') == 'HIGH' else 'btn-outline-primary' }}">
+        HIGH Confidence
+      </a>
+      <a href="/workspace/view/{{ job_id }}?match_confidence=MEDIUM"
+         class="btn btn-sm {{ 'btn-info' if active_filters.get('match_confidence') == 'MEDIUM' else 'btn-outline-info' }}">
+        MEDIUM
+      </a>
+      <a href="/workspace/view/{{ job_id }}?match_confidence=LOW"
+         class="btn btn-sm {{ 'btn-danger' if active_filters.get('match_confidence') == 'LOW' else 'btn-outline-danger' }}">
+        LOW
+      </a>
+      <a href="/workspace/view/{{ job_id }}?has_flags=true"
+         class="btn btn-sm {{ 'btn-danger' if active_filters.get('has_flags') else 'btn-outline-danger' }}">
+        <i class="bi bi-flag-fill"></i> Has Flags
+      </a>
+    </div>
+  </div>
+
+  <!-- Poles table -->
+  <div class="bg-white rounded border p-3">
+    <h5 class="mb-3">Poles <span class="text-muted fs-6">({{ poles_with_eq|length }} shown)</span></h5>
+    {% if poles_with_eq %}
+    <div class="table-responsive">
+      <table class="table table-hover table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Support No</th>
+            <th>Design Status</th>
+            <th>Evidence Quality</th>
+            <th>Match Confidence</th>
+            <th>Flags</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pole, eq in poles_with_eq %}
+          <tr>
+            <td><strong>{{ pole.support_no }}</strong></td>
+            <td>
+              {% if pole.design_ready %}
+                <span class="badge bg-success">Ready</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Blocked</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if eq == 'HIGH' %}
+                <span class="badge badge-high text-white">HIGH</span>
+              {% elif eq == 'MEDIUM' %}
+                <span class="badge badge-medium text-white">MEDIUM</span>
+              {% else %}
+                <span class="badge badge-low text-white">LOW</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if pole.match_confidence == 'HIGH' %}
+                <span class="badge bg-primary">HIGH</span>
+              {% elif pole.match_confidence == 'MEDIUM' %}
+                <span class="badge bg-info">MEDIUM</span>
+              {% elif pole.match_confidence == 'LOW' %}
+                <span class="badge bg-danger">LOW</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ pole.match_confidence }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% set flag_count = [
+                pole.voltage_verification_required,
+                pole.conductor_verification_required,
+                pole.pole_class_verification_required,
+                pole.condition_verification_required,
+                pole.identity_verification_required,
+                pole.equipment_conflict_flag
+              ] | select | list | length %}
+              {% if flag_count > 0 %}
+                <span class="badge bg-danger">{{ flag_count }} flag{{ 's' if flag_count != 1 }}</span>
+              {% else %}
+                <span class="text-muted small">None</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="/workspace/pole/{{ job_id }}/{{ pole.support_no }}"
+                 class="btn btn-sm btn-outline-primary">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-muted mb-0">No poles match the current filters.</p>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>
