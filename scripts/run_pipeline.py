@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
 """
 GridFlow Unified Pipeline CLI
 
@@ -17,15 +18,18 @@ from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from gridflow.baseline import (
-    CSVParser,
     CoordinateTransformer,
+    CSVParser,
     RouteReconstructor,
     SchemaValidator,
 )
 from gridflow.field import (
     EvidenceQualityScorer,
-    FieldDatasetValidator,
     FolderScanner,
 )
 from gridflow.matching import (
@@ -34,11 +38,17 @@ from gridflow.matching import (
     SupportNumberMatcher,
 )
 from gridflow.merge import DataMerger, QAReportGenerator
+from gridflow.reports import (
+    DesignReadinessReporter,
+    DNORequestReporter,
+    MatchConfidenceReporter,
+)
 
 logger = logging.getLogger(__name__)
 
 
 # ─── Argument parsing ────────────────────────────────────────────────────────
+
 
 def parse_args():
     p = ArgumentParser(
@@ -51,27 +61,37 @@ def parse_args():
             "    --output ./output/"
         ),
     )
-    p.add_argument("--baseline", required=True, type=Path,
-                   help="Path to DNO baseline CSV file")
-    p.add_argument("--field", required=True, type=Path,
-                   help="Path to field evidence root folder")
-    p.add_argument("--output", required=True, type=Path,
-                   help="Output directory (created if not exists)")
-    p.add_argument("--baseline-format", default="AUTO",
-                   choices=["AUTO", "ENWL", "TRIMBLE", "GENERIC"],
-                   help="Baseline CSV format (default: AUTO-detect)")
-    p.add_argument("--report", action="store_true", default=True,
-                   help="Generate QA report markdown (default: yes)")
-    p.add_argument("--csv", action="store_true", default=True,
-                   help="Generate per-pole CSV summary (default: yes)")
-    p.add_argument("--strict", action="store_true",
-                   help="Fail on any validation error")
-    p.add_argument("--no-coord-transform", action="store_true",
-                   help="Skip OSGB36→WGS84 coordinate transformation")
-    p.add_argument("--no-route-reconstruct", action="store_true",
-                   help="Skip route reconstruction")
-    p.add_argument("--log-level", default="INFO",
-                   choices=["DEBUG", "INFO", "WARNING", "ERROR"])
+    p.add_argument("--baseline", required=True, type=Path, help="Path to DNO baseline CSV file")
+    p.add_argument("--field", required=True, type=Path, help="Path to field evidence root folder")
+    p.add_argument(
+        "--output", required=True, type=Path, help="Output directory (created if not exists)"
+    )
+    p.add_argument(
+        "--baseline-format",
+        default="AUTO",
+        choices=["AUTO", "ENWL", "TRIMBLE", "GENERIC"],
+        help="Baseline CSV format (default: AUTO-detect)",
+    )
+    p.add_argument(
+        "--report",
+        action="store_true",
+        default=True,
+        help="Generate QA report markdown (default: yes)",
+    )
+    p.add_argument(
+        "--csv",
+        action="store_true",
+        default=True,
+        help="Generate per-pole CSV summary (default: yes)",
+    )
+    p.add_argument("--strict", action="store_true", help="Fail on any validation error")
+    p.add_argument(
+        "--no-coord-transform",
+        action="store_true",
+        help="Skip OSGB36→WGS84 coordinate transformation",
+    )
+    p.add_argument("--no-route-reconstruct", action="store_true", help="Skip route reconstruction")
+    p.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     return p.parse_args()
 
 
@@ -99,6 +119,7 @@ def stage_fail(elapsed, err):
 
 
 # ─── Stage implementations ───────────────────────────────────────────────────
+
 
 def run_stage1(args, run_dir: Path) -> tuple[object, dict]:
     """Stage 1: Baseline Ingest."""
@@ -317,7 +338,34 @@ def run_stage4(baseline_dataset, field_dataset, register, run_dir: Path) -> tupl
     return merged, result
 
 
+def run_stage5a_reports(merged, run_dir: Path) -> list[Path]:
+    """Generate Stage 5A pilot output pack reports."""
+    logger.info("=" * 60)
+    logger.info("Stage 5A — Generating Pilot Reports")
+    logger.info("=" * 60)
+
+    merged_poles = merged.poles
+    reporters = [
+        ("06_dno_data_request.md", DNORequestReporter()),
+        ("07_design_readiness_summary.md", DesignReadinessReporter()),
+        ("08_match_confidence_analysis.md", MatchConfidenceReporter()),
+    ]
+
+    written: list[Path] = []
+    for filename, reporter in reporters:
+        logger.info("Generating %s...", filename)
+        report_text = reporter.generate(merged_poles)
+        path = run_dir / filename
+        path.write_text(report_text, encoding="utf-8")
+        logger.info("✓ Report: %s (%d chars)", path.name, len(report_text))
+        written.append(path)
+
+    logger.info("Stage 5A reports generated successfully")
+    return written
+
+
 # ─── Pipeline orchestrator ───────────────────────────────────────────────────
+
 
 def main():
     args = parse_args()
@@ -336,7 +384,7 @@ def main():
 
     banner(
         f"GRIDFLOW PIPELINE — SURVEY-TO-DESIGN WORKFLOW\n"
-        f"{'='*70}\n"
+        f"{'=' * 70}\n"
         f"Run ID:  {run_id}\n"
         f"Baseline: {args.baseline}\n"
         f"Field:    {args.field}\n"
@@ -386,9 +434,7 @@ def main():
     # ── Stage 4 ──
     stage_header(4, 4, "Merge + QA Analysis")
     try:
-        merged, stages["merge"] = run_stage4(
-            baseline_dataset, field_dataset, register, run_dir
-        )
+        merged, stages["merge"] = run_stage4(baseline_dataset, field_dataset, register, run_dir)
     except Exception as e:
         elapsed = time.monotonic() - t_pipeline_start
         stage_fail(elapsed, e)
@@ -396,6 +442,13 @@ def main():
         overall_status = "FAILED"
         _write_summary(run_id, args, run_dir, stages, overall_status, None, t_pipeline_start)
         return 1
+
+    try:
+        report_paths = run_stage5a_reports(merged, run_dir)
+        print(f"  Stage 5A reports: {len(report_paths)} files")
+    except Exception as e:
+        logger.warning("Stage 5A reporting failed (pipeline result preserved): %s", e)
+        print(f"  Stage 5A reports: FAILED ({e})")
 
     # ── Summary ──
     total_elapsed = time.monotonic() - t_pipeline_start
@@ -442,7 +495,9 @@ def _write_summary(
         "run_date": datetime.now().isoformat(),
         "baseline_source": str(args.baseline),
         "field_source": str(args.field),
-        "baseline_format_detected": stages.get("baseline_ingest", {}).get("format_detected", "UNKNOWN"),
+        "baseline_format_detected": stages.get("baseline_ingest", {}).get(
+            "format_detected", "UNKNOWN"
+        ),
         "duration_seconds": round(elapsed, 3),
         "stages": stages,
         "overall_status": overall_status,
