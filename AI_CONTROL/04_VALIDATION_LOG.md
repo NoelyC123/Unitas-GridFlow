@@ -446,3 +446,20 @@ Purpose: record validation runs and evidence paths so branch readiness is visibl
 - Screenshots: no
 - Verdict: pending (expected pass with 1050+ tests, 1 skipped)
 - Notes: P_LOCAL_001 Field-Capture Review documents (89–90) classifying P_LOCAL_001 as field-capture validation proof and explaining Phase 4 requirements. Control files (00, 02, 03, 04, 05, CHANGELOG) updated with field-capture readiness task context. All P_LOCAL_001 CSV/photos remain local-only and git-ignored. Stage 4C remains blocked until Phase 4 complete.
+
+## 2026-05-15 — P_LOCAL_002 evidence audit pass
+
+Validation command:
+python3 scripts/audit_plocal002_evidence.py --root real_pilot_data/P_LOCAL_002 --verbose
+
+Result:
+PASS
+
+Audit summary:
+- Pole folders: 10
+- Known support numbers: 10/10
+- Notes present: 10/10
+- Folders with missing evidence flags: 0/10
+
+Audit file:
+real_pilot_data/P_LOCAL_002/route_notes/P_LOCAL_002_EVIDENCE_AUDIT.md

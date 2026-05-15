@@ -545,3 +545,20 @@ Append-only rule: add new entries below. Do not rewrite previous entries except 
 - Files changed: AI_CONTROL/95_P_LOCAL_001_FIELD_CAPTURE_RESULT.md,AI_CONTROL/00_PROJECT_BOARD.md,AI_CONTROL/02_CURRENT_TASK.md,AI_CONTROL/03_WORKER_LOG.md,AI_CONTROL/04_VALIDATION_LOG.md,AI_CONTROL/05_HANDOFF.md,CHANGELOG.md
 - Validation state: `pytest -v` passed with `1075 passed, 1 skipped`; `pre-commit run --all-files` passed; `python3.13 scripts/repo_health.py` warning-only before commit due to expected dirty governance files; pre-commit merge-safety warning-only because branch changes were not yet committed; local final validator result recorded 9 valid rows, 0 blocked rows, 9 review-required rows, 33/33 photos found, 0 missing photos, 0 unreferenced photos
 - Next action: commit governance files only, rerun merge-safety on the committed branch, and keep Stage 4C blocked.
+
+## 2026-05-15 — P_LOCAL_002 evidence organisation complete
+
+Completed manual evidence organisation for P_LOCAL_002.
+
+Result:
+- 10 real pole/support folders retained.
+- Removed unused 11_SUPPORT_UNKNOWN scaffold.
+- All 10 folders now have known support numbers.
+- All 10 folders contain notes.
+- All 10 folders contain field photos, ENWL screenshots, and map screenshots.
+- Final evidence audit reports 0 folders with missing evidence flags.
+- Created local upload bundle: P_LOCAL_002_evidence_complete_2026-05-15.zip.
+
+Important:
+- Zip bundle is local/untracked and should not be committed unless explicitly required.
+- Next action is pole_notes quality review, not more evidence sorting.
