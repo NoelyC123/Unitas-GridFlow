@@ -154,5 +154,127 @@
     </div>
   </div>
   {% endif %}
+
+  {# ── DNO Evidence (ENWL Network Asset Viewer) ── #}
+  <div class="card mb-4">
+    <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+      <span>DNO Evidence <small class="text-muted fw-normal">(ENWL Network Asset Viewer)</small></span>
+      {% if enwl_evidence and enwl_evidence.available %}
+        {% if enwl_evidence.dno_badge == 'GREEN' %}
+          <span class="badge bg-success">Level 1 + Level 2 Confirmed</span>
+        {% else %}
+          <span class="badge bg-warning text-dark">Level 1 — Route Evidence Only</span>
+        {% endif %}
+      {% else %}
+        <span class="badge bg-secondary">No ENWL Evidence</span>
+      {% endif %}
+    </div>
+
+    {% if enwl_evidence and enwl_evidence.available %}
+    <div class="card-body p-0">
+
+      {# Level 1 — Pole Identity #}
+      <div class="border-bottom px-3 py-2">
+        <div class="fw-semibold small text-muted mb-1">LEVEL 1 — Pole Identity</div>
+        <table class="table table-sm mb-0">
+          {% if enwl_evidence.pole_fid %}
+          <tr><th class="ps-0 w-40">ENWL Pole FID</th><td>{{ enwl_evidence.pole_fid }}</td></tr>
+          {% endif %}
+          {% if enwl_evidence.spn %}
+          <tr><th class="ps-0">SPN</th><td>{{ enwl_evidence.spn }}</td></tr>
+          {% endif %}
+          {% if enwl_evidence.pole_type %}
+          <tr><th class="ps-0">Pole Type</th><td>{{ enwl_evidence.pole_type }}</td></tr>
+          {% endif %}
+          {% if enwl_evidence.pole_class %}
+          <tr><th class="ps-0">Pole Class</th><td>{{ enwl_evidence.pole_class }}</td></tr>
+          {% endif %}
+          {% if enwl_evidence.support_diameter %}
+          <tr><th class="ps-0">Support Diameter</th><td>{{ enwl_evidence.support_diameter }}</td></tr>
+          {% endif %}
+          {% if not enwl_evidence.pole_fid and not enwl_evidence.spn %}
+          <tr><td colspan="2" class="text-muted ps-0">Pole FID not confirmed — notes may need review</td></tr>
+          {% endif %}
+        </table>
+      </div>
+
+      {# Level 2 — Direct Equipment Evidence #}
+      <div class="border-bottom px-3 py-2">
+        <div class="fw-semibold small text-muted mb-1">LEVEL 2 — Direct Equipment Evidence</div>
+        {% if enwl_evidence.direct_equipment %}
+          <div class="small text-success mb-1">Directly linked to this pole via ENWL equipment record</div>
+          {% for eq in enwl_evidence.direct_equipment %}
+          <div class="border rounded p-2 mb-1 bg-success bg-opacity-10 small">
+            <strong>{{ eq.feature_type or 'Equipment' }}</strong>
+            {% if eq.fid %} — FID {{ eq.fid }}{% endif %}
+            {% if eq.voltage %} &middot; {{ eq.voltage }}{% endif %}
+            {% if eq.fid_polestructure %}
+              <br><span class="text-muted">fid_polestructure: {{ eq.fid_polestructure }}</span>
+            {% endif %}
+            {% if eq.spn %}
+              <br><span class="text-muted">SPN: {{ eq.spn }}</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <span class="text-muted small">No direct equipment link identified for this pole (no fid_polestructure match).</span>
+        {% endif %}
+      </div>
+
+      {# Level 3 — Route Conductor Evidence #}
+      <div class="border-bottom px-3 py-2">
+        <div class="fw-semibold small text-muted mb-1">LEVEL 3 — Route Conductor Evidence</div>
+        <div class="alert alert-warning py-2 px-3 mb-2 small" role="alert">
+          <strong>ROUTE-LEVEL EVIDENCE ONLY</strong><br>
+          {{ enwl_evidence.caution }}
+        </div>
+        {% if enwl_evidence.conductors %}
+          {% for c in enwl_evidence.conductors %}
+          <div class="border rounded p-2 mb-1 bg-warning bg-opacity-10 small">
+            <strong>{{ c.text_map or c.feature_type or 'Conductor' }}</strong>
+            {% if c.fid %} — FID {{ c.fid }}{% endif %}
+            {% if c.voltage %} &middot; {{ c.voltage }}{% endif %}
+            {% if c.material %} &middot; {{ c.material }}{% endif %}
+            {% if c.cable_size %} &middot; {{ c.cable_size }}{% endif %}
+            {% if c.rated_current %} &middot; {{ c.rated_current }}A{% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <span class="text-muted small">No route conductor records in trace evidence.</span>
+        {% endif %}
+      </div>
+
+      {# Level 4 — Nearby Context #}
+      <div class="px-3 py-2">
+        <div class="fw-semibold small text-muted mb-1">LEVEL 4 — Nearby Context Only</div>
+        {% if enwl_evidence.nearby_context %}
+          <div class="small text-muted mb-1">Nearby network features — not proven to attach to this pole</div>
+          {% for n in enwl_evidence.nearby_context %}
+          <div class="border rounded p-2 mb-1 bg-secondary bg-opacity-10 small">
+            <strong>{{ n.feature_type or 'Feature' }}</strong>
+            {% if n.fid %} — FID {{ n.fid }}{% endif %}
+            {% if n.voltage %} &middot; {{ n.voltage }}{% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <span class="text-muted small">No nearby context features found.</span>
+        {% endif %}
+      </div>
+
+      <div class="px-3 py-2 border-top">
+        <small class="text-muted">{{ enwl_evidence.provenance }}</small>
+      </div>
+
+    </div>
+    {% else %}
+    <div class="card-body">
+      <p class="text-muted mb-0 small">
+        No ENWL trace evidence is available for this job.
+        Copy <code>enwl_trace/*.geojson</code> into the job directory to enable DNO evidence display.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
 </div>
 {% endblock %}

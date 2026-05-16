@@ -32,6 +32,23 @@
     </div>
   </div>
 
+  {% if enwl_summary and enwl_summary.available %}
+  <div class="alert alert-info py-2 mb-4" role="alert">
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+      <strong>DNO Evidence (ENWL)</strong>
+      <span class="badge bg-info text-dark">{{ enwl_summary.trace_file_count }} trace file{{ 's' if enwl_summary.trace_file_count != 1 }}</span>
+      <span>{{ enwl_summary.conductor_count }} conductor record{{ 's' if enwl_summary.conductor_count != 1 }}</span>
+      <span>{{ enwl_summary.direct_equipment_count }} direct equipment link{{ 's' if enwl_summary.direct_equipment_count != 1 }}</span>
+      <span>{{ enwl_summary.nearby_context_count }} nearby context feature{{ 's' if enwl_summary.nearby_context_count != 1 }}</span>
+      <small class="text-muted ms-auto">Route-level evidence only — open a pole for detail</small>
+    </div>
+  </div>
+  {% elif enwl_summary and not enwl_summary.available %}
+  <div class="alert alert-secondary py-2 mb-4" role="alert">
+    <small class="text-muted">No ENWL trace evidence available for this job.</small>
+  </div>
+  {% endif %}
+
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
       <div class="stat-card bg-white border text-center">

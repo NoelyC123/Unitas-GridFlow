@@ -11,6 +11,10 @@ from pathlib import Path
 from flask import Blueprint, render_template, request
 
 from gridflow.workspace import ReviewDataProvider
+from gridflow.workspace.enwl_evidence_adapter import (
+    load_enwl_pole_evidence,
+    load_enwl_trace_summary,
+)
 from gridflow.workspace.review_data_provider import _evidence_quality
 
 logger = logging.getLogger(__name__)
@@ -73,6 +77,8 @@ def view_job(job_id: str):
         # Attach derived evidence quality to each pole for the template
         poles_with_eq = [(p, _evidence_quality(p)) for p in poles]
 
+        enwl_summary = load_enwl_trace_summary(job_dir)
+
         return render_template(
             "workspace/review_workspace.html",
             job_id=job_id,
@@ -80,6 +86,7 @@ def view_job(job_id: str):
             stats=stats,
             active_filters=filters,
             run_timestamp=run_timestamp,
+            enwl_summary=enwl_summary,
         )
 
     except FileNotFoundError as e:
@@ -120,12 +127,18 @@ def view_pole(job_id: str, support_no: str):
             )
 
         evidence_quality = _evidence_quality(pole)
+        enwl_evidence = load_enwl_pole_evidence(
+            job_dir=job_dir,
+            pole_folder_name=pole.folder_name,
+            notes_content=pole.notes_content,
+        )
 
         return render_template(
             "workspace/pole_detail.html",
             job_id=job_id,
             pole=pole,
             evidence_quality=evidence_quality,
+            enwl_evidence=enwl_evidence,
         )
 
     except FileNotFoundError as e:
