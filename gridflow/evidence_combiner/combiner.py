@@ -120,6 +120,8 @@ class EvidenceCombiner:
             pole_fid=_find_first(
                 text,
                 r"(?:ENWL\s+pole\s+FID|Pole\s+FID):\s*([0-9]+)",
+                r"ENWL\s+FID:\s*([0-9]+)",
+                r"pole\s+FID\s+([0-9]+)",
                 r"fid_polestructure\s+([0-9]+)",
             ),
             spn=_find_first(text, r"\bSPN:\s*([A-Za-z0-9]+)"),
