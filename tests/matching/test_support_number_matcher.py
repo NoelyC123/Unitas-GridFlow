@@ -76,6 +76,29 @@ class TestMatchDataset:
         results = matcher.match(baseline, field)
         assert results[0].match_type == "UNMATCHED"
 
+    def test_uses_pole_id_when_support_no_missing(self, matcher):
+        baseline = BaselineDataset(
+            poles=[
+                BaselinePole(
+                    pole_id="903203",
+                    support_no=None,
+                    easting=354123.0,
+                    northing=456789.0,
+                )
+            ]
+        )
+        field = FieldDataset(
+            dataset_path="/t",
+            scan_date="2026",
+            poles=[make_field_pole("01_SUPPORT_903203_LV", "903203")],
+        )
+
+        results = matcher.match(baseline, field)
+
+        assert len(results) == 1
+        assert results[0].match_type == "EXACT"
+        assert results[0].baseline_support_no == "903203"
+
     def test_extra_field_pole(self, matcher):
         baseline = BaselineDataset(poles=[make_baseline_pole("P1", "903203")])
         field = FieldDataset(

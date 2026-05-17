@@ -11,6 +11,11 @@ from unittest.mock import patch
 
 import pytest
 
+from gridflow.baseline.models import BaselineDataset
+from gridflow.field.models import FieldDataset
+from gridflow.matching.models import MatchRegister
+from gridflow.merge.models import MergedDataset
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from scripts.run_pipeline import main
 
@@ -374,3 +379,95 @@ class TestPipelineOutputContent:
         assert captured["jobs_root"] is None
         assert captured["overwrite"] is True
         assert captured["summary"][0] == "PIPELINE_REG_TEST"
+
+    def test_pipeline_marks_partial_for_catastrophic_non_exception_outcome(self, tmp_path):
+        """Operational failure without exceptions should downgrade summary status to PARTIAL."""
+        output_dir = tmp_path / "gridflow_output"
+        baseline = BaselineDataset(
+            poles=[],
+            metadata={"source_file": "baseline.csv", "format": "GENERIC", "total_rows": 12},
+        )
+        field = FieldDataset(
+            dataset_path="/field",
+            scan_date="2026-05-17",
+            total_poles=12,
+            poles=[],
+            evidence_summary={"notes_present": 0},
+        )
+        register = MatchRegister(
+            baseline_total=10, field_total=12, matched=0, unmatched_baseline=10
+        )
+        merged = MergedDataset(total_poles_baseline=10, total_poles_field=12, total_matched=0)
+
+        with (
+            patch(
+                "scripts.run_pipeline.run_stage1",
+                return_value=(
+                    baseline,
+                    {
+                        "status": "PASS",
+                        "poles": 10,
+                        "errors": 0,
+                        "format_detected": "GENERIC",
+                        "duration_seconds": 0.01,
+                    },
+                ),
+            ),
+            patch(
+                "scripts.run_pipeline.run_stage2",
+                return_value=(
+                    field,
+                    {
+                        "status": "PASS",
+                        "poles": 12,
+                        "high": 0,
+                        "medium": 0,
+                        "low": 12,
+                        "duration_seconds": 0.01,
+                    },
+                ),
+            ),
+            patch(
+                "scripts.run_pipeline.run_stage3",
+                return_value=(
+                    register,
+                    {
+                        "status": "PASS",
+                        "matched": 0,
+                        "unmatched": 10,
+                        "match_rate": 0.0,
+                        "duration_seconds": 0.01,
+                    },
+                ),
+            ),
+            patch(
+                "scripts.run_pipeline.run_stage4",
+                return_value=(
+                    merged,
+                    {
+                        "status": "PASS",
+                        "merged": 0,
+                        "design_ready": 0,
+                        "design_blocked": 0,
+                        "duration_seconds": 0.01,
+                    },
+                ),
+            ),
+        ):
+            rc = _run_pipeline(
+                [
+                    "--baseline",
+                    str(BASELINE_FIXTURE),
+                    "--field",
+                    str(FIELD_DATASET),
+                    "--output",
+                    str(output_dir),
+                    "--log-level",
+                    "WARNING",
+                ]
+            )
+
+        assert rc == 0
+        run_dir = sorted(output_dir.glob("pipeline_run_*"))[0]
+        summary = json.loads((run_dir / "pipeline_summary.json").read_text())
+        assert summary["overall_status"] == "PARTIAL"

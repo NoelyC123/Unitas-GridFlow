@@ -221,6 +221,6 @@ def test_real_plocal002_conflicts_detected_if_available():
         pytest.skip("P_LOCAL_002 trace file not available")
 
     results = ConflictDetector().detect_survey(survey_root, trace_path)
-    assert len(results) == 10
+    assert len(results) == 12
     total = sum(len(v) for v in results.values())
     assert total >= 0

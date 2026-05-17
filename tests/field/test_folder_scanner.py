@@ -86,6 +86,25 @@ class TestScanDatasets:
         assert result.total_poles == 1
         assert "Café pole note" in result.poles[0].notes_content
 
+    def test_scan_detects_markdown_notes_files(self, scanner, tmp_path):
+        """Markdown pole notes should count as notes input."""
+        pole_dir = tmp_path / "01_SUPPORT_903203_LV"
+        (pole_dir / "field_photos").mkdir(parents=True)
+        (pole_dir / "map_screenshots").mkdir()
+        (pole_dir / "notes").mkdir()
+        (pole_dir / "field_photos" / "photo_001.jpeg").touch()
+        (pole_dir / "field_photos" / "photo_002.jpeg").touch()
+        (pole_dir / "field_photos" / "photo_003.jpeg").touch()
+        (pole_dir / "map_screenshots" / "map_popup.png").touch()
+        (pole_dir / "notes" / "pole_notes.md").write_text("Support number: 903203\nCondition: Good")
+
+        result = scanner.scan(tmp_path)
+
+        assert result.total_poles == 1
+        assert result.poles[0].notes_present is True
+        assert result.poles[0].notes_path.endswith("pole_notes.md")
+        assert "903203" in (result.poles[0].notes_content or "")
+
 
 class TestExtractSupportNo:
     def test_extract_pure_numeric(self, scanner):

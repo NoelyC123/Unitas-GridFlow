@@ -36,8 +36,17 @@ class RouteReconstructor:
         """
         logger.info("Reconstructing pole sequences")
 
-        poles_by_route = self._group_poles_by_route(dataset.poles)
-        logger.info(f"Grouped {len(dataset.poles)} poles into {len(poles_by_route)} routes")
+        poles_with_coords = [
+            p for p in dataset.poles if p.easting is not None and p.northing is not None
+        ]
+        poles_without_coords = [p for p in dataset.poles if p.easting is None or p.northing is None]
+
+        poles_by_route = self._group_poles_by_route(poles_with_coords)
+        logger.info(
+            "Grouped %d coordinate-complete poles into %d routes",
+            len(poles_with_coords),
+            len(poles_by_route),
+        )
 
         # Process each route
         for route_id, poles in poles_by_route.items():
@@ -47,6 +56,7 @@ class RouteReconstructor:
                 pole.pole_sequence = seq
 
         dataset.poles = [p for route_poles in poles_by_route.values() for p in route_poles]
+        dataset.poles.extend(poles_without_coords)
         logger.info(f"Assigned sequence to {len(dataset.poles)} poles")
 
         return dataset

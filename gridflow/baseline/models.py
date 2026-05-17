@@ -60,8 +60,8 @@ class BaselinePole(BaseModel):
 
     pole_id: str = Field(..., description="Unique DNO system identifier")
     support_no: Optional[str] = Field(None, description="Support number or asset code")
-    easting: float = Field(..., description="OSGB36 easting (meters)")
-    northing: float = Field(..., description="OSGB36 northing (meters)")
+    easting: Optional[float] = Field(None, description="OSGB36 easting (meters)")
+    northing: Optional[float] = Field(None, description="OSGB36 northing (meters)")
     latitude: Optional[float] = Field(None, description="WGS84 latitude")
     longitude: Optional[float] = Field(None, description="WGS84 longitude")
     route_id: Optional[str] = Field(None, description="Route identifier")
@@ -73,15 +73,19 @@ class BaselinePole(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional fields")
 
     @field_validator("easting")
-    def validate_easting(cls, v: float) -> float:
+    def validate_easting(cls, v: Optional[float]) -> Optional[float]:
         """Validate easting is within UK bounds (0-700,000m)."""
+        if v is None:
+            return v
         if not 0 <= v <= 700000:
             raise ValueError(f"Easting {v} outside UK bounds (0-700000)")
         return v
 
     @field_validator("northing")
-    def validate_northing(cls, v: float) -> float:
+    def validate_northing(cls, v: Optional[float]) -> Optional[float]:
         """Validate northing is within UK bounds (0-1,300,000m)."""
+        if v is None:
+            return v
         if not 0 <= v <= 1300000:
             raise ValueError(f"Northing {v} outside UK bounds (0-1300000)")
         return v

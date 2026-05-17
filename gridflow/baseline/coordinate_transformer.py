@@ -145,7 +145,13 @@ class CoordinateTransformer:
         for pole in dataset.poles:
             try:
                 # Skip if already has WGS84
-                if pole.latitude and pole.longitude:
+                if pole.latitude is not None and pole.longitude is not None:
+                    transformed_poles.append(pole)
+                    continue
+
+                if pole.easting is None or pole.northing is None:
+                    logger.warning("Could not transform %s: coordinates missing", pole.pole_id)
+                    errors += 1
                     transformed_poles.append(pole)
                     continue
 
@@ -179,7 +185,11 @@ class CoordinateTransformer:
         Returns:
             BaselinePole with WGS84 coordinates added
         """
-        if pole.latitude and pole.longitude:
+        if pole.latitude is not None and pole.longitude is not None:
+            return pole
+
+        if pole.easting is None or pole.northing is None:
+            logger.warning(f"Could not transform {pole.pole_id}: coordinates missing")
             return pole
 
         try:

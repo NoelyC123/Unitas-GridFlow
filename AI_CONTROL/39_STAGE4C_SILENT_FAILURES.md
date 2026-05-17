@@ -100,3 +100,18 @@ Run: `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047`
 3. Test fixes on P_LOCAL_002
 4. Re-run validation
 5. Expect: 10/12 or 12/12 matched (depending on coordinate handling)
+
+---
+## FIXES APPLIED (2026-05-17)
+
+All 4 critical bugs fixed:
+
+1. ✅ Bug 1: CSV parser uses `pole_id` fallback
+2. ✅ Bug 2: Matcher tries `pole_id` when `support_no` missing
+3. ✅ Bug 3: Blank coordinate rows included with flag
+4. ✅ Bug 4: `.md` added to notes extensions
+
+Validation:
+- Before: `0/10` matched, `0/12` notes
+- After: `12/12` matched, `12/12` notes
+- Pipeline now functional for Stage 4C M1 validation (`PARTIAL` status remains correct until the two manual coordinate lookups are completed)

@@ -52,7 +52,6 @@ class CSVParser:
         "Point ID": "pole_id",
         "Easting": "easting",
         "Northing": "northing",
-        "Northing": "northing",
     }
 
     # Common encoding attempts in order
@@ -147,11 +146,16 @@ class CSVParser:
                 easting = self._parse_float(row.get("Easting"))
                 northing = self._parse_float(row.get("Northing"))
 
-                if not pole_id or easting is None or northing is None:
+                if not pole_id:
                     continue  # Skip incomplete rows
 
+                coordinate_status = "COMPLETE"
+                if easting is None or northing is None:
+                    coordinate_status = "MISSING"
+                    logger.warning("Baseline pole %s: coordinates missing", pole_id)
+
                 # Extract optional fields
-                support_no = str(row.get("Support No", "")).strip() or None
+                support_no = str(row.get("Support No", "")).strip() or pole_id
                 latitude = self._parse_float(row.get("Latitude"))
                 longitude = self._parse_float(row.get("Longitude"))
                 feature_code = str(row.get("Feature", "")).strip() or None
@@ -166,6 +170,7 @@ class CSVParser:
 
                 # Collect metadata
                 metadata = {k: v for k, v in row.to_dict().items() if k not in self.ENWL_COLUMN_MAP}
+                metadata["coordinate_status"] = coordinate_status
 
                 pole = BaselinePole(
                     pole_id=pole_id,
@@ -213,16 +218,19 @@ class CSVParser:
                 easting = self._parse_float(row.get("Easting"))
                 northing = self._parse_float(row.get("Northing"))
 
+                coordinate_status = "COMPLETE"
                 if easting is None or northing is None:
-                    continue
+                    coordinate_status = "MISSING"
+                    logger.warning("Baseline pole %s: coordinates missing", pole_id)
 
                 # Extract optional fields
-                support_no = str(row.get("Point Name", "")).strip() or None
+                support_no = str(row.get("Point Name", "")).strip() or pole_id
                 feature_code = str(row.get("Feature Code", "")).strip() or None
 
                 metadata = {
                     k: v for k, v in row.to_dict().items() if k not in self.TRIMBLE_COLUMN_MAP
                 }
+                metadata["coordinate_status"] = coordinate_status
 
                 pole = BaselinePole(
                     pole_id=pole_id,
@@ -283,12 +291,21 @@ class CSVParser:
                 easting = self._parse_float(row.get(easting_col)) if easting_col else None
                 northing = self._parse_float(row.get(northing_col)) if northing_col else None
 
+                coordinate_status = "COMPLETE"
                 if easting is None or northing is None:
-                    continue
+                    easting = None
+                    northing = None
+                    coordinate_status = "MISSING"
+                    logger.warning("Baseline pole %s: coordinates missing", pole_id)
 
-                support_no = str(row.get(support_col, "")).strip() or None if support_col else None
+                if support_col:
+                    support_no = str(row.get(support_col, "")).strip() or pole_id
+                else:
+                    support_no = pole_id
+                    logger.info("Using pole_id as support_no fallback for row %s", idx)
 
                 metadata = {k: v for k, v in row.to_dict().items()}
+                metadata["coordinate_status"] = coordinate_status
 
                 pole = BaselinePole(
                     pole_id=pole_id,

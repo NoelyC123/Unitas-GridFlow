@@ -197,5 +197,5 @@ def test_real_plocal002_linking_distribution_if_available():
     assert result.returncode == 0
     report = Path("/tmp/P_LOCAL_002_LINKING_REPORT_TEST.md").read_text(encoding="utf-8")
     assert "HIGH confidence: 3" in report
-    assert "MEDIUM confidence: 7" in report
+    assert "MEDIUM confidence: 9" in report
     assert "Manual confirmation required: 0" in report

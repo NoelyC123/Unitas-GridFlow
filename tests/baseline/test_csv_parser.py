@@ -110,19 +110,37 @@ class TestCSVParserEdgeCases:
         csv_path.write_text("ENID,Support No\n16938106,903203\n")
 
         dataset = parser.parse(csv_path)
-        # Should skip rows with missing coordinates
-        assert dataset.pole_count == 0
+        assert dataset.pole_count == 1
+        assert dataset.poles[0].pole_id == "16938106"
+        assert dataset.poles[0].support_no == "903203"
+        assert dataset.poles[0].easting is None
+        assert dataset.poles[0].northing is None
+        assert dataset.poles[0].metadata["coordinate_status"] == "MISSING"
+
+    def test_parse_generic_uses_pole_id_as_support_fallback(self, parser, tmp_path):
+        """Generic CSVs without support/name columns should use pole_id as support_no."""
+        csv_path = tmp_path / "generic.csv"
+        csv_path.write_text("pole_id,easting,northing,voltage\n903101,352000.0,478000.0,LV\n")
+
+        dataset = parser.parse(csv_path, format_hint="GENERIC")
+
+        assert dataset.pole_count == 1
+        assert dataset.poles[0].pole_id == "903101"
+        assert dataset.poles[0].support_no == "903101"
 
     def test_parse_csv_with_no_required_columns_returns_empty_dataset(self, parser, tmp_path):
-        """A baseline CSV with no id/support/coordinate columns should not crash."""
+        """A baseline CSV with no coordinate columns should still preserve identity rows."""
         csv_path = tmp_path / "missing_required_columns.csv"
         csv_path.write_text("Name,Description\nAlpha,No coordinate fields\n")
 
         dataset = parser.parse(csv_path)
 
-        assert dataset.pole_count == 0
+        assert dataset.pole_count == 1
         assert dataset.metadata["total_rows"] == 1
-        assert dataset.metadata["parsed_poles"] == 0
+        assert dataset.metadata["parsed_poles"] == 1
+        assert dataset.poles[0].support_no == "Alpha"
+        assert dataset.poles[0].easting is None
+        assert dataset.poles[0].northing is None
 
     def test_parse_latin1_encoded_csv(self, parser, tmp_path):
         """CSV parser should fall back to non-UTF encodings when needed."""

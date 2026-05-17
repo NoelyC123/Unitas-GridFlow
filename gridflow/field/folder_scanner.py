@@ -21,7 +21,7 @@ FOLDER_PATTERN = re.compile(r"^(\d{2})_SUPPORT_([^_]+(?:_[A-Za-z])?(?=_|$)[^_]*)
 
 PHOTO_EXTENSIONS = {".jpeg", ".jpg", ".heic", ".JPEG", ".JPG", ".HEIC"}
 SCREENSHOT_EXTENSIONS = {".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"}
-NOTES_EXTENSIONS = {".txt", ".TXT"}
+NOTES_EXTENSIONS = {".txt", ".TXT", ".md", ".MD"}
 
 
 class FolderScanner:

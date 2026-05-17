@@ -129,5 +129,5 @@ def test_real_plocal002_summary_if_available():
     )
 
     assert result.returncode == 0
-    assert "Total poles processed: 10" in result.stdout
+    assert "Total poles processed: 12" in result.stdout
     assert "| 05 | 900344 | 16869657 |" in result.stdout

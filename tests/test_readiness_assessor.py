@@ -195,5 +195,6 @@ def test_real_plocal002_assessment_if_available():
         "03_SUPPORT_900343",
         "05_SUPPORT_900344",
         "06_SUPPORT_900345",
+        "12_SUPPORT_903203_LV_TERMINAL_STREET_LIGHT",
     ]
-    assert len(by_status.get("not_ready", [])) == 7
+    assert len(by_status.get("not_ready", [])) == 8

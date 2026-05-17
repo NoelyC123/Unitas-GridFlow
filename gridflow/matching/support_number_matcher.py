@@ -54,9 +54,12 @@ class SupportNumberMatcher:
         matched_field_keys: set[str] = set()
 
         for bp in baseline_dataset.poles:
-            b_key = self._normalize(bp.support_no or "")
+            support_no = bp.support_no or bp.pole_id
+            if not bp.support_no and bp.pole_id:
+                logger.debug("Using pole_id %s for baseline pole %s", bp.pole_id, bp.pole_id)
+            b_key = self._normalize(support_no or "")
 
-            result = self._try_match(bp, field_by_normalized, b_key)
+            result = self._try_match(bp, field_by_normalized, b_key, support_no or "")
 
             if result.match_type != "UNMATCHED":
                 matched_field_keys.add(self._normalize(result.field_support_no or ""))
@@ -81,6 +84,7 @@ class SupportNumberMatcher:
         baseline_pole,
         field_by_normalized: dict,
         b_key: str,
+        support_no: str,
     ) -> MatchResult:
         """Attempt exact and then variant match for one baseline pole."""
         # Attempt 1: exact normalized match
@@ -88,7 +92,7 @@ class SupportNumberMatcher:
             fp = field_by_normalized[b_key]
             return MatchResult(
                 baseline_pole_id=baseline_pole.pole_id,
-                baseline_support_no=baseline_pole.support_no or "",
+                baseline_support_no=support_no,
                 field_folder=fp.folder_name,
                 field_support_no=fp.support_no,
                 match_type="EXACT",
@@ -100,7 +104,7 @@ class SupportNumberMatcher:
             fp = field_by_normalized[stripped]
             return MatchResult(
                 baseline_pole_id=baseline_pole.pole_id,
-                baseline_support_no=baseline_pole.support_no or "",
+                baseline_support_no=support_no,
                 field_folder=fp.folder_name,
                 field_support_no=fp.support_no,
                 match_type="EXACT",
@@ -109,7 +113,7 @@ class SupportNumberMatcher:
 
         return MatchResult(
             baseline_pole_id=baseline_pole.pole_id,
-            baseline_support_no=baseline_pole.support_no or "",
+            baseline_support_no=support_no,
             match_type="UNMATCHED",
             match_confidence="UNMATCHED",
         )

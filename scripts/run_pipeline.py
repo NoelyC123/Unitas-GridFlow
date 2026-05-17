@@ -491,6 +491,28 @@ def main():
         print(f"  Stage 5A reports: FAILED ({e})")
 
     # ── Summary ──
+    if baseline_dataset and field_dataset and register and merged:
+        source_rows = baseline_dataset.metadata.get("total_rows", baseline_dataset.pole_count)
+        parsed_poles = baseline_dataset.pole_count
+        notes_present = field_dataset.evidence_summary.get("notes_present", 0)
+        baseline_errors = stages.get("baseline_ingest", {}).get("errors", 0)
+        if (
+            baseline_errors > 0
+            or (source_rows and parsed_poles < source_rows)
+            or (field_dataset.total_poles > 0 and notes_present == 0)
+            or (
+                baseline_dataset.pole_count > 0
+                and field_dataset.total_poles > 0
+                and register.matched == 0
+            )
+            or (
+                baseline_dataset.pole_count > 0
+                and register.matched > 0
+                and merged.total_matched == 0
+            )
+        ):
+            overall_status = "PARTIAL"
+
     total_elapsed = time.monotonic() - t_pipeline_start
     _write_summary(run_id, args, run_dir, stages, overall_status, merged, t_pipeline_start)
 
