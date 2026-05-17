@@ -15,6 +15,10 @@ from gridflow.workspace.enwl_evidence_adapter import (
     load_enwl_pole_evidence,
     load_enwl_trace_summary,
 )
+from gridflow.workspace.readiness_adapter import (
+    load_job_readiness_summary,
+    load_pole_readiness,
+)
 from gridflow.workspace.review_data_provider import _evidence_quality
 
 logger = logging.getLogger(__name__)
@@ -78,6 +82,7 @@ def view_job(job_id: str):
         poles_with_eq = [(p, _evidence_quality(p)) for p in poles]
 
         enwl_summary = load_enwl_trace_summary(job_dir)
+        readiness_summary = load_job_readiness_summary(job_dir, poles)
 
         return render_template(
             "workspace/review_workspace.html",
@@ -87,6 +92,7 @@ def view_job(job_id: str):
             active_filters=filters,
             run_timestamp=run_timestamp,
             enwl_summary=enwl_summary,
+            readiness_summary=readiness_summary,
         )
 
     except FileNotFoundError as e:
@@ -132,6 +138,7 @@ def view_pole(job_id: str, support_no: str):
             pole_folder_name=pole.folder_name,
             notes_content=pole.notes_content,
         )
+        pole_readiness = load_pole_readiness(job_dir, pole)
 
         return render_template(
             "workspace/pole_detail.html",
@@ -139,6 +146,7 @@ def view_pole(job_id: str, support_no: str):
             pole=pole,
             evidence_quality=evidence_quality,
             enwl_evidence=enwl_evidence,
+            pole_readiness=pole_readiness,
         )
 
     except FileNotFoundError as e:

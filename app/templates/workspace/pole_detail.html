@@ -142,6 +142,63 @@
     </div>
   </div>
 
+  {# ── Design Readiness (Stage 6E) ── #}
+  <div class="card mb-4">
+    <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+      <span>Design Readiness</span>
+      {% if pole_readiness %}
+        {% if pole_readiness.display_level == 'ready' %}
+          <span class="badge bg-success">Ready</span>
+        {% elif pole_readiness.display_level == 'review_required' %}
+          <span class="badge bg-warning text-dark">Review Required</span>
+        {% elif pole_readiness.display_level == 'not_ready' %}
+          <span class="badge bg-danger">Not Ready</span>
+        {% else %}
+          <span class="badge bg-secondary">Insufficient Evidence</span>
+        {% endif %}
+      {% else %}
+        <span class="badge bg-secondary">Not Assessed</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      {% if not pole_readiness %}
+        <p class="text-muted mb-0 small">Readiness assessment not yet run for this job.</p>
+      {% elif pole_readiness.display_level == 'ready' %}
+        <p class="text-success mb-0"><strong>Design-ready.</strong> All evidence requirements met.</p>
+      {% elif pole_readiness.display_level == 'review_required' %}
+        <p class="text-warning-emphasis mb-1"><strong>Review required before design.</strong></p>
+        {% if pole_readiness.cautions %}
+        <ul class="mb-2 small">
+          {% for caution in pole_readiness.cautions %}<li>{{ caution }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        <div class="alert alert-warning py-2 px-3 mb-0 small" role="alert">
+          Conductor evidence is route-level provenance only — not per-span confirmed.
+          Designer must obtain DNO conductor schedule before proceeding.
+        </div>
+      {% elif pole_readiness.display_level == 'not_ready' %}
+        <p class="text-danger mb-1"><strong>Not design-ready.</strong> Resolve blockers before proceeding.</p>
+        {% if pole_readiness.blockers %}
+        <ul class="mb-2 small">
+          {% for blocker in pole_readiness.blockers %}<li>{{ blocker }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        {% if pole_readiness.cautions %}
+        <div class="alert alert-warning py-2 px-3 mb-0 small" role="alert">
+          {{ pole_readiness.cautions | join(' ') }}
+        </div>
+        {% endif %}
+      {% else %}
+        <p class="text-muted mb-0 small">Insufficient evidence to assess readiness for this pole.</p>
+      {% endif %}
+      {% if pole_readiness and pole_readiness.source == 'merge_pipeline' %}
+      <p class="text-muted small mt-2 mb-0">
+        Source: field evidence pipeline — Stage 6E three-source assessment not yet run.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
   {% if pole.designer_actions %}
   <div class="card mb-4">
     <div class="card-header fw-semibold bg-danger text-white">Required Actions Before Design</div>

@@ -32,6 +32,25 @@
     </div>
   </div>
 
+  {% if readiness_summary and readiness_summary.available %}
+  <div class="alert alert-secondary py-2 mb-3" role="alert">
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+      <strong>Readiness</strong>
+      <span class="badge bg-success">{{ readiness_summary.ready_count }} Ready</span>
+      <span class="badge bg-warning text-dark">{{ readiness_summary.review_count }} Review</span>
+      <span class="badge bg-danger">{{ readiness_summary.not_ready_count }} Not Ready</span>
+      {% if readiness_summary.insufficient_count %}
+      <span class="badge bg-secondary">{{ readiness_summary.insufficient_count }} Insufficient</span>
+      {% endif %}
+      {% if readiness_summary.source == 'stage_6e' %}
+      <small class="text-muted ms-auto">Stage 6E assessment</small>
+      {% else %}
+      <small class="text-muted ms-auto">Based on field evidence — Stage 6E assessment not yet run</small>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   {% if enwl_summary and enwl_summary.available %}
   <div class="alert alert-info py-2 mb-4" role="alert">
     <div class="d-flex flex-wrap gap-3 align-items-center">
