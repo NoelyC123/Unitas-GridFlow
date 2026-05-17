@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>P_LOCAL_002 Validation Report</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: #0f172a;
+      margin: 0 auto;
+      max-width: 1200px;
+      padding: 24px;
+      line-height: 1.45;
+      background: #ffffff;
+    }
+    h1, h2, h3 { margin-bottom: 8px; }
+    h1 { color: #0f172a; border-bottom: 3px solid #1d4ed8; padding-bottom: 8px; }
+    h2 { color: #1e293b; margin-top: 28px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 24px;
+    }
+    .card {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+    .label { font-size: 12px; color: #475569; text-transform: uppercase; }
+    .value { font-size: 22px; font-weight: 700; color: #0f172a; margin-top: 6px; }
+    .callout {
+      border-left: 4px solid #f59e0b;
+      background: #fffbeb;
+      padding: 12px 14px;
+      margin: 16px 0;
+    }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; vertical-align: top; text-align: left; }
+    th { background: #e2e8f0; }
+    .ok { color: #166534; font-weight: 600; }
+    .warn { color: #92400e; font-weight: 600; }
+    .bad { color: #991b1b; font-weight: 600; }
+    ul { margin-top: 6px; }
+    code { background: #f1f5f9; padding: 1px 4px; border-radius: 4px; }
+    .small { font-size: 12px; color: #64748b; }
+    @media print {
+      body { padding: 0; font-size: 11pt; }
+      .summary { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <h1>P_LOCAL_002 Validation Report</h1>
+
+  <div class="summary">
+    <div class="card"><div class="label">Job ID</div><div class="value">P_LOCAL_002</div></div>
+    <div class="card"><div class="label">Poles</div><div class="value">12</div></div>
+    <div class="card"><div class="label">Validation Date</div><div class="value">2026-05-17</div></div>
+    <div class="card"><div class="label">Overall Status</div><div class="value warn">CONDITIONAL</div></div>
+  </div>
+
+  <p><strong>Stage 4C M1 status:</strong> IN PROGRESS</p>
+
+  <div class="callout">
+    <strong>Execution summary:</strong> Phase 4 structural validation remains 12/12 complete, but the current Stage 4C pipeline run only processed 10 baseline rows, parsed 0/12 notes, matched 0/10 poles, and produced 0 merged poles. The two known coordinate gaps remain open, and several silent checks were identified.
+  </div>
+
+  <h2>Executive Summary</h2>
+  <ul>
+    <li>Job ID: <code>P_LOCAL_002</code></li>
+    <li>Poles: <code>12</code></li>
+    <li>Validation date: <code>2026-05-17</code></li>
+    <li>Overall status: <span class="warn">CONDITIONAL</span> (coordinate gaps and Stage 4C pipeline gaps)</li>
+    <li>Stage 4C M1 status: <span class="warn">IN PROGRESS</span></li>
+  </ul>
+
+  <h2>Pole-by-Pole Summary</h2>
+  <table>
+    <tr>
+      <th>Pole ID</th>
+      <th>Support</th>
+      <th>Baseline Coords</th>
+      <th>Field Evidence</th>
+      <th>Conflicts</th>
+      <th>Status</th>
+    </tr>
+    <tr><td>01</td><td>902202</td><td class="ok">✅ Present</td><td>Complete (6 photos, 6 ENWL, 4 maps)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>02</td><td>902201</td><td class="ok">✅ Present</td><td>Complete (10 photos, 7 ENWL, 1 map)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>03</td><td>900343</td><td class="ok">✅ Present</td><td>Complete (7 photos, 6 ENWL, 1 map)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>04</td><td>900342A</td><td class="ok">✅ Present</td><td>Complete (7 photos, 9 ENWL, 1 map)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>05</td><td>900344</td><td class="ok">✅ Present</td><td>Complete (9 photos, 17 ENWL, 1 map)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>06</td><td>900345</td><td class="ok">✅ Present</td><td>Complete (14 photos, 19 ENWL, 2 maps)</td><td class="warn">Pole 06 ENWL vs field structure conflict</td><td class="warn">⚠️</td></tr>
+    <tr><td>07</td><td>903104</td><td class="ok">✅ Present</td><td>Complete (9 photos, 4 ENWL, 2 maps)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>08</td><td>903103</td><td class="ok">✅ Present</td><td>Complete (7 photos, 4 ENWL, 1 map)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>09</td><td>903102</td><td class="ok">✅ Present</td><td>Complete (8 photos, 3 ENWL, 1 map)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>10</td><td>903101</td><td class="warn">⚠️ Missing</td><td>Complete (9 photos, 5 ENWL, 1 map)</td><td>Coordinate gap only</td><td class="warn">⚠️</td></tr>
+    <tr><td>11</td><td>903202</td><td class="ok">✅ Present</td><td>Complete (7 photos, 4 ENWL, 5 maps)</td><td>None</td><td class="ok">✅</td></tr>
+    <tr><td>12</td><td>903203</td><td class="warn">⚠️ Missing</td><td>Complete (6 photos, 5 ENWL, 3 maps)</td><td>Coordinate gap only</td><td class="warn">⚠️</td></tr>
+  </table>
+
+  <h2>Evidence Quality Metrics</h2>
+  <ul>
+    <li>Structural match: <strong>12/12 = 100%</strong></li>
+    <li>Baseline completeness: <strong>10/12 = 83%</strong></li>
+    <li>Note completeness: <strong>12/12 = 100%</strong></li>
+    <li>Photo coverage: <strong>12/12 folders populated</strong></li>
+    <li>ENWL screenshot coverage: <strong>12/12 folders populated</strong></li>
+  </ul>
+
+  <h2>Identified Issues</h2>
+  <ul>
+    <li>Pole 10 (903101): Baseline coordinates missing</li>
+    <li>Pole 12 (903203): Baseline coordinates missing</li>
+    <li>Pole 06 (900345): ENWL vs field structural conflict</li>
+    <li>Pipeline baseline ingest dropped 2 rows instead of surfacing a named warning</li>
+    <li>Pipeline notes parsing reported 0/12 despite 12/12 note files present</li>
+    <li>Pipeline matching returned 0/10 despite proven structural support identity coverage</li>
+  </ul>
+
+  <h2>Pipeline Run Snapshot</h2>
+  <table>
+    <tr><th>Measure</th><th>Result</th></tr>
+    <tr><td>Baseline rows in CSV</td><td>12</td></tr>
+    <tr><td>Baseline poles parsed by pipeline</td><td>10</td></tr>
+    <tr><td>Field poles scanned</td><td>12</td></tr>
+    <tr><td>Matches produced by pipeline</td><td>0/10</td></tr>
+    <tr><td>Merged poles</td><td>0</td></tr>
+    <tr><td>Overall pipeline status</td><td>PASS (not operationally sufficient)</td></tr>
+    <tr><td>Runtime</td><td>0.37s real / 0.08s pipeline-reported</td></tr>
+    <tr><td>Peak memory footprint</td><td>71,205,464 bytes</td></tr>
+  </table>
+
+  <h2>Design-Readiness Assessment</h2>
+  <ul>
+    <li>Design-ready: <strong>0/12</strong> (correct — all remain blocked pending DNO records and successful end-to-end linking)</li>
+    <li>Review-required: <strong>12/12</strong></li>
+    <li>Blockers:
+      <ul>
+        <li>Missing coordinates: 2</li>
+        <li>Conflicts: 1</li>
+        <li>DNO verification / engineering records: 12</li>
+        <li>Current Stage 4C matching failure: 12</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>Evidence Inventory</h2>
+  <ul>
+    <li>Total field photos: <strong>99</strong></li>
+    <li>Total ENWL screenshots: <strong>89</strong></li>
+    <li>Total map screenshots: <strong>23</strong></li>
+    <li>Total notes: <strong>12</strong></li>
+  </ul>
+
+  <h2>Next Actions</h2>
+  <ol>
+    <li>Manual ENWL coordinate lookup for supports <code>903101</code> and <code>903203</code></li>
+    <li>Investigate Pole 06 ENWL vs field structural discrepancy</li>
+    <li>Fix silent Stage 4C checks:
+      <ul>
+        <li>preserve blank-coordinate rows with explicit warnings</li>
+        <li>restore note detection / note parsing</li>
+        <li>restore baseline-to-field support matching</li>
+        <li>correct QA percentage and report roll-up bugs</li>
+      </ul>
+    </li>
+    <li>Re-run validation with the complete 12-row baseline</li>
+    <li>Obtain DNO engineering records before any design-readiness claim</li>
+  </ol>
+
+  <p class="small">Report source files: <code>real_pilot_data/P_LOCAL_002/csv/P_LOCAL_002_baseline.csv</code>, <code>real_pilot_data/P_LOCAL_002/enwl_enrichment_clean/</code>, <code>validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/</code>.</p>
+</body>
+</html>

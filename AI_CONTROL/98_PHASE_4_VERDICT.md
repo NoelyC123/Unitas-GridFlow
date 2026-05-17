@@ -196,3 +196,60 @@ Next Actions:
 
 Phase 4: SUBSTANTIALLY COMPLETE
 Quality: HIGH (conservative, evidence-based)
+
+---
+STAGE 4C M1 PIPELINE VALIDATION (2026-05-17)
+---
+
+PIPELINE RUN RESULTS:
+- Command: `/usr/bin/time -l ./.venv312/bin/python scripts/run_pipeline.py --baseline real_pilot_data/P_LOCAL_002/csv/P_LOCAL_002_baseline.csv --field real_pilot_data/P_LOCAL_002/enwl_enrichment_clean --output validation_runs/P_LOCAL_002 --log-level INFO`
+- Runtime: `0.37s` real / `0.08s` pipeline-reported
+- Outputs:
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/00_pilot_output_pack_index.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/01_baseline_dataset.json`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/02_field_dataset.json`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/03_match_register.csv`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/03_match_register.json`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/04_merged_dataset.csv`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/04_merged_dataset.json`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/05_qa_report.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/06_dno_data_request.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/07_design_readiness_summary.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/08_match_confidence_analysis.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/09_verification_flags_breakdown.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/10_evidence_provenance_log.md`
+  - `validation_runs/P_LOCAL_002/pipeline_run_2026-05-17_181047/pipeline_summary.json`
+
+VALIDATION OUTCOMES:
+- Structural validation: `12/12` proven externally, but pipeline ingest only processed `10/12` baseline rows
+- QA checks performed: baseline ingest, field import, matching, merge, QA report, and Stage 5A report generation
+- Issues detected: `8` silent/missing checks identified
+- Design-readiness: `0/12` operationally; pipeline output reported `0/10` processed baseline poles
+
+SILENT/MISSING CHECKS IDENTIFIED:
+- Blank-coordinate baseline rows were silently dropped instead of preserved with a visible warning flag
+- Field notes were not detected (`Notes parsed: 0/12`) despite note files existing for all 12 poles
+- Evidence quality scoring collapsed to `12 LOW` for a complete evidence pack
+- Baseline-to-field matching returned `0/10` despite proven structural support identity coverage
+- Pilot reports 00/07 rolled up to `0` baseline / `0` field because they relied on merged-only data
+- QA report percentage bug showed `UNMATCHED = 1000.0%`
+- QA report lost baseline support identity and rendered unmatched baseline poles as `None`
+- Overall pipeline status remained `PASS` despite `0` merged poles and `0.0%` match rate
+
+PIPELINE STATUS:
+- Core functionality: PARTIAL
+- Evidence handling: PARTIAL
+- Conflict detection: PARTIAL
+- Report generation: PARTIAL
+
+STAGE 4C M1 PROGRESS:
+- Task 1: ✅ COMPLETE (validation run executed)
+- Task 2: ⏳ PENDING (coordinate lookup manual)
+- Task 3: ✅ COMPLETE (silent/missing checks identified)
+- Task 4: ⏳ PENDING (implement missing checks)
+
+NEXT MILESTONE ACTIONS:
+- Fill coordinate gaps (manual ENWL lookup)
+- Address silent/missing checks
+- Re-run validation with complete baseline
+- Achieve 12/12 = 100% baseline + validation
