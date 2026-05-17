@@ -26,22 +26,23 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - `p-controlled-001-readiness-gate-complete`
 - `stage4-real-survey-pack-readiness-review-complete`
 - `stage4-real-survey-baseline-conversion-review-complete`
+- `phase-4-fixes-complete`
 
 ## Active Task
 
 <!-- PROJECT_CONTROL:ACTIVE_TASK_START -->
-- Task: P_CONTROLLED_LOCAL_001 Planning (doc 96)
-- Branch: `claude-code/p-controlled-local-001-plan`
-- Owner: none
-- Status: awaiting_approval
-- Summary: Created `AI_CONTROL/96_P_CONTROLLED_LOCAL_001_PLAN.md` planning the next controlled local baseline-to-field matching pilot using ENWL Network Asset Viewer baseline data. Plan covers baseline data sources (trace-results.csv, pole/conductor popups, route overview), expected field inputs (context/marking/top/base photos), required outputs (baseline/conductor/field registers, match report, validator report), matching criteria (exact/likely/uncertain/no match categories), acceptance targets (≥8–12 structures, ≥80% exact match rate, 0 blocked rows), timeline (~1–2 weeks), and real data handling (local-only, not committed). Purpose: confidence test before Phase 4 (larger 30–50 pole baseline pilot). Stage 4C remains blocked pending Phase 4 execution. Document ready for approval to proceed with pilot execution.
+- Task: Stage 4C M1: P_LOCAL_002 validation run + silent check identification
+- Branch: `codex/stage6e-readiness-logic`
+- Owner: Codex
+- Status: in_progress
+- Summary: Phase 4 same-site baseline pilot is now complete with CONDITIONAL GO. P_LOCAL_002 achieved 12 poles and 100% validation match. Stage 4C is authorized. Milestone 1 is focused on the validation run and silent-check identification. Task 1 is running, Task 2 is complete, and Tasks 3 and 4 remain pending. Timeline is days, not months.
 <!-- PROJECT_CONTROL:ACTIVE_TASK_END -->
 
 ## In Progress
 
 | Task | Branch | Owner | Lane | Status |
 | --- | --- | --- | --- | --- |
-| P_CONTROLLED_LOCAL_001 Planning (doc 96) | `claude-code/p-controlled-local-001-plan` | none | Stage 4 field pilot execution | awaiting_approval |
+| Stage 4C M1: P_LOCAL_002 validation run + silent check identification | `codex/stage6e-readiness-logic` | Codex | Stage 4C validation | in_progress |
 
 ## Review / Validation
 
@@ -64,6 +65,13 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - Exact match rules are strict: only whitespace and case normalisation are allowed; duplicates and missing/unsafe `pole_id` values are blocking
 - Starter output uses the current Stage 4 header set and leaves unconfirmed technical fields blank or `unknown`
 
+**Phase 4 same-site baseline pilot complete:**
+
+- Phase 4 is now COMPLETE with CONDITIONAL GO
+- P_LOCAL_002 achieved 12 poles and 100% validation match
+- Stage 4C is AUTHORIZED
+- Tag: `phase-4-fixes-complete`
+
 **Controlled Pilot Field Pack v1 (docs 80–82):**
 
 - Documents 80–82 are now present: field-day procedure, photo/evidence rules, and operator decision notes
@@ -81,8 +89,7 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 
 ## Blocked
 
-- Stage 4C runtime integration (pending controlled baseline pilot approval)
-- Stage 4C controlled baseline pilot execution (blocked until Noel builds and validates `P_LOCAL_001` against actual local survey/photos, records exact-match results, and completes the signed decision path)
+- Stage 4C silent check implementation (blocked until Milestone 1 validation findings are documented)
 
 ## In Review / Audit
 
@@ -131,6 +138,19 @@ This board is the first file to read after `01_CURRENT_STATE.md`. It records the
 - PoleCAD export planning.
 - Electrical asset / line / cable interaction layer.
 - Lifecycle visualization follow-up enhancements.
+
+## Current Phase
+
+- Stage 4C M1: P_LOCAL_002 validation run + silent check identification
+  - Status: IN PROGRESS
+  - Tasks: 1 running, 2 complete, 3 & 4 pending
+  - Timeline: Days (not months)
+
+## Known Gaps
+
+- Pole 10 (903101): Baseline coordinates missing
+- Pole 12 (903203): Baseline coordinates missing
+- Pole 06 (900345): ENWL vs field conflict documented
 
 ## Operating Rule
 
