@@ -4,7 +4,8 @@ Purpose: authoritative current-state file for all GridFlow workers and project r
 
 ## Current Status
 
-Stage 5G Complete - Designer Review Ready.
+Stage 7A Complete — Photo integration backend shipped. Stage 7 workspace maturation is
+the active phase.
 
 Stage 4C is complete. The backend reconciliation pipeline is operational:
 
@@ -22,7 +23,18 @@ Stage 5 has produced a pilot-ready review package:
 - ✅ Stage 5F: Truthfulness hardening (114 review document)
 - ✅ Stage 5G: Designer review kit
 
-The next active phase is an in-person designer review, not broad new feature implementation.
+Stage 6 ENWL evidence integration is complete:
+
+- ✅ Stage 6A: ENWL trace parser, four-level evidence classification
+- ✅ Stage 6B: Three-source evidence combiner, workspace DNO Evidence display
+- ✅ Stage 6C: Formal pole-to-ENWL linking (12/12 poles on P_LOCAL_002)
+- ✅ Stage 6D: Conflict detection (0 conflicts detected on P_LOCAL_002)
+- ✅ Stage 6E: Conservative design-readiness logic with four readiness levels
+
+Stage 7 workspace maturation is in progress:
+
+- ✅ Stage 7A: Photo backend — `gridflow/photos/loader.py`, CLI, 99 photos across 12 poles
+- ⏳ Stage 7B: Workspace photo display (blocked on photo-serving strategy decision)
 
 ## Current Product Identity
 
@@ -49,6 +61,18 @@ Stage 4C backend modules:
 - `gridflow/field/` - structured field evidence import, notes parsing, evidence quality scoring, special flag detection.
 - `gridflow/matching/` - support number matching, confidence scoring, conflict detection, match register generation.
 - `gridflow/merge/` - merged pole records, verification flags, design blocker analysis, QA report generation.
+
+Stage 6 ENWL evidence modules:
+
+- `gridflow/enwl_trace/` - Stage 6A: conservative ENWL trace GeoJSON parser, four-level relationship classification.
+- `gridflow/evidence_combiner/` - Stage 6B/6C: three-source evidence combiner and formal pole-to-ENWL linker.
+- `gridflow/conflict_detector/` - Stage 6D: field vs ENWL attribute conflict detection.
+- `gridflow/readiness/` - Stage 6E: conservative four-level design-readiness assessor.
+- `gridflow/workspace/` - workspace display adapters for ENWL evidence, readiness, and review data.
+
+Stage 7A photo module:
+
+- `gridflow/photos/` - photo loader, PhotoSet/PhotoFile schemas, type detection, survey-level photo summary.
 
 Unified CLI:
 
@@ -92,54 +116,76 @@ Stage 5G designer review assets:
 
 ## Current Validation Status
 
-Latest expected test baseline:
+Latest test baseline:
 
 ```text
-1355 passed
+1470 passed, 9 skipped
 ```
 
-Validated reference dataset:
+Validated reference datasets:
 
-- `real_pilot_data/P_LOCAL_001/enwl_enrichment_clean`
-
-Known P_LOCAL_001 outcomes:
+**P_LOCAL_001** (`real_pilot_data/P_LOCAL_001/enwl_enrichment_clean`):
 
 - 10/10 poles matched.
-- 9 HIGH evidence quality.
-- 1 MEDIUM evidence quality.
+- 9 HIGH evidence quality, 1 MEDIUM.
 - 100% match rate.
-- All 10 poles have `design_blocked=True`.
+- All 10 poles `design_blocked=True` (correct — awaiting DNO records).
 - QA and pilot-pack reports generate successfully.
-- Workspace and preview overlay can review registered output.
 
-The `design_blocked=True` result is correct and expected for this dataset. It reflects that identity and evidence reconciliation can succeed while final design remains blocked pending authoritative DNO engineering records such as voltage, conductor specification, pole class or strength rating, equipment ratings, and inspection history.
+**P_LOCAL_002** (`real_pilot_data/P_LOCAL_002/enwl_enrichment_clean`):
+
+- 12/12 poles matched (100% match rate).
+- 12/12 notes detected (post-8afeee0 fix).
+- 12/12 evidence quality HIGH.
+- 12/12 poles formally linked to ENWL records via Stage 6C.
+- 3 HIGH confidence links (Poles 03, 05, 06 via `fid_polestructure`).
+- 7 MEDIUM confidence links (support_no match).
+- 0 conflicts detected (Stage 6D).
+- 0 poles `design_ready=True` (correct — conductor specification not per-span confirmed).
+- 3 poles expected `review_required` (Stage 6E: Poles 03, 05, 06 — HIGH link, route conductor).
+- 7 poles `not_ready` (MEDIUM link, no conductor evidence per span).
+- 99 photos across 12 poles detected by Stage 7A loader.
+- 10/12 baseline coordinates complete (903101 and 903203 still missing easting/northing).
+
+The `design_blocked=True` result is correct for both datasets. Identity and evidence
+reconciliation succeeded; final design remains blocked pending DNO engineering records
+(conductor specification, pole class/strength rating).
 
 ## Current Weakness
 
-The current weakness is designer validation.
+Primary weakness: no real Unitas operational job validated end-to-end yet.
 
-P_LOCAL_001 proves the workflow on a controlled reference evidence set. It does not yet prove that a practising UK OHL designer understands, trusts, or would use the output on a live project.
+P_LOCAL_001 and P_LOCAL_002 both use local evidence from `real_pilot_data/` (gitignored).
+Neither has been run against a job originating from a real Unitas project with a real
+client baseline. Until GridFlow is used on an actual Unitas OHL job, the operational gap
+remains unproven.
 
-The next task is to conduct the structured designer review using:
+Secondary weakness: photo serving not resolved.
 
-- `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md`
-- `AI_CONTROL/115_DESIGNER_ONE_PAGER.html`
-- registered job `P_LOCAL_DESIGNER_REVIEW`
-- live feedback capture route when available
+Stage 7A provides a photo loader and CLI but photos are not yet visible in the workspace.
+The workspace still shows only "Photos: N" (a count). The serving strategy must be
+decided and implemented before Stage 7B can be validated. See
+`AI_CONTROL/133_STAGE7B_PHOTO_SERVING_DECISION.md`.
+
+Coordinate gaps on P_LOCAL_002: supports 903101 and 903203 have blank easting/northing
+in `P_LOCAL_002_baseline.csv`. They are flagged with `coordinate_status=MISSING` but
+coordinates have not yet been populated from ENWL FID lookup.
 
 ## Current Next Phase
 
 Current active phase:
 
 ```text
-Conduct Designer Review - In-Person Walk-Through
+Stage 7B — Workspace Photo Display
 ```
 
-Do not start Stage 6 implementation until designer feedback is captured and documented.
+Prerequisites before Stage 7B can start:
 
-Expected review output:
+- Adopt photo-serving strategy from `AI_CONTROL/133_STAGE7B_PHOTO_SERVING_DECISION.md`
+- Implement Flask route (Option A) for local dev validation
+- Add photo section to `app/templates/workspace/pole_detail.html`
 
-- `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md`
+After Stage 7B, validate on the next real Unitas OHL project.
 
 ## Source Of Truth Hierarchy
 
