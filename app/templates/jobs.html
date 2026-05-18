@@ -53,6 +53,84 @@
       overflow: hidden;
     }
 
+    .jobs-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 16px;
+      padding: 16px;
+      background: #f8fafc;
+    }
+
+    .job-summary-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(15,23,42,0.04);
+    }
+
+    .job-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .job-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .job-metric {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #f9fafb;
+      min-width: 0;
+    }
+
+    .job-metric-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1.1;
+    }
+
+    .job-metric-label {
+      font-size: 0.72rem;
+      color: #6b7280;
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+
+    .eq-pill {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .eq-green { background: #e8f7ee; color: #1d7f49; }
+    .eq-amber { background: #fff4d6; color: #946200; }
+    .eq-red { background: #fdeaea; color: #c83737; }
+
+    .readiness-summary {
+      font-size: 0.92rem;
+      color: #374151;
+    }
+
+    .job-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .table thead th {
       white-space: nowrap;
       vertical-align: middle;
@@ -166,26 +244,8 @@
 
     <div class="card jobs-card">
       <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Job</th>
-                <th>Status</th>
-                <th>Rulepack</th>
-                <th>Counts</th>
-                <th class="desktop-only">Source File</th>
-                <th class="desktop-only">Notes</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="jobs-tbody">
-              <tr>
-                <td colspan="7" class="empty-state">Loading jobs…</td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="jobs-tbody" class="jobs-list">
+          <div class="empty-state">Loading jobs…</div>
         </div>
       </div>
     </div>
@@ -236,31 +296,42 @@
         return '<span class="text-muted">No actions</span>';
       }
 
-      const mapBtn = `
-        <a href="/map/view/${jobId}" class="btn btn-sm btn-outline-primary me-2">
-          <i class="bi bi-map"></i> Map
-        </a>
-      `;
-
-      const pdfBtn = `
-        <a href="/pdf/qa/${jobId}" class="btn btn-sm btn-outline-danger">
-          <i class="bi bi-file-pdf"></i> PDF
-        </a>
-      `;
-
-      if (status === "complete") {
-        return mapBtn + pdfBtn;
-      }
-
-      if (status === "error" || status === "failed") {
-        return `
-          <a href="/pdf/qa/${jobId}" class="btn btn-sm btn-outline-danger">
-            <i class="bi bi-file-pdf"></i> PDF
+      const buttons = [];
+      if (meta.workspace_ready) {
+        buttons.push(`
+          <a href="/workspace/view/${jobId}" class="btn btn-sm btn-outline-dark">
+            <i class="bi bi-eye"></i> View
           </a>
-        `;
+        `);
       }
-
-      return '<span class="text-muted">Processing…</span>';
+      if (meta.export_ready) {
+        buttons.push(`
+          <a href="/workspace/export/${jobId}/excel" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-file-earmark-excel"></i> Export Excel
+          </a>
+        `);
+        buttons.push(`
+          <a href="/workspace/export/${jobId}/csv" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-filetype-csv"></i> Export CSV
+          </a>
+        `);
+        buttons.push(`
+          <a href="/workspace/export/${jobId}/pdf" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-file-pdf"></i> Export PDF
+          </a>
+        `);
+      }
+      if (status === "complete") {
+        buttons.push(`
+          <a href="/map/view/${jobId}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-map"></i> Map
+          </a>
+        `);
+      }
+      if (!buttons.length) {
+        return '<span class="text-muted">Processing…</span>';
+      }
+      return `<div class="job-actions">${buttons.join("")}</div>`;
     }
 
     function buildNotes(meta) {
@@ -275,18 +346,42 @@
       return '<span class="text-muted">—</span>';
     }
 
+    function readinessSummary(meta) {
+      const summary = meta.readiness_summary;
+      if (!summary) return '<span class="text-muted">No readiness summary</span>';
+      return `
+        <div class="readiness-summary">
+          <strong>${summary.ready} Ready</strong> /
+          ${summary.review} Review /
+          ${summary.not_ready} Not Ready
+          ${summary.insufficient ? `/ ${summary.insufficient} Insufficient` : ""}
+        </div>
+      `;
+    }
+
+    function evidenceQualityPill(meta) {
+      const indicator = String(meta.evidence_quality_indicator || "RED").toUpperCase();
+      const klass = indicator === "GREEN" ? "eq-green" : indicator === "AMBER" ? "eq-amber" : "eq-red";
+      return `<span class="eq-pill ${klass}">${indicator}</span>`;
+    }
+
+    function formatDate(epochSeconds) {
+      if (!epochSeconds) return "—";
+      const date = new Date(Number(epochSeconds) * 1000);
+      if (Number.isNaN(date.getTime())) return "—";
+      return date.toLocaleDateString("en-GB", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      });
+    }
+
     function renderJobs(jobs) {
       const tbody = document.getElementById("jobs-tbody");
       if (!tbody) return;
 
       if (!Array.isArray(jobs) || jobs.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="empty-state">
-              No jobs found yet. Upload a survey to create the first job.
-            </td>
-          </tr>
-        `;
+        tbody.innerHTML = `<div class="empty-state">No jobs found yet. Upload a survey to create the first job.</div>`;
         return;
       }
 
@@ -301,21 +396,45 @@
         const filename = escapeHtml(meta.filename || "—");
 
         return `
-          <tr>
-            <td>
-              <div class="job-id">${jobId}</div>
-            </td>
-            <td>
-              <span class="status-pill ${statusClass(meta.status)}">${status}</span>
-            </td>
-            <td>
-              <span class="rulepack-badge">${rulepack}</span>
-            </td>
-            <td>${buildCounts(meta)}</td>
-            <td class="desktop-only">${filename}</td>
-            <td class="desktop-only">${buildNotes(meta)}</td>
-            <td>${buildActions(meta)}</td>
-          </tr>
+          <article class="job-summary-card">
+            <div class="job-card-top">
+              <div>
+                <div class="job-id">${jobId}</div>
+                <div class="page-sub">${filename}</div>
+              </div>
+              <div class="d-flex flex-column align-items-end gap-2">
+                <span class="status-pill ${statusClass(meta.status)}">${status}</span>
+                <span class="rulepack-badge">${rulepack}</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              ${readinessSummary(meta)}
+              ${evidenceQualityPill(meta)}
+            </div>
+            <div class="job-meta-grid">
+              <div class="job-metric">
+                <div class="job-metric-value">${meta.photo_count_total ?? 0}</div>
+                <div class="job-metric-label">Photos</div>
+              </div>
+              <div class="job-metric">
+                <div class="job-metric-value">${formatDate(meta.last_assessed_date)}</div>
+                <div class="job-metric-label">Last assessed</div>
+              </div>
+              <div class="job-metric">
+                <div class="job-metric-value">${meta.pole_count ?? 0}</div>
+                <div class="job-metric-label">Poles</div>
+              </div>
+              <div class="job-metric">
+                <div class="job-metric-value">${meta.issue_count ?? 0}</div>
+                <div class="job-metric-label">Issues</div>
+              </div>
+            </div>
+            <div class="count-stack">
+              <div><strong>Pass / Warning / Fail:</strong> ${meta.pass_count ?? 0}/${meta.warn_count ?? 0}/${meta.fail_count ?? 0}</div>
+              <div><strong>Notes:</strong> ${buildNotes(meta)}</div>
+            </div>
+            <div>${buildActions(meta)}</div>
+          </article>
         `;
       }).join("");
     }
@@ -331,11 +450,7 @@
         }
 
         if (tbody) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="7" class="empty-state">Loading jobs…</td>
-            </tr>
-          `;
+          tbody.innerHTML = `<div class="empty-state">Loading jobs…</div>`;
         }
 
         const res = await fetch("/api/jobs/", { cache: "no-store" });
@@ -355,11 +470,7 @@
         }
 
         if (tbody) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="7" class="empty-state">Could not load jobs.</td>
-            </tr>
-          `;
+          tbody.innerHTML = `<div class="empty-state">Could not load jobs.</div>`;
         }
       }
     }

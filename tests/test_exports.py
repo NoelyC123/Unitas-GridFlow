@@ -7,6 +7,7 @@ from pathlib import Path
 
 from gridflow.exports import SurveyCSVExporter
 from gridflow.exports.excel_exporter import POLES_COLUMNS
+from gridflow.exports.pdf_exporter import SurveyPDFExporter
 
 PYTHON3 = "python3"
 
@@ -199,3 +200,52 @@ def test_empty_survey_folder_raises_clear_error(tmp_path):
         assert "no pole folders" in str(exc).lower()
     else:
         raise AssertionError("Expected ValueError for empty survey")
+
+
+def test_pdf_export_creates_file_with_multiple_pages(tmp_path):
+    survey_root = tmp_path / "P_TEST"
+    poles_root = survey_root / "enwl_enrichment_clean"
+    for idx in range(1, 14):
+        pole = poles_root / f"{idx:02d}_SUPPORT_{100000 + idx}"
+        (pole / "field_photos").mkdir(parents=True, exist_ok=True)
+        (pole / "field_photos" / "IMG_0001.jpg").write_bytes(b"img")
+        _write_notes(
+            pole / "notes" / "pole_notes.md",
+            str(100000 + idx),
+            str(1000 + idx),
+            f"SPN{idx:03d}",
+        )
+
+    trace_path = survey_root / "trace.geojson"
+    trace_path.write_text(
+        json.dumps(
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": {
+                            "FID": str(1000 + idx),
+                            "feature_type": "Pole",
+                            "support_no": str(100000 + idx),
+                            "spn": f"SPN{idx:03d}",
+                            "pole_type": "Intermediate",
+                            "pole_class": "Single Wood Pole",
+                            "support_diameter": "Stout",
+                        },
+                        "geometry": {"type": "Point", "coordinates": [-2.7, 54.1]},
+                    }
+                    for idx in range(1, 14)
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    output = tmp_path / "survey.pdf"
+    bundle = SurveyPDFExporter().export(survey_root, trace_path, output)
+    assert bundle.total_poles == 13
+    assert output.exists()
+    pdf_bytes = output.read_bytes()
+    assert len(pdf_bytes) > 0
+    assert pdf_bytes.count(b"/Type /Page") >= 2
