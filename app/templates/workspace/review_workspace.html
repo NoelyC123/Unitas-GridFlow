@@ -96,29 +96,80 @@
   </div>
 
   <div class="filter-bar mb-4">
-    <div class="fw-semibold mb-2"><i class="bi bi-funnel"></i> Filter Poles</div>
-    <div class="d-flex flex-wrap gap-2">
-      <a href="/workspace/view/{{ job_id }}"
-         class="btn btn-sm {{ 'btn-secondary' if not active_filters else 'btn-outline-secondary' }}">All Poles</a>
-      <a href="/workspace/view/{{ job_id }}?design_ready=true"
-         class="btn btn-sm {{ 'btn-success' if active_filters.get('design_ready') == true else 'btn-outline-success' }}">Design Ready</a>
-      <a href="/workspace/view/{{ job_id }}?design_ready=false"
-         class="btn btn-sm {{ 'btn-warning' if active_filters.get('design_ready') == false else 'btn-outline-warning' }}">Design Blocked</a>
-      <a href="/workspace/view/{{ job_id }}?match_confidence=HIGH"
-         class="btn btn-sm {{ 'btn-primary' if active_filters.get('match_confidence') == 'HIGH' else 'btn-outline-primary' }}">HIGH Confidence</a>
-      <a href="/workspace/view/{{ job_id }}?match_confidence=MEDIUM"
-         class="btn btn-sm {{ 'btn-info' if active_filters.get('match_confidence') == 'MEDIUM' else 'btn-outline-info' }}">MEDIUM</a>
-      <a href="/workspace/view/{{ job_id }}?match_confidence=LOW"
-         class="btn btn-sm {{ 'btn-danger' if active_filters.get('match_confidence') == 'LOW' else 'btn-outline-danger' }}">LOW</a>
-      <a href="/workspace/view/{{ job_id }}?has_flags=true"
-         class="btn btn-sm {{ 'btn-danger' if active_filters.get('has_flags') else 'btn-outline-danger' }}">
-        <i class="bi bi-flag-fill"></i> Has Flags
-      </a>
-    </div>
+    <form method="get" action="/workspace/view/{{ job_id }}">
+      <div class="fw-semibold mb-2"><i class="bi bi-search"></i> Search &amp; Filter</div>
+      <div class="input-group mb-2">
+        <input type="text" name="q" class="form-control form-control-sm"
+               placeholder="Search by support number, folder, or notes..."
+               value="{{ active_filters.q or '' }}">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+        {% if active_filters.q or active_filters.status or active_filters.confidence or active_filters.photos or active_filters.conflicts or active_filters.sort %}
+          <a href="/workspace/view/{{ job_id }}" class="btn btn-sm btn-outline-danger">Clear all</a>
+        {% endif %}
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+        <select name="status" class="form-select form-select-sm w-auto">
+          <option value="">All readiness</option>
+          <option value="ready" {% if active_filters.status == 'ready' %}selected{% endif %}>Ready</option>
+          <option value="review_required" {% if active_filters.status == 'review_required' %}selected{% endif %}>Review Required</option>
+          <option value="not_ready" {% if active_filters.status == 'not_ready' %}selected{% endif %}>Not Ready</option>
+          <option value="insufficient_evidence" {% if active_filters.status == 'insufficient_evidence' %}selected{% endif %}>Insufficient Evidence</option>
+        </select>
+        <select name="confidence" class="form-select form-select-sm w-auto">
+          <option value="">All confidence</option>
+          <option value="HIGH" {% if active_filters.confidence == 'HIGH' %}selected{% endif %}>HIGH</option>
+          <option value="MEDIUM" {% if active_filters.confidence == 'MEDIUM' %}selected{% endif %}>MEDIUM</option>
+          <option value="LOW" {% if active_filters.confidence == 'LOW' %}selected{% endif %}>LOW</option>
+          <option value="UNMATCHED" {% if active_filters.confidence == 'UNMATCHED' %}selected{% endif %}>UNMATCHED</option>
+        </select>
+        <select name="photos" class="form-select form-select-sm w-auto">
+          <option value="">Any photos</option>
+          <option value="yes" {% if active_filters.photos == 'yes' %}selected{% endif %}>Has photos</option>
+          <option value="no" {% if active_filters.photos == 'no' %}selected{% endif %}>No photos</option>
+        </select>
+        <select name="conflicts" class="form-select form-select-sm w-auto">
+          <option value="">Any conflicts</option>
+          <option value="yes" {% if active_filters.conflicts == 'yes' %}selected{% endif %}>Has conflicts</option>
+          <option value="no" {% if active_filters.conflicts == 'no' %}selected{% endif %}>No conflicts</option>
+        </select>
+        <select name="sort" class="form-select form-select-sm w-auto">
+          <option value="pole_number" {% if not active_filters.sort or active_filters.sort == 'pole_number' %}selected{% endif %}>Sort: Pole number</option>
+          <option value="readiness_status" {% if active_filters.sort == 'readiness_status' %}selected{% endif %}>Sort: Readiness</option>
+          <option value="linking_confidence" {% if active_filters.sort == 'linking_confidence' %}selected{% endif %}>Sort: Confidence</option>
+          <option value="photo_count" {% if active_filters.sort == 'photo_count' %}selected{% endif %}>Sort: Photos</option>
+          <option value="conflict_count" {% if active_filters.sort == 'conflict_count' %}selected{% endif %}>Sort: Conflicts</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="/workspace/view/{{ job_id }}"
+           class="btn btn-sm {{ 'btn-secondary' if not active_filters else 'btn-outline-secondary' }}">All Poles</a>
+        <a href="/workspace/view/{{ job_id }}?design_ready=true"
+           class="btn btn-sm {{ 'btn-success' if active_filters.get('design_ready') == true else 'btn-outline-success' }}">Design Ready</a>
+        <a href="/workspace/view/{{ job_id }}?design_ready=false"
+           class="btn btn-sm {{ 'btn-warning' if active_filters.get('design_ready') == false else 'btn-outline-warning' }}">Design Blocked</a>
+        <a href="/workspace/view/{{ job_id }}?match_confidence=HIGH"
+           class="btn btn-sm {{ 'btn-primary' if active_filters.get('match_confidence') == 'HIGH' else 'btn-outline-primary' }}">HIGH Confidence</a>
+        <a href="/workspace/view/{{ job_id }}?match_confidence=MEDIUM"
+           class="btn btn-sm {{ 'btn-info' if active_filters.get('match_confidence') == 'MEDIUM' else 'btn-outline-info' }}">MEDIUM</a>
+        <a href="/workspace/view/{{ job_id }}?match_confidence=LOW"
+           class="btn btn-sm {{ 'btn-danger' if active_filters.get('match_confidence') == 'LOW' else 'btn-outline-danger' }}">LOW</a>
+        <a href="/workspace/view/{{ job_id }}?has_flags=true"
+           class="btn btn-sm {{ 'btn-danger' if active_filters.get('has_flags') else 'btn-outline-danger' }}">
+          <i class="bi bi-flag-fill"></i> Has Flags
+        </a>
+      </div>
+    </form>
   </div>
 
   <div class="bg-white rounded border p-3">
-    <h5 class="mb-3">Poles <span class="text-muted fs-6">({{ poles_with_eq|length }} shown)</span></h5>
+    <h5 class="mb-3">Poles
+      {% if total_poles is defined and total_poles != poles_with_eq|length %}
+        <span class="text-muted fs-6">Showing {{ poles_with_eq|length }} of {{ total_poles }}</span>
+      {% else %}
+        <span class="text-muted fs-6">({{ poles_with_eq|length }} shown)</span>
+      {% endif %}
+    </h5>
     {% if poles_with_eq %}
     <div class="table-responsive">
       <table class="table table-hover table-sm align-middle mb-0">
