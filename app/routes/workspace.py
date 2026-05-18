@@ -11,7 +11,11 @@ from types import SimpleNamespace
 
 from flask import Blueprint, current_app, render_template, request
 
+from gridflow.conflict_detector import ConflictDetector
+from gridflow.evidence_combiner import combine_pole_evidence, link_pole
 from gridflow.photos import load_pole_photos
+from gridflow.readiness import ReadinessAssessor
+from gridflow.timeline import EvidenceTimelineBuilder
 from gridflow.workspace import ReviewDataProvider
 from gridflow.workspace.enwl_evidence_adapter import (
     load_enwl_pole_evidence,
@@ -76,6 +80,38 @@ def _survey_id_from_job(job_dir: Path) -> str | None:
     except Exception:
         logger.warning("Could not derive survey_id from %s", merged_path)
     return None
+
+
+def _survey_root_from_job(job_dir: Path, survey_id: str | None) -> Path | None:
+    if not survey_id:
+        return None
+    root = Path(current_app.config.get("REAL_PILOT_DATA_ROOT", ""))
+    if not root:
+        return None
+    survey_root = root / survey_id
+    return survey_root if survey_root.exists() else None
+
+
+def _trace_path_for_survey(survey_root: Path | None) -> Path | None:
+    if survey_root is None:
+        return None
+    trace_dir = survey_root / "enwl_trace"
+    if not trace_dir.exists():
+        return None
+    matches = sorted(trace_dir.glob("*.geojson"))
+    return matches[0] if matches else None
+
+
+def _to_mapping(value) -> dict:
+    if value is None:
+        return {}
+    if isinstance(value, dict):
+        return dict(value)
+    if hasattr(value, "to_dict") and callable(value.to_dict):
+        return dict(value.to_dict())
+    if hasattr(value, "__dict__"):
+        return dict(vars(value))
+    return {}
 
 
 @workspace_bp.route("/view/<job_id>")
@@ -188,14 +224,12 @@ def view_pole(job_id: str, support_no: str):
             )
 
         evidence_quality = _evidence_quality(pole)
+        survey_id = _survey_id_from_job(job_dir)
+        survey_root = _survey_root_from_job(job_dir, survey_id)
+        trace_path = _trace_path_for_survey(survey_root)
         photo_set = (
-            load_pole_photos(
-                Path(current_app.config.get("REAL_PILOT_DATA_ROOT", ""))
-                / (_survey_id_from_job(job_dir) or "")
-                / "enwl_enrichment_clean"
-                / (pole.folder_name or "")
-            )
-            if pole.folder_name and _survey_id_from_job(job_dir)
+            load_pole_photos(survey_root / "enwl_enrichment_clean" / (pole.folder_name or ""))
+            if pole.folder_name and survey_root
             else None
         )
         photos_by_type = (
@@ -228,7 +262,73 @@ def view_pole(job_id: str, support_no: str):
             notes_content=pole.notes_content,
         )
         pole_readiness = load_pole_readiness(job_dir, pole)
-        survey_id = _survey_id_from_job(job_dir)
+        readiness_payload = _to_mapping(pole_readiness)
+        timeline = EvidenceTimelineBuilder().build(
+            pole.folder_name or support_no,
+            {
+                "pole_id": pole.folder_name or support_no,
+                "support_no": pole.support_no,
+                "photo_count": photo_set.photo_count if photo_set else pole.field_photo_count,
+                "contributing_files": {
+                    "pole_folder": str(
+                        survey_root / "enwl_enrichment_clean" / (pole.folder_name or "")
+                    )
+                    if survey_root and pole.folder_name
+                    else "",
+                    "pole_notes": str(
+                        survey_root
+                        / "enwl_enrichment_clean"
+                        / (pole.folder_name or "")
+                        / "notes"
+                        / "pole_notes.md"
+                    )
+                    if survey_root and pole.folder_name
+                    else "",
+                    "field_photos": str(
+                        survey_root
+                        / "enwl_enrichment_clean"
+                        / (pole.folder_name or "")
+                        / "field_photos"
+                    )
+                    if survey_root and pole.folder_name
+                    else "",
+                },
+                "linking": {},
+                "readiness": {
+                    **readiness_payload,
+                    "assessment_timestamp": _pipeline_run_timestamp(job_dir),
+                },
+                "conflicts": [],
+            },
+        )
+        if survey_root and trace_path and pole.folder_name:
+            try:
+                combined = combine_pole_evidence(survey_root, pole.folder_name, trace_path)
+                linking = link_pole(survey_root, pole.folder_name, trace_path)
+                conflicts = ConflictDetector().detect_pole(
+                    survey_root, pole.folder_name, trace_path
+                )
+                readiness = ReadinessAssessor().assess_from_records(combined, linking, conflicts)
+                timeline = EvidenceTimelineBuilder().build(
+                    pole.folder_name,
+                    {
+                        **combined,
+                        "linking": linking.to_dict(),
+                        "readiness": {
+                            **readiness.to_dict(),
+                            "assessment_timestamp": _pipeline_run_timestamp(job_dir),
+                        },
+                        "conflicts": [conflict.to_dict() for conflict in conflicts],
+                    },
+                )
+            except Exception:
+                logger.warning(
+                    "Could not build evidence timeline for %s/%s",
+                    job_id,
+                    pole.folder_name,
+                    exc_info=True,
+                )
+        pole_view.timeline = timeline
 
         return render_template(
             "workspace/pole_detail.html",
