@@ -42,7 +42,7 @@ python-dateutil==2.9.0.post0
 python-discovery==1.2.2
 pytz==2025.2
 PyYAML==6.0.3
-reportlab==4.2.2
+reportlab==4.5.1
 ruff==0.15.11
 selenium==4.43.0
 setuptools==82.0.1
