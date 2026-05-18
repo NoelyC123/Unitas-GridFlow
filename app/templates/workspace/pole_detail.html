@@ -240,6 +240,40 @@
     </div>
   </div>
 
+  <div class="card mb-3">
+    <div class="card-header">
+      <h6 class="mb-0">Evidence Timeline</h6>
+    </div>
+    <div class="card-body p-0">
+      {% if pole.timeline and pole.timeline.events %}
+      <ul class="list-group list-group-flush">
+        {% for event in pole.timeline.events %}
+        <li class="list-group-item">
+          <div class="d-flex align-items-start gap-3">
+            <div class="text-muted small text-nowrap" style="min-width:90px;">
+              {{ event.date_display }}
+            </div>
+            <div>
+              <span class="badge bg-secondary me-1">{{ event.source }}</span>
+              <strong>{{ event.title }}</strong>
+              <span class="badge ms-1
+                {% if event.confidence == 'HIGH' %}bg-success
+                {% elif event.confidence == 'MEDIUM' %}bg-warning text-dark
+                {% else %}bg-secondary{% endif %}">
+                {{ event.confidence }}
+              </span>
+              <div class="text-muted small mt-1">{{ event.description }}</div>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="p-3 text-muted small">No timeline events available for this pole.</div>
+      {% endif %}
+    </div>
+  </div>
+
   {% if pole.designer_actions %}
   <div class="card mb-4">
     <div class="card-header fw-semibold bg-danger text-white">Required Actions Before Design</div>

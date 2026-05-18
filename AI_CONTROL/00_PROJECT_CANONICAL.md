@@ -49,17 +49,22 @@ It complements Field Maps/basic GIS display by adding design-readiness interpret
 
 ## Current phase
 
-As of the May 2026 source-of-truth references:
+As of 2026-05-18:
 
-- Stage 1 post-survey QA gate: complete for the current evidence set
-- Stage 2 design-ready handoff / Design Chain: complete for the current evidence set
-- Stage 3 live intake platform: complete for the current evidence set
-- Phase C map intelligence: complete
-- Current status: strategic scope decision pending
+- Stage 1 post-survey QA gate: complete
+- Stage 2 design-ready handoff / Design Chain: complete
+- Stage 3 live intake platform: complete
+- Stage 4C baseline-field matching pipeline: complete (P_LOCAL_001 and P_LOCAL_002 validated)
+- Stage 5 pilot-ready workspace: complete
+- Stage 6 ENWL evidence integration (6A–6E): complete
+- Stage 7 workspace maturation: in progress (7A–7E)
 
-Phase C delivered feature-type filtering, asset lifecycle visualisation, stay evidence detection at angle poles, span anomaly analysis, crossing/context enrichment, and professional popup organisation. The project has real operational validation from P011, Gordon/NIE, and Bellsprings/SPEN evidence.
+Stage 7 is the active phase. Stages 7A (photo backend), 7B (photo serving), 7C (exports),
+7E (search/filter) are merged. Stage 7D (evidence timeline) is in progress.
 
-The next decision is not primarily technical. It is whether to proceed with a lower-risk Phase C2/D professional QA + display refinement path before any Stage 4/full survey-platform expansion.
+The project has been validated on P_LOCAL_001 (10 poles, P_LOCAL_001 reference set) and
+P_LOCAL_002 (12 poles, ENWL baseline, 100% match rate, 1521 tests passing). Real Unitas
+OHL job validation is the next priority.
 
 ---
 
@@ -75,8 +80,10 @@ The tool currently:
 - Flags design-readiness issues such as missing heights, missing stay evidence, span anomalies, legacy/unverified evidence, and unclear replacement relationships
 - Renders a Leaflet map with feature filters, lifecycle display, span lines, crossing context, and review-oriented popups
 - Produces QA/design-readiness outputs including issue registers, map data, route/design-chain data, and PDF handoff reports
-- Has 300+ tests passing according to the May 2026 control references
-- Has been validated on real operational survey evidence including P011, Gordon/NIE, and Bellsprings/SPEN
+- Has 1521 tests passing (2026-05-18)
+- Has been validated on P_LOCAL_001 (10 poles), P_LOCAL_002 (12 poles, ENWL), and real operational survey evidence including P011, Gordon/NIE, and Bellsprings/SPEN
+- Three-source evidence integration (field + ENWL pole/equipment + ENWL trace) proven on P_LOCAL_002
+- Workspace shows field photos, ENWL evidence, readiness status, search/filter, and design-readiness assessment per pole
 
 ---
 
@@ -121,7 +128,9 @@ The May 2026 source-of-truth references define the live strategic fork:
 - Asset relationships, GIS parity, and commercial platform features
 - Must not begin without customer/commercial validation
 
-Recommended framing from the May 2026 references: proceed with the lower-risk Phase C2/D professional QA + display refinement first, validate customer/commercial demand, and only then decide whether Stage 4 is justified.
+Stage 6/7 has proceeded on the lower-risk path: evidence integration and workspace
+maturation before any Stage 4 survey-platform expansion. The next gate is real Unitas OHL
+job validation, after which Stage 8 planning becomes the decision point.
 
 ---
 
