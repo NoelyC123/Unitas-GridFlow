@@ -3,7 +3,7 @@
 **Date:** 2026-05-18
 **Command used:** `git branch -r` + `git branch -r --merged master`
 
-This document is read-only. No branches have been deleted.
+**Updated:** 2026-05-18 — cleanup executed. See "Cleanup Executed" section below.
 
 ---
 
@@ -129,3 +129,71 @@ git push origin --delete \
   claude-code/controlled-pilot-field-pack-v1 \
   ...
 ```
+
+---
+
+## Cleanup Executed — 2026-05-18
+
+**Date:** 2026-05-18
+**Executed by:** Claude Code session cleanup
+
+**41 merged branches deleted via `git push origin --delete`:**
+
+claude-code branches (19 deleted):
+- `claude-code/branch-retirement-control-deconfliction`
+- `claude-code/controlled-pilot-field-pack-v1`
+- `claude-code/p-controlled-001-readiness-gate`
+- `claude-code/p-real-001-mini-independent-gate-audit`
+- `claude-code/stage4a-safety-harness-audit`
+- `claude-code/stage4c-architecture-v2`
+- `claude-code/stage4c-controlled-baseline-pilot-prep`
+- `claude-code/stage5-data-readiness-plan`
+- `claude-code/stage5b-workspace-foundation`
+- `claude-code/stage5c-map-overlay`
+- `claude-code/stage5e-design-ready-fix`
+- `claude-code/stage5f-readiness-trimble-review`
+- `claude-code/stage5g-feedback-tool-and-preflight`
+- `claude-code/stage6a-complete-pole-notes`
+- `claude-code/stage6c-completion-and-6e-spec`
+- `claude-code/stage6c-linking-spec`
+- `claude-code/stage6e-workspace-readiness`
+- `claude-code/stage7a-photo-spec`
+- `claude-code/update-stage6a0-spike-after-notes-cleanup`
+
+codex branches (22 deleted):
+- `codex/c2d-struct-inference`
+- `codex/plocal002-evidence-organiser`
+- `codex/review-workspace-v2-command-center`
+- `codex/security-dependency-fix`
+- `codex/stage4-structured-capture-integration-plan`
+- `codex/stage5-control-refresh`
+- `codex/stage5-plocal-validation-findings`
+- `codex/stage5-quick-wins`
+- `codex/stage5-validation-discovery`
+- `codex/stage5a-foundation-v1`
+- `codex/stage5a2-enhanced-reports`
+- `codex/stage5e-output-registration`
+- `codex/stage5f-safety-and-smoke-test`
+- `codex/stage5g-review-script-and-summary`
+- `codex/stage6a-enwl-evidence-parser`
+- `codex/stage6a-enwl-trace-inspector-cli`
+- `codex/stage6b-evidence-combiner`
+- `codex/stage6b-evidence-export-bundle`
+- `codex/stage6c-linking-implementation`
+- `codex/stage6d-conflict-detection`
+- `codex/stage6e-readiness-logic`
+- `codex/stage7a-photo-integration`
+
+**7 unmerged branches kept (unchanged):**
+
+| Branch | Reason kept |
+|---|---|
+| `claude-code/c2e2-support-suite` | Unmerged — content review required |
+| `claude-code/pre-pilot-cleanroom-v2` | Unmerged — check against current state |
+| `claude-code/real-field-pilot-readiness-stage4c-gate-audit` | Unmerged — gate audit content may still be relevant |
+| `claude-code/stage4-structured-capture-technical-audit` | Unmerged — check if superseded |
+| `claude-code/stage4b-4c-safety-pilot-harness` | Unmerged — check if superseded by 8afeee0 fixes |
+| `codex/c2d-duplicate-detection` | Unmerged — may contain unreleased Stage 2 work |
+| `codex/c2d-geom-pipeline` | Unmerged — may contain unreleased Stage 2 geometry work |
+
+Dependabot branches left untouched (auto-managed by GitHub).

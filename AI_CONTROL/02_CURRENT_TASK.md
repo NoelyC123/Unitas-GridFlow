@@ -1,118 +1,67 @@
-# Current Active Phase
+# Current Task
 
-Conduct Designer Review - In-Person Walk-Through
+## Status
 
-## Active Priority
+Active development — Stage 7 workspace maturation in progress.
 
-Run the Stage 5G designer review using the structured script and one-page summary.
+---
 
-Use:
+## Completed Today (2026-05-18)
 
-- `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md` as the walk-through script.
-- `AI_CONTROL/115_DESIGNER_ONE_PAGER.html` as the printed summary handed to the designer at the start.
-- Registered job `P_LOCAL_DESIGNER_REVIEW`.
-- Feedback route `http://127.0.0.1:5000/feedback/<job_id>` when available.
+- **Stage 6E:** Conservative design-readiness logic with four readiness levels
+- **Stage 7A:** Photo backend (`gridflow/photos/loader.py`), CLI photo listing, 99 photos across 12 P_LOCAL_002 poles
+- **Stage 7B:** Secure photo serving Flask route (Option A), workspace photo display in pole detail
+- **Stage 7C:** Evidence export formats (CSV, JSON bundle)
+- **Stage 7D:** Evidence timeline (`codex/stage7d-evidence-timeline` — in progress)
+- **Stage 7E:** Search and filter engine (`PoleFilterEngine`, template UI, 28 tests)
+- **UX bug fixes:** 3 map viewer bugs resolved (`codex/ux-bug-fixes`)
+- **Security:** Flask vulnerability dependency fix (`codex/security-dependency-fix` — merged)
+- **Control docs:** Current state patched, photo serving decision documented, branch cleanup executed (41 branches deleted)
 
-## Review Setup
+---
 
-Create the registered review job:
+## Current State
 
-```bash
-cd /Users/noelcollins/Unitas-GridFlow
-source .venv312/bin/activate
+- **Tests:** 1521 passing, 9 skipped
+- **P_LOCAL_002:** 12 poles, 3 review_required, 7 not_ready, 0 conflicts detected
+- **Workspace:** Photo display (Stage 7B), search/filter (Stage 7E), evidence timeline (Stage 7D), exports (Stage 7C) all functional or in progress
+- **Real job validation:** PENDING — scheduled for next session
 
-python scripts/run_pipeline.py \
-  --baseline tests/baseline/fixtures/enwl_sample.csv \
-  --field real_pilot_data/P_LOCAL_001/enwl_enrichment_clean \
-  --output /tmp/gridflow_designer_review \
-  --job-id P_LOCAL_DESIGNER_REVIEW \
-  --register \
-  --overwrite-registration
-```
+---
 
-Run the pre-flight check when available:
+## Next Session Priorities
 
-```bash
-python scripts/preflight_designer_review.py P_LOCAL_DESIGNER_REVIEW
-```
+1. Run a real Unitas OHL job through GridFlow end-to-end
+2. Capture designer feedback on Stage 6/7 features
+3. Stage 8 planning gate — only after real job validation confirms the system works on live project data
 
-Start Flask:
+---
 
-```bash
-export FLASK_APP=run.py
-flask run
-```
+## Blocked On
 
-Review routes:
+- Real job validation (scheduled next session)
+- Photo serving production path: Option B (copy on registration) required before any multi-machine or hosted deployment — see `AI_CONTROL/133_STAGE7B_PHOTO_SERVING_DECISION.md`
+- Baseline coordinate gaps for P_LOCAL_002 supports 903101 and 903203 (ENWL FID lookup required — see `AI_CONTROL/30_STAGE4C_IMPLEMENTATION_PLAN.md`)
 
-- Workspace: `http://127.0.0.1:5000/workspace/view/P_LOCAL_DESIGNER_REVIEW`
-- Overlay map: `http://127.0.0.1:5000/map/overlay/P_LOCAL_DESIGNER_REVIEW`
-- QA map: `http://127.0.0.1:5000/map/view/P_LOCAL_DESIGNER_REVIEW`
-- Feedback form: `http://127.0.0.1:5000/feedback/P_LOCAL_DESIGNER_REVIEW`
+---
 
-## Core Message
-
-Use this wording throughout the review:
-
-> You have survey evidence, but you still need confirmed DNO engineering
-> records before design.
-
-Conductor spec and pole class/strength rating require authoritative confirmation from DNO baseline engineering records. Field evidence may suggest these attributes, but they should not be treated as authoritative design inputs unless confirmed by DNO or baseline records.
-
-In the current readiness model, poles without confirmed conductor specification and pole class/strength rating remain design-blocked until the relevant DNO engineering records are obtained.
-
-## Feedback Capture
-
-Capture designer feedback through the live form where possible:
-
-- `http://127.0.0.1:5000/feedback/P_LOCAL_DESIGNER_REVIEW`
-
-If the live form is unavailable, use the paper backup table in `AI_CONTROL/115_DESIGNER_REVIEW_SCRIPT.md`.
-
-Document findings in:
-
-- `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md`
-
-The findings document must include:
-
-- one direct designer quote per review question where possible,
-- severity per finding,
-- whether the designer understands why 0/10 design-ready is correct for this dataset,
-- whether Report 06 is usable for a DNO data request,
-- whether the workspace and map overlay are useful enough for pilot review,
-- whether photo/evidence integration is a blocker or later enhancement,
-- the recommended next phase.
-
-## Active Boundaries
-
-Do not start Stage 6 implementation until designer feedback is captured and `AI_CONTROL/116_DESIGNER_FEEDBACK_FINDINGS.md` exists.
+## Protected Boundaries
 
 Do not claim:
 
-- final engineering design capability,
-- DNO data replacement,
-- autonomous design authorization,
-- production multi-user deployment,
-- PoleCAD export,
-- DNO-grade compliance verification,
-- full GIS product capability.
+- final engineering design capability
+- DNO data replacement
+- autonomous design authorization
+- production multi-user deployment
+- PoleCAD export
+- DNO-grade compliance verification
+- full GIS product capability
 
 Do preserve:
 
-- evidence-based claims,
-- source authority hierarchy,
-- verification flags,
-- design blocker visibility,
-- designer feedback as the next decision input,
-- local-data privacy boundaries.
-
-## Acceptance Direction
-
-The designer review should answer:
-
-- Can a UK OHL designer explain what GridFlow does after a 25-minute walk-through?
-- Does the designer understand that 0/10 design-ready is due to missing DNO engineering records, not pipeline failure?
-- Is Report 06 clear enough to support a real DNO data request?
-- Does the workspace help designers inspect matched poles efficiently?
-- Does the map overlay help detect baseline-field alignment issues?
-- What is the first practical improvement needed before a controlled pilot?
+- evidence-based claims
+- source authority hierarchy
+- verification flags
+- design blocker visibility
+- designer feedback as the next decision input
+- local-data privacy boundaries
