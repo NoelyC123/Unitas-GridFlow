@@ -7,14 +7,17 @@ Web UI for browsing and filtering merged pole data produced by the GridFlow pipe
 import json
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 
+from gridflow.photos import load_pole_photos
 from gridflow.workspace import ReviewDataProvider
 from gridflow.workspace.enwl_evidence_adapter import (
     load_enwl_pole_evidence,
     load_enwl_trace_summary,
 )
+from gridflow.workspace.filter_engine import PoleFilterEngine
 from gridflow.workspace.readiness_adapter import (
     load_job_readiness_summary,
     load_pole_readiness,
@@ -56,6 +59,25 @@ def _pipeline_run_timestamp(job_dir: Path) -> str:
     return "Unknown"
 
 
+def _survey_id_from_job(job_dir: Path) -> str | None:
+    """Derive survey folder id from merged dataset field_source."""
+    merged_path = job_dir / "04_merged_dataset.json"
+    if not merged_path.exists():
+        return None
+    try:
+        with open(merged_path, encoding="utf-8") as f:
+            data = json.load(f)
+        field_source = data.get("field_source") or ""
+        field_path = Path(field_source)
+        if field_path.name == "enwl_enrichment_clean" and field_path.parent.name:
+            return field_path.parent.name
+        if field_path.name:
+            return field_path.name
+    except Exception:
+        logger.warning("Could not derive survey_id from %s", merged_path)
+    return None
+
+
 @workspace_bp.route("/view/<job_id>")
 def view_job(job_id: str):
     """Display review workspace for a job."""
@@ -65,31 +87,64 @@ def view_job(job_id: str):
         provider.load_job()
         run_timestamp = _pipeline_run_timestamp(job_dir)
 
-        filters: dict = {}
+        legacy_filters: dict = {}
         if request.args.get("design_ready") in ("true", "false"):
-            filters["design_ready"] = request.args.get("design_ready") == "true"
+            legacy_filters["design_ready"] = request.args.get("design_ready") == "true"
         if request.args.get("evidence_quality"):
-            filters["evidence_quality"] = request.args.get("evidence_quality")
+            legacy_filters["evidence_quality"] = request.args.get("evidence_quality")
         if request.args.get("match_confidence"):
-            filters["match_confidence"] = request.args.get("match_confidence")
+            legacy_filters["match_confidence"] = request.args.get("match_confidence")
         if request.args.get("has_flags") == "true":
-            filters["has_flags"] = True
+            legacy_filters["has_flags"] = True
 
-        poles = provider.get_poles(filters)
+        all_poles = provider.get_poles(legacy_filters)
         stats = provider.get_statistics()
 
-        # Attach derived evidence quality to each pole for the template
+        # Stage 7E: apply search/filter/sort
+        search_query = request.args.get("q", "").strip() or None
+        status_filter = request.args.get("status") or None
+        confidence_filter = request.args.get("confidence") or None
+        photos_param = request.args.get("photos")
+        has_photos = True if photos_param == "yes" else (False if photos_param == "no" else None)
+        conflicts_param = request.args.get("conflicts")
+        has_conflicts = (
+            True if conflicts_param == "yes" else (False if conflicts_param == "no" else None)
+        )
+        sort_by = request.args.get("sort") or None
+
+        engine = PoleFilterEngine()
+        poles = engine.filter(
+            all_poles,
+            query=search_query,
+            status=status_filter,
+            confidence=confidence_filter,
+            has_photos=has_photos,
+            has_conflicts=has_conflicts,
+            sort_by=sort_by,
+        )
+
+        active_filters = {
+            **legacy_filters,
+            "q": search_query,
+            "status": status_filter,
+            "confidence": confidence_filter,
+            "photos": photos_param,
+            "conflicts": conflicts_param,
+            "sort": sort_by,
+        }
+
         poles_with_eq = [(p, _evidence_quality(p)) for p in poles]
 
         enwl_summary = load_enwl_trace_summary(job_dir)
-        readiness_summary = load_job_readiness_summary(job_dir, poles)
+        readiness_summary = load_job_readiness_summary(job_dir, all_poles)
 
         return render_template(
             "workspace/review_workspace.html",
             job_id=job_id,
             poles_with_eq=poles_with_eq,
+            total_poles=len(all_poles),
             stats=stats,
-            active_filters=filters,
+            active_filters=active_filters,
             run_timestamp=run_timestamp,
             enwl_summary=enwl_summary,
             readiness_summary=readiness_summary,
@@ -133,20 +188,56 @@ def view_pole(job_id: str, support_no: str):
             )
 
         evidence_quality = _evidence_quality(pole)
+        photo_set = (
+            load_pole_photos(
+                Path(current_app.config.get("REAL_PILOT_DATA_ROOT", ""))
+                / (_survey_id_from_job(job_dir) or "")
+                / "enwl_enrichment_clean"
+                / (pole.folder_name or "")
+            )
+            if pole.folder_name and _survey_id_from_job(job_dir)
+            else None
+        )
+        photos_by_type = (
+            {
+                photo_type: [
+                    photo for photo in photo_set.photo_files if photo.photo_type == photo_type
+                ]
+                for photo_type in [
+                    "full_pole",
+                    "pole_top",
+                    "pole_base",
+                    "equipment",
+                    "span",
+                    "context",
+                    "unknown",
+                ]
+            }
+            if photo_set
+            else {}
+        )
+        pole_view = SimpleNamespace(
+            **pole.model_dump(),
+            photo_count=photo_set.photo_count if photo_set else pole.field_photo_count,
+            photos_by_type=photos_by_type,
+            pole_folder=pole.folder_name,
+        )
         enwl_evidence = load_enwl_pole_evidence(
             job_dir=job_dir,
             pole_folder_name=pole.folder_name,
             notes_content=pole.notes_content,
         )
         pole_readiness = load_pole_readiness(job_dir, pole)
+        survey_id = _survey_id_from_job(job_dir)
 
         return render_template(
             "workspace/pole_detail.html",
             job_id=job_id,
-            pole=pole,
+            pole=pole_view,
             evidence_quality=evidence_quality,
             enwl_evidence=enwl_evidence,
             pole_readiness=pole_readiness,
+            survey_id=survey_id,
         )
 
     except FileNotFoundError as e:

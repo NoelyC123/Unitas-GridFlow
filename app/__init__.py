@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from flask import Flask, jsonify, render_template
 
@@ -13,6 +14,10 @@ def create_app() -> Flask:
     )
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "unitas-gridflow-dev-key")
+    app.config["REAL_PILOT_DATA_ROOT"] = os.environ.get(
+        "GRIDFLOW_PILOT_DATA_ROOT",
+        str(Path(__file__).resolve().parents[1] / "real_pilot_data"),
+    )
 
     @app.get("/health/full")
     def health_full():
@@ -130,6 +135,13 @@ def create_app() -> Flask:
         app.register_blueprint(workspace_bp)
     except Exception as exc:
         app.logger.warning(f"workspace blueprint not loaded: {exc}")
+
+    try:
+        from app.routes.photos import photos_bp
+
+        app.register_blueprint(photos_bp)
+    except Exception as exc:
+        app.logger.warning(f"photos blueprint not loaded: {exc}")
 
     try:
         from app.routes.map_overlay import map_overlay_bp

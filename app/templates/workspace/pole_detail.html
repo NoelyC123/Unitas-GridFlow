@@ -115,6 +115,47 @@
     </div>
   </div>
 
+  <div class="card mb-3" id="field-photos-section">
+    <div class="card-header">
+      <h6 class="mb-0">Field Photos
+        <span class="badge bg-secondary ms-2" id="photo-count-badge">{{ pole.photo_count or 0 }}</span>
+      </h6>
+    </div>
+    <div class="card-body">
+      {% if pole.photo_count and pole.photo_count > 0 and survey_id %}
+        <div class="row g-2" id="photo-grid">
+          {% for photo_type in ['full_pole', 'pole_top', 'pole_base', 'equipment', 'span', 'context', 'unknown'] %}
+            {% set type_photos = pole.photos_by_type.get(photo_type, []) %}
+            {% if type_photos %}
+              <div class="col-12">
+                <small class="text-muted text-uppercase fw-bold">{{ photo_type.replace('_', ' ') }}</small>
+              </div>
+              {% for photo in type_photos %}
+                <div class="col-6 col-md-4 col-lg-3">
+                  <a href="/api/photos/{{ survey_id }}/{{ pole.pole_folder }}/{{ photo.filename }}"
+                     target="_blank"
+                     class="photo-thumb-link">
+                    <img
+                      src="/api/photos/{{ survey_id }}/{{ pole.pole_folder }}/{{ photo.filename }}"
+                      alt="{{ photo.photo_type }}"
+                      class="img-fluid rounded photo-thumb"
+                      loading="lazy"
+                      style="max-height: 120px; width: 100%; object-fit: cover;"
+                      onerror="this.parentElement.parentElement.style.display='none'">
+                  </a>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% elif pole.photo_count and pole.photo_count > 0 %}
+        <p class="text-muted mb-0">Field photos detected, but survey photo serving is not configured for this job.</p>
+      {% else %}
+        <p class="text-muted mb-0">No field photos detected for this pole.</p>
+      {% endif %}
+    </div>
+  </div>
+
   <div class="card mb-4">
     <div class="card-header fw-semibold">Verification Flags</div>
     <div class="card-body">
