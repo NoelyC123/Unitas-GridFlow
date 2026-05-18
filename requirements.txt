@@ -40,7 +40,7 @@ pytest==9.0.3
 pytest-cov==7.1.0
 python-dateutil==2.9.0.post0
 python-discovery==1.2.2
-pytz==2025.2
+pytz==2026.2
 PyYAML==6.0.3
 reportlab==4.2.2
 ruff==0.15.11
