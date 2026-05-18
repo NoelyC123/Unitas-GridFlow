@@ -1694,6 +1694,8 @@ class MapViewer {
 
   activateReviewFocusMode(category, { focusFirst = true } = {}) {
     if (!category) return;
+    // BUG FIX: switching review categories should close any planner awareness popup left open.
+    if (category !== 'awareness') this.closePlannerAwarenessPopups();
     const targets = this.getFocusTargetsForCategory(category);
     this.activeFocusMode = 'review';
     this.activeFocusCategory = category;
@@ -1717,6 +1719,8 @@ class MapViewer {
   }
 
   clearReviewFocusMode() {
+    // BUG FIX: clearing review focus should also clear planner awareness popups.
+    this.closePlannerAwarenessPopups();
     this.activeFocusMode = null;
     this.activeFocusCategory = null;
     this.activeFocusTargetIds = [];
@@ -1990,6 +1994,8 @@ class MapViewer {
   releaseReviewNavigationMap() {
     this._reviewNavigationLocked = true;
     this.focusReleased = false;
+    // BUG FIX: release should clear planner popups and direct route highlight state.
+    this.closePlannerAwarenessPopups();
     this.activeFocusMode = null;
     this.activeFocusCategory = null;
     this.activeFocusTargetIds = [];
@@ -1998,6 +2004,7 @@ class MapViewer {
     this.clearFocusedReviewTarget();
     this.clearCurrentReviewTargetSpan();
     this.clearSpanRouteHighlight();
+    this._directPopupSpanRef = null;
     this.resetReviewMapView();
     this.applyReviewFocusStyles();
     this.renderReviewNavigationState();
@@ -2082,6 +2089,7 @@ class MapViewer {
       this.markFocusedReviewTarget(ref.line);
       this.markCurrentReviewTargetSpan(ref);
       if (typeof ref.line.openPopup === 'function') ref.line.openPopup();
+      this.forcePanToReviewTarget(target, ref.line, { maxZoom: 17 });
       this.applyReviewFocusStyles();
       this.renderReviewCommandCenter();
       return;
@@ -2094,6 +2102,7 @@ class MapViewer {
       this.panToReviewLayer(marker, { minZoom: 16 });
       this.markFocusedReviewTarget(marker);
       if (marker && typeof marker.openPopup === 'function') marker.openPopup();
+      this.forcePanToReviewTarget(target, marker, { minZoom: 16 });
       this.applyReviewFocusStyles();
       this.renderReviewCommandCenter();
       return;
@@ -2106,6 +2115,7 @@ class MapViewer {
       this.panToReviewLayer(marker, { minZoom: 16 });
       this.markFocusedReviewTarget(marker);
       if (typeof marker.openPopup === 'function') marker.openPopup();
+      this.forcePanToReviewTarget(target, marker, { minZoom: 16 });
       this.applyReviewFocusStyles();
       this.renderReviewCommandCenter();
     }
@@ -2626,6 +2636,7 @@ class MapViewer {
       this.map.setView(this._reviewHomeView.center, this._reviewHomeView.zoom);
       return;
     }
+    // BUG FIX: release should still fall back to the full job extent when a stored home view is unavailable.
     if (Array.isArray(this._reviewHomeBounds) && this._reviewHomeBounds.length > 1) {
       if (typeof this.map.fitBounds === 'function') {
         this.map.fitBounds(this._reviewHomeBounds, { padding: [40, 40] });
@@ -2646,6 +2657,33 @@ class MapViewer {
       const zoom = Math.max(this.map.getZoom?.() || 15, options.minZoom || 16);
       this.map.setView(layer.getLatLng(), zoom);
     }
+  }
+
+  forcePanToReviewTarget(target, layer, options = {}) {
+    if (!this.map || !target || !layer || this._reviewNavigationLocked === false) return;
+    const latLng = this.popupTargetLatLng(layer);
+    if (!latLng) return;
+    // BUG FIX: next/previous navigation should recenter the map on the selected target after popup updates.
+    if (target.type === 'span') {
+      if (typeof this.map.flyTo === 'function') {
+        this.map.flyTo(latLng, this.map.getZoom?.() || options.maxZoom || 17, { animate: true });
+      } else if (typeof this.map.panTo === 'function') {
+        this.map.panTo(latLng);
+      }
+      return;
+    }
+    const zoom = Math.max(this.map.getZoom?.() || 15, options.minZoom || 16);
+    if (typeof this.map.flyTo === 'function') {
+      this.map.flyTo(latLng, zoom, { animate: true });
+    } else if (typeof this.map.panTo === 'function') {
+      this.map.panTo(latLng);
+    }
+  }
+
+  closePlannerAwarenessPopups() {
+    (this._awarenessMarkerRefs || []).forEach(({ marker }) => {
+      if (marker && typeof marker.closePopup === 'function') marker.closePopup();
+    });
   }
 
   toggleSpanRouteHighlight(spanRef) {
@@ -2787,6 +2825,8 @@ class MapViewer {
       return;
     }
 
+    // BUG FIX: hiding the planner awareness layer should close any open planner popup.
+    this.closePlannerAwarenessPopups();
     if (this.map.hasLayer(this.plannerAwarenessLayer)) {
       this.map.removeLayer(this.plannerAwarenessLayer);
     }
