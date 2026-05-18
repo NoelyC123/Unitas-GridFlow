@@ -9,10 +9,11 @@ import logging
 from pathlib import Path
 from types import SimpleNamespace
 
-from flask import Blueprint, current_app, render_template, request
+from flask import Blueprint, current_app, render_template, request, send_file
 
 from gridflow.conflict_detector import ConflictDetector
 from gridflow.evidence_combiner import combine_pole_evidence, link_pole
+from gridflow.exports import SurveyCSVExporter, SurveyExcelExporter, SurveyPDFExporter
 from gridflow.photos import load_pole_photos
 from gridflow.readiness import ReadinessAssessor
 from gridflow.timeline import EvidenceTimelineBuilder
@@ -112,6 +113,24 @@ def _to_mapping(value) -> dict:
     if hasattr(value, "__dict__"):
         return dict(vars(value))
     return {}
+
+
+def _job_export_paths(
+    job_id: str, export_format: str
+) -> tuple[Path | None, Path | None, Path | None]:
+    job_dir = JOBS_ROOT / job_id
+    survey_id = _survey_id_from_job(job_dir)
+    survey_root = _survey_root_from_job(job_dir, survey_id)
+    trace_path = _trace_path_for_survey(survey_root)
+    if survey_root is None or trace_path is None:
+        return None, None, None
+    ext = {"excel": ".xlsx", "csv": ".csv", "pdf": ".pdf"}.get(export_format)
+    if ext is None:
+        return None, None, None
+    export_dir = job_dir / "exports"
+    export_dir.mkdir(parents=True, exist_ok=True)
+    output_path = export_dir / f"{job_id}_survey{ext}"
+    return survey_root, trace_path, output_path
 
 
 @workspace_bp.route("/view/<job_id>")
@@ -354,3 +373,31 @@ def view_pole(job_id: str, support_no: str):
     except Exception as e:
         logger.error("Error loading pole %s: %s", support_no, e, exc_info=True)
         return f"Error loading pole: {e}", 500
+
+
+@workspace_bp.route("/export/<job_id>/<export_format>")
+def export_job(job_id: str, export_format: str):
+    """Generate and download survey exports for a registered job."""
+    try:
+        survey_root, trace_path, output_path = _job_export_paths(job_id, export_format)
+        if survey_root is None or trace_path is None or output_path is None:
+            return f"Export source not available for job {job_id}", 404
+
+        if export_format == "excel":
+            SurveyExcelExporter().export(survey_root, trace_path, output_path)
+            mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        elif export_format == "csv":
+            SurveyCSVExporter().export(survey_root, trace_path, output_path)
+            mimetype = "text/csv"
+        elif export_format == "pdf":
+            SurveyPDFExporter().export(survey_root, trace_path, output_path)
+            mimetype = "application/pdf"
+        else:
+            return f"Unsupported export format: {export_format}", 404
+
+        return send_file(output_path, as_attachment=True, mimetype=mimetype)
+    except FileNotFoundError:
+        return f"Export source not available for job {job_id}", 404
+    except Exception as exc:
+        logger.error("Export failed for %s (%s): %s", job_id, export_format, exc, exc_info=True)
+        return f"Export failed: {exc}", 500
