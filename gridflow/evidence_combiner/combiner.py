@@ -26,6 +26,7 @@ from gridflow.enwl_trace import (
     ENWLEvidenceFeature,
     parse_geojson_file,
 )
+from gridflow.photos import load_pole_photos
 
 DESIGN_READINESS_CAUTION = (
     "This combined record is evidence provenance only. It does not mark the pole "
@@ -73,6 +74,7 @@ class EvidenceCombiner:
 
         parsed_notes = self.parse_pole_notes(notes_path)
         trace_dataset = parse_geojson_file(trace_path)
+        photos = load_pole_photos(pole_dir)
 
         direct_equipment = self._combine_direct_equipment(parsed_notes, trace_dataset.features)
         route_conductors = self._combine_route_conductors(parsed_notes, trace_dataset.features)
@@ -87,6 +89,9 @@ class EvidenceCombiner:
             "pole_class": parsed_notes.pole_class,
             "support_diameter": parsed_notes.support_diameter,
             "coordinates": parsed_notes.coordinates,
+            "photo_count": photos.photo_count,
+            "photo_types_present": photos.photo_types_present,
+            "photos_available": photos.photo_count > 0,
             "direct_equipment_records": direct_equipment,
             "route_conductor_evidence": route_conductors,
             "nearby_context": nearby_context,
@@ -100,6 +105,7 @@ class EvidenceCombiner:
             "contributing_files": {
                 "survey_root": str(survey_root),
                 "pole_folder": str(pole_dir),
+                "field_photos": str(pole_dir / "field_photos"),
                 "pole_notes": str(notes_path),
                 "trace_geojson": str(trace_path),
             },
