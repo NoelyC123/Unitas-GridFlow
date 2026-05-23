@@ -4,9 +4,9 @@ External full reference pack:
 
 /Volumes/T5 EVO/GridFlow_External_Evidence/dno_specs_FULL_2026-05-23
 
-Light local reference copy:
+Curated local GridFlow reference pack:
 
-/Users/noelcollins/GridFlow_Reference/dno_specs_KEEP_LIGHT
+/Users/noelcollins/GridFlow_Reference/dno_specs_CURATED_KEEP_2026-05-23
 
 Original source location before cleanup:
 
@@ -15,16 +15,30 @@ Original source location before cleanup:
 Purpose:
 This folder contains DNO and ENA specification/reference material retained for GridFlow research.
 
-Observed useful contents:
-- DNO_Master_Pack.pdf
-- index.csv
-- index.jsonl
-- NIE documents and connection/code references
-- SPEN documents including OHL and asset/safety references
-- ENWL documents including ES259 and EPD473 references
-- Northern Powergrid technical specifications
-- ENA Engineering Recommendations including G81, G12, G5, G87 and related documents
-- overhead line, conductor, pole, safety, connection and design/planning references
+Audit result:
+- 98 files total
+- 91 PDFs
+- 2 DOCX files
+- 1 CSV index
+- 1 JSONL index
+- 3 macOS junk files
+- 12,893 GridFlow-relevant keyword hits
+- Many duplicate PDFs identified and preserved externally
+
+High-value GridFlow topics:
+- overhead line construction
+- wood poles
+- LV ABC overhead lines
+- EHV wood pole lines up to 132kV
+- conductor joints, terminations and binders
+- pole-mounted transformers
+- overhead services / eaves wall mains
+- OHL safety and GS6 clearance guidance
+- ENA G81 design/planning references
+- SPEN OHL standards
+- ENWL OHL standards
+- NIE G98/G99 and Distribution Code references
+- Northern Powergrid OHL technical specifications
 
 GridFlow use:
 - DNO rulepack research
